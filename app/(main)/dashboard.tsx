@@ -7,12 +7,16 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
+  APPETITE_OPTIONS,
+  ENERGY_OPTIONS,
   HEALTH_CONDITION_OPTIONS,
   PET_AGE_GROUP_OPTIONS,
   PET_SPECIES_OPTIONS,
+  SYMPTOM_OPTIONS,
 } from '@/constants/check-in';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
 import type { HealthCondition } from '@/types/pet';
 
@@ -27,6 +31,20 @@ function getHealthConditionLabels(conditions: HealthCondition[]): string[] {
   return conditions.map((condition) =>
     getOptionLabel(HEALTH_CONDITION_OPTIONS, condition)
   );
+}
+
+function formatCheckInDate(date: string): string {
+  const [year, month, day] = date.split('-').map(Number);
+
+  if (!year || !month || !day) {
+    return date;
+  }
+
+  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 type DetailRowProps = {
@@ -58,12 +76,26 @@ export default function DashboardScreen() {
   const loadPet = usePetStore((state) => state.loadPet);
   const clearError = usePetStore((state) => state.clearError);
 
+  const latestCheckIn = useCheckInStore((state) => state.latestCheckIn);
+  const checkInIsLoading = useCheckInStore((state) => state.isLoading);
+  const checkInError = useCheckInStore((state) => state.error);
+  const loadLatestCheckIn = useCheckInStore((state) => state.loadLatestCheckIn);
+  const clearCheckInError = useCheckInStore((state) => state.clearError);
+
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   useEffect(() => {
     void loadPet();
   }, [loadPet]);
+
+  useEffect(() => {
+    if (!pet?.id) {
+      return;
+    }
+
+    void loadLatestCheckIn(pet.id);
+  }, [loadLatestCheckIn, pet?.id]);
 
   const handleRetry = () => {
     clearError();
@@ -72,6 +104,19 @@ export default function DashboardScreen() {
 
   const handleSetupPet = () => {
     router.replace('/(setup)/pet-type');
+  };
+
+  const handleStartCheckIn = () => {
+    router.push('/check-in');
+  };
+
+  const handleRetryCheckIn = () => {
+    if (!pet?.id) {
+      return;
+    }
+
+    clearCheckInError();
+    void loadLatestCheckIn(pet.id);
   };
 
   return (
@@ -101,6 +146,48 @@ export default function DashboardScreen() {
       ) : (
         <View style={styles.body}>
           <ThemedText type="title">{pet.name}</ThemedText>
+
+          <Button title="Start Check-In" onPress={handleStartCheckIn} />
+
+          <Card>
+            <ThemedText type="subtitle">Latest Check-In</ThemedText>
+            {checkInIsLoading ? (
+              <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
+            ) : checkInError ? (
+              <View style={styles.checkInError}>
+                <ThemedText style={styles.message}>{checkInError}</ThemedText>
+                <Button title="Try Again" variant="secondary" onPress={handleRetryCheckIn} />
+              </View>
+            ) : latestCheckIn ? (
+              <>
+                <ThemedText
+                  lightColor={textSecondaryColor}
+                  darkColor={textSecondaryColor}
+                  style={styles.checkInDate}>
+                  {formatCheckInDate(latestCheckIn.date)}
+                </ThemedText>
+                <DetailRow
+                  label="Appetite"
+                  value={getOptionLabel(APPETITE_OPTIONS, latestCheckIn.appetite)}
+                />
+                <DetailRow
+                  label="Energy"
+                  value={getOptionLabel(ENERGY_OPTIONS, latestCheckIn.energy)}
+                />
+                <DetailRow
+                  label="Symptoms"
+                  value={getOptionLabel(SYMPTOM_OPTIONS, latestCheckIn.symptom)}
+                />
+              </>
+            ) : (
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.message}>
+                No check-ins yet. Start your first check-in above.
+              </ThemedText>
+            )}
+          </Card>
 
           <Card>
             <ThemedText type="subtitle">Profile</ThemedText>
@@ -158,5 +245,14 @@ const styles = StyleSheet.create({
   },
   conditionItem: {
     ...Typography.body,
+  },
+  checkInLoading: {
+    alignSelf: 'flex-start',
+  },
+  checkInError: {
+    gap: Spacing.sm,
+  },
+  checkInDate: {
+    ...Typography.caption,
   },
 });

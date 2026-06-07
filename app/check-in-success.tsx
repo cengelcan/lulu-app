@@ -1,34 +1,52 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { Button } from '@/components/ui/Button';
+import { ScreenContainer } from '@/components/ui/ScreenContainer';
+import { Spacing, Typography } from '@/constants/theme';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 export default function CheckInSuccessScreen() {
   const router = useRouter();
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">Great!</ThemedText>
-      <ThemedText>You&apos;ve completed your first health check-in.</ThemedText>
-      <Pressable style={styles.button} onPress={() => router.replace('/(main)/dashboard')}>
-        <ThemedText type="defaultSemiBold">Go To Dashboard</ThemedText>
-      </Pressable>
-    </ThemedView>
+    <ScreenContainer contentStyle={styles.content}>
+      <ThemedText type="title" style={styles.title}>
+        Great!
+      </ThemedText>
+      <ThemedText
+        lightColor={textSecondaryColor}
+        darkColor={textSecondaryColor}
+        style={styles.message}>
+        You&apos;ve completed your first health check-in.
+      </ThemedText>
+      <Button
+        title="Go To Dashboard"
+        onPress={() => router.replace('/(main)/dashboard')}
+        style={styles.button}
+      />
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
-    gap: 12,
+    gap: Spacing.md,
+  },
+  title: {
+    textAlign: 'center',
+  },
+  message: {
+    textAlign: 'center',
+    ...Typography.body,
   },
   button: {
-    marginTop: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    marginTop: Spacing.lg,
+    alignSelf: 'stretch',
   },
 });

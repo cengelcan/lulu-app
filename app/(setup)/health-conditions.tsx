@@ -1,34 +1,34 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
+import { useCallback } from 'react';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { SelectableOption } from '@/components/setup/selectable-option';
+import { SetupScreen } from '@/components/setup/setup-screen';
+import { HEALTH_CONDITION_OPTIONS } from '@/constants/check-in';
+import { useSetupStore } from '@/stores/setup.store';
 
 export default function HealthConditionsScreen() {
   const router = useRouter();
+  const healthConditions = useSetupStore((state) => state.healthConditions);
+  const toggleHealthCondition = useSetupStore((state) => state.toggleHealthCondition);
+
+  const handleContinue = useCallback(() => {
+    router.push('/(setup)/check-in-prefs');
+  }, [router]);
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">Health Conditions</ThemedText>
-      <ThemedText>Select existing health conditions</ThemedText>
-      <Pressable style={styles.button} onPress={() => router.push('/(setup)/check-in-prefs')}>
-        <ThemedText type="defaultSemiBold">Continue</ThemedText>
-      </Pressable>
-    </ThemedView>
+    <SetupScreen
+      step={4}
+      title="Any health conditions?"
+      description="Select all that apply. You can skip this if none apply."
+      onContinue={handleContinue}>
+      {HEALTH_CONDITION_OPTIONS.map((option) => (
+        <SelectableOption
+          key={option.value}
+          label={option.label}
+          selected={healthConditions.includes(option.value)}
+          onPress={() => toggleHealthCondition(option.value)}
+        />
+      ))}
+    </SetupScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    gap: 12,
-  },
-  button: {
-    marginTop: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-});

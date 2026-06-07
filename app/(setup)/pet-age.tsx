@@ -1,36 +1,46 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
+import { useCallback, useState } from 'react';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { SelectableOption } from '@/components/setup/selectable-option';
+import { SetupScreen } from '@/components/setup/setup-screen';
+import { PET_AGE_GROUP_OPTIONS } from '@/constants/check-in';
+import { useSetupStore, validateAgeGroup } from '@/stores/setup.store';
 
 export default function PetAgeScreen() {
   const router = useRouter();
+  const ageGroup = useSetupStore((state) => state.ageGroup);
+  const setAgeGroup = useSetupStore((state) => state.setAgeGroup);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleContinue = useCallback(() => {
+    const validationError = validateAgeGroup(ageGroup);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    router.push('/(setup)/health-conditions');
+  }, [ageGroup, router]);
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">Pet Age Group</ThemedText>
-      <ThemedText>Under 1 Year / 1-3 / 4-7 / 8-12 / 13+</ThemedText>
-      <Pressable
-        style={styles.button}
-        onPress={() => router.push('/(setup)/health-conditions')}>
-        <ThemedText type="defaultSemiBold">Continue</ThemedText>
-      </Pressable>
-    </ThemedView>
+    <SetupScreen
+      step={3}
+      title="How old is your pet?"
+      description="Select the age group that best fits."
+      onContinue={handleContinue}
+      continueDisabled={!ageGroup}
+      error={error}>
+      {PET_AGE_GROUP_OPTIONS.map((option) => (
+        <SelectableOption
+          key={option.value}
+          label={option.label}
+          selected={ageGroup === option.value}
+          onPress={() => {
+            setError(null);
+            setAgeGroup(option.value);
+          }}
+        />
+      ))}
+    </SetupScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    gap: 12,
-  },
-  button: {
-    marginTop: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-});

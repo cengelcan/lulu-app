@@ -1,34 +1,77 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
+import { useCallback, useState } from 'react';
+import { StyleSheet, TextInput } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { SetupScreen } from '@/components/setup/setup-screen';
+import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useThemeColor } from '@/hooks/use-theme-color';
+import { PET_NAME_MAX_LENGTH } from '@/types/pet';
+import { useSetupStore, validatePetName } from '@/stores/setup.store';
 
 export default function PetNameScreen() {
   const router = useRouter();
+  const name = useSetupStore((state) => state.name);
+  const setName = useSetupStore((state) => state.setName);
+  const [error, setError] = useState<string | null>(null);
+
+  const textColor = useThemeColor({}, 'text');
+  const borderColor = useThemeColor({}, 'border');
+  const surfaceColor = useThemeColor({}, 'surface');
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  const handleContinue = useCallback(() => {
+    const validationError = validatePetName(name);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setName(name.trim());
+    router.push('/(setup)/pet-age');
+  }, [name, router, setName]);
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">Pet Name</ThemedText>
-      <ThemedText>Enter your pet&apos;s name</ThemedText>
-      <Pressable style={styles.button} onPress={() => router.push('/(setup)/pet-age')}>
-        <ThemedText type="defaultSemiBold">Continue</ThemedText>
-      </Pressable>
-    </ThemedView>
+    <SetupScreen
+      step={2}
+      title="What's your pet's name?"
+      description={`Enter a name between 1 and ${PET_NAME_MAX_LENGTH} characters.`}
+      onContinue={handleContinue}
+      continueDisabled={!name.trim()}
+      error={error}>
+      <TextInput
+        accessibilityLabel="Pet name"
+        autoCapitalize="words"
+        autoCorrect={false}
+        maxLength={PET_NAME_MAX_LENGTH}
+        placeholder="Pet name"
+        placeholderTextColor={textSecondaryColor}
+        returnKeyType="done"
+        style={[
+          styles.input,
+          {
+            color: textColor,
+            backgroundColor: surfaceColor,
+            borderColor,
+          },
+        ]}
+        value={name}
+        onChangeText={(value) => {
+          setError(null);
+          setName(value);
+        }}
+        onSubmitEditing={handleContinue}
+      />
+    </SetupScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    gap: 12,
-  },
-  button: {
-    marginTop: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+  input: {
+    ...Typography.body,
+    borderWidth: 1,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    minHeight: 52,
   },
 });

@@ -5,8 +5,12 @@ const DATABASE_NAME = 'pet_health_journal.db';
 let database: SQLite.SQLiteDatabase | null = null;
 
 /**
- * Migration SQL lives in storage/migrations/001_initial.sql.
- * Keep this constant in sync when the migration file changes.
+ * Migration SQL lives in storage/migrations/*.sql.
+ * Keep these constants in sync when migration files change.
+ *
+ * Dev note: databases created before migration 002 may retain
+ * idx_check_ins_pet_date until 002 runs. If the unique constraint error
+ * persists, delete the local pet_health_journal.db and restart the app.
  */
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -31,13 +35,16 @@ CREATE TABLE IF NOT EXISTS check_ins (
   FOREIGN KEY (pet_id) REFERENCES pets (id) ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_check_ins_pet_date ON check_ins (pet_id, date);
-
 CREATE INDEX IF NOT EXISTS idx_check_ins_pet_created_at ON check_ins (pet_id, created_at DESC);
+`;
+
+const MIGRATION_002_SQL = `
+DROP INDEX IF EXISTS idx_check_ins_pet_date;
 `;
 
 async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
   await db.execAsync(MIGRATION_001_SQL);
+  await db.execAsync(MIGRATION_002_SQL);
 }
 
 export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {

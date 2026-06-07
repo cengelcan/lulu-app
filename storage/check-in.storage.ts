@@ -52,7 +52,7 @@ export async function getLatestCheckInByPetId(petId: string): Promise<CheckIn | 
   const row = await db.getFirstAsync<CheckInRow>(
     `SELECT * FROM check_ins
      WHERE pet_id = ?
-     ORDER BY date DESC, created_at DESC
+     ORDER BY created_at DESC
      LIMIT 1`,
     petId
   );
@@ -65,7 +65,7 @@ export async function getCheckInsByPetId(petId: string): Promise<CheckIn[]> {
   const rows = await db.getAllAsync<CheckInRow>(
     `SELECT * FROM check_ins
      WHERE pet_id = ?
-     ORDER BY date DESC, created_at DESC`,
+     ORDER BY created_at DESC`,
     petId
   );
 

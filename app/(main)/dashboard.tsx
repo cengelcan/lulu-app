@@ -33,17 +33,19 @@ function getHealthConditionLabels(conditions: HealthCondition[]): string[] {
   );
 }
 
-function formatCheckInDate(date: string): string {
-  const [year, month, day] = date.split('-').map(Number);
+function formatCheckInDateTime(createdAt: string): string {
+  const parsed = new Date(createdAt);
 
-  if (!year || !month || !day) {
-    return date;
+  if (Number.isNaN(parsed.getTime())) {
+    return createdAt;
   }
 
-  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+  return parsed.toLocaleString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 }
 
@@ -77,9 +79,10 @@ export default function DashboardScreen() {
   const clearError = usePetStore((state) => state.clearError);
 
   const latestCheckIn = useCheckInStore((state) => state.latestCheckIn);
+  const checkIns = useCheckInStore((state) => state.checkIns);
   const checkInIsLoading = useCheckInStore((state) => state.isLoading);
   const checkInError = useCheckInStore((state) => state.error);
-  const loadLatestCheckIn = useCheckInStore((state) => state.loadLatestCheckIn);
+  const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
   const clearCheckInError = useCheckInStore((state) => state.clearError);
 
   const primaryColor = useThemeColor({}, 'primary');
@@ -94,8 +97,8 @@ export default function DashboardScreen() {
       return;
     }
 
-    void loadLatestCheckIn(pet.id);
-  }, [loadLatestCheckIn, pet?.id]);
+    void loadCheckIns(pet.id);
+  }, [loadCheckIns, pet?.id]);
 
   const handleRetry = () => {
     clearError();
@@ -116,7 +119,7 @@ export default function DashboardScreen() {
     }
 
     clearCheckInError();
-    void loadLatestCheckIn(pet.id);
+    void loadCheckIns(pet.id);
   };
 
   return (
@@ -164,7 +167,7 @@ export default function DashboardScreen() {
                   lightColor={textSecondaryColor}
                   darkColor={textSecondaryColor}
                   style={styles.checkInDate}>
-                  {formatCheckInDate(latestCheckIn.date)}
+                  {formatCheckInDateTime(latestCheckIn.createdAt)}
                 </ThemedText>
                 <DetailRow
                   label="Appetite"
@@ -206,6 +209,49 @@ export default function DashboardScreen() {
               </ThemedText>
             ))}
           </Card>
+
+          <View style={styles.historySection}>
+            <ThemedText type="subtitle">View History</ThemedText>
+            {checkInIsLoading ? (
+              <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
+            ) : checkInError ? (
+              <View style={styles.checkInError}>
+                <ThemedText style={styles.message}>{checkInError}</ThemedText>
+                <Button title="Try Again" variant="secondary" onPress={handleRetryCheckIn} />
+              </View>
+            ) : checkIns.length === 0 ? (
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.historyEmpty}>
+                No check-in history yet. Complete a check-in to start building your pet&apos;s
+                health record.
+              </ThemedText>
+            ) : (
+              checkIns.map((checkIn) => (
+                <Card key={checkIn.id}>
+                  <ThemedText
+                    lightColor={textSecondaryColor}
+                    darkColor={textSecondaryColor}
+                    style={styles.checkInDate}>
+                    {formatCheckInDateTime(checkIn.createdAt)}
+                  </ThemedText>
+                  <DetailRow
+                    label="Appetite"
+                    value={getOptionLabel(APPETITE_OPTIONS, checkIn.appetite)}
+                  />
+                  <DetailRow
+                    label="Energy"
+                    value={getOptionLabel(ENERGY_OPTIONS, checkIn.energy)}
+                  />
+                  <DetailRow
+                    label="Symptoms"
+                    value={getOptionLabel(SYMPTOM_OPTIONS, checkIn.symptom)}
+                  />
+                </Card>
+              ))
+            )}
+          </View>
         </View>
       )}
     </ScreenContainer>
@@ -254,5 +300,11 @@ const styles = StyleSheet.create({
   },
   checkInDate: {
     ...Typography.caption,
+  },
+  historySection: {
+    gap: Spacing.md,
+  },
+  historyEmpty: {
+    ...Typography.body,
   },
 });

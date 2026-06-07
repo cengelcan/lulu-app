@@ -20,6 +20,4 @@ CREATE TABLE IF NOT EXISTS check_ins (
   FOREIGN KEY (pet_id) REFERENCES pets (id) ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_check_ins_pet_date ON check_ins (pet_id, date);
-
 CREATE INDEX IF NOT EXISTS idx_check_ins_pet_created_at ON check_ins (pet_id, created_at DESC);

@@ -14,6 +14,8 @@ type OnboardingScreenProps = {
   description: string;
   buttonTitle: string;
   onContinue: () => void;
+  isLoading?: boolean;
+  error?: string | null;
 };
 
 export function OnboardingScreen({
@@ -22,6 +24,8 @@ export function OnboardingScreen({
   description,
   buttonTitle,
   onContinue,
+  isLoading = false,
+  error = null,
 }: OnboardingScreenProps) {
   const primaryColor = useThemeColor({}, 'primary');
   const borderColor = useThemeColor({}, 'border');
@@ -75,7 +79,21 @@ export function OnboardingScreen({
         </ThemedText>
       </View>
 
-      <Button title={buttonTitle} onPress={onContinue} style={styles.button} />
+      {error ? (
+        <ThemedText
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.error}>
+          {error}
+        </ThemedText>
+      ) : null}
+
+      <Button
+        title={buttonTitle}
+        onPress={onContinue}
+        disabled={isLoading}
+        style={styles.button}
+      />
     </ScreenContainer>
   );
 }
@@ -109,6 +127,10 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  error: {
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
   button: {
     marginBottom: Spacing.md,

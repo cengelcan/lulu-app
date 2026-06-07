@@ -1,34 +1,17 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
 
 export default function Onboarding4Screen() {
   const router = useRouter();
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">Onboarding 4</ThemedText>
-      <ThemedText>Turn daily notes into vet-ready reports.</ThemedText>
-      <Pressable style={styles.button} onPress={() => router.replace('/(auth)')}>
-        <ThemedText type="defaultSemiBold">Get Started</ThemedText>
-      </Pressable>
-    </ThemedView>
+    <OnboardingScreen
+      step={4}
+      title="Turn daily notes into vet-ready reports."
+      description="Prepare users for veterinary visits."
+      buttonTitle="Get Started"
+      onContinue={() => router.replace('/(setup)/pet-type')}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    gap: 12,
-  },
-  button: {
-    marginTop: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-});

@@ -6,10 +6,17 @@ import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useCheckInStore } from '@/stores/check-in.store';
 
 export default function CheckInSuccessScreen() {
   const router = useRouter();
+  const checkInCount = useCheckInStore((state) => state.checkIns.length);
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  const isFirstCheckIn = checkInCount === 1;
+  const message = isFirstCheckIn
+    ? "You've completed your first health check-in."
+    : "Your check-in is saved. Thanks for keeping track.";
 
   return (
     <ScreenContainer contentStyle={styles.content}>
@@ -20,7 +27,7 @@ export default function CheckInSuccessScreen() {
         lightColor={textSecondaryColor}
         darkColor={textSecondaryColor}
         style={styles.message}>
-        You&apos;ve completed your first health check-in.
+        {message}
       </ThemedText>
       <Button
         title="Go To Dashboard"

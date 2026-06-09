@@ -1,6 +1,7 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { DailyCheckInProgress } from '@/components/dashboard/DailyCheckInProgress';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
@@ -8,6 +9,7 @@ import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
@@ -160,6 +162,9 @@ export default function DashboardScreen() {
   };
 
   const handleEditPet = () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     router.push('/edit-pet');
   };
 
@@ -212,17 +217,39 @@ export default function DashboardScreen() {
         <View style={styles.body}>
           <View style={styles.petHeader}>
             <PetAvatar photoUri={pet.photoUri} size={80} />
-            <ThemedText type="title" style={styles.petName}>
-              {pet.name}
-            </ThemedText>
+            <View style={styles.petInfo}>
+              <ThemedText type="title" style={styles.petName}>
+                {pet.name}
+              </ThemedText>
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.petSubtitle}>
+                {getOptionLabel(PET_SPECIES_OPTIONS, pet.species)} •{' '}
+                {getOptionLabel(PET_AGE_GROUP_OPTIONS, pet.ageGroup)}
+              </ThemedText>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Edit pet"
+              onPress={handleEditPet}
+              hitSlop={8}
+              style={({ pressed }) => [styles.editAction, { opacity: pressed ? 0.6 : 1 }]}>
+              <IconSymbol name="pencil" size={15} color={primaryColor} />
+              <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.editLabel}>
+                Edit
+              </ThemedText>
+            </Pressable>
           </View>
-
-          <Button title="Start Check-In" onPress={handleStartCheckIn} />
-          <Button title="Edit Pet" variant="secondary" onPress={handleEditPet} />
 
           <Card>
             <ThemedText type="subtitle">Quick Actions</ThemedText>
             <View style={styles.quickActionsGrid}>
+              <QuickActionItem
+                label="Start Check-In"
+                icon="checkmark.circle.fill"
+                onPress={handleStartCheckIn}
+              />
               <QuickActionItem
                 label="Reports"
                 icon="chart.line.uptrend.xyaxis"
@@ -401,12 +428,29 @@ const styles = StyleSheet.create({
   },
   petHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: Spacing.md,
   },
-  petName: {
+  petInfo: {
     flex: 1,
+    gap: Spacing.xs,
+    paddingTop: Spacing.xs,
+  },
+  petName: {
     flexShrink: 1,
+  },
+  petSubtitle: {
+    ...Typography.body,
+  },
+  editAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingTop: Spacing.sm,
+  },
+  editLabel: {
+    ...Typography.body,
+    fontWeight: '400',
   },
   centered: {
     flex: 1,

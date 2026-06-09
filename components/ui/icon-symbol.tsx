@@ -24,6 +24,8 @@ const MAPPING = {
   'lock.fill': 'lock',
   'pawprint.fill': 'pets',
   'checkmark': 'check',
+  'pencil': 'edit',
+  'checkmark.circle.fill': 'check-circle',
 } as IconMapping;
 
 /**

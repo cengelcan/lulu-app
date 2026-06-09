@@ -1,7 +1,7 @@
 import { type Href, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { syncCheckInReminderSchedule } from '@/services/notifications';
+import { getNotificationLaunchRoute, syncCheckInReminderSchedule } from '@/services/notifications';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
 
@@ -60,6 +60,13 @@ export function useBootstrap() {
     if (hasCompletedOnboarding === null) {
       setError('Onboarding status is unavailable');
       setPhase('error');
+      return;
+    }
+
+    const notificationRoute = await getNotificationLaunchRoute();
+    if (notificationRoute) {
+      setPhase('redirecting');
+      router.replace(notificationRoute);
       return;
     }
 

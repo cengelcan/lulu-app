@@ -1,5 +1,16 @@
 import type { CheckInPreference } from '@/types/check-in';
 
+export const APP_SCHEME = 'luluapp';
+
+export const CHECK_IN_ROUTE = '/check-in' as const;
+
+export const CHECK_IN_DEEP_LINK = `${APP_SCHEME}://check-in`;
+
+export const CHECK_IN_NOTIFICATION_DATA = {
+  route: CHECK_IN_ROUTE,
+  deepLink: CHECK_IN_DEEP_LINK,
+} as const;
+
 export const CHECK_IN_REMINDER_NOTIFICATION_ID = 'pet-health-check-in-reminder';
 
 export const ANDROID_CHECK_IN_CHANNEL_ID = 'check-in-reminders';

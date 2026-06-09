@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import {
   ALL_CHECK_IN_REMINDER_NOTIFICATION_IDS,
   ANDROID_CHECK_IN_CHANNEL_ID,
+  CHECK_IN_NOTIFICATION_DATA,
   CHECK_IN_REMINDER_NOTIFICATION_ID,
   CHECK_IN_REMINDER_SCHEDULE,
   CHECK_IN_REMINDER_SLOT_IDS,
@@ -48,6 +49,7 @@ async function scheduleDailyCheckInReminder(
       title,
       body,
       sound: true,
+      data: { ...CHECK_IN_NOTIFICATION_DATA },
       ...(Platform.OS === 'android' ? { channelId: ANDROID_CHECK_IN_CHANNEL_ID } : {}),
     },
     trigger: {

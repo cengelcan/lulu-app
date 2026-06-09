@@ -1,17 +1,26 @@
-import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { APPETITE_OPTIONS, ENERGY_OPTIONS, SYMPTOM_OPTIONS } from '@/constants/check-in';
-import { Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
 import type { Appetite, CheckIn, Energy, Symptom } from '@/types/check-in';
+import {
+  formatCheckInTitleDate,
+  formatLocalDate,
+  getTodayStart,
+  isFutureLocalDate,
+  isTodayLocalDate,
+  isValidLocalDateString,
+  parseLocalDate,
+} from '@/utils/date';
 
 function createCheckInId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -22,12 +31,26 @@ function createCheckInId(): string {
 }
 
 function getTodayDateString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  return formatLocalDate(getTodayStart());
+}
 
-  return `${year}-${month}-${day}`;
+function sortCheckInsByCreatedAtDesc(checkIns: CheckIn[]): CheckIn[] {
+  return [...checkIns].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
+function formatCheckInTime(createdAt: string): string {
+  const parsed = new Date(createdAt);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return createdAt;
+  }
+
+  return parsed.toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 type OptionSectionProps<T extends string> = {
@@ -58,14 +81,57 @@ function OptionSection<T extends string>({
   );
 }
 
+type ExistingCheckInItemProps = {
+  checkIn: CheckIn;
+  isSelected: boolean;
+  onSelect: () => void;
+};
+
+function ExistingCheckInItem({ checkIn, isSelected, onSelect }: ExistingCheckInItemProps) {
+  const surfaceColor = useThemeColor({}, 'surface');
+  const borderColor = useThemeColor({}, 'border');
+  const primaryColor = useThemeColor({}, 'primary');
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  const appetiteLabel =
+    APPETITE_OPTIONS.find((option) => option.value === checkIn.appetite)?.label ??
+    checkIn.appetite;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: isSelected }}
+      onPress={onSelect}
+      style={[
+        styles.existingItem,
+        {
+          backgroundColor: surfaceColor,
+          borderColor: isSelected ? primaryColor : borderColor,
+          borderWidth: isSelected ? 2 : StyleSheet.hairlineWidth,
+        },
+      ]}>
+      <ThemedText type="defaultSemiBold">{formatCheckInTime(checkIn.createdAt)}</ThemedText>
+      <ThemedText
+        lightColor={textSecondaryColor}
+        darkColor={textSecondaryColor}
+        style={styles.existingItemDetail}>
+        {appetiteLabel}
+      </ThemedText>
+    </Pressable>
+  );
+}
+
 export default function CheckInScreen() {
   const router = useRouter();
+  const { date: dateParam } = useLocalSearchParams<{ date?: string | string[] }>();
 
   const pet = usePetStore((state) => state.pet);
   const petIsLoading = usePetStore((state) => state.isLoading);
   const loadPet = usePetStore((state) => state.loadPet);
 
+  const checkIns = useCheckInStore((state) => state.checkIns);
   const createCheckIn = useCheckInStore((state) => state.createCheckIn);
+  const updateCheckIn = useCheckInStore((state) => state.updateCheckIn);
   const checkInIsLoading = useCheckInStore((state) => state.isLoading);
   const checkInError = useCheckInStore((state) => state.error);
   const clearCheckInError = useCheckInStore((state) => state.clearError);
@@ -73,10 +139,50 @@ export default function CheckInScreen() {
   const [appetite, setAppetite] = useState<Appetite | null>(null);
   const [energy, setEnergy] = useState<Energy | null>(null);
   const [symptom, setSymptom] = useState<Symptom | null>(null);
+  const [editingCheckInId, setEditingCheckInId] = useState<string | null>(null);
+  const [isAddingNew, setIsAddingNew] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
+  const isExplicitDate = rawDateParam !== undefined && rawDateParam !== '';
+  const selectedDate = useMemo(() => {
+    if (isExplicitDate && isValidLocalDateString(rawDateParam)) {
+      return rawDateParam;
+    }
+
+    return getTodayDateString();
+  }, [isExplicitDate, rawDateParam]);
+
+  const selectedDateObject = useMemo(() => parseLocalDate(selectedDate), [selectedDate]);
+  const isFutureDate = selectedDateObject ? isFutureLocalDate(selectedDateObject) : false;
+  const isEditMode = isExplicitDate;
+
+  const dayCheckIns = useMemo(
+    () => sortCheckInsByCreatedAtDesc(checkIns.filter((checkIn) => checkIn.date === selectedDate)),
+    [checkIns, selectedDate]
+  );
+
+  const prefillFromCheckIn = useCallback((checkIn: CheckIn) => {
+    setAppetite(checkIn.appetite);
+    setEnergy(checkIn.energy);
+    setSymptom(checkIn.symptom);
+    setEditingCheckInId(checkIn.id);
+    setIsAddingNew(false);
+    setValidationError(null);
+    clearCheckInError();
+  }, [clearCheckInError]);
+
+  const resetForm = useCallback(() => {
+    setAppetite(null);
+    setEnergy(null);
+    setSymptom(null);
+    setEditingCheckInId(null);
+    setValidationError(null);
+    clearCheckInError();
+  }, [clearCheckInError]);
 
   useEffect(() => {
     void loadPet();
@@ -88,10 +194,44 @@ export default function CheckInScreen() {
     }
   }, [pet, petIsLoading, router]);
 
+  useEffect(() => {
+    setIsAddingNew(false);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (!isEditMode) {
+      resetForm();
+      return;
+    }
+
+    if (dayCheckIns.length === 0) {
+      resetForm();
+      return;
+    }
+
+    if (!isAddingNew) {
+      prefillFromCheckIn(dayCheckIns[0]);
+    }
+  }, [dayCheckIns, isAddingNew, isEditMode, prefillFromCheckIn, resetForm]);
+
+  const screenTitle = useMemo(() => {
+    if (!pet) {
+      return '';
+    }
+
+    if (isTodayLocalDate(selectedDate)) {
+      return `How is ${pet.name} today?`;
+    }
+
+    return `How was ${pet.name} on ${formatCheckInTitleDate(selectedDate)}?`;
+  }, [pet, selectedDate]);
+
   const isFormComplete = appetite !== null && energy !== null && symptom !== null;
+  const isEditingExisting = editingCheckInId !== null;
+  const saveButtonTitle = isEditingExisting ? 'Update Check-In' : 'Save Check-In';
 
   const handleSave = useCallback(async () => {
-    if (!pet) {
+    if (!pet || isFutureDate) {
       return;
     }
 
@@ -103,18 +243,35 @@ export default function CheckInScreen() {
     setValidationError(null);
     clearCheckInError();
 
-    const checkIn: CheckIn = {
-      id: createCheckInId(),
-      petId: pet.id,
-      date: getTodayDateString(),
-      appetite,
-      energy,
-      symptom,
-      createdAt: new Date().toISOString(),
-    };
-
     try {
-      await createCheckIn(checkIn);
+      if (isEditingExisting && editingCheckInId) {
+        const existingCheckIn = dayCheckIns.find((checkIn) => checkIn.id === editingCheckInId);
+        if (!existingCheckIn) {
+          setValidationError('This check-in could not be found. Please try again.');
+          return;
+        }
+
+        await updateCheckIn({
+          ...existingCheckIn,
+          date: selectedDate,
+          appetite,
+          energy,
+          symptom,
+        });
+      } else {
+        const checkIn: CheckIn = {
+          id: createCheckInId(),
+          petId: pet.id,
+          date: selectedDate,
+          appetite,
+          energy,
+          symptom,
+          createdAt: new Date().toISOString(),
+        };
+
+        await createCheckIn(checkIn);
+      }
+
       router.replace('/check-in-success');
     } catch {
       // Store already sets error state.
@@ -123,14 +280,28 @@ export default function CheckInScreen() {
     appetite,
     clearCheckInError,
     createCheckIn,
+    dayCheckIns,
+    editingCheckInId,
     energy,
+    isEditingExisting,
     isFormComplete,
+    isFutureDate,
     pet,
     router,
+    selectedDate,
     symptom,
+    updateCheckIn,
   ]);
 
-  const errorMessage = validationError ?? checkInError;
+  const handleAddAnother = () => {
+    resetForm();
+    setIsAddingNew(true);
+  };
+
+  const errorMessage =
+    validationError ??
+    checkInError ??
+    (isFutureDate ? 'You can only add check-ins for today or past days.' : null);
 
   if (petIsLoading || !pet) {
     return (
@@ -143,13 +314,32 @@ export default function CheckInScreen() {
   return (
     <ScreenContainer scrollable contentStyle={styles.content}>
       <View style={styles.body}>
-        <ThemedText type="title">How is {pet.name} today?</ThemedText>
+        <ThemedText type="title">{screenTitle}</ThemedText>
         <ThemedText
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
           style={styles.description}>
           Select one option for each question.
         </ThemedText>
+
+        {isEditMode && dayCheckIns.length > 0 ? (
+          <View style={styles.existingSection}>
+            <ThemedText type="subtitle">Check-ins for this day</ThemedText>
+            <View style={styles.existingList}>
+              {dayCheckIns.map((checkIn) => (
+                <ExistingCheckInItem
+                  key={checkIn.id}
+                  checkIn={checkIn}
+                  isSelected={editingCheckInId === checkIn.id}
+                  onSelect={() => prefillFromCheckIn(checkIn)}
+                />
+              ))}
+            </View>
+            {!isAddingNew ? (
+              <Button title="Add another check-in" variant="ghost" onPress={handleAddAnother} />
+            ) : null}
+          </View>
+        ) : null}
 
         <OptionSection
           title="Appetite"
@@ -195,9 +385,9 @@ export default function CheckInScreen() {
       ) : null}
 
       <Button
-        title="Save Check-In"
+        title={saveButtonTitle}
         onPress={() => void handleSave()}
-        disabled={!isFormComplete || checkInIsLoading}
+        disabled={!isFormComplete || checkInIsLoading || isFutureDate}
         style={styles.button}
       />
     </ScreenContainer>
@@ -221,6 +411,20 @@ const styles = StyleSheet.create({
   },
   description: {
     ...Typography.body,
+  },
+  existingSection: {
+    gap: Spacing.sm,
+  },
+  existingList: {
+    gap: Spacing.sm,
+  },
+  existingItem: {
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    gap: Spacing.xs,
+  },
+  existingItemDetail: {
+    ...Typography.caption,
   },
   section: {
     gap: Spacing.sm,

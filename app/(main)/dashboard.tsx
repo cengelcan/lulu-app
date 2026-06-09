@@ -1,7 +1,8 @@
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { DailyCheckInProgress } from '@/components/dashboard/DailyCheckInProgress';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
@@ -119,6 +120,16 @@ export default function DashboardScreen() {
     void loadCheckIns(pet.id);
   }, [loadCheckIns, pet?.id]);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!pet?.id) {
+        return;
+      }
+
+      void loadCheckIns(pet.id);
+    }, [loadCheckIns, pet?.id])
+  );
+
   useEffect(() => {
     if (!pet?.id) {
       return;
@@ -232,6 +243,8 @@ export default function DashboardScreen() {
               />
             </View>
           </Card>
+
+          <DailyCheckInProgress />
 
           <Card>
             <ThemedText type="subtitle">Upcoming Reminder</ThemedText>

@@ -131,6 +131,10 @@ export default function DashboardScreen() {
     router.push('/check-in');
   };
 
+  const handleEditPet = () => {
+    router.push('/edit-pet');
+  };
+
   const handleRetryCheckIn = () => {
     if (!pet?.id) {
       return;
@@ -169,6 +173,7 @@ export default function DashboardScreen() {
           <ThemedText type="title">{pet.name}</ThemedText>
 
           <Button title="Start Check-In" onPress={handleStartCheckIn} />
+          <Button title="Edit Pet" variant="secondary" onPress={handleEditPet} />
 
           <Card>
             <ThemedText type="subtitle">Upcoming Reminder</ThemedText>

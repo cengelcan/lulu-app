@@ -16,7 +16,9 @@ import {
 } from '@/constants/check-in';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { getUpcomingReminder } from '@/services/notifications/upcoming';
 import { useCheckInStore } from '@/stores/check-in.store';
+import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
 import type { HealthCondition } from '@/types/pet';
 
@@ -85,6 +87,11 @@ export default function DashboardScreen() {
   const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
   const clearCheckInError = useCheckInStore((state) => state.clearError);
 
+  const reminderPreference = useNotificationStore((state) => state.preference);
+  const reminderPermission = useNotificationStore((state) => state.permission);
+  const reminderIsLoading = useNotificationStore((state) => state.isLoading);
+  const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
+
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -99,6 +106,17 @@ export default function DashboardScreen() {
 
     void loadCheckIns(pet.id);
   }, [loadCheckIns, pet?.id]);
+
+  useEffect(() => {
+    if (!pet?.id) {
+      return;
+    }
+
+    void loadNotificationSettings();
+  }, [loadNotificationSettings, pet?.id]);
+
+  const upcomingReminder =
+    reminderPermission === 'allowed' ? getUpcomingReminder(reminderPreference) : null;
 
   const handleRetry = () => {
     clearError();
@@ -151,6 +169,32 @@ export default function DashboardScreen() {
           <ThemedText type="title">{pet.name}</ThemedText>
 
           <Button title="Start Check-In" onPress={handleStartCheckIn} />
+
+          <Card>
+            <ThemedText type="subtitle">Upcoming Reminder</ThemedText>
+            {reminderIsLoading ? (
+              <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
+            ) : reminderPermission === 'later' ? (
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.message}>
+                Reminders are off
+              </ThemedText>
+            ) : upcomingReminder ? (
+              <>
+                <DetailRow label="Date" value={upcomingReminder.dateLabel} />
+                <DetailRow label="Time" value={upcomingReminder.timeLabel} />
+              </>
+            ) : (
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.message}>
+                No reminder scheduled
+              </ThemedText>
+            )}
+          </Card>
 
           <Card>
             <ThemedText type="subtitle">Latest Check-In</ThemedText>

@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { Button } from '@/components/ui/Button';
 import { Spacing } from '@/constants/theme';
+import { syncCheckInReminderSchedule } from '@/services/notifications';
 import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
 import {
@@ -81,6 +82,13 @@ export default function NotificationPermissionScreen() {
 
         if (usePetStore.getState().error) {
           return;
+        }
+
+        if (permission === 'allowed') {
+          await syncCheckInReminderSchedule({
+            permission,
+            petName: name.trim(),
+          });
         }
 
         resetDraft();

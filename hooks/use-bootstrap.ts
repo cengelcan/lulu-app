@@ -1,6 +1,7 @@
 import { type Href, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { syncCheckInReminderSchedule } from '@/services/notifications';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
 
@@ -39,6 +40,10 @@ export function useBootstrap() {
     clearPetError();
 
     await Promise.all([loadOnboardingStatus(), loadPet()]);
+
+    if (usePetStore.getState().pet) {
+      await syncCheckInReminderSchedule();
+    }
 
     const onboardingError = useOnboardingStore.getState().error;
     const petError = usePetStore.getState().error;

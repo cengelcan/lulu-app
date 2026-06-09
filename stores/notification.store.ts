@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 
 import {
+  cancelCheckInReminder,
+  requestNotificationPermission,
+  syncCheckInReminderSchedule,
+} from '@/services/notifications';
+import {
   getCheckInPreferences,
   getNotificationPermission,
   setCheckInPreferences,
@@ -54,6 +59,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     try {
       await setCheckInPreferences(preference);
       set({ preference, isLoading: false });
+      await syncCheckInReminderSchedule({ preference });
     } catch (error) {
       set({
         isLoading: false,
@@ -67,8 +73,15 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
+      if (permission === 'allowed') {
+        await requestNotificationPermission();
+      } else {
+        await cancelCheckInReminder();
+      }
+
       await setNotificationPermission(permission);
       set({ permission, isLoading: false });
+      await syncCheckInReminderSchedule({ permission });
     } catch (error) {
       set({
         isLoading: false,

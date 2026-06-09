@@ -18,7 +18,6 @@ import {
 } from '@/constants/check-in';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { scheduleDevTestReminder } from '@/services/notifications/test';
 import {
   canSkipNextReminder,
   getUpcomingReminder,
@@ -103,7 +102,6 @@ export default function DashboardScreen() {
   const skipNextReminder = useNotificationStore((state) => state.skipNextReminder);
 
   const [comingSoonVisible, setComingSoonVisible] = useState(false);
-  const [devTestReminderFeedback, setDevTestReminderFeedback] = useState<string | null>(null);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -172,17 +170,6 @@ export default function DashboardScreen() {
 
   const handleDismissComingSoon = () => {
     setComingSoonVisible(false);
-  };
-
-  const handleScheduleTestReminder = () => {
-    if (!pet?.name) {
-      return;
-    }
-
-    void (async () => {
-      const result = await scheduleDevTestReminder(pet.name);
-      setDevTestReminderFeedback(result.message);
-    })();
   };
 
   return (
@@ -277,20 +264,6 @@ export default function DashboardScreen() {
               </ThemedText>
             )}
           </Card>
-
-          {__DEV__ ? (
-            <View style={styles.devTestSection}>
-              <Button
-                title="Test Reminder (10 sec)"
-                variant="ghost"
-                onPress={handleScheduleTestReminder}
-                style={styles.devTestButton}
-              />
-              {devTestReminderFeedback ? (
-                <ThemedText style={styles.devTestFeedback}>{devTestReminderFeedback}</ThemedText>
-              ) : null}
-            </View>
-          ) : null}
 
           <Card>
             <ThemedText type="subtitle">Latest Check-In</ThemedText>
@@ -454,17 +427,6 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     marginTop: Spacing.sm,
-  },
-  devTestSection: {
-    gap: Spacing.xs,
-  },
-  devTestButton: {
-    minHeight: 36,
-    paddingVertical: Spacing.sm,
-    alignSelf: 'flex-start',
-  },
-  devTestFeedback: {
-    ...Typography.caption,
   },
   quickActionsGrid: {
     flexDirection: 'row',

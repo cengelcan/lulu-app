@@ -2,10 +2,14 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import {
+  ALL_CHECK_IN_REMINDER_NOTIFICATION_IDS,
   ANDROID_CHECK_IN_CHANNEL_ID,
   CHECK_IN_REMINDER_NOTIFICATION_ID,
   CHECK_IN_REMINDER_SCHEDULE,
+  CHECK_IN_REMINDER_SLOT_IDS,
+  isNotificationSchedulablePreference,
   isSchedulableCheckInPreference,
+  MULTIPLE_TIMES_DAILY_SLOTS,
   type SchedulableCheckInPreference,
 } from '@/services/notifications/constants';
 import { getCheckInReminderContent } from '@/services/notifications/content';
@@ -23,18 +27,23 @@ export async function cancelCheckInReminder(): Promise<void> {
     return;
   }
 
-  await Notifications.cancelScheduledNotificationAsync(CHECK_IN_REMINDER_NOTIFICATION_ID);
+  await Promise.all(
+    ALL_CHECK_IN_REMINDER_NOTIFICATION_IDS.map((identifier) =>
+      Notifications.cancelScheduledNotificationAsync(identifier)
+    )
+  );
 }
 
 async function scheduleDailyCheckInReminder(
-  preference: SchedulableCheckInPreference,
-  petName: string
+  slot: SchedulableCheckInPreference,
+  petName: string,
+  identifier: string
 ): Promise<void> {
-  const { hour, minute } = CHECK_IN_REMINDER_SCHEDULE[preference];
-  const { title, body } = getCheckInReminderContent(preference, petName);
+  const { hour, minute } = CHECK_IN_REMINDER_SCHEDULE[slot];
+  const { title, body } = getCheckInReminderContent(slot, petName);
 
   await Notifications.scheduleNotificationAsync({
-    identifier: CHECK_IN_REMINDER_NOTIFICATION_ID,
+    identifier,
     content: {
       title,
       body,
@@ -69,7 +78,7 @@ export async function syncCheckInReminderSchedule(input?: {
 
   await cancelCheckInReminder();
 
-  if (permission !== 'allowed' || !isSchedulableCheckInPreference(preference)) {
+  if (permission !== 'allowed' || !isNotificationSchedulablePreference(preference)) {
     return;
   }
 
@@ -83,5 +92,16 @@ export async function syncCheckInReminderSchedule(input?: {
     return;
   }
 
-  await scheduleDailyCheckInReminder(preference, petName);
+  if (preference === 'multiple_times_daily') {
+    await Promise.all(
+      MULTIPLE_TIMES_DAILY_SLOTS.map((slot) =>
+        scheduleDailyCheckInReminder(slot, petName, CHECK_IN_REMINDER_SLOT_IDS[slot])
+      )
+    );
+    return;
+  }
+
+  if (isSchedulableCheckInPreference(preference)) {
+    await scheduleDailyCheckInReminder(preference, petName, CHECK_IN_REMINDER_NOTIFICATION_ID);
+  }
 }

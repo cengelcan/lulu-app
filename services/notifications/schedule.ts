@@ -14,7 +14,13 @@ import {
   type SchedulableCheckInPreference,
 } from '@/services/notifications/constants';
 import { getCheckInReminderContent } from '@/services/notifications/content';
+import { formatLocalDate } from '@/services/notifications/date';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
+import {
+  getSkippedReminders,
+  isReminderSkipped,
+  pruneExpiredSkips,
+} from '@/services/notifications/skip.storage';
 import { getPet } from '@/storage/pet.storage';
 import {
   getCheckInPreferences,
@@ -33,6 +39,16 @@ export async function cancelCheckInReminder(): Promise<void> {
       Notifications.cancelScheduledNotificationAsync(identifier)
     )
   );
+}
+
+export async function cancelCheckInReminderSlot(
+  slot: SchedulableCheckInPreference
+): Promise<void> {
+  if (Platform.OS === 'web') {
+    return;
+  }
+
+  await Notifications.cancelScheduledNotificationAsync(CHECK_IN_REMINDER_SLOT_IDS[slot]);
 }
 
 async function scheduleDailyCheckInReminder(
@@ -94,16 +110,25 @@ export async function syncCheckInReminderSchedule(input?: {
     return;
   }
 
+  await pruneExpiredSkips();
+  const skippedReminders = await getSkippedReminders();
+  const today = formatLocalDate(new Date());
+
   if (preference === 'multiple_times_daily') {
     await Promise.all(
-      MULTIPLE_TIMES_DAILY_SLOTS.map((slot) =>
+      MULTIPLE_TIMES_DAILY_SLOTS.filter(
+        (slot) => !isReminderSkipped(slot, today, skippedReminders)
+      ).map((slot) =>
         scheduleDailyCheckInReminder(slot, petName, CHECK_IN_REMINDER_SLOT_IDS[slot])
       )
     );
     return;
   }
 
-  if (isSchedulableCheckInPreference(preference)) {
+  if (
+    isSchedulableCheckInPreference(preference) &&
+    !isReminderSkipped(preference, today, skippedReminders)
+  ) {
     await scheduleDailyCheckInReminder(preference, petName, CHECK_IN_REMINDER_NOTIFICATION_ID);
   }
 }

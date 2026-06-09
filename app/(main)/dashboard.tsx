@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
+import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -198,7 +199,12 @@ export default function DashboardScreen() {
         </View>
       ) : (
         <View style={styles.body}>
-          <ThemedText type="title">{pet.name}</ThemedText>
+          <View style={styles.petHeader}>
+            <PetAvatar photoUri={pet.photoUri} size={80} />
+            <ThemedText type="title" style={styles.petName}>
+              {pet.name}
+            </ThemedText>
+          </View>
 
           <Button title="Start Check-In" onPress={handleStartCheckIn} />
           <Button title="Edit Pet" variant="secondary" onPress={handleEditPet} />
@@ -379,6 +385,15 @@ const styles = StyleSheet.create({
   body: {
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
+  },
+  petHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  petName: {
+    flex: 1,
+    flexShrink: 1,
   },
   centered: {
     flex: 1,

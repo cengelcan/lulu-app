@@ -22,6 +22,7 @@ const MAPPING = {
   'doc.text.fill': 'description',
   'pills.fill': 'medication',
   'lock.fill': 'lock',
+  'pawprint.fill': 'pets',
 } as IconMapping;
 
 /**

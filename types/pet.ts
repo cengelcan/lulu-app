@@ -23,6 +23,7 @@ export type Pet = {
   species: PetSpecies;
   ageGroup: PetAgeGroup;
   healthConditions: HealthCondition[];
+  photoUri?: string | null;
   createdAt: string;
 };
 

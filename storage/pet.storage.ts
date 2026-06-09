@@ -8,6 +8,7 @@ type PetRow = {
   species: string;
   age_group: string;
   health_conditions: string;
+  photo_uri: string | null;
   created_at: string;
 };
 
@@ -18,6 +19,7 @@ function mapPetRow(row: PetRow): Pet {
     species: row.species as PetSpecies,
     ageGroup: row.age_group as PetAgeGroup,
     healthConditions: JSON.parse(row.health_conditions) as HealthCondition[],
+    photoUri: row.photo_uri,
     createdAt: row.created_at,
   };
 }
@@ -26,13 +28,14 @@ export async function createPet(pet: Pet): Promise<void> {
   const db = await getDatabase();
 
   await db.runAsync(
-    `INSERT INTO pets (id, name, species, age_group, health_conditions, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO pets (id, name, species, age_group, health_conditions, photo_uri, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     pet.id,
     pet.name,
     pet.species,
     pet.ageGroup,
     JSON.stringify(pet.healthConditions),
+    pet.photoUri ?? null,
     pet.createdAt
   );
 }
@@ -59,12 +62,13 @@ export async function updatePet(pet: Pet): Promise<void> {
 
   await db.runAsync(
     `UPDATE pets
-     SET name = ?, species = ?, age_group = ?, health_conditions = ?
+     SET name = ?, species = ?, age_group = ?, health_conditions = ?, photo_uri = ?
      WHERE id = ?`,
     pet.name,
     pet.species,
     pet.ageGroup,
     JSON.stringify(pet.healthConditions),
+    pet.photoUri ?? null,
     pet.id
   );
 }

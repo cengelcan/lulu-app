@@ -1,7 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { PetAvatar } from '@/components/pet/PetAvatar';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -18,6 +19,7 @@ import {
   validatePetName,
   validateSpecies,
 } from '@/stores/setup.store';
+import { pickPetPhotoFromGallery } from '@/services/pet-photo';
 import { usePetStore } from '@/stores/pet.store';
 import type { HealthCondition, PetAgeGroup, PetSpecies } from '@/types/pet';
 import { PET_NAME_MAX_LENGTH } from '@/types/pet';
@@ -83,8 +85,10 @@ export default function EditPetScreen() {
   const [healthConditions, setHealthConditions] = useState<HealthCondition[]>(
     () => pet?.healthConditions ?? []
   );
+  const [photoUri, setPhotoUri] = useState<string | null>(() => pet?.photoUri ?? null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPickingPhoto, setIsPickingPhoto] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textColor = useThemeColor({}, 'text');
@@ -111,7 +115,29 @@ export default function EditPetScreen() {
     setName(pet.name);
     setAgeGroup(pet.ageGroup);
     setHealthConditions(pet.healthConditions);
+    setPhotoUri(pet.photoUri ?? null);
   }, [pet?.id]);
+
+  const handleChangePhoto = useCallback(async () => {
+    setValidationError(null);
+    clearError();
+    setIsPickingPhoto(true);
+
+    try {
+      const result = await pickPetPhotoFromGallery();
+
+      if (result.ok) {
+        setPhotoUri(result.uri);
+        return;
+      }
+
+      if (result.reason === 'permission_denied') {
+        setValidationError('Photo library access is required to choose a pet photo.');
+      }
+    } finally {
+      setIsPickingPhoto(false);
+    }
+  }, [clearError]);
 
   const handleSave = useCallback(async () => {
     if (!pet) {
@@ -151,6 +177,7 @@ export default function EditPetScreen() {
         species,
         ageGroup,
         healthConditions,
+        photoUri,
       });
       router.replace('/(main)/dashboard');
     } catch {
@@ -158,7 +185,7 @@ export default function EditPetScreen() {
     } finally {
       setIsSaving(false);
     }
-  }, [ageGroup, clearError, healthConditions, name, pet, router, species, updatePet]);
+  }, [ageGroup, clearError, healthConditions, name, pet, photoUri, router, species, updatePet]);
 
   const errorMessage = validationError ?? petError;
 
@@ -180,6 +207,32 @@ export default function EditPetScreen() {
           style={styles.description}>
           Update your pet&apos;s profile information.
         </ThemedText>
+
+        <View style={styles.section}>
+          <ThemedText type="subtitle">Profile Photo</ThemedText>
+          <View style={styles.photoRow}>
+            <PetAvatar photoUri={photoUri} size={88} />
+            <Pressable
+              accessibilityLabel="Change photo"
+              accessibilityRole="button"
+              disabled={isPickingPhoto || isSaving}
+              onPress={() => void handleChangePhoto()}
+              style={({ pressed }) => [
+                styles.changePhotoButton,
+                {
+                  backgroundColor: surfaceColor,
+                  borderColor,
+                  opacity: pressed || isPickingPhoto || isSaving ? 0.7 : 1,
+                },
+              ]}>
+              {isPickingPhoto ? (
+                <ActivityIndicator color={primaryColor} size="small" />
+              ) : (
+                <ThemedText type="defaultSemiBold">Change Photo</ThemedText>
+              )}
+            </Pressable>
+          </View>
+        </View>
 
         <OptionSection
           title="Pet Type"
@@ -286,6 +339,21 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: Spacing.sm,
+  },
+  photoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  changePhotoButton: {
+    flex: 1,
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: Radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
   },
   input: {
     ...Typography.body,

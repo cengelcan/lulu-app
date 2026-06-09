@@ -11,6 +11,8 @@ let database: SQLite.SQLiteDatabase | null = null;
  * Dev note: databases created before migration 002 may retain
  * idx_check_ins_pet_date until 002 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
+ *
+ * Migration 003 adds pets.photo_uri via ensurePetPhotoUriColumn (idempotent).
  */
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -42,9 +44,19 @@ const MIGRATION_002_SQL = `
 DROP INDEX IF EXISTS idx_check_ins_pet_date;
 `;
 
+async function ensurePetPhotoUriColumn(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(pets)');
+  const hasPhotoUri = columns.some((column) => column.name === 'photo_uri');
+
+  if (!hasPhotoUri) {
+    await db.execAsync('ALTER TABLE pets ADD COLUMN photo_uri TEXT;');
+  }
+}
+
 async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
   await db.execAsync(MIGRATION_001_SQL);
   await db.execAsync(MIGRATION_002_SQL);
+  await ensurePetPhotoUriColumn(db);
 }
 
 export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {

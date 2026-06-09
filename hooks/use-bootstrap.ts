@@ -7,6 +7,9 @@ import { usePetStore } from '@/stores/pet.store';
 
 export type BootstrapPhase = 'loading' | 'error' | 'redirecting';
 
+/** PRD Screen 01 — splash visible for 2–3 seconds before navigation */
+export const SPLASH_MIN_DURATION_MS = 2500;
+
 function resolveBootstrapRoute(
   hasCompletedOnboarding: boolean,
   hasPet: boolean
@@ -22,6 +25,15 @@ function resolveBootstrapRoute(
   return '/(main)/dashboard';
 }
 
+async function waitForMinSplashDuration(startedAt: number): Promise<void> {
+  const remaining = SPLASH_MIN_DURATION_MS - (Date.now() - startedAt);
+  if (remaining > 0) {
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, remaining);
+    });
+  }
+}
+
 export function useBootstrap() {
   const router = useRouter();
   const loadOnboardingStatus = useOnboardingStore((state) => state.loadOnboardingStatus);
@@ -34,6 +46,7 @@ export function useBootstrap() {
   const hasStarted = useRef(false);
 
   const runBootstrap = useCallback(async () => {
+    const startedAt = Date.now();
     setPhase('loading');
     setError(null);
     clearOnboardingError();
@@ -49,6 +62,7 @@ export function useBootstrap() {
     const petError = usePetStore.getState().error;
 
     if (onboardingError || petError) {
+      await waitForMinSplashDuration(startedAt);
       setError(onboardingError ?? petError);
       setPhase('error');
       return;
@@ -58,12 +72,15 @@ export function useBootstrap() {
     const { pet } = usePetStore.getState();
 
     if (hasCompletedOnboarding === null) {
+      await waitForMinSplashDuration(startedAt);
       setError('Onboarding status is unavailable');
       setPhase('error');
       return;
     }
 
     const notificationRoute = await getNotificationLaunchRoute();
+    await waitForMinSplashDuration(startedAt);
+
     if (notificationRoute) {
       setPhase('redirecting');
       router.replace(notificationRoute);

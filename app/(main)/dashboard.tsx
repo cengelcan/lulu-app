@@ -1,10 +1,12 @@
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
   APPETITE_OPTIONS,
@@ -99,6 +101,8 @@ export default function DashboardScreen() {
   const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
   const skipNextReminder = useNotificationStore((state) => state.skipNextReminder);
 
+  const [comingSoonVisible, setComingSoonVisible] = useState(false);
+
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -160,6 +164,14 @@ export default function DashboardScreen() {
     void skipNextReminder();
   };
 
+  const handleLockedQuickAction = () => {
+    setComingSoonVisible(true);
+  };
+
+  const handleDismissComingSoon = () => {
+    setComingSoonVisible(false);
+  };
+
   return (
     <ScreenContainer scrollable contentStyle={styles.content}>
       {isLoading ? (
@@ -190,6 +202,30 @@ export default function DashboardScreen() {
 
           <Button title="Start Check-In" onPress={handleStartCheckIn} />
           <Button title="Edit Pet" variant="secondary" onPress={handleEditPet} />
+
+          <Card>
+            <ThemedText type="subtitle">Quick Actions</ThemedText>
+            <View style={styles.quickActionsGrid}>
+              <QuickActionItem
+                label="Reports"
+                icon="chart.line.uptrend.xyaxis"
+                locked
+                onPress={handleLockedQuickAction}
+              />
+              <QuickActionItem
+                label="Records"
+                icon="doc.text.fill"
+                locked
+                onPress={handleLockedQuickAction}
+              />
+              <QuickActionItem
+                label="Medication"
+                icon="pills.fill"
+                locked
+                onPress={handleLockedQuickAction}
+              />
+            </View>
+          </Card>
 
           <Card>
             <ThemedText type="subtitle">Upcoming Reminder</ThemedText>
@@ -331,6 +367,7 @@ export default function DashboardScreen() {
           </View>
         </View>
       )}
+      <ComingSoonModal visible={comingSoonVisible} onDismiss={handleDismissComingSoon} />
     </ScreenContainer>
   );
 }
@@ -390,5 +427,10 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     marginTop: Spacing.sm,
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
   },
 });

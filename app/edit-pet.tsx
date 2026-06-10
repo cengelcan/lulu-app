@@ -264,7 +264,7 @@ export default function EditPetScreen() {
         microchipId: normalizeOptionalText(microchipId),
         ownerName: normalizeOptionalText(ownerName),
       });
-      router.replace('/pet-profile');
+      router.back();
     } catch {
       // Store already sets error state.
     } finally {

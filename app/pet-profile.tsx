@@ -1,5 +1,6 @@
+import { HeaderBackButton } from '@react-navigation/elements';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { PetAvatar } from '@/components/pet/PetAvatar';
@@ -56,9 +57,30 @@ export default function PetProfileScreen() {
 
   useEffect(() => {
     if (!isLoading && !pet) {
-      router.replace('/(tabs)/home');
+      router.dismissTo('/(tabs)/home');
     }
   }, [isLoading, pet, router]);
+
+  const handleGoHome = useCallback(() => {
+    router.dismissTo('/(tabs)/home');
+  }, [router]);
+
+  const screenOptions = useMemo(
+    () => ({
+      headerShown: true as const,
+      title: 'Pet Profile',
+      headerBackTitle: 'Home',
+      headerLeft: (props: { tintColor?: string }) => (
+        <HeaderBackButton
+          {...props}
+          label="Home"
+          tintColor={props.tintColor ?? primaryColor}
+          onPress={handleGoHome}
+        />
+      ),
+    }),
+    [handleGoHome, primaryColor]
+  );
 
   const handleEditProfile = () => {
     router.push('/edit-pet');
@@ -67,13 +89,7 @@ export default function PetProfileScreen() {
   if (isLoading || !pet) {
     return (
       <>
-        <Stack.Screen
-          options={{
-            headerShown: true,
-            title: 'Pet Profile',
-            headerBackTitle: 'Home',
-          }}
-        />
+        <Stack.Screen options={screenOptions} />
         <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
           <ActivityIndicator color={primaryColor} size="large" />
         </ScreenContainer>
@@ -83,13 +99,7 @@ export default function PetProfileScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Pet Profile',
-          headerBackTitle: 'Home',
-        }}
-      />
+      <Stack.Screen options={screenOptions} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
       <View style={styles.body}>
         <View style={styles.header}>

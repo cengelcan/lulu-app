@@ -1,5 +1,4 @@
 import { cancelCheckInReminder } from '@/services/notifications';
-import { clearSkippedReminders } from '@/services/notifications/skip.storage';
 import * as petStorage from '@/storage/pet.storage';
 import {
   removeCheckInPreferences,
@@ -27,7 +26,6 @@ export async function deleteAllLocalData(petId?: string | null): Promise<void> {
     removeCurrentUserId(),
     removeCheckInPreferences(),
     removeNotificationPermission(),
-    clearSkippedReminders(),
   ]);
 }
 
@@ -47,10 +45,7 @@ export function resetAppStoresAfterDataDeletion(): void {
   useNotificationStore.setState({
     preference: null,
     permission: null,
-    skippedReminders: [],
-    skipFeedbackMessage: null,
     isLoading: false,
-    isSkipping: false,
     error: null,
   });
   useSetupStore.getState().resetDraft();

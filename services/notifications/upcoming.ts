@@ -6,7 +6,6 @@ import {
   type SchedulableCheckInPreference,
 } from '@/services/notifications/constants';
 import { addDays, formatLocalDate } from '@/services/notifications/date';
-import { isReminderSkipped, type SkippedReminder } from '@/services/notifications/skip.storage';
 import type { CheckInPreference } from '@/types/check-in';
 
 export type UpcomingReminderDisplay = {
@@ -51,9 +50,8 @@ function getUpcomingFromSlot(
   };
 }
 
-export function resolveUpcomingSlot(
+function resolveUpcomingSlot(
   preference: CheckInPreference | null,
-  skippedReminders: SkippedReminder[] = [],
   now: Date = new Date()
 ): { slot: SchedulableCheckInPreference; date: string } | null {
   if (!isNotificationSchedulablePreference(preference)) {
@@ -69,10 +67,9 @@ export function resolveUpcomingSlot(
           ? MULTIPLE_TIMES_DAILY_SLOTS.filter((slot) => isSlotAfterNow(slot, day, now))
           : MULTIPLE_TIMES_DAILY_SLOTS;
 
-      for (const slot of slots) {
-        if (!isReminderSkipped(slot, date, skippedReminders)) {
-          return { slot, date };
-        }
+      const slot = slots[0];
+      if (slot) {
+        return { slot, date };
       }
     }
 
@@ -85,7 +82,7 @@ export function resolveUpcomingSlot(
     const slotToday = new Date(now);
     slotToday.setHours(hour, minute, 0, 0);
 
-    if (now < slotToday && !isReminderSkipped(preference, today, skippedReminders)) {
+    if (now < slotToday) {
       return { slot: preference, date: today };
     }
 
@@ -99,36 +96,13 @@ export function resolveUpcomingSlot(
 
 export function getUpcomingReminder(
   preference: CheckInPreference | null,
-  skippedReminders: SkippedReminder[] = [],
   now: Date = new Date()
 ): UpcomingReminderDisplay | null {
-  const upcoming = resolveUpcomingSlot(preference, skippedReminders, now);
+  const upcoming = resolveUpcomingSlot(preference, now);
 
   if (!upcoming) {
     return null;
   }
 
   return getUpcomingFromSlot(upcoming.slot, upcoming.date, now);
-}
-
-export function canSkipNextReminder(
-  preference: CheckInPreference | null,
-  skippedReminders: SkippedReminder[] = [],
-  now: Date = new Date()
-): boolean {
-  if (!isNotificationSchedulablePreference(preference)) {
-    return false;
-  }
-
-  const upcoming = resolveUpcomingSlot(preference, skippedReminders, now);
-
-  if (!upcoming) {
-    return false;
-  }
-
-  if (preference === 'multiple_times_daily') {
-    return true;
-  }
-
-  return upcoming.date === formatLocalDate(now);
 }

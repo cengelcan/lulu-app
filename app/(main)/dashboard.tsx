@@ -22,10 +22,7 @@ import {
 } from '@/constants/check-in';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import {
-  canSkipNextReminder,
-  getUpcomingReminder,
-} from '@/services/notifications/upcoming';
+import { getUpcomingReminder } from '@/services/notifications/upcoming';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
@@ -120,12 +117,8 @@ export default function DashboardScreen() {
 
   const reminderPreference = useNotificationStore((state) => state.preference);
   const reminderPermission = useNotificationStore((state) => state.permission);
-  const skippedReminders = useNotificationStore((state) => state.skippedReminders);
-  const skipFeedbackMessage = useNotificationStore((state) => state.skipFeedbackMessage);
   const reminderIsLoading = useNotificationStore((state) => state.isLoading);
-  const isSkippingReminder = useNotificationStore((state) => state.isSkipping);
   const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
-  const skipNextReminder = useNotificationStore((state) => state.skipNextReminder);
 
   const [comingSoonVisible, setComingSoonVisible] = useState(false);
 
@@ -163,12 +156,7 @@ export default function DashboardScreen() {
   }, [loadNotificationSettings, pet?.id]);
 
   const upcomingReminder =
-    reminderPermission === 'allowed'
-      ? getUpcomingReminder(reminderPreference, skippedReminders)
-      : null;
-  const canSkipReminder =
-    reminderPermission === 'allowed' &&
-    canSkipNextReminder(reminderPreference, skippedReminders);
+    reminderPermission === 'allowed' ? getUpcomingReminder(reminderPreference) : null;
 
   const handleRetry = () => {
     clearError();
@@ -204,10 +192,6 @@ export default function DashboardScreen() {
 
     clearCheckInError();
     void loadCheckIns(pet.id);
-  };
-
-  const handleSkipNextReminder = () => {
-    void skipNextReminder();
   };
 
   const handleLockedQuickAction = () => {
@@ -347,20 +331,8 @@ export default function DashboardScreen() {
               </View>
             ) : upcomingReminder ? (
               <>
-                {skipFeedbackMessage ? (
-                  <ThemedText style={styles.skipFeedback}>{skipFeedbackMessage}</ThemedText>
-                ) : null}
                 <DetailRow label="Date" value={upcomingReminder.dateLabel} />
                 <DetailRow label="Time" value={upcomingReminder.timeLabel} />
-                {canSkipReminder ? (
-                  <Button
-                    title="Skip Next Reminder"
-                    variant="secondary"
-                    disabled={isSkippingReminder}
-                    onPress={handleSkipNextReminder}
-                    style={styles.skipButton}
-                  />
-                ) : null}
               </>
             ) : (
               <ThemedText
@@ -562,13 +534,6 @@ const styles = StyleSheet.create({
   },
   historyEmpty: {
     ...Typography.body,
-  },
-  skipFeedback: {
-    ...Typography.body,
-    textAlign: 'center',
-  },
-  skipButton: {
-    marginTop: Spacing.sm,
   },
   deniedReminder: {
     gap: Spacing.sm,

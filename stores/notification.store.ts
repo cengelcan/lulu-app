@@ -2,12 +2,8 @@ import { create } from 'zustand';
 
 import {
   cancelCheckInReminder,
-  getSkippedReminders,
-  pruneExpiredSkips,
   requestNotificationPermission,
-  skipNextReminder as skipNextReminderService,
   syncCheckInReminderSchedule,
-  type SkippedReminder,
 } from '@/services/notifications';
 import { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
 import {
@@ -22,16 +18,11 @@ import type { CheckInPreference } from '@/types/check-in';
 type NotificationState = {
   preference: CheckInPreference | null;
   permission: NotificationPermissionStatus | null;
-  skippedReminders: SkippedReminder[];
-  skipFeedbackMessage: string | null;
   isLoading: boolean;
-  isSkipping: boolean;
   error: string | null;
   loadNotificationSettings: () => Promise<void>;
   savePreference: (preference: CheckInPreference) => Promise<void>;
   savePermission: (permission: NotificationPermissionStatus) => Promise<NotificationPermissionStatus>;
-  skipNextReminder: () => Promise<void>;
-  clearSkipFeedbackMessage: () => void;
   clearError: () => void;
 };
 
@@ -39,26 +30,22 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
 }
 
-export const useNotificationStore = create<NotificationState>((set, get) => ({
+export const useNotificationStore = create<NotificationState>((set) => ({
   preference: null,
   permission: null,
-  skippedReminders: [],
-  skipFeedbackMessage: null,
   isLoading: false,
-  isSkipping: false,
   error: null,
 
   loadNotificationSettings: async () => {
     set({ isLoading: true, error: null });
 
     try {
-      const [preference, permission, skippedReminders] = await Promise.all([
+      const [preference, permission] = await Promise.all([
         getCheckInPreferences(),
         getNotificationPermission(),
-        pruneExpiredSkips().then(() => getSkippedReminders()),
       ]);
 
-      set({ preference, permission, skippedReminders, isLoading: false });
+      set({ preference, permission, isLoading: false });
     } catch (error) {
       set({
         isLoading: false,
@@ -68,14 +55,12 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   savePreference: async (preference) => {
-    set({ isLoading: true, error: null, skipFeedbackMessage: null });
+    set({ isLoading: true, error: null });
 
     try {
       await setCheckInPreferences(preference);
       set({ preference, isLoading: false });
       await syncCheckInReminderSchedule({ preference });
-      const skippedReminders = await getSkippedReminders();
-      set({ skippedReminders });
     } catch (error) {
       set({
         isLoading: false,
@@ -86,7 +71,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   savePermission: async (permission) => {
-    set({ isLoading: true, error: null, skipFeedbackMessage: null });
+    set({ isLoading: true, error: null });
 
     try {
       let resolvedPermission = permission;
@@ -101,8 +86,6 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       await setNotificationPermission(resolvedPermission);
       set({ permission: resolvedPermission, isLoading: false });
       await syncCheckInReminderSchedule({ permission: resolvedPermission });
-      const skippedReminders = await getSkippedReminders();
-      set({ skippedReminders });
       return resolvedPermission;
     } catch (error) {
       set({
@@ -112,30 +95,6 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       throw error;
     }
   },
-
-  skipNextReminder: async () => {
-    const { preference } = get();
-
-    set({ isSkipping: true, error: null });
-
-    try {
-      await skipNextReminderService(preference);
-      const skippedReminders = await getSkippedReminders();
-      set({
-        skippedReminders,
-        skipFeedbackMessage: 'Next reminder skipped',
-        isSkipping: false,
-      });
-    } catch (error) {
-      set({
-        isSkipping: false,
-        error: getErrorMessage(error, 'Failed to skip reminder'),
-      });
-      throw error;
-    }
-  },
-
-  clearSkipFeedbackMessage: () => set({ skipFeedbackMessage: null }),
 
   clearError: () => set({ error: null }),
 }));

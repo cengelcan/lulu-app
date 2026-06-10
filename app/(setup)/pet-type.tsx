@@ -1,16 +1,27 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { PET_SPECIES_OPTIONS } from '@/constants/check-in';
+import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupStore, validateSpecies } from '@/stores/setup.store';
 
 export default function PetTypeScreen() {
   const router = useRouter();
+  const mode = useSetupMode();
+  const totalSteps = setupTotalSteps(mode);
+
   const species = useSetupStore((state) => state.species);
   const setSpecies = useSetupStore((state) => state.setSpecies);
+  const resetDraft = useSetupStore((state) => state.resetDraft);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mode === 'add') {
+      resetDraft();
+    }
+  }, [mode, resetDraft]);
 
   const handleContinue = useCallback(() => {
     const validationError = validateSpecies(species);
@@ -19,12 +30,13 @@ export default function PetTypeScreen() {
       return;
     }
 
-    router.push('/(setup)/pet-name');
-  }, [router, species]);
+    router.push(setupRoute('/(setup)/pet-name', mode));
+  }, [mode, router, species]);
 
   return (
     <SetupScreen
       step={1}
+      totalSteps={totalSteps}
       title="What type of pet do you have?"
       description="Select one option to continue."
       onContinue={handleContinue}

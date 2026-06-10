@@ -1,26 +1,98 @@
 import { useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { HEALTH_CONDITION_OPTIONS } from '@/constants/check-in';
+import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
+import { finalizeAddModePet, validateSetupDraft } from '@/services/setup/finalize-pet-creation';
+import { useCheckInStore } from '@/stores/check-in.store';
+import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 
 export default function HealthConditionsScreen() {
   const router = useRouter();
+  const mode = useSetupMode();
+  const totalSteps = setupTotalSteps(mode);
+
+  const species = useSetupStore((state) => state.species);
+  const name = useSetupStore((state) => state.name);
+  const ageGroup = useSetupStore((state) => state.ageGroup);
   const healthConditions = useSetupStore((state) => state.healthConditions);
   const toggleHealthCondition = useSetupStore((state) => state.toggleHealthCondition);
+  const resetDraft = useSetupStore((state) => state.resetDraft);
+
+  const createPet = usePetStore((state) => state.createPet);
+  const setActivePet = usePetStore((state) => state.setActivePet);
+  const petIsLoading = usePetStore((state) => state.isLoading);
+  const petError = usePetStore((state) => state.error);
+  const clearPetError = usePetStore((state) => state.clearError);
+
+  const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
+
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const handleContinueInitial = useCallback(() => {
+    router.push(setupRoute('/(setup)/check-in-prefs', mode));
+  }, [mode, router]);
+
+  const handleContinueAdd = useCallback(async () => {
+    const draft = { species, name, ageGroup, healthConditions };
+    const draftError = validateSetupDraft(draft);
+
+    if (draftError) {
+      setValidationError(draftError);
+      return;
+    }
+
+    setValidationError(null);
+    clearPetError();
+
+    try {
+      await finalizeAddModePet(draft, {
+        createPet,
+        setActivePet,
+        loadCheckIns,
+        resetDraft,
+        router,
+      });
+    } catch {
+      // Store sets error state.
+    }
+  }, [
+    ageGroup,
+    clearPetError,
+    createPet,
+    healthConditions,
+    loadCheckIns,
+    name,
+    resetDraft,
+    router,
+    setActivePet,
+    species,
+  ]);
 
   const handleContinue = useCallback(() => {
-    router.push('/(setup)/check-in-prefs');
-  }, [router]);
+    if (mode === 'add') {
+      void handleContinueAdd();
+      return;
+    }
+
+    handleContinueInitial();
+  }, [handleContinueAdd, handleContinueInitial, mode]);
+
+  const error = validationError ?? petError;
 
   return (
     <SetupScreen
       step={4}
+      totalSteps={totalSteps}
       title="Any health conditions?"
       description="Select all that apply. You can skip this if none apply."
-      onContinue={handleContinue}>
+      onContinue={handleContinue}
+      buttonTitle={mode === 'add' ? 'Add Pet' : 'Continue'}
+      isLoading={mode === 'add' ? petIsLoading : false}
+      error={error}>
       {HEALTH_CONDITION_OPTIONS.map((option) => (
         <SelectableOption
           key={option.value}

@@ -8,7 +8,6 @@ import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -16,6 +15,7 @@ import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
 import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
+import { useSetupStore } from '@/stores/setup.store';
 import type { Pet } from '@/types/pet';
 
 type MyPetsScreenContentProps = {
@@ -78,13 +78,13 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
 
   const setActivePetInStore = usePetStore((state) => state.setActivePet);
   const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
+  const resetDraft = useSetupStore((state) => state.resetDraft);
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [currentPet, setCurrentPet] = useState<Pet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSwitching, setIsSwitching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [comingSoonVisible, setComingSoonVisible] = useState(false);
 
   const loadPets = useCallback(async () => {
     setIsLoading(true);
@@ -115,11 +115,8 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
   };
 
   const handleAddPet = () => {
-    setComingSoonVisible(true);
-  };
-
-  const handleDismissComingSoon = () => {
-    setComingSoonVisible(false);
+    resetDraft();
+    router.push('/(setup)/pet-type?mode=add');
   };
 
   const handleSelectPet = useCallback(
@@ -197,7 +194,6 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
           <Button title="Add Pet" variant="secondary" onPress={handleAddPet} />
         </View>
       )}
-      <ComingSoonModal visible={comingSoonVisible} onDismiss={handleDismissComingSoon} />
     </ScreenContainer>
   );
 }

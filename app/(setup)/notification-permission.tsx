@@ -5,27 +5,20 @@ import { StyleSheet, View } from 'react-native';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { Button } from '@/components/ui/Button';
 import { Spacing } from '@/constants/theme';
-import { syncCheckInReminderSchedule } from '@/services/notifications';
+import { setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
+import {
+  finalizeInitialModePet,
+  validateSetupDraft,
+} from '@/services/setup/finalize-pet-creation';
 import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
-import {
-  useSetupStore,
-  validateAgeGroup,
-  validatePetName,
-  validateSpecies,
-} from '@/stores/setup.store';
+import { useSetupStore } from '@/stores/setup.store';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
-
-function createPetId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-}
 
 export default function NotificationPermissionScreen() {
   const router = useRouter();
+  const mode = useSetupMode();
+  const totalSteps = setupTotalSteps(mode);
 
   const species = useSetupStore((state) => state.species);
   const name = useSetupStore((state) => state.name);
@@ -50,11 +43,9 @@ export default function NotificationPermissionScreen() {
 
   const completeSetup = useCallback(
     async (permission: NotificationPermissionStatus) => {
-      const nameError = validatePetName(name);
-      const speciesError = validateSpecies(species);
-      const ageGroupError = validateAgeGroup(ageGroup);
+      const draft = { species, name, ageGroup, healthConditions };
+      const draftError = validateSetupDraft(draft);
 
-      const draftError = nameError ?? speciesError ?? ageGroupError;
       if (draftError) {
         setValidationError(draftError);
         return;
@@ -65,34 +56,16 @@ export default function NotificationPermissionScreen() {
       clearNotificationError();
 
       try {
-        const resolvedPermission = await savePermission(permission);
-
-        if (useNotificationStore.getState().error) {
-          return;
-        }
-
-        await createPet({
-          id: createPetId(),
-          name: name.trim(),
-          species: species!,
-          ageGroup: ageGroup!,
-          healthConditions: healthConditions.length > 0 ? healthConditions : ['none'],
-          createdAt: new Date().toISOString(),
+        await finalizeInitialModePet(draft, permission, {
+          createPet,
+          savePermission,
+          resetDraft,
+          router,
         });
 
-        if (usePetStore.getState().error) {
+        if (usePetStore.getState().error || useNotificationStore.getState().error) {
           return;
         }
-
-        if (resolvedPermission === 'allowed') {
-          await syncCheckInReminderSchedule({
-            permission: resolvedPermission,
-            petName: name.trim(),
-          });
-        }
-
-        resetDraft();
-        router.replace('/(tabs)/home');
       } catch {
         // Stores set error state.
       }
@@ -114,6 +87,7 @@ export default function NotificationPermissionScreen() {
   return (
     <SetupScreen
       step={6}
+      totalSteps={totalSteps}
       title="Stay on track with reminders"
       description="We can send gentle reminders for daily check-ins. You can change this later in settings."
       error={error}

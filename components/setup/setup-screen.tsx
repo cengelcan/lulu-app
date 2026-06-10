@@ -6,10 +6,11 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-const TOTAL_STEPS = 6;
+const DEFAULT_TOTAL_STEPS = 6;
 
 type SetupScreenProps = {
   step: 1 | 2 | 3 | 4 | 5 | 6;
+  totalSteps?: number;
   title: string;
   description?: string;
   children?: React.ReactNode;
@@ -23,6 +24,7 @@ type SetupScreenProps = {
 
 export function SetupScreen({
   step,
+  totalSteps = DEFAULT_TOTAL_STEPS,
   title,
   description,
   children,
@@ -42,10 +44,10 @@ export function SetupScreen({
       <View style={styles.body}>
         <View
           accessibilityRole="progressbar"
-          accessibilityLabel={`Step ${step} of ${TOTAL_STEPS}`}
-          accessibilityValue={{ min: 1, max: TOTAL_STEPS, now: step }}
+          accessibilityLabel={`Step ${step} of ${totalSteps}`}
+          accessibilityValue={{ min: 1, max: totalSteps, now: step }}
           style={styles.progress}>
-          {Array.from({ length: TOTAL_STEPS }, (_, index) => {
+          {Array.from({ length: totalSteps }, (_, index) => {
             const stepNumber = index + 1;
             const isActive = stepNumber === step;
             const isCompleted = stepNumber < step;
@@ -70,7 +72,7 @@ export function SetupScreen({
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
           style={styles.stepLabel}>
-          {step} of {TOTAL_STEPS}
+          {step} of {totalSteps}
         </ThemedText>
 
         <ThemedText type="title" style={styles.title}>

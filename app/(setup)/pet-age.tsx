@@ -4,10 +4,14 @@ import { useCallback, useState } from 'react';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { PET_AGE_GROUP_OPTIONS } from '@/constants/check-in';
+import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupStore, validateAgeGroup } from '@/stores/setup.store';
 
 export default function PetAgeScreen() {
   const router = useRouter();
+  const mode = useSetupMode();
+  const totalSteps = setupTotalSteps(mode);
+
   const ageGroup = useSetupStore((state) => state.ageGroup);
   const setAgeGroup = useSetupStore((state) => state.setAgeGroup);
   const [error, setError] = useState<string | null>(null);
@@ -19,12 +23,13 @@ export default function PetAgeScreen() {
       return;
     }
 
-    router.push('/(setup)/health-conditions');
-  }, [ageGroup, router]);
+    router.push(setupRoute('/(setup)/health-conditions', mode));
+  }, [ageGroup, mode, router]);
 
   return (
     <SetupScreen
       step={3}
+      totalSteps={totalSteps}
       title="How old is your pet?"
       description="Select the age group that best fits."
       onContinue={handleContinue}

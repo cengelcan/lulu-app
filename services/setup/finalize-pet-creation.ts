@@ -58,6 +58,7 @@ type FinalizeAddModePetDeps = {
 
 type FinalizeInitialModePetDeps = {
   createPet: (pet: Pet) => Promise<void>;
+  setActivePet: (petId: string) => Promise<void>;
   savePermission: (permission: NotificationPermissionStatus) => Promise<NotificationPermissionStatus>;
   resetDraft: () => void;
   router: Router;
@@ -87,6 +88,7 @@ export async function finalizeInitialModePet(
   const resolvedPermission = await deps.savePermission(permission);
 
   await deps.createPet(pet);
+  await deps.setActivePet(pet.id);
 
   if (resolvedPermission === 'allowed') {
     await syncCheckInReminderSchedule({

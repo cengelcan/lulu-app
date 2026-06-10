@@ -27,6 +27,7 @@ export default function NotificationPermissionScreen() {
   const resetDraft = useSetupStore((state) => state.resetDraft);
 
   const createPet = usePetStore((state) => state.createPet);
+  const setActivePet = usePetStore((state) => state.setActivePet);
   const petIsLoading = usePetStore((state) => state.isLoading);
   const petError = usePetStore((state) => state.error);
   const clearPetError = usePetStore((state) => state.clearError);
@@ -58,6 +59,7 @@ export default function NotificationPermissionScreen() {
       try {
         await finalizeInitialModePet(draft, permission, {
           createPet,
+          setActivePet,
           savePermission,
           resetDraft,
           router,
@@ -75,6 +77,7 @@ export default function NotificationPermissionScreen() {
       clearNotificationError,
       clearPetError,
       createPet,
+      setActivePet,
       healthConditions,
       name,
       resetDraft,

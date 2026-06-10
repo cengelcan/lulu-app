@@ -17,7 +17,6 @@ import {
   resetAppStoresAfterDataDeletion,
 } from '@/services/cleanup/delete-all-local-data';
 import { useNotificationStore } from '@/stores/notification.store';
-import { usePetStore } from '@/stores/pet.store';
 import type { CheckInPreference } from '@/types/check-in';
 
 function getNotificationStatusMessage(
@@ -43,7 +42,6 @@ export function SettingsScreenContent({
   edges = ['top', 'bottom'],
 }: SettingsScreenContentProps) {
   const router = useRouter();
-  const pet = usePetStore((state) => state.pet);
 
   const preference = useNotificationStore((state) => state.preference);
   const permission = useNotificationStore((state) => state.permission);
@@ -101,7 +99,7 @@ export function SettingsScreenContent({
     setIsDeleting(true);
 
     try {
-      await deleteAllLocalData(pet?.id);
+      await deleteAllLocalData();
       resetAppStoresAfterDataDeletion();
       setDeleteModalVisible(false);
       router.replace('/');
@@ -174,7 +172,7 @@ export function SettingsScreenContent({
       <ConfirmModal
         visible={deleteModalVisible}
         title="Delete All Data?"
-        message="This will permanently remove your pet profile, check-ins, reminders, and app preferences from this device."
+        message="This will permanently remove all pets and their check-ins, reminders, and app preferences from this device."
         confirmLabel="Delete"
         destructive
         isLoading={isDeleting}

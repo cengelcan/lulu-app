@@ -171,3 +171,8 @@ export async function deletePet(id: string): Promise<void> {
   const db = await getDatabase();
   await db.runAsync('DELETE FROM pets WHERE id = ?', id);
 }
+
+export async function deleteAllPets(): Promise<void> {
+  const db = await getDatabase();
+  await db.execAsync('DELETE FROM pets');
+}

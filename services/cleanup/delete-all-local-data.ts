@@ -1,6 +1,7 @@
 import { cancelCheckInReminder } from '@/services/notifications';
 import * as petStorage from '@/storage/pet.storage';
 import {
+  removeActivePetId,
   removeCheckInPreferences,
   removeCurrentUserId,
   removeNotificationPermission,
@@ -12,16 +13,12 @@ import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 
-export async function deleteAllLocalData(petId?: string | null): Promise<void> {
+export async function deleteAllLocalData(): Promise<void> {
   await cancelCheckInReminder();
-
-  const resolvedPetId = petId ?? (await petStorage.getPet())?.id ?? null;
-
-  if (resolvedPetId) {
-    await petStorage.deletePet(resolvedPetId);
-  }
+  await petStorage.deleteAllPets();
 
   await Promise.all([
+    removeActivePetId(),
     setOnboardingCompleted(false),
     removeCurrentUserId(),
     removeCheckInPreferences(),

@@ -61,6 +61,10 @@ export async function addSkippedReminder(skip: SkippedReminder): Promise<void> {
   );
 }
 
+export async function clearSkippedReminders(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.reminderSkips);
+}
+
 export async function pruneExpiredSkips(now: Date = new Date()): Promise<SkippedReminder[]> {
   const today = formatLocalDate(now);
   const active = (await getSkippedReminders()).filter((skip) => skip.date >= today);

@@ -168,6 +168,13 @@ export default function DashboardScreen() {
     router.push('/edit-pet');
   };
 
+  const handleOpenSettings = () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push('/settings');
+  };
+
   const handleRetryCheckIn = () => {
     if (!pet?.id) {
       return;
@@ -233,17 +240,27 @@ export default function DashboardScreen() {
                 {getOptionLabel(PET_AGE_GROUP_OPTIONS, pet.ageGroup)}
               </ThemedText>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Edit pet"
-              onPress={handleEditPet}
-              hitSlop={8}
-              style={({ pressed }) => [styles.editAction, { opacity: pressed ? 0.6 : 1 }]}>
-              <IconSymbol name="pencil" size={15} color={primaryColor} />
-              <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.editLabel}>
-                Edit
-              </ThemedText>
-            </Pressable>
+            <View style={styles.headerActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Settings"
+                onPress={handleOpenSettings}
+                hitSlop={8}
+                style={({ pressed }) => [styles.settingsAction, { opacity: pressed ? 0.6 : 1 }]}>
+                <IconSymbol name="gearshape.fill" size={20} color={primaryColor} />
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Edit pet"
+                onPress={handleEditPet}
+                hitSlop={8}
+                style={({ pressed }) => [styles.editAction, { opacity: pressed ? 0.6 : 1 }]}>
+                <IconSymbol name="pencil" size={15} color={primaryColor} />
+                <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.editLabel}>
+                  Edit
+                </ThemedText>
+              </Pressable>
+            </View>
           </View>
 
           <Button title="Start Check-In" onPress={handleStartCheckIn} />
@@ -464,11 +481,18 @@ const styles = StyleSheet.create({
   petSubtitle: {
     ...Typography.body,
   },
+  headerActions: {
+    alignItems: 'flex-end',
+    gap: Spacing.sm,
+    paddingTop: Spacing.sm,
+  },
+  settingsAction: {
+    padding: Spacing.xs,
+  },
   editAction: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingTop: Spacing.sm,
   },
   editLabel: {
     ...Typography.body,

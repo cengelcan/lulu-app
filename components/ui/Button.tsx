@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, type PressableProps, type StyleProp, type 
 import { Radius, Spacing, Typography, type ThemeColor } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 
 type ButtonProps = Omit<PressableProps, 'style'> & {
   title: string;
@@ -30,6 +30,10 @@ const variantStyles: Record<
   ghost: {
     background: 'background',
     text: 'primary',
+  },
+  destructive: {
+    background: 'alert',
+    text: 'primaryText',
   },
 };
 

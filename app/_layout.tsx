@@ -24,6 +24,7 @@ export default function RootLayout() {
         <Stack.Screen name="check-in" />
         <Stack.Screen name="check-in-success" />
         <Stack.Screen name="edit-pet" />
+        <Stack.Screen name="settings" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

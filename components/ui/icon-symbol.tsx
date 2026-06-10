@@ -25,6 +25,7 @@ const MAPPING = {
   'pawprint.fill': 'pets',
   'checkmark': 'check',
   'pencil': 'edit',
+  'gearshape.fill': 'settings',
 } as IconMapping;
 
 /**

@@ -9,15 +9,20 @@ type SelectableOptionProps = {
   label: string;
   selected: boolean;
   onPress: () => void;
+  disabled?: boolean;
 };
 
-export function SelectableOption({ label, selected, onPress }: SelectableOptionProps) {
+export function SelectableOption({ label, selected, onPress, disabled = false }: SelectableOptionProps) {
   const primaryColor = useThemeColor({}, 'primary');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const handlePress = () => {
+    if (disabled) {
+      return;
+    }
+
     if (process.env.EXPO_OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -27,14 +32,15 @@ export function SelectableOption({ label, selected, onPress }: SelectableOptionP
   return (
     <Pressable
       accessibilityRole="radio"
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected, disabled }}
+      disabled={disabled}
       onPress={handlePress}
       style={({ pressed }) => [
         styles.option,
         {
           backgroundColor: selected ? primaryColor : surfaceColor,
           borderColor: selected ? primaryColor : borderColor,
-          opacity: pressed ? 0.85 : 1,
+          opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
         },
       ]}>
       <ThemedText

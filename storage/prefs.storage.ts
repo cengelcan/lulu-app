@@ -35,6 +35,10 @@ export async function setCheckInPreferences(preference: CheckInPreference): Prom
   await AsyncStorage.setItem(StorageKeys.checkInPreferences, preference);
 }
 
+export async function removeCheckInPreferences(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.checkInPreferences);
+}
+
 export async function getNotificationPermission(): Promise<NotificationPermissionStatus | null> {
   const value = await AsyncStorage.getItem(StorageKeys.notificationPermission);
   if (value === 'allowed' || value === 'later' || value === 'denied') {
@@ -48,4 +52,8 @@ export async function setNotificationPermission(
   status: NotificationPermissionStatus
 ): Promise<void> {
   await AsyncStorage.setItem(StorageKeys.notificationPermission, status);
+}
+
+export async function removeNotificationPermission(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.notificationPermission);
 }

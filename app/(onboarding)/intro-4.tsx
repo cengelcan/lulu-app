@@ -25,9 +25,9 @@ export default function Onboarding4Screen() {
   return (
     <OnboardingScreen
       step={4}
-      title="Turn daily notes into vet-ready reports."
-      description="Prepare users for veterinary visits."
-      buttonTitle="Get Started"
+      title="Be prepared for every vet visit."
+      description="Bring organized notes and health records when your pet needs care."
+      buttonTitle="Start Tracking"
       onContinue={() => void handleContinue()}
       isLoading={isLoading}
       error={error}

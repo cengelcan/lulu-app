@@ -8,9 +8,9 @@ export default function Onboarding2Screen() {
   return (
     <OnboardingScreen
       step={2}
-      title="Can you remember when the symptoms started?"
-      description="The primary goal is to create a health history that helps users remember important changes over time."
-      buttonTitle="Continue"
+      title="Check in within seconds."
+      description="Record how your pet is doing in under 10 seconds — anytime, anywhere."
+      buttonTitle="Sounds Good"
       onContinue={() => router.push('/(onboarding)/intro-3')}
     />
   );

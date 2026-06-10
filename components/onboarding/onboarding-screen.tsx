@@ -67,7 +67,7 @@ export function OnboardingScreen({
           {step} of {TOTAL_STEPS}
         </ThemedText>
 
-        <ThemedText type="title" style={styles.title}>
+        <ThemedText accessibilityRole="header" type="title" style={styles.title}>
           {title}
         </ThemedText>
 
@@ -90,6 +90,7 @@ export function OnboardingScreen({
 
       <Button
         title={buttonTitle}
+        accessibilityLabel={buttonTitle}
         onPress={onContinue}
         disabled={isLoading}
         style={styles.button}

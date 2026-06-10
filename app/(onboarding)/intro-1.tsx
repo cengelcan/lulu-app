@@ -8,9 +8,9 @@ export default function Onboarding1Screen() {
   return (
     <OnboardingScreen
       step={1}
-      title="Never forget an important health change again."
-      description="The application focuses on symptom awareness, behavioral changes and veterinary visit preparation."
-      buttonTitle="Continue"
+      title="Never forget the small changes."
+      description="Keep track of your pet's appetite, energy, and symptoms before they become easy to overlook."
+      buttonTitle="Next"
       onContinue={() => router.push('/(onboarding)/intro-2')}
     />
   );

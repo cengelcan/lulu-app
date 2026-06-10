@@ -8,9 +8,9 @@ export default function Onboarding3Screen() {
   return (
     <OnboardingScreen
       step={3}
-      title="Daily check-ins take less than 10 seconds."
-      description="Allow users to complete a daily health check-in in less than 10 seconds."
-      buttonTitle="Continue"
+      title="See patterns over time."
+      description="Build a simple health history that helps you notice changes early."
+      buttonTitle="I'm Ready"
       onContinue={() => router.push('/(onboarding)/intro-4')}
     />
   );

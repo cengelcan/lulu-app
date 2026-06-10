@@ -41,7 +41,7 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
   },
 
   loadCheckIns: async (petId) => {
-    set({ isLoading: true, error: null });
+    set({ checkIns: [], latestCheckIn: null, isLoading: true, error: null });
 
     try {
       const checkIns = await checkInStorage.getCheckInsByPetId(petId);

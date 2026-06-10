@@ -8,6 +8,7 @@ type PetState = {
   isLoading: boolean;
   error: string | null;
   loadPet: () => Promise<void>;
+  setActivePet: (petId: string) => Promise<void>;
   createPet: (pet: Pet) => Promise<void>;
   updatePet: (pet: Pet) => Promise<void>;
   deletePet: (id: string) => Promise<void>;
@@ -34,6 +35,18 @@ export const usePetStore = create<PetState>((set) => ({
         isLoading: false,
         error: getErrorMessage(error, 'Failed to load pet'),
       });
+    }
+  },
+
+  setActivePet: async (petId) => {
+    set({ error: null });
+
+    try {
+      const pet = await petStorage.setActivePet(petId);
+      set({ pet });
+    } catch (error) {
+      set({ error: getErrorMessage(error, 'Failed to switch pet') });
+      throw error;
     }
   },
 

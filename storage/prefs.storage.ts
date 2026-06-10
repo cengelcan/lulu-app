@@ -57,3 +57,15 @@ export async function setNotificationPermission(
 export async function removeNotificationPermission(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.notificationPermission);
 }
+
+export async function getActivePetId(): Promise<string | null> {
+  return AsyncStorage.getItem(StorageKeys.activePetId);
+}
+
+export async function setActivePetId(petId: string): Promise<void> {
+  await AsyncStorage.setItem(StorageKeys.activePetId, petId);
+}
+
+export async function removeActivePetId(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.activePetId);
+}

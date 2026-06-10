@@ -7,6 +7,12 @@ import type {
   PetSpecies,
 } from '@/types/pet';
 
+import {
+  getActivePetId,
+  removeActivePetId,
+  setActivePetId,
+} from './prefs.storage';
+
 import { getDatabase } from './database';
 
 type PetRow = {
@@ -79,14 +85,50 @@ export async function getPetById(id: string): Promise<Pet | null> {
   return row ? mapPetRow(row) : null;
 }
 
-/** Returns the single pet profile (MVP supports one pet per user). */
-export async function getPet(): Promise<Pet | null> {
+export async function getPets(): Promise<Pet[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<PetRow>('SELECT * FROM pets ORDER BY created_at ASC');
+
+  return rows.map(mapPetRow);
+}
+
+export async function getFirstPet(): Promise<Pet | null> {
   const db = await getDatabase();
   const row = await db.getFirstAsync<PetRow>(
     'SELECT * FROM pets ORDER BY created_at ASC LIMIT 1'
   );
 
   return row ? mapPetRow(row) : null;
+}
+
+export async function getActivePet(): Promise<Pet | null> {
+  const activePetId = await getActivePetId();
+
+  if (activePetId) {
+    const activePet = await getPetById(activePetId);
+
+    if (activePet) {
+      return activePet;
+    }
+  }
+
+  const firstPet = await getFirstPet();
+
+  if (firstPet) {
+    await setActivePetId(firstPet.id);
+    return firstPet;
+  }
+
+  await removeActivePetId();
+  return null;
+}
+
+/**
+ * Deprecated: use getActivePet(), getFirstPet(), or getPets() instead.
+ * TODO: remove once all call sites migrate off getPet().
+ */
+export async function getPet(): Promise<Pet | null> {
+  return getActivePet();
 }
 
 export async function updatePet(pet: Pet): Promise<void> {

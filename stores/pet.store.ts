@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
 import * as petStorage from '@/storage/pet.storage';
 import type { Pet } from '@/types/pet';
 
@@ -44,6 +45,7 @@ export const usePetStore = create<PetState>((set) => ({
     try {
       const pet = await petStorage.setActivePet(petId);
       set({ pet });
+      await syncCheckInReminderSchedule({ petName: pet.name });
     } catch (error) {
       set({ error: getErrorMessage(error, 'Failed to switch pet') });
       throw error;

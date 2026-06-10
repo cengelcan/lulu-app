@@ -87,21 +87,23 @@ Ana UX (My Pets listesi, seçim, ekleme) tamamlandı. Bu dosya kalan işleri ve 
 ### TODO-4: `setActivePet` içinde notification sync merkezileştir
 
 **Öncelik:** P2  
-**Durum:** ⬜ Bekliyor
+**Durum:** ✅ Tamamlandı
 
 **Dosyalar:**
 - `stores/pet.store.ts`
 - `components/pets/MyPetsScreenContent.tsx`
-- `services/setup/finalize-pet-creation.ts` (değerlendir)
+- `services/setup/finalize-pet-creation.ts`
 
-**Yapılacaklar:**
-- [ ] `pet.store.setActivePet` içinde `syncCheckInReminderSchedule({ petName })` çağır
-- [ ] My Pets'teki duplicate sync çağrısını kaldır
-- [ ] Add flow ile çakışma olmadığını doğrula
+**Yapılanlar:**
+- [x] `pet.store.setActivePet` içinde `syncCheckInReminderSchedule({ petName })` çağrılıyor
+- [x] My Pets'teki duplicate sync kaldırıldı
+- [x] Add/initial finalize flow'daki duplicate sync kaldırıldı (`setActivePet` üzerinden)
 
 **Kabul kriterleri:**
-- [ ] Pet switch her yerden yapılsa reminder metni güncellenir
-- [ ] Notification permission / preference değişmez
+- [x] Pet switch her yerden yapılsa reminder metni güncellenir
+- [x] Notification permission / preference değişmez (sadece pet name copy)
+
+**Commit önerisi:** `refactor: sync reminder schedule in setActivePet`
 
 ---
 

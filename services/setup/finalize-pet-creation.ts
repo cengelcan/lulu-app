@@ -1,6 +1,5 @@
 import type { Router } from 'expo-router';
 
-import { syncCheckInReminderSchedule } from '@/services/notifications';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
 import type { HealthCondition, Pet, PetAgeGroup, PetSpecies } from '@/types/pet';
 import {
@@ -73,7 +72,6 @@ export async function finalizeAddModePet(
   await deps.createPet(pet);
   await deps.setActivePet(pet.id);
   await deps.loadCheckIns(pet.id);
-  await syncCheckInReminderSchedule({ petName: pet.name });
 
   deps.resetDraft();
   deps.router.replace('/(tabs)/home');
@@ -89,13 +87,6 @@ export async function finalizeInitialModePet(
 
   await deps.createPet(pet);
   await deps.setActivePet(pet.id);
-
-  if (resolvedPermission === 'allowed') {
-    await syncCheckInReminderSchedule({
-      permission: resolvedPermission,
-      petName: pet.name,
-    });
-  }
 
   deps.resetDraft();
   deps.router.replace('/(tabs)/home');

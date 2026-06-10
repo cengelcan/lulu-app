@@ -11,7 +11,6 @@ import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
 import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
@@ -140,7 +139,6 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         try {
           await setActivePetInStore(pet.id);
           void loadCheckIns(pet.id);
-          void syncCheckInReminderSchedule({ petName: pet.name });
           setCurrentPet(pet);
           router.replace('/(tabs)/home');
         } catch {

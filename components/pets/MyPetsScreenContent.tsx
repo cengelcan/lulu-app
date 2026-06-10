@@ -138,7 +138,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
       void (async () => {
         try {
           await setActivePetInStore(pet.id);
-          void loadCheckIns(pet.id);
+          await loadCheckIns(pet.id);
           setCurrentPet(pet);
           router.replace('/(tabs)/home');
         } catch {

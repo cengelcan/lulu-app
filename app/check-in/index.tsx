@@ -135,6 +135,7 @@ export default function CheckInScreen() {
   const loadPet = usePetStore((state) => state.loadPet);
 
   const checkIns = useCheckInStore((state) => state.checkIns);
+  const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
   const createCheckIn = useCheckInStore((state) => state.createCheckIn);
   const updateCheckIn = useCheckInStore((state) => state.updateCheckIn);
   const checkInIsLoading = useCheckInStore((state) => state.isLoading);
@@ -198,6 +199,14 @@ export default function CheckInScreen() {
   useEffect(() => {
     void loadPet();
   }, [loadPet]);
+
+  useEffect(() => {
+    if (!pet?.id) {
+      return;
+    }
+
+    void loadCheckIns(pet.id);
+  }, [loadCheckIns, pet?.id]);
 
   useEffect(() => {
     if (!petIsLoading && !pet) {

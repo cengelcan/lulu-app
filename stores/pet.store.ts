@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
 import * as petStorage from '@/storage/pet.storage';
+import { useCheckInStore } from '@/stores/check-in.store';
 import type { Pet } from '@/types/pet';
 
 type PetState = {
@@ -41,6 +42,7 @@ export const usePetStore = create<PetState>((set) => ({
 
   setActivePet: async (petId) => {
     set({ error: null });
+    useCheckInStore.getState().clearCheckIns();
 
     try {
       const pet = await petStorage.setActivePet(petId);

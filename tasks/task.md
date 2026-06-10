@@ -110,22 +110,28 @@ Ana UX (My Pets listesi, seçim, ekleme) tamamlandı. Bu dosya kalan işleri ve 
 ### TODO-5: Check-in store pet switch güvenliği doğrula
 
 **Öncelik:** P2  
-**Durum:** ⬜ Bekliyor (büyük ölçüde yapılmış, doğrulama gerekli)
+**Durum:** ✅ Tamamlandı
 
 **Dosyalar:**
 - `stores/check-in.store.ts`
-- `components/dashboard/DashboardScreen.tsx`
+- `stores/pet.store.ts`
+- `components/pets/MyPetsScreenContent.tsx`
 - `app/check-in/index.tsx`
 
-**Kontrol listesi:**
-- [ ] `loadCheckIns` başında state temizliği yeterli mi?
-- [ ] Dashboard `useFocusEffect` + `pet?.id` dependency doğru mu?
-- [ ] Pet switch sırasında eski check-in'ler flash etmiyor mu?
-- [ ] Gerekirse `clearCheckIns()` helper ekle
+**Doğrulama / yapılanlar:**
+- [x] `loadCheckIns` başında state temizliği zaten vardı — korundu
+- [x] `clearCheckIns()` helper eklendi
+- [x] `setActivePet` switch anında check-in state'i senkron temizliyor (flash önleme)
+- [x] My Pets `await loadCheckIns` — Home'a geçmeden önce doğru data yükleniyor
+- [x] Check-in ekranı `pet?.id` değişince check-in'leri yeniden yüklüyor
+- [x] Dashboard `pet?.id` dependency — zaten doğruydu
 
 **Kabul kriterleri:**
-- [ ] A pet check-in → B'ye geç → B'nin history'si görünür
-- [ ] Geri A'ya geç → A'nın history'si geri gelir
+- [x] A pet check-in → B'ye geç → B'nin history'si görünür
+- [x] Geri A'ya geç → A'nın history'si geri gelir
+- [x] Switch sırasında eski check-in flash etmiyor
+
+**Commit önerisi:** `fix: clear stale check-ins when switching active pet`
 
 ---
 

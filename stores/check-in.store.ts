@@ -10,6 +10,7 @@ type CheckInState = {
   error: string | null;
   loadLatestCheckIn: (petId: string) => Promise<void>;
   loadCheckIns: (petId: string) => Promise<void>;
+  clearCheckIns: () => void;
   createCheckIn: (checkIn: CheckIn) => Promise<void>;
   updateCheckIn: (checkIn: CheckIn) => Promise<void>;
   deleteCheckIn: (id: string, petId: string) => Promise<void>;
@@ -54,6 +55,8 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
       });
     }
   },
+
+  clearCheckIns: () => set({ checkIns: [], latestCheckIn: null, error: null }),
 
   createCheckIn: async (checkIn) => {
     set({ isLoading: true, error: null });

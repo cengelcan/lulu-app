@@ -242,14 +242,11 @@ export default function DashboardScreen() {
             </Pressable>
           </View>
 
+          <Button title="Start Check-In" onPress={handleStartCheckIn} />
+
           <Card>
             <ThemedText type="subtitle">Quick Actions</ThemedText>
             <View style={styles.quickActionsGrid}>
-              <QuickActionItem
-                label="Start Check-In"
-                icon="checkmark.circle.fill"
-                onPress={handleStartCheckIn}
-              />
               <QuickActionItem
                 label="Reports"
                 icon="chart.line.uptrend.xyaxis"

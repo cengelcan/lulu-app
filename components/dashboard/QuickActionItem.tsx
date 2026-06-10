@@ -7,7 +7,6 @@ import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 type QuickActionIconName =
-  | 'checkmark.circle.fill'
   | 'chart.line.uptrend.xyaxis'
   | 'doc.text.fill'
   | 'pills.fill'

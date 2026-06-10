@@ -6,14 +6,14 @@ let database: SQLite.SQLiteDatabase | null = null;
 
 /**
  * Migration SQL lives in storage/migrations/*.sql.
- * Keep these constants in sync when migration files change.
+ * Schema version is tracked with PRAGMA user_version.
  *
  * Dev note: databases created before migration 002 may retain
- * idx_check_ins_pet_date until 002 runs. If the unique constraint error
+ * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
- *
- * Migration 003 adds pets.photo_uri via ensurePetPhotoUriColumn (idempotent).
  */
+const CURRENT_SCHEMA_VERSION = 4;
+
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
 
@@ -44,6 +44,15 @@ const MIGRATION_002_SQL = `
 DROP INDEX IF EXISTS idx_check_ins_pet_date;
 `;
 
+async function getSchemaVersion(db: SQLite.SQLiteDatabase): Promise<number> {
+  const result = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+  return result?.user_version ?? 0;
+}
+
+async function setSchemaVersion(db: SQLite.SQLiteDatabase, version: number): Promise<void> {
+  await db.execAsync(`PRAGMA user_version = ${version}`);
+}
+
 async function ensurePetPhotoUriColumn(db: SQLite.SQLiteDatabase): Promise<void> {
   const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(pets)');
   const hasPhotoUri = columns.some((column) => column.name === 'photo_uri');
@@ -53,10 +62,40 @@ async function ensurePetPhotoUriColumn(db: SQLite.SQLiteDatabase): Promise<void>
   }
 }
 
+async function ensureCheckInNotesColumn(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(check_ins)');
+  const hasNotes = columns.some((column) => column.name === 'notes');
+
+  if (!hasNotes) {
+    await db.execAsync('ALTER TABLE check_ins ADD COLUMN notes TEXT;');
+  }
+}
+
 async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
-  await db.execAsync(MIGRATION_001_SQL);
-  await db.execAsync(MIGRATION_002_SQL);
-  await ensurePetPhotoUriColumn(db);
+  let version = await getSchemaVersion(db);
+
+  if (version < 1) {
+    await db.execAsync(MIGRATION_001_SQL);
+    version = 1;
+    await setSchemaVersion(db, version);
+  }
+
+  if (version < 2) {
+    await db.execAsync(MIGRATION_002_SQL);
+    version = 2;
+    await setSchemaVersion(db, version);
+  }
+
+  if (version < 3) {
+    await ensurePetPhotoUriColumn(db);
+    version = 3;
+    await setSchemaVersion(db, version);
+  }
+
+  if (version < CURRENT_SCHEMA_VERSION) {
+    await ensureCheckInNotesColumn(db);
+    await setSchemaVersion(db, CURRENT_SCHEMA_VERSION);
+  }
 }
 
 export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {

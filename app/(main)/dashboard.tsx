@@ -81,6 +81,28 @@ function DetailRow({ label, value }: DetailRowProps) {
   );
 }
 
+type NotesPreviewProps = {
+  notes: string;
+};
+
+function NotesPreview({ notes }: NotesPreviewProps) {
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  return (
+    <View style={styles.detailRow}>
+      <ThemedText
+        lightColor={textSecondaryColor}
+        darkColor={textSecondaryColor}
+        style={styles.detailLabel}>
+        Notes
+      </ThemedText>
+      <ThemedText type="defaultSemiBold" numberOfLines={2} ellipsizeMode="tail">
+        &ldquo;{notes}&rdquo;
+      </ThemedText>
+    </View>
+  );
+}
+
 export default function DashboardScreen() {
   const router = useRouter();
   const pet = usePetStore((state) => state.pet);
@@ -379,6 +401,7 @@ export default function DashboardScreen() {
                   label="Symptoms"
                   value={getOptionLabel(SYMPTOM_OPTIONS, latestCheckIn.symptom)}
                 />
+                {latestCheckIn.notes ? <NotesPreview notes={latestCheckIn.notes} /> : null}
               </>
             ) : (
               <ThemedText
@@ -446,6 +469,7 @@ export default function DashboardScreen() {
                     label="Symptoms"
                     value={getOptionLabel(SYMPTOM_OPTIONS, checkIn.symptom)}
                   />
+                  {checkIn.notes ? <NotesPreview notes={checkIn.notes} /> : null}
                 </Card>
               ))
             )}

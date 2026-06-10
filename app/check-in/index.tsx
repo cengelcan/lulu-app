@@ -1,12 +1,17 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { APPETITE_OPTIONS, ENERGY_OPTIONS, SYMPTOM_OPTIONS } from '@/constants/check-in';
+import {
+  APPETITE_OPTIONS,
+  CHECK_IN_NOTES_MAX_LENGTH,
+  ENERGY_OPTIONS,
+  SYMPTOM_OPTIONS,
+} from '@/constants/check-in';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -139,12 +144,16 @@ export default function CheckInScreen() {
   const [appetite, setAppetite] = useState<Appetite | null>(null);
   const [energy, setEnergy] = useState<Energy | null>(null);
   const [symptom, setSymptom] = useState<Symptom | null>(null);
+  const [notes, setNotes] = useState('');
   const [editingCheckInId, setEditingCheckInId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const primaryColor = useThemeColor({}, 'primary');
+  const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const surfaceColor = useThemeColor({}, 'surface');
+  const borderColor = useThemeColor({}, 'border');
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
   const isExplicitDate = rawDateParam !== undefined && rawDateParam !== '';
@@ -169,6 +178,7 @@ export default function CheckInScreen() {
     setAppetite(checkIn.appetite);
     setEnergy(checkIn.energy);
     setSymptom(checkIn.symptom);
+    setNotes(checkIn.notes ?? '');
     setEditingCheckInId(checkIn.id);
     setIsAddingNew(false);
     setValidationError(null);
@@ -179,6 +189,7 @@ export default function CheckInScreen() {
     setAppetite(null);
     setEnergy(null);
     setSymptom(null);
+    setNotes('');
     setEditingCheckInId(null);
     setValidationError(null);
     clearCheckInError();
@@ -226,9 +237,13 @@ export default function CheckInScreen() {
     return `How was ${pet.name} on ${formatCheckInTitleDate(selectedDate)}?`;
   }, [pet, selectedDate]);
 
+  const trimmedNotes = notes.trim();
+  const notesLength = notes.length;
+  const isNotesOverLimit = notesLength > CHECK_IN_NOTES_MAX_LENGTH;
   const isFormComplete = appetite !== null && energy !== null && symptom !== null;
   const isEditingExisting = editingCheckInId !== null;
   const saveButtonTitle = isEditingExisting ? 'Update Check-In' : 'Save Check-In';
+  const normalizedNotes = trimmedNotes.length > 0 ? trimmedNotes : null;
 
   const handleSave = useCallback(async () => {
     if (!pet || isFutureDate) {
@@ -237,6 +252,11 @@ export default function CheckInScreen() {
 
     if (!isFormComplete) {
       setValidationError('Please answer all questions before saving.');
+      return;
+    }
+
+    if (isNotesOverLimit) {
+      setValidationError(`Notes must be ${CHECK_IN_NOTES_MAX_LENGTH} characters or fewer.`);
       return;
     }
 
@@ -257,6 +277,7 @@ export default function CheckInScreen() {
           appetite,
           energy,
           symptom,
+          notes: normalizedNotes,
         });
       } else {
         const checkIn: CheckIn = {
@@ -266,6 +287,7 @@ export default function CheckInScreen() {
           appetite,
           energy,
           symptom,
+          notes: normalizedNotes,
           createdAt: new Date().toISOString(),
         };
 
@@ -286,6 +308,8 @@ export default function CheckInScreen() {
     isEditingExisting,
     isFormComplete,
     isFutureDate,
+    isNotesOverLimit,
+    normalizedNotes,
     pet,
     router,
     selectedDate,
@@ -373,6 +397,45 @@ export default function CheckInScreen() {
             setSymptom(value);
           }}
         />
+
+        <View style={styles.section}>
+          <ThemedText type="subtitle">Anything else you&apos;d like to remember?</ThemedText>
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.notesSubtitle}>
+            Optional notes for future vet visits.
+          </ThemedText>
+          <TextInput
+            accessibilityLabel="Additional notes"
+            multiline
+            placeholder="Example: Limping slightly after the afternoon walk."
+            placeholderTextColor={textSecondaryColor}
+            style={[
+              styles.notesInput,
+              {
+                color: textColor,
+                backgroundColor: surfaceColor,
+                borderColor: isNotesOverLimit ? primaryColor : borderColor,
+              },
+            ]}
+            textAlignVertical="top"
+            value={notes}
+            onChangeText={(value) => {
+              setValidationError(null);
+              clearCheckInError();
+              setNotes(value);
+            }}
+          />
+          <ThemedText
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={`${notesLength} of ${CHECK_IN_NOTES_MAX_LENGTH} characters`}
+            lightColor={isNotesOverLimit ? primaryColor : textSecondaryColor}
+            darkColor={isNotesOverLimit ? primaryColor : textSecondaryColor}
+            style={styles.notesCounter}>
+            {notesLength} / {CHECK_IN_NOTES_MAX_LENGTH}
+          </ThemedText>
+        </View>
       </View>
 
       {errorMessage ? (
@@ -387,7 +450,7 @@ export default function CheckInScreen() {
       <Button
         title={saveButtonTitle}
         onPress={() => void handleSave()}
-        disabled={!isFormComplete || checkInIsLoading || isFutureDate}
+        disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit}
         style={styles.button}
       />
     </ScreenContainer>
@@ -428,6 +491,21 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: Spacing.sm,
+  },
+  notesSubtitle: {
+    ...Typography.body,
+  },
+  notesInput: {
+    ...Typography.body,
+    borderWidth: 1,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    minHeight: 120,
+  },
+  notesCounter: {
+    ...Typography.caption,
+    textAlign: 'right',
   },
   error: {
     textAlign: 'center',

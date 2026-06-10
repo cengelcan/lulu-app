@@ -9,6 +9,7 @@ type CheckInRow = {
   appetite: string;
   energy: string;
   symptom: string;
+  notes: string | null;
   created_at: string;
 };
 
@@ -20,6 +21,7 @@ function mapCheckInRow(row: CheckInRow): CheckIn {
     appetite: row.appetite as Appetite,
     energy: row.energy as Energy,
     symptom: row.symptom as Symptom,
+    notes: row.notes,
     createdAt: row.created_at,
   };
 }
@@ -28,14 +30,15 @@ export async function createCheckIn(checkIn: CheckIn): Promise<void> {
   const db = await getDatabase();
 
   await db.runAsync(
-    `INSERT INTO check_ins (id, pet_id, date, appetite, energy, symptom, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO check_ins (id, pet_id, date, appetite, energy, symptom, notes, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     checkIn.id,
     checkIn.petId,
     checkIn.date,
     checkIn.appetite,
     checkIn.energy,
     checkIn.symptom,
+    checkIn.notes ?? null,
     checkIn.createdAt
   );
 }
@@ -77,12 +80,13 @@ export async function updateCheckIn(checkIn: CheckIn): Promise<void> {
 
   await db.runAsync(
     `UPDATE check_ins
-     SET date = ?, appetite = ?, energy = ?, symptom = ?
+     SET date = ?, appetite = ?, energy = ?, symptom = ?, notes = ?
      WHERE id = ?`,
     checkIn.date,
     checkIn.appetite,
     checkIn.energy,
     checkIn.symptom,
+    checkIn.notes ?? null,
     checkIn.id
   );
 }

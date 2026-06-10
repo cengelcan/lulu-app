@@ -56,3 +56,5 @@ export const SYMPTOM_OPTIONS: Option<Symptom>[] = [
   { value: 'diarrhea', label: 'Diarrhea' },
   { value: 'other', label: 'Other' },
 ];
+
+export const CHECK_IN_NOTES_MAX_LENGTH = 500;

@@ -17,5 +17,6 @@ export type CheckIn = {
   appetite: Appetite;
   energy: Energy;
   symptom: Symptom;
+  notes?: string | null;
   createdAt: string;
 };

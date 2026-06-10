@@ -3,6 +3,7 @@ export {
   getNotificationLaunchRoute,
   getRouteFromNotificationResponse,
 } from '@/services/notifications/response';
+export { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
 export {
   hasNotificationPermission,
   requestNotificationPermission,

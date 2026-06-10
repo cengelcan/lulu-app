@@ -9,6 +9,7 @@ import {
   syncCheckInReminderSchedule,
   type SkippedReminder,
 } from '@/services/notifications';
+import { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
 import {
   getCheckInPreferences,
   getNotificationPermission,
@@ -28,7 +29,7 @@ type NotificationState = {
   error: string | null;
   loadNotificationSettings: () => Promise<void>;
   savePreference: (preference: CheckInPreference) => Promise<void>;
-  savePermission: (permission: NotificationPermissionStatus) => Promise<void>;
+  savePermission: (permission: NotificationPermissionStatus) => Promise<NotificationPermissionStatus>;
   skipNextReminder: () => Promise<void>;
   clearSkipFeedbackMessage: () => void;
   clearError: () => void;
@@ -88,17 +89,21 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     set({ isLoading: true, error: null, skipFeedbackMessage: null });
 
     try {
+      let resolvedPermission = permission;
+
       if (permission === 'allowed') {
-        await requestNotificationPermission();
+        const osGranted = await requestNotificationPermission();
+        resolvedPermission = resolveStoredNotificationPermission(permission, osGranted);
       } else {
         await cancelCheckInReminder();
       }
 
-      await setNotificationPermission(permission);
-      set({ permission, isLoading: false });
-      await syncCheckInReminderSchedule({ permission });
+      await setNotificationPermission(resolvedPermission);
+      set({ permission: resolvedPermission, isLoading: false });
+      await syncCheckInReminderSchedule({ permission: resolvedPermission });
       const skippedReminders = await getSkippedReminders();
       set({ skippedReminders });
+      return resolvedPermission;
     } catch (error) {
       set({
         isLoading: false,

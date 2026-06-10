@@ -1,7 +1,7 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import * as Haptics from 'expo-haptics';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { DailyCheckInProgress } from '@/components/dashboard/DailyCheckInProgress';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
@@ -189,6 +189,10 @@ export default function DashboardScreen() {
     setComingSoonVisible(false);
   };
 
+  const handleOpenNotificationSettings = () => {
+    void Linking.openSettings();
+  };
+
   return (
     <ScreenContainer scrollable contentStyle={styles.content}>
       {isLoading ? (
@@ -281,6 +285,27 @@ export default function DashboardScreen() {
                 style={styles.message}>
                 Reminders are off
               </ThemedText>
+            ) : reminderPermission === 'denied' ? (
+              <View style={styles.deniedReminder}>
+                <ThemedText
+                  lightColor={textSecondaryColor}
+                  darkColor={textSecondaryColor}
+                  style={styles.message}>
+                  Notifications are disabled.
+                </ThemedText>
+                <ThemedText
+                  lightColor={textSecondaryColor}
+                  darkColor={textSecondaryColor}
+                  style={styles.message}>
+                  Enable them in Settings.
+                </ThemedText>
+                <Button
+                  title="Open Settings"
+                  variant="secondary"
+                  onPress={handleOpenNotificationSettings}
+                  style={styles.openSettingsButton}
+                />
+              </View>
             ) : upcomingReminder ? (
               <>
                 {skipFeedbackMessage ? (
@@ -496,6 +521,12 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     marginTop: Spacing.sm,
+  },
+  deniedReminder: {
+    gap: Spacing.sm,
+  },
+  openSettingsButton: {
+    marginTop: Spacing.xs,
   },
   quickActionsGrid: {
     flexDirection: 'row',

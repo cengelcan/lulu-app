@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '@/constants/storage-keys';
 import type { CheckInPreference } from '@/types/check-in';
 
-export type NotificationPermissionStatus = 'allowed' | 'later';
+export type NotificationPermissionStatus = 'allowed' | 'later' | 'denied';
 
 export async function getOnboardingCompleted(): Promise<boolean> {
   const value = await AsyncStorage.getItem(StorageKeys.onboardingCompleted);
@@ -37,7 +37,7 @@ export async function setCheckInPreferences(preference: CheckInPreference): Prom
 
 export async function getNotificationPermission(): Promise<NotificationPermissionStatus | null> {
   const value = await AsyncStorage.getItem(StorageKeys.notificationPermission);
-  if (value === 'allowed' || value === 'later') {
+  if (value === 'allowed' || value === 'later' || value === 'denied') {
     return value;
   }
 

@@ -65,7 +65,7 @@ export default function NotificationPermissionScreen() {
       clearNotificationError();
 
       try {
-        await savePermission(permission);
+        const resolvedPermission = await savePermission(permission);
 
         if (useNotificationStore.getState().error) {
           return;
@@ -84,9 +84,9 @@ export default function NotificationPermissionScreen() {
           return;
         }
 
-        if (permission === 'allowed') {
+        if (resolvedPermission === 'allowed') {
           await syncCheckInReminderSchedule({
-            permission,
+            permission: resolvedPermission,
             petName: name.trim(),
           });
         }

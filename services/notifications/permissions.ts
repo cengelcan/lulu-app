@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 
 import { ANDROID_CHECK_IN_CHANNEL_ID } from '@/services/notifications/constants';
 
+export { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
+
 export async function ensureAndroidNotificationChannel(): Promise<void> {
   if (Platform.OS !== 'android') {
     return;

@@ -1,15 +1,19 @@
 import { create } from 'zustand';
 
 import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
+import { removeActivePetId } from '@/storage/prefs.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import type { Pet } from '@/types/pet';
 
 type PetState = {
+  pets: Pet[];
   pet: Pet | null;
+  activePetId: string | null;
   isLoading: boolean;
   error: string | null;
   loadPet: () => Promise<void>;
+  loadPets: () => Promise<void>;
   setActivePet: (petId: string) => Promise<void>;
   createPet: (pet: Pet) => Promise<void>;
   updatePet: (pet: Pet) => Promise<void>;
@@ -21,23 +25,38 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
 }
 
-export const usePetStore = create<PetState>((set) => ({
+export const usePetStore = create<PetState>((set, get) => ({
+  pets: [],
   pet: null,
+  activePetId: null,
   isLoading: false,
   error: null,
 
-  loadPet: async () => {
+  loadPets: async () => {
     set({ isLoading: true, error: null });
 
     try {
-      const pet = await petStorage.getActivePet();
-      set({ pet, isLoading: false });
+      const [pets, activePet] = await Promise.all([
+        petStorage.getPets(),
+        petStorage.getActivePet(),
+      ]);
+
+      set({
+        pets,
+        pet: activePet,
+        activePetId: activePet?.id ?? null,
+        isLoading: false,
+      });
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load pet'),
+        error: getErrorMessage(error, 'Failed to load pets'),
       });
     }
+  },
+
+  loadPet: async () => {
+    await get().loadPets();
   },
 
   setActivePet: async (petId) => {
@@ -46,7 +65,7 @@ export const usePetStore = create<PetState>((set) => ({
 
     try {
       const pet = await petStorage.setActivePet(petId);
-      set({ pet });
+      set({ pet, activePetId: pet.id });
       await syncCheckInReminderSchedule({ petName: pet.name });
     } catch (error) {
       set({ error: getErrorMessage(error, 'Failed to switch pet') });
@@ -59,7 +78,11 @@ export const usePetStore = create<PetState>((set) => ({
 
     try {
       await petStorage.createPet(pet);
-      set({ pet, isLoading: false });
+      set((state) => ({
+        pets: [...state.pets, pet],
+        pet,
+        isLoading: false,
+      }));
     } catch (error) {
       set({
         isLoading: false,
@@ -74,7 +97,11 @@ export const usePetStore = create<PetState>((set) => ({
 
     try {
       await petStorage.updatePet(pet);
-      set({ pet, isLoading: false });
+      set((state) => ({
+        pet: state.pet?.id === pet.id ? pet : state.pet,
+        pets: state.pets.map((entry) => (entry.id === pet.id ? pet : entry)),
+        isLoading: false,
+      }));
     } catch (error) {
       set({
         isLoading: false,
@@ -88,8 +115,22 @@ export const usePetStore = create<PetState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
+      const wasActive = get().pet?.id === id;
       await petStorage.deletePet(id);
-      set({ pet: null, isLoading: false });
+
+      const remainingPets = get().pets.filter((entry) => entry.id !== id);
+
+      if (remainingPets.length === 0) {
+        await removeActivePetId();
+        set({ pets: [], pet: null, activePetId: null, isLoading: false });
+        return;
+      }
+
+      set({ pets: remainingPets, isLoading: false });
+
+      if (wasActive) {
+        await get().setActivePet(remainingPets[0].id);
+      }
     } catch (error) {
       set({
         isLoading: false,

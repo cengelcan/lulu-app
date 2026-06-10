@@ -164,36 +164,45 @@ Ana UX (My Pets listesi, seçim, ekleme) tamamlandı. Bu dosya kalan işleri ve 
 ### TODO-7: Pet store'u çoklu pet modeline genişlet
 
 **Öncelik:** P3  
-**Durum:** ⬜ Bekliyor
+**Durum:** ✅ Tamamlandı
 
 **Dosyalar:**
 - `stores/pet.store.ts`
 - `components/pets/MyPetsScreenContent.tsx`
+- `services/cleanup/delete-all-local-data.ts`
 
-**Hedef state:** `pets[]`, `pet` (aktif), `activePetId`
+**Yapılanlar:**
+- [x] Store state: `pets[]`, `pet` (aktif), `activePetId`
+- [x] `loadPets()` — liste + aktif pet tek seferde
+- [x] `loadPet()` → `loadPets()` delegate
+- [x] `createPet` → listeye append
+- [x] `updatePet` → hem `pet` hem `pets[]` günceller
+- [x] My Pets store'dan besleniyor (`petStorage` bypass kaldırıldı)
 
-**Yapılacaklar:**
-- [ ] `loadPets()` ekle
-- [ ] `createPet` → listeye append + aktif yap
-- [ ] `deletePet` → listeden çıkar, aktifse yeniden ata
-- [ ] My Pets'i store'dan besle (doğrudan `petStorage` bypass'ını kaldır)
+**Kabul kriterleri:**
+- [x] My Pets ve Dashboard aynı store state'ini paylaşır
+- [x] Pet ekleme/seçme sonrası My Pets listesi stale kalmaz (focus'ta `loadPets`)
+
+**Commit önerisi:** `refactor: extend pet store for multi-pet list state`
 
 ---
 
 ### TODO-8: `deletePet` edge case'leri
 
 **Öncelik:** P3  
-**Durum:** ⬜ Bekliyor
+**Durum:** ✅ Tamamlandı (TODO-7 ile birlikte)
 
 **Dosyalar:**
 - `stores/pet.store.ts`
-- `storage/pet.storage.ts`
 
-**Yapılacaklar:**
-- [ ] Aktif pet silinirse → kalan pet'ten birini active yap
-- [ ] Son pet silinirse → `removeActivePetId()` + `pet: null`
+**Yapılanlar:**
+- [x] Aktif pet silinirse → kalan listeden ilki active yapılır + reminder sync
+- [x] Son pet silinirse → `removeActivePetId()` + state temizliği
+- [x] Delete All Data reset → `pets[]` + `activePetId` temizlenir
 
 **Not:** My Pets'ten per-pet delete UI plan dışı (v1).
+
+**Commit önerisi:** _(TODO-7 commit'ine dahil)_
 
 ---
 

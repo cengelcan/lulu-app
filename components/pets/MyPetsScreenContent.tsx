@@ -11,7 +11,6 @@ import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
@@ -20,10 +19,6 @@ import type { Pet } from '@/types/pet';
 type MyPetsScreenContentProps = {
   edges?: Edge[];
 };
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
 
 type PetListItemProps = {
   pet: Pet;
@@ -75,33 +70,18 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
-  const setActivePetInStore = usePetStore((state) => state.setActivePet);
+  const pets = usePetStore((state) => state.pets);
+  const activePet = usePetStore((state) => state.pet);
+  const isLoading = usePetStore((state) => state.isLoading);
+  const error = usePetStore((state) => state.error);
+  const loadPets = usePetStore((state) => state.loadPets);
+  const setActivePet = usePetStore((state) => state.setActivePet);
+  const clearError = usePetStore((state) => state.clearError);
+
   const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
   const resetDraft = useSetupStore((state) => state.resetDraft);
 
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [currentPet, setCurrentPet] = useState<Pet | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSwitching, setIsSwitching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadPets = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const [petsList, active] = await Promise.all([
-        petStorage.getPets(),
-        petStorage.getActivePet(),
-      ]);
-      setPets(petsList);
-      setCurrentPet(active);
-    } catch (loadError) {
-      setError(getErrorMessage(loadError, 'Failed to load pets'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -118,6 +98,11 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
     router.push('/(setup)/pet-type?mode=add');
   };
 
+  const handleRetry = () => {
+    clearError();
+    void loadPets();
+  };
+
   const handleSelectPet = useCallback(
     (pet: Pet) => {
       if (isSwitching) {
@@ -128,7 +113,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
 
-      if (currentPet?.id === pet.id) {
+      if (activePet?.id === pet.id) {
         router.replace('/(tabs)/home');
         return;
       }
@@ -137,9 +122,8 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
 
       void (async () => {
         try {
-          await setActivePetInStore(pet.id);
+          await setActivePet(pet.id);
           await loadCheckIns(pet.id);
-          setCurrentPet(pet);
           router.replace('/(tabs)/home');
         } catch {
           // Error is stored in pet store for retry flows.
@@ -148,7 +132,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         }
       })();
     },
-    [currentPet?.id, isSwitching, loadCheckIns, router, setActivePetInStore]
+    [activePet?.id, isSwitching, loadCheckIns, router, setActivePet]
   );
 
   return (
@@ -160,7 +144,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
       ) : error ? (
         <View style={styles.centered}>
           <ThemedText style={styles.message}>{error}</ThemedText>
-          <Button title="Try Again" onPress={() => void loadPets()} />
+          <Button title="Try Again" onPress={handleRetry} />
         </View>
       ) : pets.length === 0 ? (
         <View style={styles.centered}>
@@ -183,7 +167,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
               <PetListItem
                 key={pet.id}
                 pet={pet}
-                isActive={currentPet?.id === pet.id}
+                isActive={activePet?.id === pet.id}
                 disabled={isSwitching}
                 onPress={() => handleSelectPet(pet)}
               />

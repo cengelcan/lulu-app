@@ -27,7 +27,13 @@ export async function deleteAllLocalData(): Promise<void> {
 }
 
 export function resetAppStoresAfterDataDeletion(): void {
-  usePetStore.setState({ pet: null, isLoading: false, error: null });
+  usePetStore.setState({
+    pets: [],
+    pet: null,
+    activePetId: null,
+    isLoading: false,
+    error: null,
+  });
   useCheckInStore.setState({
     latestCheckIn: null,
     checkIns: [],

@@ -28,7 +28,7 @@ export const usePetStore = create<PetState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const pet = await petStorage.getPet();
+      const pet = await petStorage.getActivePet();
       set({ pet, isLoading: false });
     } catch (error) {
       set({

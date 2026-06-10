@@ -15,7 +15,7 @@ import {
 } from '@/services/notifications/constants';
 import { getCheckInReminderContent } from '@/services/notifications/content';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
-import { getPet } from '@/storage/pet.storage';
+import { getActivePet } from '@/storage/pet.storage';
 import {
   getCheckInPreferences,
   getNotificationPermission,
@@ -75,7 +75,7 @@ export async function syncCheckInReminderSchedule(input?: {
     input?.permission !== undefined ? Promise.resolve(input.permission) : getNotificationPermission(),
     input?.petName !== undefined
       ? Promise.resolve(input.petName ? { name: input.petName } : null)
-      : getPet(),
+      : getActivePet(),
   ]);
 
   await cancelCheckInReminder();

@@ -134,14 +134,6 @@ export async function getActivePet(): Promise<Pet | null> {
   return null;
 }
 
-/**
- * Deprecated: use getActivePet(), getFirstPet(), or getPets() instead.
- * TODO: remove once all call sites migrate off getPet().
- */
-export async function getPet(): Promise<Pet | null> {
-  return getActivePet();
-}
-
 export async function updatePet(pet: Pet): Promise<void> {
   const db = await getDatabase();
 

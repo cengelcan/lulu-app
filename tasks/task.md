@@ -69,17 +69,18 @@ Ana UX (My Pets listesi, seçim, ekleme) tamamlandı. Bu dosya kalan işleri ve 
 ### TODO-3: `getPet()` deprecated wrapper'ı kaldır
 
 **Öncelik:** P1  
-**Durum:** ⬜ Bekliyor
+**Durum:** ✅ Tamamlandı
 
-**Kalan call site'lar:**
-- [ ] `stores/pet.store.ts` → `loadPet` içinde `getActivePet()` kullan
-- [ ] `services/notifications/schedule.ts` → `getActivePet()` kullan
-- [ ] `storage/pet.storage.ts` → `getPet()` fonksiyonunu sil
-- [ ] Repo genelinde `getPet(` grep temiz
+**Güncellenen dosyalar:**
+- [x] `stores/pet.store.ts` → `getActivePet()`
+- [x] `services/notifications/schedule.ts` → `getActivePet()`
+- [x] `storage/pet.storage.ts` → `getPet()` silindi
 
 **Kabul kriterleri:**
-- [ ] `getPet(` hiçbir yerde kalmamış
-- [ ] Tüm ekranlar aktif pet'i doğru yüklüyor
+- [x] `getPet(` hiçbir yerde kalmamış
+- [x] Tüm ekranlar aktif pet'i doğru yüklüyor
+
+**Commit önerisi:** `refactor: replace deprecated getPet with getActivePet`
 
 ---
 

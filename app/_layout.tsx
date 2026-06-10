@@ -23,6 +23,7 @@ export default function RootLayout() {
         <Stack.Screen name="(main)" />
         <Stack.Screen name="check-in" />
         <Stack.Screen name="check-in-success" />
+        <Stack.Screen name="pet-profile" />
         <Stack.Screen name="edit-pet" />
         <Stack.Screen name="settings" />
       </Stack>

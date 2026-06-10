@@ -12,7 +12,7 @@ let database: SQLite.SQLiteDatabase | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 4;
+const CURRENT_SCHEMA_VERSION = 5;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -71,6 +71,27 @@ async function ensureCheckInNotesColumn(db: SQLite.SQLiteDatabase): Promise<void
   }
 }
 
+const PET_IDENTITY_COLUMNS = [
+  { name: 'color', sql: 'ALTER TABLE pets ADD COLUMN color TEXT;' },
+  { name: 'sex', sql: 'ALTER TABLE pets ADD COLUMN sex TEXT;' },
+  { name: 'spay_neuter_status', sql: 'ALTER TABLE pets ADD COLUMN spay_neuter_status TEXT;' },
+  { name: 'birth_date', sql: 'ALTER TABLE pets ADD COLUMN birth_date TEXT;' },
+  { name: 'adoption_date', sql: 'ALTER TABLE pets ADD COLUMN adoption_date TEXT;' },
+  { name: 'microchip_id', sql: 'ALTER TABLE pets ADD COLUMN microchip_id TEXT;' },
+  { name: 'owner_name', sql: 'ALTER TABLE pets ADD COLUMN owner_name TEXT;' },
+] as const;
+
+async function ensurePetIdentityColumns(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(pets)');
+  const existingNames = new Set(columns.map((column) => column.name));
+
+  for (const column of PET_IDENTITY_COLUMNS) {
+    if (!existingNames.has(column.name)) {
+      await db.execAsync(column.sql);
+    }
+  }
+}
+
 async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
   let version = await getSchemaVersion(db);
 
@@ -92,8 +113,14 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     await setSchemaVersion(db, version);
   }
 
-  if (version < CURRENT_SCHEMA_VERSION) {
+  if (version < 4) {
     await ensureCheckInNotesColumn(db);
+    version = 4;
+    await setSchemaVersion(db, version);
+  }
+
+  if (version < CURRENT_SCHEMA_VERSION) {
+    await ensurePetIdentityColumns(db);
     await setSchemaVersion(db, CURRENT_SCHEMA_VERSION);
   }
 }

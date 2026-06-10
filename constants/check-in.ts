@@ -1,5 +1,11 @@
 import type { Appetite, CheckInPreference, Energy, Symptom } from '@/types/check-in';
-import type { HealthCondition, PetAgeGroup, PetSpecies } from '@/types/pet';
+import type {
+  HealthCondition,
+  PetAgeGroup,
+  PetSex,
+  PetSpayNeuterStatus,
+  PetSpecies,
+} from '@/types/pet';
 
 type Option<T extends string> = {
   value: T;
@@ -9,6 +15,19 @@ type Option<T extends string> = {
 export const PET_SPECIES_OPTIONS: Option<PetSpecies>[] = [
   { value: 'cat', label: 'Cat' },
   { value: 'dog', label: 'Dog' },
+];
+
+export const PET_SEX_OPTIONS: Option<PetSex>[] = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'unknown', label: 'Unknown' },
+];
+
+export const PET_SPAY_NEUTER_STATUS_OPTIONS: Option<PetSpayNeuterStatus>[] = [
+  { value: 'spayed', label: 'Spayed' },
+  { value: 'neutered', label: 'Neutered' },
+  { value: 'not_spayed_neutered', label: 'Not Spayed / Neutered' },
+  { value: 'unknown', label: 'Unknown' },
 ];
 
 export const PET_AGE_GROUP_OPTIONS: Option<PetAgeGroup>[] = [

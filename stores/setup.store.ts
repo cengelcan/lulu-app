@@ -1,8 +1,13 @@
 import { create } from 'zustand';
 
+import { isValidLocalDateString } from '@/utils/date';
+
 import {
+  PET_COLOR_MAX_LENGTH,
+  PET_MICROCHIP_MAX_LENGTH,
   PET_NAME_MAX_LENGTH,
   PET_NAME_MIN_LENGTH,
+  PET_OWNER_MAX_LENGTH,
   type HealthCondition,
   type PetAgeGroup,
   type PetSpecies,
@@ -45,6 +50,50 @@ export function validateSpecies(species: PetSpecies | null): string | null {
 export function validateAgeGroup(ageGroup: PetAgeGroup | null): string | null {
   if (!ageGroup) {
     return 'Please select an age group';
+  }
+
+  return null;
+}
+
+export function validateOptionalPetDate(date: string): string | null {
+  const trimmed = date.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (!isValidLocalDateString(trimmed)) {
+    return 'Enter a valid date as YYYY-MM-DD';
+  }
+
+  return null;
+}
+
+export function validateOptionalColor(color: string): string | null {
+  const trimmed = color.trim();
+
+  if (trimmed.length > PET_COLOR_MAX_LENGTH) {
+    return `Color must be ${PET_COLOR_MAX_LENGTH} characters or less`;
+  }
+
+  return null;
+}
+
+export function validateOptionalOwnerName(ownerName: string): string | null {
+  const trimmed = ownerName.trim();
+
+  if (trimmed.length > PET_OWNER_MAX_LENGTH) {
+    return `Owner name must be ${PET_OWNER_MAX_LENGTH} characters or less`;
+  }
+
+  return null;
+}
+
+export function validateOptionalMicrochipId(microchipId: string): string | null {
+  const trimmed = microchipId.trim();
+
+  if (trimmed.length > PET_MICROCHIP_MAX_LENGTH) {
+    return `Microchip ID must be ${PET_MICROCHIP_MAX_LENGTH} characters or less`;
   }
 
   return null;

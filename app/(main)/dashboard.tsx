@@ -161,6 +161,13 @@ export default function DashboardScreen() {
     router.push('/check-in');
   };
 
+  const handleOpenPetProfile = () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push('/pet-profile');
+  };
+
   const handleOpenSettings = () => {
     if (process.env.EXPO_OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -216,12 +223,18 @@ export default function DashboardScreen() {
       ) : (
         <View style={styles.body}>
           <View style={styles.petHeader}>
-            <PetAvatar photoUri={pet.photoUri} size={80} />
-            <View style={styles.petInfo}>
-              <ThemedText type="title" style={styles.petName}>
-                {pet.name}
-              </ThemedText>
-            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${pet.name} profile`}
+              onPress={handleOpenPetProfile}
+              style={({ pressed }) => [styles.petProfileAction, { opacity: pressed ? 0.7 : 1 }]}>
+              <PetAvatar photoUri={pet.photoUri} size={80} />
+              <View style={styles.petInfo}>
+                <ThemedText type="title" style={styles.petName}>
+                  {pet.name}
+                </ThemedText>
+              </View>
+            </Pressable>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Settings"
@@ -407,6 +420,12 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
   },
   petHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+  },
+  petProfileAction: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: Spacing.md,

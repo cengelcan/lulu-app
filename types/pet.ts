@@ -17,6 +17,14 @@ export type HealthCondition =
   | 'other'
   | 'not_sure';
 
+export type PetSex = 'male' | 'female' | 'unknown';
+
+export type PetSpayNeuterStatus =
+  | 'spayed'
+  | 'neutered'
+  | 'not_spayed_neutered'
+  | 'unknown';
+
 export type Pet = {
   id: string;
   name: string;
@@ -24,8 +32,18 @@ export type Pet = {
   ageGroup: PetAgeGroup;
   healthConditions: HealthCondition[];
   photoUri?: string | null;
+  color?: string | null;
+  sex?: PetSex | null;
+  spayNeuterStatus?: PetSpayNeuterStatus | null;
+  birthDate?: string | null;
+  adoptionDate?: string | null;
+  microchipId?: string | null;
+  ownerName?: string | null;
   createdAt: string;
 };
 
 export const PET_NAME_MIN_LENGTH = 1;
 export const PET_NAME_MAX_LENGTH = 30;
+export const PET_COLOR_MAX_LENGTH = 50;
+export const PET_OWNER_MAX_LENGTH = 50;
+export const PET_MICROCHIP_MAX_LENGTH = 50;

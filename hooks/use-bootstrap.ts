@@ -7,8 +7,8 @@ import { usePetStore } from '@/stores/pet.store';
 
 export type BootstrapPhase = 'loading' | 'error' | 'redirecting';
 
-/** PRD Screen 01 — splash visible for 2–3 seconds before navigation */
-export const SPLASH_MIN_DURATION_MS = 2500;
+/** PRD Screen 01 — minimum splash visibility before navigation */
+export const SPLASH_MIN_DURATION_MS = 1000;
 
 function resolveBootstrapRoute(
   hasCompletedOnboarding: boolean,

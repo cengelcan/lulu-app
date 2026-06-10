@@ -21,8 +21,8 @@ export default function SplashScreen() {
     <ScreenContainer contentStyle={styles.content}>
       <View style={styles.center}>
         <View
-          accessibilityLabel="Lulu logo"
-          accessibilityRole="image"
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
           style={[styles.logoContainer, { backgroundColor: primaryColor }]}>
           <MaterialIcons name="pets" size={40} color={primaryTextColor} />
         </View>

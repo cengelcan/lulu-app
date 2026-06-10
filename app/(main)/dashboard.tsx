@@ -15,9 +15,6 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
   APPETITE_OPTIONS,
   ENERGY_OPTIONS,
-  HEALTH_CONDITION_OPTIONS,
-  PET_AGE_GROUP_OPTIONS,
-  PET_SPECIES_OPTIONS,
   SYMPTOM_OPTIONS,
 } from '@/constants/check-in';
 import { Spacing, Typography } from '@/constants/theme';
@@ -26,19 +23,12 @@ import { getUpcomingReminder } from '@/services/notifications/upcoming';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
-import type { HealthCondition } from '@/types/pet';
 
 function getOptionLabel<T extends string>(
   options: { value: T; label: string }[],
   value: T
 ): string {
   return options.find((option) => option.value === value)?.label ?? value;
-}
-
-function getHealthConditionLabels(conditions: HealthCondition[]): string[] {
-  return conditions.map((condition) =>
-    getOptionLabel(HEALTH_CONDITION_OPTIONS, condition)
-  );
 }
 
 function formatCheckInDateTime(createdAt: string): string {
@@ -171,13 +161,6 @@ export default function DashboardScreen() {
     router.push('/check-in');
   };
 
-  const handleEditPet = () => {
-    if (process.env.EXPO_OS === 'ios') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    router.push('/edit-pet');
-  };
-
   const handleOpenSettings = () => {
     if (process.env.EXPO_OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -238,35 +221,15 @@ export default function DashboardScreen() {
               <ThemedText type="title" style={styles.petName}>
                 {pet.name}
               </ThemedText>
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.petSubtitle}>
-                {getOptionLabel(PET_SPECIES_OPTIONS, pet.species)} •{' '}
-                {getOptionLabel(PET_AGE_GROUP_OPTIONS, pet.ageGroup)}
-              </ThemedText>
             </View>
-            <View style={styles.headerActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Settings"
-                onPress={handleOpenSettings}
-                hitSlop={8}
-                style={({ pressed }) => [styles.settingsAction, { opacity: pressed ? 0.6 : 1 }]}>
-                <IconSymbol name="gearshape.fill" size={20} color={primaryColor} />
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Edit pet"
-                onPress={handleEditPet}
-                hitSlop={8}
-                style={({ pressed }) => [styles.editAction, { opacity: pressed ? 0.6 : 1 }]}>
-                <IconSymbol name="pencil" size={15} color={primaryColor} />
-                <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.editLabel}>
-                  Edit
-                </ThemedText>
-              </Pressable>
-            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Settings"
+              onPress={handleOpenSettings}
+              hitSlop={8}
+              style={({ pressed }) => [styles.settingsAction, { opacity: pressed ? 0.6 : 1 }]}>
+              <IconSymbol name="gearshape.fill" size={20} color={primaryColor} />
+            </Pressable>
           </View>
 
           <Button title="Start Check-In" onPress={handleStartCheckIn} />
@@ -385,24 +348,6 @@ export default function DashboardScreen() {
             )}
           </Card>
 
-          <Card>
-            <ThemedText type="subtitle">Profile</ThemedText>
-            <DetailRow label="Type" value={getOptionLabel(PET_SPECIES_OPTIONS, pet.species)} />
-            <DetailRow
-              label="Age Group"
-              value={getOptionLabel(PET_AGE_GROUP_OPTIONS, pet.ageGroup)}
-            />
-          </Card>
-
-          <Card>
-            <ThemedText type="subtitle">Health Conditions</ThemedText>
-            {getHealthConditionLabels(pet.healthConditions).map((label) => (
-              <ThemedText key={label} style={styles.conditionItem}>
-                {label}
-              </ThemedText>
-            ))}
-          </Card>
-
           <View style={styles.historySection}>
             <ThemedText type="subtitle">View History</ThemedText>
             {checkInIsLoading ? (
@@ -474,25 +419,9 @@ const styles = StyleSheet.create({
   petName: {
     flexShrink: 1,
   },
-  petSubtitle: {
-    ...Typography.body,
-  },
-  headerActions: {
-    alignItems: 'flex-end',
-    gap: Spacing.sm,
-    paddingTop: Spacing.sm,
-  },
   settingsAction: {
     padding: Spacing.xs,
-  },
-  editAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  editLabel: {
-    ...Typography.body,
-    fontWeight: '400',
+    paddingTop: Spacing.sm,
   },
   centered: {
     flex: 1,
@@ -516,9 +445,6 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     ...Typography.caption,
-  },
-  conditionItem: {
-    ...Typography.body,
   },
   checkInLoading: {
     alignSelf: 'flex-start',

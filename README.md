@@ -4,6 +4,8 @@
 
 Pet Health Journal is a mobile application designed to help pet owners track their cats' and dogs' health through quick daily check-ins.
 
+Users can manage multiple pets and switch between them at any time. The dashboard, check-ins, and reminder copy always reflect the **currently active pet**.
+
 Unlike traditional pet management apps that require extensive manual logging, Pet Health Journal focuses on capturing meaningful health changes in less than 10 seconds per day.
 
 The primary goal is to help pet owners remember symptoms, medication adherence, behavioral changes, and overall wellbeing before veterinary visits.
@@ -55,6 +57,23 @@ The focus is detecting meaningful changes.
 - Age Group
 - Existing Health Conditions
 
+### My Pets
+
+- List all pets (avatar + name)
+- Indicate the active pet ("Current" badge)
+- Tap a pet to switch the active pet and open Home
+- Add additional pets without repeating onboarding or global notification setup
+
+### Navigation
+
+Bottom tabs:
+
+- **Home** — dashboard for the active pet
+- **My Pets** — pet list, selection, and add pet
+- **Profile** — app settings (notifications, reminder preferences, delete all data)
+
+Notification and check-in preferences are **global** (shared across all pets). Reminder notification text uses the active pet's name.
+
 ### Daily Check-In
 
 Users receive reminders and answer:
@@ -81,7 +100,7 @@ Users receive reminders and answer:
 
 ### Dashboard
 
-Displays:
+Displays data for the **active pet**:
 
 - Last Check-In
 - Today's Status
@@ -101,13 +120,26 @@ Users choose preferred check-in times:
 
 # User Journey
 
-## Day 1
+## Day 1 (First Pet)
 
 1. Install App
 2. Complete onboarding
-3. Create pet profile
+3. Complete initial pet setup (type → name → age → health → check-in prefs → notifications)
 4. Complete first check-in
-5. View dashboard
+5. View dashboard (Home tab)
+
+## Adding Another Pet
+
+1. Open **My Pets** tab
+2. Tap **Add Pet**
+3. Complete pet-only setup (type → name → age → health) — skips onboarding and global prefs
+4. New pet becomes active; app navigates to Home
+
+## Switching Pets
+
+1. Open **My Pets** tab
+2. Tap a pet row
+3. Active pet updates; app navigates to Home with that pet's dashboard and check-in history
 
 ## Daily Usage
 
@@ -119,6 +151,26 @@ Users choose preferred check-in times:
 Total time:
 
 Less than 10 seconds.
+
+---
+
+# Pet Setup Flows
+
+## Initial Setup (First Pet)
+
+Full flow after onboarding:
+
+`pet-type → pet-name → pet-age → health-conditions → check-in-prefs → notification-permission → Home`
+
+Creates the first pet, saves global notification/check-in preferences, and sets the new pet as active.
+
+## Add Mode (Additional Pets)
+
+From **My Pets → Add Pet**:
+
+`pet-type → pet-name → pet-age → health-conditions → Home`
+
+Skips check-in preferences and notification permission. Global prefs stay unchanged. The new pet becomes the active pet.
 
 ---
 
@@ -326,6 +378,10 @@ Primary actions must be reachable with one thumb.
 ---
 
 # Dashboard Structure
+
+Bottom tabs: **Home** | **My Pets** | **Profile**
+
+## Home (Active Pet)
 
 Header
 

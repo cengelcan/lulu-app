@@ -211,44 +211,53 @@ Ana UX (My Pets listesi, seçim, ekleme) tamamlandı. Bu dosya kalan işleri ve 
 ### TODO-9: PRD güncelle
 
 **Öncelik:** P3  
-**Durum:** ⬜ Bekliyor
+**Durum:** ✅ Tamamlandı
 
 **Dosya:** `PRD.md`
 
-**Yapılacaklar:**
-- [ ] FR-001: "create one pet" → çoklu pet
-- [ ] My Pets tab UX gereksinimlerini ekle
-- [ ] Active pet kavramını dokümante et
-- [ ] Global notification prefs limitasyonunu not et
+**Yapılanlar:**
+- [x] FR-001 → çoklu pet + FR-001a/b/c eklendi
+- [x] Screen 16 My Pets UX gereksinimleri eklendi
+- [x] Active pet kavramı (Dashboard, data model, FR'ler)
+- [x] Global notification prefs limitasyonu dokümante edildi
+- [x] FR-008 Delete All Data, MVP release criteria güncellendi
+
+**Commit önerisi:** `docs: update PRD for multi-pet support`
 
 ---
 
 ### TODO-10: README güncelle
 
 **Öncelik:** P4  
-**Durum:** ⬜ Bekliyor
+**Durum:** ✅ Tamamlandı
 
 **Dosya:** `README.md`
 
-**Yapılacaklar:**
-- [ ] Tab yapısı: Home | My Pets | Profile
-- [ ] Çoklu pet akışı kısa özet
-- [ ] Add mode vs initial setup farkı
+**Yapılanlar:**
+- [x] Tab yapısı: Home | My Pets | Profile
+- [x] Çoklu pet akışı (switch, add) özeti
+- [x] Initial setup vs add mode farkı
+- [x] Global notification prefs notu
+
+**Commit önerisi:** `docs: document multi-pet flows in README`
 
 ---
 
 ### TODO-11: Legacy route temizliği
 
 **Öncelik:** P4  
-**Durum:** ⬜ Bekliyor
+**Durum:** ✅ Tamamlandı
 
 **Dosyalar:**
-- `app/(main)/dashboard.tsx`
-- `app/(main)/_layout.tsx`
+- `app/(main)/dashboard.tsx` — silindi
+- `app/(main)/_layout.tsx` — silindi
+- `app/_layout.tsx` — `(main)` Stack.Screen kaldırıldı
 
-**Yapılacaklar:**
-- [ ] `(main)` grubuna referans var mı kontrol et
-- [ ] Güvenliyse redirect route'u kaldır
+**Kontrol:**
+- [x] Kod tabanında `/(main)/` referansı yoktu
+- [x] Redirect route güvenle kaldırıldı
+
+**Commit önerisi:** `chore: remove legacy (main) dashboard redirect`
 
 ---
 

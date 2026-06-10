@@ -21,7 +21,6 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(setup)" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(main)" />
         <Stack.Screen name="check-in" />
         <Stack.Screen name="check-in-success" />
         <Stack.Screen name="pet-profile" />

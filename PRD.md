@@ -7,7 +7,9 @@ Version: 1.0 (MVP)
 
 # 1. Product Summary
 
-Pet Health Journal is a mobile application that enables pet owners to track their pet's health through quick daily check-ins.
+Pet Health Journal is a mobile application that enables pet owners to track their pets' health through quick daily check-ins.
+
+Users can manage multiple pets and select one active pet at a time. The dashboard, check-ins, and reminders reflect the currently active pet.
 
 The application focuses on symptom awareness, behavioral changes and veterinary visit preparation.
 
@@ -97,6 +99,10 @@ First Check-In
 ↓
 
 Dashboard
+
+↓
+
+My Pets (select active pet / add pet)
 
 ↓
 
@@ -400,6 +406,16 @@ Go To Dashboard
 
 Dashboard
 
+Shows data for the **currently active pet**.
+
+## Navigation
+
+Bottom tabs:
+
+- Home
+- My Pets
+- Profile
+
 ---
 
 ## Header
@@ -448,13 +464,70 @@ Date
 
 Time
 
+Reminder copy uses the **active pet's name**.
+
+---
+
+# Screen 16
+
+My Pets
+
+## Purpose
+
+List all pets owned by the user and manage the active pet selection.
+
+---
+
+## Pet List
+
+Each row displays:
+
+- Pet photo / avatar
+- Pet name
+
+The **active pet** must have a subtle visual indicator (for example, a "Current" badge or highlighted border).
+
+---
+
+## Actions
+
+### Tap Pet Row
+
+- Set tapped pet as the active pet
+- Persist active pet selection locally
+- Navigate to Home (Dashboard)
+
+### Add Pet
+
+- Open pet setup flow in **add mode**
+- Collect pet-specific fields only (type, name, age group, health conditions)
+- Skip onboarding and global notification / check-in preference setup
+- New pet becomes the active pet after creation
+- Navigate to Home (Dashboard)
+
+### Empty State
+
+If no pets exist, show CTA to initial pet setup.
+
+---
+
+# Screen 17
+
+Profile & Settings
+
+App-level settings (notifications, reminder preferences, delete all data).
+
+Notification and check-in preferences are **global** (shared across all pets). Reminder notification text uses the active pet's name.
+
 ---
 
 # 7. Check-In System
 
 ## Daily Reminder
 
-Trigger according to selected schedule.
+Trigger according to the user's **global** reminder preference schedule.
+
+Reminder notification copy uses the **active pet's name**. There is one shared reminder schedule for all pets in MVP.
 
 Examples:
 
@@ -510,11 +583,40 @@ User
 
 ---
 
+AppPreferences (local)
+
+- activePetId
+- onboardingCompleted
+- notificationPermission
+- checkInPreference
+
+`activePetId` identifies which pet is currently active. If missing or stale, the system falls back to the oldest pet.
+
+---
+
 # 9. Functional Requirements
 
 FR-001
 
-User must be able to create one pet.
+User must be able to create and manage multiple pets.
+
+---
+
+FR-001a
+
+User must be able to select one **active pet** at a time. Dashboard, check-ins, and reminder copy reflect the active pet.
+
+---
+
+FR-001b
+
+User must be able to add an additional pet without repeating onboarding or global notification / check-in preference setup.
+
+---
+
+FR-001c
+
+My Pets must list all pets with avatar and name, indicate the active pet, and allow switching the active pet.
 
 ---
 
@@ -538,7 +640,9 @@ User must be able to view latest check-in.
 
 FR-005
 
-User must receive scheduled reminders.
+User must receive scheduled reminders based on global reminder preferences.
+
+Reminder text must use the active pet's name. Changing the active pet updates scheduled reminder copy without changing permission or preference settings.
 
 ---
 
@@ -550,7 +654,13 @@ User must be able to skip a reminder.
 
 FR-007
 
-System must save historical check-in data.
+System must save historical check-in data per pet (`petId`).
+
+---
+
+FR-008
+
+Delete All Data must remove all pets, all check-ins, active pet selection, and app preferences from the device.
 
 ---
 
@@ -615,8 +725,10 @@ Wearable Integrations
 Release is approved when:
 
 - Onboarding works
-- Pet creation works
-- Notifications work
+- Pet creation works (initial setup and add-pet flow)
+- Multiple pets can be listed, selected, and added from My Pets
+- Active pet switching updates dashboard and check-in history correctly
+- Notifications work (global prefs; reminder copy follows active pet)
 - Daily check-ins work
 - Dashboard works
 - Data persists correctly

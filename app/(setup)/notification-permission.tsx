@@ -92,7 +92,7 @@ export default function NotificationPermissionScreen() {
         }
 
         resetDraft();
-        router.replace('/(main)/dashboard');
+        router.replace('/(tabs)/home');
       } catch {
         // Stores set error state.
       }

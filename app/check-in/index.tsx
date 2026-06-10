@@ -201,7 +201,7 @@ export default function CheckInScreen() {
 
   useEffect(() => {
     if (!petIsLoading && !pet) {
-      router.replace('/(main)/dashboard');
+      router.replace('/(tabs)/home');
     }
   }, [pet, petIsLoading, router]);
 

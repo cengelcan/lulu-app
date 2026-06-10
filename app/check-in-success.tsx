@@ -30,8 +30,8 @@ export default function CheckInSuccessScreen() {
         {message}
       </ThemedText>
       <Button
-        title="Go To Dashboard"
-        onPress={() => router.replace('/(main)/dashboard')}
+        title="Go Home"
+        onPress={() => router.replace('/(tabs)/home')}
         style={styles.button}
       />
     </ScreenContainer>

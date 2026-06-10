@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
@@ -143,7 +143,7 @@ export default function EditPetScreen() {
 
   useEffect(() => {
     if (!petIsLoading && !pet) {
-      router.replace('/(main)/dashboard');
+      router.replace('/(tabs)/home');
     }
   }, [pet, petIsLoading, router]);
 
@@ -293,16 +293,20 @@ export default function EditPetScreen() {
 
   if (petIsLoading || !pet) {
     return (
-      <ScreenContainer contentStyle={styles.centered}>
-        <ActivityIndicator color={primaryColor} size="large" />
-      </ScreenContainer>
+      <>
+        <Stack.Screen options={{ headerShown: true, title: 'Edit Pet' }} />
+        <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
+          <ActivityIndicator color={primaryColor} size="large" />
+        </ScreenContainer>
+      </>
     );
   }
 
   return (
-    <ScreenContainer scrollable contentStyle={styles.content}>
+    <>
+      <Stack.Screen options={{ headerShown: true, title: 'Edit Pet' }} />
+      <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
       <View style={styles.body}>
-        <ThemedText type="title">Edit Pet</ThemedText>
         <ThemedText
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
@@ -582,6 +586,7 @@ export default function EditPetScreen() {
         style={styles.button}
       />
     </ScreenContainer>
+    </>
   );
 }
 

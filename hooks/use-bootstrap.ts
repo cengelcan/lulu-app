@@ -22,7 +22,7 @@ function resolveBootstrapRoute(
     return '/(setup)/pet-type';
   }
 
-  return '/(main)/dashboard';
+  return '/(tabs)/home';
 }
 
 async function waitForMinSplashDuration(startedAt: number): Promise<void> {

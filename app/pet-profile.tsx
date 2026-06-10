@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -56,7 +56,7 @@ export default function PetProfileScreen() {
 
   useEffect(() => {
     if (!isLoading && !pet) {
-      router.replace('/(main)/dashboard');
+      router.replace('/(tabs)/home');
     }
   }, [isLoading, pet, router]);
 
@@ -66,14 +66,31 @@ export default function PetProfileScreen() {
 
   if (isLoading || !pet) {
     return (
-      <ScreenContainer contentStyle={styles.centered}>
-        <ActivityIndicator color={primaryColor} size="large" />
-      </ScreenContainer>
+      <>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: 'Pet Profile',
+            headerBackTitle: 'Home',
+          }}
+        />
+        <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
+          <ActivityIndicator color={primaryColor} size="large" />
+        </ScreenContainer>
+      </>
     );
   }
 
   return (
-    <ScreenContainer scrollable contentStyle={styles.content}>
+    <>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: 'Pet Profile',
+          headerBackTitle: 'Home',
+        }}
+      />
+      <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
       <View style={styles.body}>
         <View style={styles.header}>
           <PetAvatar photoUri={pet.photoUri} size={96} />
@@ -123,6 +140,7 @@ export default function PetProfileScreen() {
         />
       </View>
     </ScreenContainer>
+    </>
   );
 }
 

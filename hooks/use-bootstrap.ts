@@ -2,6 +2,7 @@ import { type Href, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getNotificationLaunchRoute, syncCheckInReminderSchedule } from '@/services/notifications';
+import * as petStorage from '@/storage/pet.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
 
@@ -12,13 +13,13 @@ export const SPLASH_MIN_DURATION_MS = 1000;
 
 function resolveBootstrapRoute(
   hasCompletedOnboarding: boolean,
-  hasPet: boolean
+  hasAnyPet: boolean
 ): Href {
   if (!hasCompletedOnboarding) {
     return '/(onboarding)/intro-1';
   }
 
-  if (!hasPet) {
+  if (!hasAnyPet) {
     return '/(setup)/pet-type';
   }
 
@@ -54,8 +55,10 @@ export function useBootstrap() {
 
     await Promise.all([loadOnboardingStatus(), loadPet()]);
 
-    if (usePetStore.getState().pet) {
-      await syncCheckInReminderSchedule();
+    const { pet } = usePetStore.getState();
+
+    if (pet) {
+      await syncCheckInReminderSchedule({ petName: pet.name });
     }
 
     const onboardingError = useOnboardingStore.getState().error;
@@ -69,7 +72,6 @@ export function useBootstrap() {
     }
 
     const { hasCompletedOnboarding } = useOnboardingStore.getState();
-    const { pet } = usePetStore.getState();
 
     if (hasCompletedOnboarding === null) {
       await waitForMinSplashDuration(startedAt);
@@ -78,6 +80,7 @@ export function useBootstrap() {
       return;
     }
 
+    const hasAnyPet = await petStorage.hasAnyPet();
     const notificationRoute = await getNotificationLaunchRoute();
     await waitForMinSplashDuration(startedAt);
 
@@ -88,7 +91,7 @@ export function useBootstrap() {
     }
 
     setPhase('redirecting');
-    router.replace(resolveBootstrapRoute(hasCompletedOnboarding, pet !== null));
+    router.replace(resolveBootstrapRoute(hasCompletedOnboarding, hasAnyPet));
   }, [
     clearOnboardingError,
     clearPetError,

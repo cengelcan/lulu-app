@@ -138,18 +138,24 @@ Ana UX (My Pets listesi, seçim, ekleme) tamamlandı. Bu dosya kalan işleri ve 
 ### TODO-6: Bootstrap akışını gözden geçir
 
 **Öncelik:** P2  
-**Durum:** ⬜ Bekliyor
+**Durum:** ✅ Tamamlandı
 
 **Dosyalar:**
 - `hooks/use-bootstrap.ts`
+- `storage/pet.storage.ts`
 
-**Yapılacaklar:**
-- [ ] `hasPet` kontrolünü gözden geçir (`hasAnyPet()` helper düşün)
-- [ ] Upgrade senaryosu: mevcut 1 pet kullanıcı → `activePetId` fallback çalışıyor mu?
+**Yapılanlar:**
+- [x] `hasAnyPet()` helper eklendi (`getFirstPet` tabanlı)
+- [x] Bootstrap routing artık `hasAnyPet` ile setup vs home kararını veriyor (aktif pet yüklü mü ayrı konu)
+- [x] `loadPet()` → `getActivePet()` upgrade'de `activePetId` yoksa first pet'e fallback + persist (mevcut, doğrulandı)
+- [x] Reminder sync bootstrap'ta aktif pet adıyla çağrılıyor (`petName` explicit)
 
 **Kabul kriterleri:**
-- [ ] Eski kullanıcı upgrade → Home aynı pet'i gösterir
-- [ ] Pet yok → setup'a yönlendirir
+- [x] Eski kullanıcı upgrade → `getActivePet` first pet'i resolve eder → Home aynı pet
+- [x] Pet yok → setup'a yönlendirir
+- [x] Onboarding tamamlanmamış → onboarding'e gider
+
+**Commit önerisi:** `refactor: gate bootstrap routing on hasAnyPet`
 
 ---
 

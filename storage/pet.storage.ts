@@ -101,6 +101,11 @@ export async function getFirstPet(): Promise<Pet | null> {
   return row ? mapPetRow(row) : null;
 }
 
+export async function hasAnyPet(): Promise<boolean> {
+  const pet = await getFirstPet();
+  return pet !== null;
+}
+
 export async function setActivePet(petId: string): Promise<Pet> {
   const pet = await getPetById(petId);
 

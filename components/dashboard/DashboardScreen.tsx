@@ -224,12 +224,10 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
             accessibilityLabel={`${pet.name} profile`}
             onPress={handleOpenPetProfile}
             style={({ pressed }) => [styles.petProfileAction, { opacity: pressed ? 0.7 : 1 }]}>
-            <PetAvatar photoUri={pet.photoUri} size={80} />
-            <View style={styles.petInfo}>
-              <ThemedText type="title" style={styles.petName}>
-                {pet.name}
-              </ThemedText>
-            </View>
+            <PetAvatar photoUri={pet.photoUri} size={96} />
+            <ThemedText type="title" style={styles.petName}>
+              {pet.name}
+            </ThemedText>
           </Pressable>
 
           <Button title="Start Check-In" onPress={handleStartCheckIn} />
@@ -407,17 +405,11 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
   },
   petProfileAction: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.md,
-  },
-  petInfo: {
-    flex: 1,
-    gap: Spacing.xs,
-    paddingTop: Spacing.xs,
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   petName: {
-    flexShrink: 1,
+    textAlign: 'center',
   },
   centered: {
     flex: 1,

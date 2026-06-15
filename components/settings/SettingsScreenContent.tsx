@@ -1,5 +1,5 @@
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
@@ -7,15 +7,10 @@ import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_PREFERENCE_OPTIONS } from '@/constants/check-in';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import {
-  deleteAllLocalData,
-  resetAppStoresAfterDataDeletion,
-} from '@/services/cleanup/delete-all-local-data';
 import { useNotificationStore } from '@/stores/notification.store';
 import type { CheckInPreference } from '@/types/check-in';
 
@@ -41,8 +36,6 @@ type SettingsScreenContentProps = {
 export function SettingsScreenContent({
   edges = ['top', 'bottom'],
 }: SettingsScreenContentProps) {
-  const router = useRouter();
-
   const preference = useNotificationStore((state) => state.preference);
   const permission = useNotificationStore((state) => state.permission);
   const isLoading = useNotificationStore((state) => state.isLoading);
@@ -50,9 +43,6 @@ export function SettingsScreenContent({
   const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
   const savePreference = useNotificationStore((state) => state.savePreference);
   const clearError = useNotificationStore((state) => state.clearError);
-
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -83,36 +73,9 @@ export function SettingsScreenContent({
     }
   };
 
-  const handleDeletePress = () => {
-    setDeleteModalVisible(true);
-  };
-
-  const handleCancelDelete = () => {
-    if (isDeleting) {
-      return;
-    }
-
-    setDeleteModalVisible(false);
-  };
-
-  const handleConfirmDelete = async () => {
-    setIsDeleting(true);
-
-    try {
-      await deleteAllLocalData();
-      resetAppStoresAfterDataDeletion();
-      setDeleteModalVisible(false);
-      router.replace('/');
-    } catch {
-      setIsDeleting(false);
-    }
-  };
-
   return (
     <ScreenContainer scrollable edges={edges} contentStyle={styles.content}>
       <View style={styles.body}>
-        <ThemedText type="title">Profile & Settings</ThemedText>
-
         <Card>
           <ThemedText type="subtitle">Notifications</ThemedText>
           {isLoading && permission === null ? (
@@ -157,28 +120,7 @@ export function SettingsScreenContent({
             />
           ))}
         </Card>
-
-        <Card>
-          <ThemedText type="subtitle">Danger Zone</ThemedText>
-          <Button
-            accessibilityLabel="Delete All Data"
-            title="Delete All Data"
-            variant="destructive"
-            onPress={handleDeletePress}
-          />
-        </Card>
       </View>
-
-      <ConfirmModal
-        visible={deleteModalVisible}
-        title="Delete All Data?"
-        message="This will permanently remove all pets and their check-ins, reminders, and app preferences from this device."
-        confirmLabel="Delete"
-        destructive
-        isLoading={isDeleting}
-        onConfirm={() => void handleConfirmDelete()}
-        onCancel={handleCancelDelete}
-      />
     </ScreenContainer>
   );
 }

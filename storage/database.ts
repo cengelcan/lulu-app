@@ -12,7 +12,7 @@ let database: SQLite.SQLiteDatabase | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 5;
+const CURRENT_SCHEMA_VERSION = 6;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -119,10 +119,45 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     await setSchemaVersion(db, version);
   }
 
-  if (version < CURRENT_SCHEMA_VERSION) {
+  if (version < 5) {
     await ensurePetIdentityColumns(db);
-    await setSchemaVersion(db, CURRENT_SCHEMA_VERSION);
+    version = 5;
+    await setSchemaVersion(db, version);
   }
+
+  if (version < 6) {
+    await ensurePetBreedColumn(db);
+    await dedupeCheckInsByPetAndDate(db);
+    await db.execAsync(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_check_ins_pet_date ON check_ins (pet_id, date);'
+    );
+    version = 6;
+    await setSchemaVersion(db, version);
+  }
+}
+
+async function ensurePetBreedColumn(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(pets)');
+  const hasBreed = columns.some((column) => column.name === 'breed');
+
+  if (!hasBreed) {
+    await db.execAsync('ALTER TABLE pets ADD COLUMN breed TEXT;');
+  }
+}
+
+async function dedupeCheckInsByPetAndDate(db: SQLite.SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    DELETE FROM check_ins
+    WHERE id IN (
+      SELECT ci.id
+      FROM check_ins ci
+      WHERE ci.created_at < (
+        SELECT MAX(created_at)
+        FROM check_ins
+        WHERE pet_id = ci.pet_id AND date = ci.date
+      )
+    );
+  `);
 }
 
 export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {

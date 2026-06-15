@@ -1,10 +1,12 @@
 import {
   HEALTH_CONDITION_OPTIONS,
+  PET_AGE_GROUP_OPTIONS,
   PET_SEX_OPTIONS,
   PET_SPAY_NEUTER_STATUS_OPTIONS,
   PET_SPECIES_OPTIONS,
 } from '@/constants/check-in';
-import type { HealthCondition, PetSex, PetSpayNeuterStatus, PetSpecies } from '@/types/pet';
+import { getBreedLabel } from '@/constants/pet-breeds';
+import type { HealthCondition, PetAgeGroup, PetSex, PetSpayNeuterStatus, PetSpecies } from '@/types/pet';
 import { formatCheckInTitleDate } from '@/utils/date';
 
 export const PET_FIELD_NOT_SET = 'Not set';
@@ -27,6 +29,18 @@ export function displayPetText(value: string | null | undefined): string {
 
 export function displayPetSpecies(species: PetSpecies): string {
   return getOptionLabel(PET_SPECIES_OPTIONS, species);
+}
+
+export function displayPetBreed(
+  breed: string | null | undefined,
+  species?: PetSpecies | null
+): string {
+  const label = getBreedLabel(breed, species);
+  return label ?? PET_FIELD_NOT_SET;
+}
+
+export function displayPetAgeGroup(ageGroup: PetAgeGroup): string {
+  return getOptionLabel(PET_AGE_GROUP_OPTIONS, ageGroup);
 }
 
 export function displayPetSex(sex: PetSex | null | undefined): string {

@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
@@ -39,25 +39,6 @@ function getTodayDateString(): string {
   return formatLocalDate(getTodayStart());
 }
 
-function sortCheckInsByCreatedAtDesc(checkIns: CheckIn[]): CheckIn[] {
-  return [...checkIns].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-}
-
-function formatCheckInTime(createdAt: string): string {
-  const parsed = new Date(createdAt);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return createdAt;
-  }
-
-  return parsed.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
-
 type OptionSectionProps<T extends string> = {
   title: string;
   options: { value: T; label: string }[];
@@ -86,46 +67,6 @@ function OptionSection<T extends string>({
   );
 }
 
-type ExistingCheckInItemProps = {
-  checkIn: CheckIn;
-  isSelected: boolean;
-  onSelect: () => void;
-};
-
-function ExistingCheckInItem({ checkIn, isSelected, onSelect }: ExistingCheckInItemProps) {
-  const surfaceColor = useThemeColor({}, 'surface');
-  const borderColor = useThemeColor({}, 'border');
-  const primaryColor = useThemeColor({}, 'primary');
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
-
-  const appetiteLabel =
-    APPETITE_OPTIONS.find((option) => option.value === checkIn.appetite)?.label ??
-    checkIn.appetite;
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: isSelected }}
-      onPress={onSelect}
-      style={[
-        styles.existingItem,
-        {
-          backgroundColor: surfaceColor,
-          borderColor: isSelected ? primaryColor : borderColor,
-          borderWidth: isSelected ? 2 : StyleSheet.hairlineWidth,
-        },
-      ]}>
-      <ThemedText type="defaultSemiBold">{formatCheckInTime(checkIn.createdAt)}</ThemedText>
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.existingItemDetail}>
-        {appetiteLabel}
-      </ThemedText>
-    </Pressable>
-  );
-}
-
 export default function CheckInScreen() {
   const router = useRouter();
   const { date: dateParam } = useLocalSearchParams<{ date?: string | string[] }>();
@@ -146,8 +87,6 @@ export default function CheckInScreen() {
   const [energy, setEnergy] = useState<Energy | null>(null);
   const [symptom, setSymptom] = useState<Symptom | null>(null);
   const [notes, setNotes] = useState('');
-  const [editingCheckInId, setEditingCheckInId] = useState<string | null>(null);
-  const [isAddingNew, setIsAddingNew] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const primaryColor = useThemeColor({}, 'primary');
@@ -157,41 +96,39 @@ export default function CheckInScreen() {
   const borderColor = useThemeColor({}, 'border');
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
-  const isExplicitDate = rawDateParam !== undefined && rawDateParam !== '';
   const selectedDate = useMemo(() => {
-    if (isExplicitDate && isValidLocalDateString(rawDateParam)) {
+    if (rawDateParam !== undefined && rawDateParam !== '' && isValidLocalDateString(rawDateParam)) {
       return rawDateParam;
     }
 
     return getTodayDateString();
-  }, [isExplicitDate, rawDateParam]);
+  }, [rawDateParam]);
 
   const selectedDateObject = useMemo(() => parseLocalDate(selectedDate), [selectedDate]);
   const isFutureDate = selectedDateObject ? isFutureLocalDate(selectedDateObject) : false;
-  const isEditMode = isExplicitDate;
 
-  const dayCheckIns = useMemo(
-    () => sortCheckInsByCreatedAtDesc(checkIns.filter((checkIn) => checkIn.date === selectedDate)),
+  const existingCheckIn = useMemo(
+    () => checkIns.find((checkIn) => checkIn.date === selectedDate) ?? null,
     [checkIns, selectedDate]
   );
 
-  const prefillFromCheckIn = useCallback((checkIn: CheckIn) => {
-    setAppetite(checkIn.appetite);
-    setEnergy(checkIn.energy);
-    setSymptom(checkIn.symptom);
-    setNotes(checkIn.notes ?? '');
-    setEditingCheckInId(checkIn.id);
-    setIsAddingNew(false);
-    setValidationError(null);
-    clearCheckInError();
-  }, [clearCheckInError]);
+  const prefillFromCheckIn = useCallback(
+    (checkIn: CheckIn) => {
+      setAppetite(checkIn.appetite);
+      setEnergy(checkIn.energy);
+      setSymptom(checkIn.symptom);
+      setNotes(checkIn.notes ?? '');
+      setValidationError(null);
+      clearCheckInError();
+    },
+    [clearCheckInError]
+  );
 
   const resetForm = useCallback(() => {
     setAppetite(null);
     setEnergy(null);
     setSymptom(null);
     setNotes('');
-    setEditingCheckInId(null);
     setValidationError(null);
     clearCheckInError();
   }, [clearCheckInError]);
@@ -215,24 +152,13 @@ export default function CheckInScreen() {
   }, [pet, petIsLoading, router]);
 
   useEffect(() => {
-    setIsAddingNew(false);
-  }, [selectedDate]);
-
-  useEffect(() => {
-    if (!isEditMode) {
-      resetForm();
+    if (existingCheckIn) {
+      prefillFromCheckIn(existingCheckIn);
       return;
     }
 
-    if (dayCheckIns.length === 0) {
-      resetForm();
-      return;
-    }
-
-    if (!isAddingNew) {
-      prefillFromCheckIn(dayCheckIns[0]);
-    }
-  }, [dayCheckIns, isAddingNew, isEditMode, prefillFromCheckIn, resetForm]);
+    resetForm();
+  }, [existingCheckIn, prefillFromCheckIn, resetForm, selectedDate]);
 
   const screenTitle = useMemo(() => {
     if (!pet) {
@@ -250,8 +176,8 @@ export default function CheckInScreen() {
   const notesLength = notes.length;
   const isNotesOverLimit = notesLength > CHECK_IN_NOTES_MAX_LENGTH;
   const isFormComplete = appetite !== null && energy !== null && symptom !== null;
-  const isEditingExisting = editingCheckInId !== null;
-  const saveButtonTitle = isEditingExisting ? 'Update Check-In' : 'Save Check-In';
+  const isUpdating = existingCheckIn !== null;
+  const saveButtonTitle = isUpdating ? 'Update Check-In' : 'Save Check-In';
   const normalizedNotes = trimmedNotes.length > 0 ? trimmedNotes : null;
 
   const handleSave = useCallback(async () => {
@@ -273,13 +199,7 @@ export default function CheckInScreen() {
     clearCheckInError();
 
     try {
-      if (isEditingExisting && editingCheckInId) {
-        const existingCheckIn = dayCheckIns.find((checkIn) => checkIn.id === editingCheckInId);
-        if (!existingCheckIn) {
-          setValidationError('This check-in could not be found. Please try again.');
-          return;
-        }
-
+      if (existingCheckIn) {
         await updateCheckIn({
           ...existingCheckIn,
           date: selectedDate,
@@ -311,10 +231,8 @@ export default function CheckInScreen() {
     appetite,
     clearCheckInError,
     createCheckIn,
-    dayCheckIns,
-    editingCheckInId,
     energy,
-    isEditingExisting,
+    existingCheckIn,
     isFormComplete,
     isFutureDate,
     isNotesOverLimit,
@@ -325,11 +243,6 @@ export default function CheckInScreen() {
     symptom,
     updateCheckIn,
   ]);
-
-  const handleAddAnother = () => {
-    resetForm();
-    setIsAddingNew(true);
-  };
 
   const errorMessage =
     validationError ??
@@ -351,123 +264,106 @@ export default function CheckInScreen() {
     <>
       <Stack.Screen options={{ headerShown: true, title: 'Check-In' }} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
-      <View style={styles.body}>
-        <ThemedText type="title">{screenTitle}</ThemedText>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.description}>
-          Select one option for each question.
-        </ThemedText>
-
-        {isEditMode && dayCheckIns.length > 0 ? (
-          <View style={styles.existingSection}>
-            <ThemedText type="subtitle">Check-ins for this day</ThemedText>
-            <View style={styles.existingList}>
-              {dayCheckIns.map((checkIn) => (
-                <ExistingCheckInItem
-                  key={checkIn.id}
-                  checkIn={checkIn}
-                  isSelected={editingCheckInId === checkIn.id}
-                  onSelect={() => prefillFromCheckIn(checkIn)}
-                />
-              ))}
-            </View>
-            {!isAddingNew ? (
-              <Button title="Add another check-in" variant="ghost" onPress={handleAddAnother} />
-            ) : null}
-          </View>
-        ) : null}
-
-        <OptionSection
-          title="Appetite"
-          options={APPETITE_OPTIONS}
-          selected={appetite}
-          onSelect={(value) => {
-            setValidationError(null);
-            clearCheckInError();
-            setAppetite(value);
-          }}
-        />
-
-        <OptionSection
-          title="Energy"
-          options={ENERGY_OPTIONS}
-          selected={energy}
-          onSelect={(value) => {
-            setValidationError(null);
-            clearCheckInError();
-            setEnergy(value);
-          }}
-        />
-
-        <OptionSection
-          title="Symptoms"
-          options={SYMPTOM_OPTIONS}
-          selected={symptom}
-          onSelect={(value) => {
-            setValidationError(null);
-            clearCheckInError();
-            setSymptom(value);
-          }}
-        />
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Anything else you&apos;d like to remember?</ThemedText>
+        <View style={styles.body}>
+          <ThemedText type="title">{screenTitle}</ThemedText>
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
-            style={styles.notesSubtitle}>
-            Optional notes for future vet visits.
+            style={styles.description}>
+            {isUpdating
+              ? 'Update your answers for this day.'
+              : 'Select one option for each question.'}
           </ThemedText>
-          <TextInput
-            accessibilityLabel="Additional notes"
-            multiline
-            placeholder="Example: Limping slightly after the afternoon walk."
-            placeholderTextColor={textSecondaryColor}
-            style={[
-              styles.notesInput,
-              {
-                color: textColor,
-                backgroundColor: surfaceColor,
-                borderColor: isNotesOverLimit ? primaryColor : borderColor,
-              },
-            ]}
-            textAlignVertical="top"
-            value={notes}
-            onChangeText={(value) => {
+
+          <OptionSection
+            title="Appetite"
+            options={APPETITE_OPTIONS}
+            selected={appetite}
+            onSelect={(value) => {
               setValidationError(null);
               clearCheckInError();
-              setNotes(value);
+              setAppetite(value);
             }}
           />
-          <ThemedText
-            accessibilityLiveRegion="polite"
-            accessibilityLabel={`${notesLength} of ${CHECK_IN_NOTES_MAX_LENGTH} characters`}
-            lightColor={isNotesOverLimit ? primaryColor : textSecondaryColor}
-            darkColor={isNotesOverLimit ? primaryColor : textSecondaryColor}
-            style={styles.notesCounter}>
-            {notesLength} / {CHECK_IN_NOTES_MAX_LENGTH}
-          </ThemedText>
+
+          <OptionSection
+            title="Energy"
+            options={ENERGY_OPTIONS}
+            selected={energy}
+            onSelect={(value) => {
+              setValidationError(null);
+              clearCheckInError();
+              setEnergy(value);
+            }}
+          />
+
+          <OptionSection
+            title="Symptoms"
+            options={SYMPTOM_OPTIONS}
+            selected={symptom}
+            onSelect={(value) => {
+              setValidationError(null);
+              clearCheckInError();
+              setSymptom(value);
+            }}
+          />
+
+          <View style={styles.section}>
+            <ThemedText type="subtitle">Anything else you&apos;d like to remember?</ThemedText>
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.notesSubtitle}>
+              Optional notes for future vet visits.
+            </ThemedText>
+            <TextInput
+              accessibilityLabel="Additional notes"
+              multiline
+              placeholder="Example: Limping slightly after the afternoon walk."
+              placeholderTextColor={textSecondaryColor}
+              style={[
+                styles.notesInput,
+                {
+                  color: textColor,
+                  backgroundColor: surfaceColor,
+                  borderColor: isNotesOverLimit ? primaryColor : borderColor,
+                },
+              ]}
+              textAlignVertical="top"
+              value={notes}
+              onChangeText={(value) => {
+                setValidationError(null);
+                clearCheckInError();
+                setNotes(value);
+              }}
+            />
+            <ThemedText
+              accessibilityLiveRegion="polite"
+              accessibilityLabel={`${notesLength} of ${CHECK_IN_NOTES_MAX_LENGTH} characters`}
+              lightColor={isNotesOverLimit ? primaryColor : textSecondaryColor}
+              darkColor={isNotesOverLimit ? primaryColor : textSecondaryColor}
+              style={styles.notesCounter}>
+              {notesLength} / {CHECK_IN_NOTES_MAX_LENGTH}
+            </ThemedText>
+          </View>
         </View>
-      </View>
 
-      {errorMessage ? (
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.error}>
-          {errorMessage}
-        </ThemedText>
-      ) : null}
+        {errorMessage ? (
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.error}>
+            {errorMessage}
+          </ThemedText>
+        ) : null}
 
-      <Button
-        title={saveButtonTitle}
-        onPress={() => void handleSave()}
-        disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit}
-        style={styles.button}
-      />
-    </ScreenContainer>
+        <Button
+          title={saveButtonTitle}
+          onPress={() => void handleSave()}
+          disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit}
+          style={styles.button}
+        />
+      </ScreenContainer>
     </>
   );
 }
@@ -489,20 +385,6 @@ const styles = StyleSheet.create({
   },
   description: {
     ...Typography.body,
-  },
-  existingSection: {
-    gap: Spacing.sm,
-  },
-  existingList: {
-    gap: Spacing.sm,
-  },
-  existingItem: {
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    gap: Spacing.xs,
-  },
-  existingItemDetail: {
-    ...Typography.caption,
   },
   section: {
     gap: Spacing.sm,

@@ -29,6 +29,7 @@ export type Pet = {
   id: string;
   name: string;
   species: PetSpecies;
+  breed?: string | null;
   ageGroup: PetAgeGroup;
   healthConditions: HealthCondition[];
   photoUri?: string | null;

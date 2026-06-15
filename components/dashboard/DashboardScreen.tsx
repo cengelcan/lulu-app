@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
   APPETITE_OPTIONS,
@@ -23,28 +24,15 @@ import { getUpcomingReminder } from '@/services/notifications/upcoming';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
+import type { CheckIn } from '@/types/check-in';
+import { formatLocalDate, getTodayStart } from '@/utils/date';
+import { displayPetSpecies } from '@/utils/pet-display';
 
 function getOptionLabel<T extends string>(
   options: { value: T; label: string }[],
   value: T
 ): string {
   return options.find((option) => option.value === value)?.label ?? value;
-}
-
-function formatCheckInDateTime(createdAt: string): string {
-  const parsed = new Date(createdAt);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return createdAt;
-  }
-
-  return parsed.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
 }
 
 type DetailRowProps = {
@@ -90,6 +78,67 @@ function NotesPreview({ notes }: NotesPreviewProps) {
   );
 }
 
+type TodaysCheckInCardProps = {
+  checkIn: CheckIn | null;
+  isLoading: boolean;
+  error: string | null;
+  onPress: () => void;
+  onRetry: () => void;
+};
+
+function TodaysCheckInCard({
+  checkIn,
+  isLoading,
+  error,
+  onPress,
+  onRetry,
+}: TodaysCheckInCardProps) {
+  const primaryColor = useThemeColor({}, 'primary');
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={
+        checkIn ? "Today's check-in. Tap to update." : "Today's check-in. Tap to start."
+      }
+      onPress={onPress}
+      style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}>
+      <Card>
+        <View style={styles.cardHeader}>
+          <ThemedText type="subtitle">Today&apos;s Check-In</ThemedText>
+          <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
+        </View>
+        {isLoading && !checkIn ? (
+          <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
+        ) : error ? (
+          <View style={styles.checkInError}>
+            <ThemedText style={styles.message}>{error}</ThemedText>
+            <Button title="Try Again" variant="secondary" onPress={onRetry} />
+          </View>
+        ) : checkIn ? (
+          <>
+            <DetailRow
+              label="Appetite"
+              value={getOptionLabel(APPETITE_OPTIONS, checkIn.appetite)}
+            />
+            <DetailRow label="Energy" value={getOptionLabel(ENERGY_OPTIONS, checkIn.energy)} />
+            <DetailRow label="Symptoms" value={getOptionLabel(SYMPTOM_OPTIONS, checkIn.symptom)} />
+            {checkIn.notes ? <NotesPreview notes={checkIn.notes} /> : null}
+          </>
+        ) : (
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.message}>
+            Not checked in yet. Tap to start today&apos;s check-in.
+          </ThemedText>
+        )}
+      </Card>
+    </Pressable>
+  );
+}
+
 type DashboardScreenProps = {
   edges?: Edge[];
 };
@@ -102,7 +151,6 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   const loadPet = usePetStore((state) => state.loadPet);
   const clearError = usePetStore((state) => state.clearError);
 
-  const latestCheckIn = useCheckInStore((state) => state.latestCheckIn);
   const checkIns = useCheckInStore((state) => state.checkIns);
   const checkInIsLoading = useCheckInStore((state) => state.isLoading);
   const checkInError = useCheckInStore((state) => state.error);
@@ -118,6 +166,12 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  const todayDateString = useMemo(() => formatLocalDate(getTodayStart()), []);
+  const todayCheckIn = useMemo(
+    () => checkIns.find((checkIn) => checkIn.date === todayDateString) ?? null,
+    [checkIns, todayDateString]
+  );
 
   useEffect(() => {
     void loadPet();
@@ -153,6 +207,13 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
   const handleStartCheckIn = () => {
     router.push('/check-in');
+  };
+
+  const handleOpenTodaysCheckIn = () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push(`/check-in?date=${todayDateString}`);
   };
 
   const handleOpenPetProfile = () => {
@@ -214,39 +275,32 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
             accessibilityLabel={`${pet.name} profile`}
             onPress={handleOpenPetProfile}
             style={({ pressed }) => [styles.petProfileAction, { opacity: pressed ? 0.7 : 1 }]}>
-            <PetAvatar photoUri={pet.photoUri} size={96} />
-            <ThemedText type="title" style={styles.petName}>
-              {pet.name}
-            </ThemedText>
+            <PetAvatar photoUri={pet.photoUri} size={88} />
+            <View style={styles.petHeaderCenter}>
+              <ThemedText type="title" style={styles.petName}>
+                {pet.name}
+              </ThemedText>
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.petSpecies}>
+                {displayPetSpecies(pet.species)}
+              </ThemedText>
+            </View>
+            <IconSymbol name="chevron.right" size={20} color={textSecondaryColor} />
           </Pressable>
 
           <Button title="Start Check-In" onPress={handleStartCheckIn} />
 
-          <Card>
-            <ThemedText type="subtitle">Quick Actions</ThemedText>
-            <View style={styles.quickActionsGrid}>
-              <QuickActionItem
-                label="Reports"
-                icon="chart.line.uptrend.xyaxis"
-                locked
-                onPress={handleLockedQuickAction}
-              />
-              <QuickActionItem
-                label="Records"
-                icon="doc.text.fill"
-                locked
-                onPress={handleLockedQuickAction}
-              />
-              <QuickActionItem
-                label="Medication"
-                icon="pills.fill"
-                locked
-                onPress={handleLockedQuickAction}
-              />
-            </View>
-          </Card>
-
           <DailyCheckInProgress />
+
+          <TodaysCheckInCard
+            checkIn={todayCheckIn}
+            error={checkInError}
+            isLoading={checkInIsLoading}
+            onPress={handleOpenTodaysCheckIn}
+            onRetry={handleRetryCheckIn}
+          />
 
           <Card>
             <ThemedText type="subtitle">Upcoming Reminder</ThemedText>
@@ -296,89 +350,28 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
           </Card>
 
           <Card>
-            <ThemedText type="subtitle">Latest Check-In</ThemedText>
-            {checkInIsLoading && checkIns.length === 0 ? (
-              <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
-            ) : checkInError ? (
-              <View style={styles.checkInError}>
-                <ThemedText style={styles.message}>{checkInError}</ThemedText>
-                <Button title="Try Again" variant="secondary" onPress={handleRetryCheckIn} />
-              </View>
-            ) : latestCheckIn ? (
-              <>
-                <ThemedText
-                  lightColor={textSecondaryColor}
-                  darkColor={textSecondaryColor}
-                  style={styles.checkInDate}>
-                  {formatCheckInDateTime(latestCheckIn.createdAt)}
-                </ThemedText>
-                <DetailRow
-                  label="Appetite"
-                  value={getOptionLabel(APPETITE_OPTIONS, latestCheckIn.appetite)}
-                />
-                <DetailRow
-                  label="Energy"
-                  value={getOptionLabel(ENERGY_OPTIONS, latestCheckIn.energy)}
-                />
-                <DetailRow
-                  label="Symptoms"
-                  value={getOptionLabel(SYMPTOM_OPTIONS, latestCheckIn.symptom)}
-                />
-                {latestCheckIn.notes ? <NotesPreview notes={latestCheckIn.notes} /> : null}
-              </>
-            ) : (
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.message}>
-                No check-ins yet. Start your first check-in above.
-              </ThemedText>
-            )}
+            <ThemedText type="subtitle">Quick Actions</ThemedText>
+            <View style={styles.quickActionsGrid}>
+              <QuickActionItem
+                label="Reports"
+                icon="chart.line.uptrend.xyaxis"
+                locked
+                onPress={handleLockedQuickAction}
+              />
+              <QuickActionItem
+                label="Records"
+                icon="doc.text.fill"
+                locked
+                onPress={handleLockedQuickAction}
+              />
+              <QuickActionItem
+                label="Medication"
+                icon="pills.fill"
+                locked
+                onPress={handleLockedQuickAction}
+              />
+            </View>
           </Card>
-
-          <View style={styles.historySection}>
-            <ThemedText type="subtitle">View History</ThemedText>
-            {checkInIsLoading && checkIns.length === 0 ? (
-              <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
-            ) : checkInError ? (
-              <View style={styles.checkInError}>
-                <ThemedText style={styles.message}>{checkInError}</ThemedText>
-                <Button title="Try Again" variant="secondary" onPress={handleRetryCheckIn} />
-              </View>
-            ) : checkIns.length === 0 ? (
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.historyEmpty}>
-                No check-in history yet. Complete a check-in to start building your pet&apos;s
-                health record.
-              </ThemedText>
-            ) : (
-              checkIns.map((checkIn) => (
-                <Card key={checkIn.id}>
-                  <ThemedText
-                    lightColor={textSecondaryColor}
-                    darkColor={textSecondaryColor}
-                    style={styles.checkInDate}>
-                    {formatCheckInDateTime(checkIn.createdAt)}
-                  </ThemedText>
-                  <DetailRow
-                    label="Appetite"
-                    value={getOptionLabel(APPETITE_OPTIONS, checkIn.appetite)}
-                  />
-                  <DetailRow
-                    label="Energy"
-                    value={getOptionLabel(ENERGY_OPTIONS, checkIn.energy)}
-                  />
-                  <DetailRow
-                    label="Symptoms"
-                    value={getOptionLabel(SYMPTOM_OPTIONS, checkIn.symptom)}
-                  />
-                  {checkIn.notes ? <NotesPreview notes={checkIn.notes} /> : null}
-                </Card>
-              ))
-            )}
-          </View>
         </View>
       )}
       <ComingSoonModal visible={comingSoonVisible} onDismiss={handleDismissComingSoon} />
@@ -395,11 +388,19 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
   },
   petProfileAction: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.md,
+  },
+  petHeaderCenter: {
+    flex: 1,
+    gap: Spacing.xs,
   },
   petName: {
-    textAlign: 'center',
+    textAlign: 'left',
+  },
+  petSpecies: {
+    ...Typography.body,
   },
   centered: {
     flex: 1,
@@ -412,7 +413,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   message: {
-    textAlign: 'center',
     ...Typography.body,
   },
   setupButton: {
@@ -424,20 +424,16 @@ const styles = StyleSheet.create({
   detailLabel: {
     ...Typography.caption,
   },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   checkInLoading: {
     alignSelf: 'flex-start',
   },
   checkInError: {
     gap: Spacing.sm,
-  },
-  checkInDate: {
-    ...Typography.caption,
-  },
-  historySection: {
-    gap: Spacing.md,
-  },
-  historyEmpty: {
-    ...Typography.body,
   },
   deniedReminder: {
     gap: Spacing.sm,

@@ -29,6 +29,7 @@ type PetRow = {
   adoption_date: string | null;
   microchip_id: string | null;
   owner_name: string | null;
+  breed: string | null;
   created_at: string;
 };
 
@@ -37,6 +38,7 @@ function mapPetRow(row: PetRow): Pet {
     id: row.id,
     name: row.name,
     species: row.species as PetSpecies,
+    breed: row.breed,
     ageGroup: row.age_group as PetAgeGroup,
     healthConditions: JSON.parse(row.health_conditions) as HealthCondition[],
     photoUri: row.photo_uri,
@@ -56,14 +58,15 @@ export async function createPet(pet: Pet): Promise<void> {
 
   await db.runAsync(
     `INSERT INTO pets (
-       id, name, species, age_group, health_conditions, photo_uri,
+       id, name, species, breed, age_group, health_conditions, photo_uri,
        color, sex, spay_neuter_status, birth_date, adoption_date, microchip_id, owner_name,
        created_at
      )
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     pet.id,
     pet.name,
     pet.species,
+    pet.breed ?? null,
     pet.ageGroup,
     JSON.stringify(pet.healthConditions),
     pet.photoUri ?? null,
@@ -144,12 +147,13 @@ export async function updatePet(pet: Pet): Promise<void> {
 
   await db.runAsync(
     `UPDATE pets
-     SET name = ?, species = ?, age_group = ?, health_conditions = ?, photo_uri = ?,
+     SET name = ?, species = ?, breed = ?, age_group = ?, health_conditions = ?, photo_uri = ?,
          color = ?, sex = ?, spay_neuter_status = ?, birth_date = ?, adoption_date = ?,
          microchip_id = ?, owner_name = ?
      WHERE id = ?`,
     pet.name,
     pet.species,
+    pet.breed ?? null,
     pet.ageGroup,
     JSON.stringify(pet.healthConditions),
     pet.photoUri ?? null,

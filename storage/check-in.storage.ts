@@ -26,8 +26,27 @@ function mapCheckInRow(row: CheckInRow): CheckIn {
   };
 }
 
+export async function getCheckInByPetIdAndDate(
+  petId: string,
+  date: string
+): Promise<CheckIn | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<CheckInRow>(
+    'SELECT * FROM check_ins WHERE pet_id = ? AND date = ?',
+    petId,
+    date
+  );
+
+  return row ? mapCheckInRow(row) : null;
+}
+
 export async function createCheckIn(checkIn: CheckIn): Promise<void> {
   const db = await getDatabase();
+  const existing = await getCheckInByPetIdAndDate(checkIn.petId, checkIn.date);
+
+  if (existing) {
+    throw new Error('A check-in already exists for this day. Use update instead.');
+  }
 
   await db.runAsync(
     `INSERT INTO check_ins (id, pet_id, date, appetite, energy, symptom, notes, created_at)

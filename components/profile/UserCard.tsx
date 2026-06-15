@@ -12,6 +12,8 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { pickImageFromGallery } from '@/services/pick-image-from-gallery';
 import { useUserStore } from '@/stores/user.store';
 
+const AVATAR_SIZE = 96;
+
 export function UserCard() {
   const router = useRouter();
 
@@ -39,6 +41,10 @@ export function UserCard() {
   const handleChangePhoto = async () => {
     if (isPickingPhoto) {
       return;
+    }
+
+    if (process.env.EXPO_OS === 'ios') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
     setIsPickingPhoto(true);
@@ -74,62 +80,73 @@ export function UserCard() {
     }
   };
 
+  const handleEditNamePress = () => {
+    if (process.env.EXPO_OS === 'ios') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+
+    setIsEditNameVisible(true);
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.topRow}>
+      <Pressable
+        accessibilityLabel="Open Settings"
+        accessibilityRole="button"
+        hitSlop={8}
+        onPress={handleOpenSettings}
+        style={({ pressed }) => [styles.settingsButton, { opacity: pressed ? 0.7 : 1 }]}>
+        <IconSymbol name="gearshape.fill" size={22} color={primaryColor} />
+      </Pressable>
+
+      <View style={styles.identity}>
         <Pressable
+          accessibilityHint="Opens photo picker"
           accessibilityLabel="Change profile photo"
           accessibilityRole="button"
           disabled={isPickingPhoto}
           onPress={() => void handleChangePhoto()}
-          style={({ pressed }) => [{ opacity: isPickingPhoto || pressed ? 0.7 : 1 }]}>
+          style={({ pressed }) => [styles.avatarButton, { opacity: isPickingPhoto || pressed ? 0.85 : 1 }]}>
           {isPickingPhoto ? (
             <View style={styles.avatarLoading}>
-              <UserAvatar photoUri={avatarUri} size={88} />
+              <UserAvatar photoUri={avatarUri} size={AVATAR_SIZE} showEditBadge />
               <ActivityIndicator color={primaryColor} style={styles.loadingIndicator} />
             </View>
           ) : (
-            <UserAvatar photoUri={avatarUri} size={88} />
+            <UserAvatar photoUri={avatarUri} size={AVATAR_SIZE} showEditBadge />
           )}
         </Pressable>
 
         <Pressable
-          accessibilityLabel="Open Settings"
+          accessibilityHint="Opens name editor"
+          accessibilityLabel={displayName ? `Edit name, ${displayName}` : 'Add your name'}
           accessibilityRole="button"
-          hitSlop={8}
-          onPress={handleOpenSettings}
-          style={({ pressed }) => [styles.settingsButton, { opacity: pressed ? 0.7 : 1 }]}>
-          <IconSymbol name="gearshape.fill" size={22} color={primaryColor} />
+          onPress={handleEditNamePress}
+          style={({ pressed }) => [styles.nameRow, { opacity: pressed ? 0.7 : 1 }]}>
+          {displayName ? (
+            <ThemedText type="subtitle" style={styles.displayName}>
+              {displayName}
+            </ThemedText>
+          ) : (
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.addName}>
+              Add your name
+            </ThemedText>
+          )}
+          <IconSymbol name="pencil" size={16} color={textSecondaryColor} />
         </Pressable>
-      </View>
 
-      <Pressable
-        accessibilityLabel={displayName ? `Edit name, ${displayName}` : 'Add your name'}
-        accessibilityRole="button"
-        onPress={() => setIsEditNameVisible(true)}
-        style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
-        {displayName ? (
-          <ThemedText type="subtitle" style={styles.displayName}>
-            {displayName}
-          </ThemedText>
-        ) : (
+        {email ? (
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
-            style={styles.addName}>
-            Add your name
+            style={styles.email}>
+            {email}
           </ThemedText>
-        )}
-      </Pressable>
-
-      {email ? (
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.email}>
-          {email}
-        </ThemedText>
-      ) : null}
+        ) : null}
+      </View>
 
       <EditNameModal
         visible={isEditNameVisible}
@@ -148,30 +165,47 @@ export function UserCard() {
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.xs,
+    position: 'relative',
     paddingTop: Spacing.sm,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    paddingBottom: Spacing.xs,
   },
   settingsButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    zIndex: 1,
     minWidth: 44,
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  identity: {
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingTop: Spacing.md,
+  },
+  avatarButton: {
+    marginBottom: Spacing.xs,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    minHeight: 44,
+    paddingHorizontal: Spacing.md,
+  },
   displayName: {
-    marginTop: Spacing.sm,
+    textAlign: 'center',
   },
   addName: {
     ...Typography.body,
-    marginTop: Spacing.sm,
     fontStyle: 'italic',
+    textAlign: 'center',
   },
   email: {
     ...Typography.caption,
+    textAlign: 'center',
   },
   avatarLoading: {
     position: 'relative',

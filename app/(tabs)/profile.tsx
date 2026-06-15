@@ -1,5 +1,5 @@
-import { SettingsScreenContent } from '@/components/settings/SettingsScreenContent';
+import { ProfileScreenContent } from '@/components/profile/ProfileScreenContent';
 
 export default function ProfileScreen() {
-  return <SettingsScreenContent edges={['top']} />;
+  return <ProfileScreenContent edges={['top']} />;
 }

@@ -27,6 +27,10 @@ const MAPPING = {
   'pencil': 'edit',
   'gearshape.fill': 'settings',
   'person.fill': 'person',
+  'star.fill': 'star',
+  'square.and.arrow.up': 'share',
+  'camera.fill': 'photo-camera',
+  'arrow.up.right': 'open-in-new',
 } as IconMapping;
 
 /**

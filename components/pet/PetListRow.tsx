@@ -5,9 +5,9 @@ import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing, Typography } from '@/constants/theme';
+import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Pet } from '@/types/pet';
-import { displayPetBreed, displayPetSpecies } from '@/utils/pet-display';
 
 type PetListRowProps = {
   pet: Pet;
@@ -19,15 +19,6 @@ type PetListRowProps = {
   onOpenProfile: () => void;
 };
 
-function getPetSubtitle(pet: Pet): string {
-  const breed = displayPetBreed(pet.breed, pet.species);
-  if (breed !== 'Not set') {
-    return breed;
-  }
-
-  return displayPetSpecies(pet.species);
-}
-
 export function PetListRow({
   pet,
   isActive,
@@ -37,9 +28,13 @@ export function PetListRow({
   onSelect,
   onOpenProfile,
 }: PetListRowProps) {
+  const { displayPetBreed, displayPetSpecies } = usePetDisplay();
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
+
+  const breed = displayPetBreed(pet.breed);
+  const subtitle = breed !== displayPetBreed(null) ? breed : displayPetSpecies(pet.species);
 
   const handleSelect = () => {
     if (disabled) {
@@ -64,8 +59,6 @@ export function PetListRow({
 
     onOpenProfile();
   };
-
-  const subtitle = getPetSubtitle(pet);
 
   return (
     <View

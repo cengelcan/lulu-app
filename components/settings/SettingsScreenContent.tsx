@@ -33,7 +33,7 @@ export function SettingsScreenContent({
   const appearance = useAppearanceStore((state) => state.appearance);
   const saveAppearance = useAppearanceStore((state) => state.saveAppearance);
 
-  const language = useLanguageStore((state) => state.language);
+  const languagePreference = useLanguageStore((state) => state.languagePreference);
   const saveLanguage = useLanguageStore((state) => state.saveLanguage);
 
   const primaryColor = useThemeColor({}, 'primary');
@@ -68,7 +68,7 @@ export function SettingsScreenContent({
     void saveAppearance(nextAppearance);
   };
 
-  const handleLanguageSelect = (nextLanguage: typeof language) => {
+  const handleLanguageSelect = (nextLanguage: typeof languagePreference) => {
     void saveLanguage(nextLanguage);
   };
 
@@ -93,7 +93,7 @@ export function SettingsScreenContent({
               appearance={appearance}
               onSelect={handleAppearanceSelect}
             />
-            <LanguageSection language={language} onSelect={handleLanguageSelect} />
+            <LanguageSection language={languagePreference} onSelect={handleLanguageSelect} />
           </>
         )}
       </View>

@@ -15,6 +15,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
 import { getUpcomingReminder } from '@/services/notifications/upcoming';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -23,7 +24,6 @@ import { usePetStore } from '@/stores/pet.store';
 import type { CheckIn } from '@/types/check-in';
 import { getAbnormalCheckInFields } from '@/utils/check-in';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
-import { displayPetSpecies } from '@/utils/pet-display';
 
 type DetailRowProps = {
   label: string;
@@ -151,6 +151,7 @@ type DashboardScreenProps = {
 export default function DashboardScreen({ edges = ['top', 'bottom'] }: DashboardScreenProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const { displayPetSpecies } = usePetDisplay();
   const pet = usePetStore((state) => state.pet);
   const isLoading = usePetStore((state) => state.isLoading);
   const error = usePetStore((state) => state.error);
@@ -259,26 +260,26 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
       ) : error ? (
         <View style={styles.centered}>
           <ThemedText style={styles.message}>{error}</ThemedText>
-          <Button title="Try Again" onPress={handleRetry} />
+          <Button title={t('common.tryAgain')} onPress={handleRetry} />
         </View>
       ) : !pet ? (
         <View style={styles.centered}>
           <ThemedText type="subtitle" style={styles.emptyTitle}>
-            No pet profile yet
+            {t('dashboard.noPetTitle')}
           </ThemedText>
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.message}>
-            Add your pet to start tracking their health.
+            {t('dashboard.noPetMessage')}
           </ThemedText>
-          <Button title="Set Up Pet" onPress={handleSetupPet} style={styles.setupButton} />
+          <Button title={t('common.setUpPet')} onPress={handleSetupPet} style={styles.setupButton} />
         </View>
       ) : (
         <View style={styles.body}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`${pet.name} profile`}
+            accessibilityLabel={t('dashboard.petProfileA11y', { name: pet.name })}
             onPress={handleOpenPetProfile}
             style={({ pressed }) => [styles.petProfileAction, { opacity: pressed ? 0.7 : 1 }]}>
             <PetAvatar photoUri={pet.photoUri} size={88} />
@@ -309,7 +310,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
           />
 
           <Card>
-            <ThemedText type="subtitle">Upcoming Reminder</ThemedText>
+            <ThemedText type="subtitle">{t('dashboard.upcomingReminder')}</ThemedText>
             {reminderIsLoading ? (
               <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
             ) : reminderPermission === 'later' ? (
@@ -317,7 +318,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
                 lightColor={textSecondaryColor}
                 darkColor={textSecondaryColor}
                 style={styles.message}>
-                Reminders are off
+                {t('dashboard.remindersOff')}
               </ThemedText>
             ) : reminderPermission === 'denied' ? (
               <View style={styles.deniedReminder}>
@@ -325,16 +326,16 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
                   lightColor={textSecondaryColor}
                   darkColor={textSecondaryColor}
                   style={styles.message}>
-                  Notifications are disabled.
+                  {t('dashboard.notificationsDisabled')}
                 </ThemedText>
                 <ThemedText
                   lightColor={textSecondaryColor}
                   darkColor={textSecondaryColor}
                   style={styles.message}>
-                  Enable them in Settings.
+                  {t('dashboard.enableInSettings')}
                 </ThemedText>
                 <Button
-                  title="Open Settings"
+                  title={t('settings.openSettings')}
                   variant="secondary"
                   onPress={handleOpenNotificationSettings}
                   style={styles.openSettingsButton}
@@ -342,36 +343,36 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
               </View>
             ) : upcomingReminder ? (
               <>
-                <DetailRow label="Date" value={upcomingReminder.dateLabel} />
-                <DetailRow label="Time" value={upcomingReminder.timeLabel} />
+                <DetailRow label={t('common.date')} value={upcomingReminder.dateLabel} />
+                <DetailRow label={t('common.time')} value={upcomingReminder.timeLabel} />
               </>
             ) : (
               <ThemedText
                 lightColor={textSecondaryColor}
                 darkColor={textSecondaryColor}
                 style={styles.message}>
-                No reminder scheduled
+                {t('dashboard.noReminderScheduled')}
               </ThemedText>
             )}
           </Card>
 
           <Card>
-            <ThemedText type="subtitle">Quick Actions</ThemedText>
+            <ThemedText type="subtitle">{t('dashboard.quickActions')}</ThemedText>
             <View style={styles.quickActionsGrid}>
               <QuickActionItem
-                label="Reports"
+                label={t('dashboard.reports')}
                 icon="chart.line.uptrend.xyaxis"
                 locked
                 onPress={handleLockedQuickAction}
               />
               <QuickActionItem
-                label="Records"
+                label={t('dashboard.records')}
                 icon="doc.text.fill"
                 locked
                 onPress={handleLockedQuickAction}
               />
               <QuickActionItem
-                label="Medication"
+                label={t('dashboard.medication')}
                 icon="pills.fill"
                 locked
                 onPress={handleLockedQuickAction}

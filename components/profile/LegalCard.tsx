@@ -7,6 +7,7 @@ import { ProfileListRow } from '@/components/profile/ProfileListRow';
 import { Card } from '@/components/ui/Card';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { PRIVACY_POLICY_URL, TERMS_URL } from '@/constants/legal';
+import { useTranslation } from '@/hooks/use-translation';
 import {
   deleteAllLocalData,
   resetAppStoresAfterDataDeletion,
@@ -21,6 +22,7 @@ async function openLegalUrl(url: string): Promise<void> {
 
 export function LegalCard() {
   const router = useRouter();
+  const { t } = useTranslation();
   const provider = useUserStore((state) => state.provider);
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -45,19 +47,19 @@ export function LegalCard() {
     <>
       <Card style={styles.card}>
         <ProfileListRow
-          label="Privacy Policy"
+          label={t('profile.privacyPolicy')}
           showChevron={false}
           showExternalIcon
           onPress={() => void openLegalUrl(PRIVACY_POLICY_URL)}
         />
         <ProfileListRow
-          label="Terms & Conditions"
+          label={t('profile.terms')}
           showChevron={false}
           showExternalIcon
           onPress={() => void openLegalUrl(TERMS_URL)}
         />
         <ProfileListRow
-          label="Delete My Account"
+          label={t('profile.deleteAccount')}
           destructive
           showChevron={false}
           isLast={!showLogOut}
@@ -65,7 +67,7 @@ export function LegalCard() {
         />
         {showLogOut ? (
           <ProfileListRow
-            label="Log Out"
+            label={t('profile.logOut')}
             destructive
             showChevron={false}
             isLast
@@ -78,9 +80,10 @@ export function LegalCard() {
 
       <ConfirmModal
         visible={deleteModalVisible}
-        title="Delete My Account?"
-        message="All pets, check-ins, and preferences on this device will be permanently removed."
-        confirmLabel="Delete"
+        title={t('profile.deleteAccountTitle')}
+        message={t('profile.deleteAccountMessage')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         destructive
         isLoading={isDeleting}
         onConfirm={() => void handleConfirmDelete()}

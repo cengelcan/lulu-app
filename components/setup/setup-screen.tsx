@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 const DEFAULT_TOTAL_STEPS = 7;
@@ -30,7 +31,7 @@ export function SetupScreen({
   title,
   description,
   children,
-  buttonTitle = 'Continue',
+  buttonTitle,
   onContinue,
   onBack,
   continueDisabled = false,
@@ -38,6 +39,8 @@ export function SetupScreen({
   error = null,
   footer,
 }: SetupScreenProps) {
+  const { t } = useTranslation();
+  const resolvedButtonTitle = buttonTitle ?? t('common.continue');
   const primaryColor = useThemeColor({}, 'primary');
   const borderColor = useThemeColor({}, 'border');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -76,7 +79,7 @@ export function SetupScreen({
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
           style={styles.stepLabel}>
-          {step} of {totalSteps}
+          {t('checkIn.progress', { count: step, total: totalSteps })}
         </ThemedText>
 
         <ThemedText type="title" style={styles.title}>
@@ -104,7 +107,7 @@ export function SetupScreen({
       {footer ?? (
         onContinue ? (
           <Button
-            title={buttonTitle}
+            title={resolvedButtonTitle}
             onPress={onContinue}
             disabled={continueDisabled || isLoading}
             style={styles.button}

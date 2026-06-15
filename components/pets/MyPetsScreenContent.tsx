@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
@@ -21,6 +22,7 @@ type MyPetsScreenContentProps = {
 
 export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenContentProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -124,20 +126,20 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
       ) : error ? (
         <View style={styles.centered}>
           <ThemedText style={styles.message}>{error}</ThemedText>
-          <Button title="Try Again" onPress={handleRetry} />
+          <Button title={t('common.tryAgain')} onPress={handleRetry} />
         </View>
       ) : pets.length === 0 ? (
         <View style={styles.centered}>
           <ThemedText type="subtitle" style={styles.emptyTitle}>
-            No pets yet
+            {t('myPets.noPetsTitle')}
           </ThemedText>
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.message}>
-            Add your first pet to begin tracking.
+            {t('myPets.noPetsMessage')}
           </ThemedText>
-          <Button title="Set Up Pet" onPress={handleSetupPet} style={styles.setupButton} />
+          <Button title={t('common.setUpPet')} onPress={handleSetupPet} style={styles.setupButton} />
         </View>
       ) : (
         <View style={styles.body}>
@@ -155,7 +157,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
               />
             ))}
           </Card>
-          <Button title="Add Pet" variant="secondary" onPress={handleAddPet} />
+          <Button title={t('common.addPet')} variant="secondary" onPress={handleAddPet} />
         </View>
       )}
     </ScreenContainer>

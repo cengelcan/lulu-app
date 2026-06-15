@@ -32,11 +32,11 @@ export function validatePetName(name: string): string | null {
   const trimmed = name.trim();
 
   if (trimmed.length < PET_NAME_MIN_LENGTH) {
-    return 'Pet name is required';
+    return 'pet.validation.nameRequired';
   }
 
   if (trimmed.length > PET_NAME_MAX_LENGTH) {
-    return `Pet name must be ${PET_NAME_MAX_LENGTH} characters or less`;
+    return 'pet.validation.nameMaxLength';
   }
 
   return null;
@@ -44,7 +44,7 @@ export function validatePetName(name: string): string | null {
 
 export function validateSpecies(species: PetSpecies | null): string | null {
   if (!species) {
-    return 'Please select a pet type';
+    return 'pet.validation.speciesRequired';
   }
 
   return null;
@@ -52,7 +52,7 @@ export function validateSpecies(species: PetSpecies | null): string | null {
 
 export function validateAgeGroup(ageGroup: PetAgeGroup | null): string | null {
   if (!ageGroup) {
-    return 'Please select an age group';
+    return 'pet.validation.ageGroupRequired';
   }
 
   return null;
@@ -66,7 +66,7 @@ export function validateOptionalPetDate(date: string): string | null {
   }
 
   if (!isValidLocalDateString(trimmed)) {
-    return 'Enter a valid date as YYYY-MM-DD';
+    return 'pet.validation.invalidDate';
   }
 
   return null;
@@ -76,7 +76,7 @@ export function validateOptionalColor(color: string): string | null {
   const trimmed = color.trim();
 
   if (trimmed.length > PET_COLOR_MAX_LENGTH) {
-    return `Color must be ${PET_COLOR_MAX_LENGTH} characters or less`;
+    return 'pet.validation.colorMaxLength';
   }
 
   return null;
@@ -86,7 +86,7 @@ export function validateOptionalOwnerName(ownerName: string): string | null {
   const trimmed = ownerName.trim();
 
   if (trimmed.length > PET_OWNER_MAX_LENGTH) {
-    return `Owner name must be ${PET_OWNER_MAX_LENGTH} characters or less`;
+    return 'pet.validation.ownerNameMaxLength';
   }
 
   return null;
@@ -96,7 +96,7 @@ export function validateOptionalMicrochipId(microchipId: string): string | null 
   const trimmed = microchipId.trim();
 
   if (trimmed.length > PET_MICROCHIP_MAX_LENGTH) {
-    return `Microchip ID must be ${PET_MICROCHIP_MAX_LENGTH} characters or less`;
+    return 'pet.validation.microchipMaxLength';
   }
 
   return null;

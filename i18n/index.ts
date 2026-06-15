@@ -1,10 +1,10 @@
 import { en } from '@/i18n/en';
 import { tr } from '@/i18n/tr';
 import type { TranslationParams, Translations } from '@/i18n/types';
-import type { AppLanguage } from '@/types/language';
+import type { ResolvedLanguage } from '@/types/language';
 import { DEFAULT_APP_LANGUAGE } from '@/types/language';
 
-const catalogs: Record<AppLanguage, Translations> = {
+const catalogs: Record<ResolvedLanguage, Translations> = {
   en,
   tr,
 };
@@ -35,7 +35,7 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string | un
 }
 
 export function translate(
-  language: AppLanguage,
+  language: ResolvedLanguage,
   key: string,
   params?: TranslationParams
 ): string {
@@ -58,6 +58,6 @@ export function translate(
   return key;
 }
 
-export function getTranslations(language: AppLanguage): Translations {
+export function getTranslations(language: ResolvedLanguage): Translations {
   return catalogs[language] ?? catalogs[DEFAULT_APP_LANGUAGE];
 }

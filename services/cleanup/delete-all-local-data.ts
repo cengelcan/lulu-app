@@ -19,7 +19,7 @@ import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
 import { DEFAULT_APP_APPEARANCE } from '@/types/appearance';
-import { DEFAULT_APP_LANGUAGE } from '@/types/language';
+import { DEFAULT_APP_LANGUAGE_PREFERENCE, resolveLanguagePreference } from '@/types/language';
 
 export async function deleteAllLocalData(): Promise<void> {
   await cancelCheckInReminder();
@@ -68,7 +68,8 @@ export function resetAppStoresAfterDataDeletion(): void {
     isLoading: false,
   });
   useLanguageStore.setState({
-    language: DEFAULT_APP_LANGUAGE,
+    languagePreference: DEFAULT_APP_LANGUAGE_PREFERENCE,
+    resolvedLanguage: resolveLanguagePreference(DEFAULT_APP_LANGUAGE_PREFERENCE),
     isLoading: false,
   });
   useSetupStore.getState().resetDraft();

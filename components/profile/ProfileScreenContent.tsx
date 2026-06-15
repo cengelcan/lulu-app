@@ -11,6 +11,7 @@ import { UserCard } from '@/components/profile/UserCard';
 import { ThemedText } from '@/components/themed-text';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useUserStore } from '@/stores/user.store';
 
@@ -18,14 +19,12 @@ type ProfileScreenContentProps = {
   edges?: Edge[];
 };
 
-function getAppVersionLabel(): string {
-  const version = Constants.expoConfig?.version ?? Constants.nativeApplicationVersion ?? '1.0.0';
-  return `Lulu v${version}`;
-}
-
 export function ProfileScreenContent({ edges = ['top', 'bottom'] }: ProfileScreenContentProps) {
+  const { t } = useTranslation();
   const loadUserProfile = useUserStore((state) => state.loadUserProfile);
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  const version = Constants.expoConfig?.version ?? Constants.nativeApplicationVersion ?? '1.0.0';
 
   useFocusEffect(
     useCallback(() => {
@@ -44,7 +43,7 @@ export function ProfileScreenContent({ edges = ['top', 'bottom'] }: ProfileScree
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
           style={styles.version}>
-          {getAppVersionLabel()}
+          {t('profile.version', { version })}
         </ThemedText>
       </View>
     </ScreenContainer>

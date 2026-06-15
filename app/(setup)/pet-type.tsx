@@ -4,12 +4,17 @@ import { useCallback, useState } from 'react';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { PET_SPECIES_OPTIONS } from '@/constants/check-in';
+import { usePetDisplay } from '@/hooks/use-pet-display';
+import { useTranslation } from '@/hooks/use-translation';
 import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { useSetupStore, validateSpecies } from '@/stores/setup.store';
+import { translateValidationError } from '@/utils/translate-error';
 
 export default function PetTypeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { getSpeciesLabel } = usePetDisplay();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
   const { showBack, onBack } = useSetupScreenBack(1, mode);
@@ -32,16 +37,16 @@ export default function PetTypeScreen() {
     <SetupScreen
       step={1}
       totalSteps={totalSteps}
-      title="What type of pet do you have?"
-      description="Select one option to continue."
+      title={t('setup.petType.title')}
+      description={t('setup.petType.description')}
       onContinue={handleContinue}
       onBack={showBack ? onBack : undefined}
       continueDisabled={!species}
-      error={error}>
+      error={translateValidationError(t, error)}>
       {PET_SPECIES_OPTIONS.map((option) => (
         <SelectableOption
           key={option.value}
-          label={option.label}
+          label={getSpeciesLabel(option.value)}
           selected={species === option.value}
           onPress={() => {
             setError(null);

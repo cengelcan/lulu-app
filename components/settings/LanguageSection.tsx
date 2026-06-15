@@ -4,23 +4,35 @@ import { ActionSheetIOS, Alert, Platform } from 'react-native';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { SettingsValueRow } from '@/components/settings/SettingsValueRow';
 import { useTranslation } from '@/hooks/use-translation';
-import {
-  APP_LANGUAGE_LABELS,
-  type AppLanguage,
-} from '@/types/language';
+import type { AppLanguagePreference } from '@/types/language';
 
 type LanguageSectionProps = {
-  language: AppLanguage;
-  onSelect: (language: AppLanguage) => void;
+  language: AppLanguagePreference;
+  onSelect: (language: AppLanguagePreference) => void;
 };
 
-const LANGUAGE_OPTIONS: AppLanguage[] = ['en', 'tr'];
+const LANGUAGE_OPTIONS: AppLanguagePreference[] = ['system', 'en', 'tr'];
+
+function getLanguageLabel(
+  t: (key: string) => string,
+  preference: AppLanguagePreference
+): string {
+  switch (preference) {
+    case 'system':
+      return t('settings.languageSystem');
+    case 'en':
+      return t('settings.languageEnglish');
+    case 'tr':
+      return t('settings.languageTurkish');
+  }
+}
 
 function showLanguagePicker(
-  current: AppLanguage,
-  onSelect: (language: AppLanguage) => void,
+  current: AppLanguagePreference,
+  onSelect: (language: AppLanguagePreference) => void,
   title: string,
-  cancelLabel: string
+  cancelLabel: string,
+  optionLabels: string[]
 ): void {
   if (Platform.OS === 'ios') {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -28,11 +40,11 @@ function showLanguagePicker(
     ActionSheetIOS.showActionSheetWithOptions(
       {
         title,
-        options: [...LANGUAGE_OPTIONS.map((key) => APP_LANGUAGE_LABELS[key]), cancelLabel],
-        cancelButtonIndex: 2,
+        options: [...optionLabels, cancelLabel],
+        cancelButtonIndex: LANGUAGE_OPTIONS.length,
       },
       (buttonIndex) => {
-        if (buttonIndex === 0 || buttonIndex === 1) {
+        if (buttonIndex >= 0 && buttonIndex < LANGUAGE_OPTIONS.length) {
           onSelect(LANGUAGE_OPTIONS[buttonIndex]);
         }
       }
@@ -41,8 +53,8 @@ function showLanguagePicker(
   }
 
   Alert.alert(title, undefined, [
-    ...LANGUAGE_OPTIONS.map((option) => ({
-      text: APP_LANGUAGE_LABELS[option],
+    ...LANGUAGE_OPTIONS.map((option, index) => ({
+      text: optionLabels[index],
       onPress: () => onSelect(option),
       ...(option === current ? { isPreferred: true } : {}),
     })),
@@ -52,16 +64,23 @@ function showLanguagePicker(
 
 export function LanguageSection({ language, onSelect }: LanguageSectionProps) {
   const { t } = useTranslation();
+  const optionLabels = LANGUAGE_OPTIONS.map((option) => getLanguageLabel(t, option));
 
   const handlePress = () => {
-    showLanguagePicker(language, onSelect, t('settings.language'), t('common.cancel'));
+    showLanguagePicker(
+      language,
+      onSelect,
+      t('settings.language'),
+      t('common.cancel'),
+      optionLabels
+    );
   };
 
   return (
     <GroupedSection title={t('settings.general')}>
       <SettingsValueRow
         label={t('settings.language')}
-        value={APP_LANGUAGE_LABELS[language]}
+        value={getLanguageLabel(t, language)}
         onPress={handlePress}
         isLast
       />

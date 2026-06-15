@@ -4,15 +4,20 @@ import { useCallback, useState } from 'react';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { HEALTH_CONDITION_OPTIONS } from '@/constants/check-in';
+import { usePetDisplay } from '@/hooks/use-pet-display';
+import { useTranslation } from '@/hooks/use-translation';
 import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { finalizeAddModePet, validateSetupDraft } from '@/services/setup/finalize-pet-creation';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
+import { translateValidationError } from '@/utils/translate-error';
 
 export default function HealthConditionsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { getHealthConditionLabel } = usePetDisplay();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
   const { onBack } = useSetupScreenBack(5, mode);
@@ -85,23 +90,23 @@ export default function HealthConditionsScreen() {
     handleContinueInitial();
   }, [handleContinueAdd, handleContinueInitial, mode]);
 
-  const error = validationError ?? petError;
+  const error = translateValidationError(t, validationError) ?? petError;
 
   return (
     <SetupScreen
       step={5}
       totalSteps={totalSteps}
-      title="Any health conditions?"
-      description="Select all that apply. You can skip this if none apply."
+      title={t('setup.healthConditions.title')}
+      description={t('setup.healthConditions.description')}
       onContinue={handleContinue}
       onBack={onBack}
-      buttonTitle={mode === 'add' ? 'Add Pet' : 'Continue'}
+      buttonTitle={mode === 'add' ? t('setup.healthConditions.addPet') : t('common.continue')}
       isLoading={mode === 'add' ? petIsLoading : false}
       error={error}>
       {HEALTH_CONDITION_OPTIONS.map((option) => (
         <SelectableOption
           key={option.value}
-          label={option.label}
+          label={getHealthConditionLabel(option.value)}
           selected={healthConditions.includes(option.value)}
           onPress={() => toggleHealthCondition(option.value)}
         />

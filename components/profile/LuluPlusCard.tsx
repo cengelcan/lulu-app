@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { Spacing, Typography } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useUserStore } from '@/stores/user.store';
 
 export function LuluPlusCard() {
+  const { t } = useTranslation();
   const isPlusActive = useUserStore((state) => state.isPlusActive);
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -23,19 +25,17 @@ export function LuluPlusCard() {
     <>
       <Card>
         <View style={styles.header}>
-          <ThemedText type="subtitle">Lulu Plus</ThemedText>
+          <ThemedText type="subtitle">{t('profile.luluPlus')}</ThemedText>
         </View>
         <ThemedText
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
           style={styles.description}>
-          {isPlusActive
-            ? 'Your plan is active. Manage your subscription anytime.'
-            : 'Unlock advanced reports, multi-caregiver sharing, and more.'}
+          {isPlusActive ? t('profile.luluPlusActive') : t('profile.luluPlusInactive')}
         </ThemedText>
         <Button
-          accessibilityLabel={isPlusActive ? 'Manage Lulu Plus' : 'Upgrade to Lulu Plus'}
-          title={isPlusActive ? 'Manage' : 'Upgrade'}
+          accessibilityLabel={isPlusActive ? t('profile.manageA11y') : t('profile.upgradeA11y')}
+          title={isPlusActive ? t('profile.manage') : t('profile.upgrade')}
           variant="secondary"
           onPress={handlePress}
           style={styles.button}

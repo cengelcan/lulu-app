@@ -4,6 +4,7 @@ import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { DISPLAY_NAME_MAX_LENGTH } from '@/types/user';
 
@@ -22,6 +23,7 @@ export function EditNameModal({
   onSave,
   onCancel,
 }: EditNameModalProps) {
+  const { t } = useTranslation();
   const [value, setValue] = useState(initialValue);
 
   const surfaceColor = useThemeColor({}, 'surface');
@@ -50,21 +52,21 @@ export function EditNameModal({
           style={[styles.card, { backgroundColor: surfaceColor }]}
           onPress={(event) => event.stopPropagation()}>
           <ThemedText type="subtitle" style={styles.title}>
-            Your Name
+            {t('profile.editNameTitle')}
           </ThemedText>
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.message}>
-            This name is optional and only shown on your profile.
+            {t('profile.editNameMessage')}
           </ThemedText>
           <TextInput
-            accessibilityLabel="Display name"
+            accessibilityLabel={t('profile.editNameTitle')}
             autoCapitalize="words"
             autoCorrect={false}
             editable={!isSaving}
             maxLength={DISPLAY_NAME_MAX_LENGTH}
-            placeholder="Your name"
+            placeholder={t('profile.editNamePlaceholder')}
             placeholderTextColor={textSecondaryColor}
             returnKeyType="done"
             style={[
@@ -81,16 +83,16 @@ export function EditNameModal({
           />
           <View style={styles.actions}>
             <Button
-              accessibilityLabel="Cancel"
-              title="Cancel"
+              accessibilityLabel={t('common.cancel')}
+              title={t('common.cancel')}
               variant="secondary"
               disabled={isSaving}
               onPress={onCancel}
               style={styles.actionButton}
             />
             <Button
-              accessibilityLabel="Save name"
-              title="Save"
+              accessibilityLabel={t('common.save')}
+              title={t('common.save')}
               disabled={isSaving}
               onPress={handleSave}
               style={styles.actionButton}

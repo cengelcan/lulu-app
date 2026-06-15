@@ -8,6 +8,7 @@ import { UserAvatar } from '@/components/profile/UserAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing, Typography } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { pickImageFromGallery } from '@/services/pick-image-from-gallery';
 import { useUserStore } from '@/stores/user.store';
@@ -16,6 +17,7 @@ const AVATAR_SIZE = 96;
 
 export function UserCard() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const displayName = useUserStore((state) => state.displayName);
   const avatarUri = useUserStore((state) => state.avatarUri);
@@ -55,13 +57,10 @@ export function UserCard() {
       if (result.ok) {
         await updateAvatarUri(result.uri);
       } else if (result.reason === 'permission_denied') {
-        Alert.alert(
-          'Photo Access Needed',
-          'Allow photo access in Settings to choose a profile picture.'
-        );
+        Alert.alert(t('profile.photoAccessTitle'), t('profile.photoAccessMessage'));
       }
     } catch {
-      Alert.alert('Could Not Save Photo', 'Please try again.');
+      Alert.alert(t('profile.couldNotSavePhoto'), t('common.tryAgain'));
     } finally {
       setIsPickingPhoto(false);
     }
@@ -74,7 +73,7 @@ export function UserCard() {
       await updateDisplayName(value);
       setIsEditNameVisible(false);
     } catch {
-      Alert.alert('Could Not Save Name', 'Please try again.');
+      Alert.alert(t('profile.couldNotSaveName'), t('common.tryAgain'));
     } finally {
       setIsSavingName(false);
     }
@@ -91,7 +90,7 @@ export function UserCard() {
   return (
     <View style={styles.container}>
       <Pressable
-        accessibilityLabel="Open Settings"
+        accessibilityLabel={t('profile.openSettingsA11y')}
         accessibilityRole="button"
         hitSlop={8}
         onPress={handleOpenSettings}
@@ -102,7 +101,7 @@ export function UserCard() {
       <View style={styles.identity}>
         <Pressable
           accessibilityHint="Opens photo picker"
-          accessibilityLabel="Change profile photo"
+          accessibilityLabel={t('profile.changePhotoA11y')}
           accessibilityRole="button"
           disabled={isPickingPhoto}
           onPress={() => void handleChangePhoto()}
@@ -119,7 +118,7 @@ export function UserCard() {
 
         <Pressable
           accessibilityHint="Opens name editor"
-          accessibilityLabel={displayName ? `Edit name, ${displayName}` : 'Add your name'}
+          accessibilityLabel={displayName ? `${t('profile.editNameA11y')}, ${displayName}` : t('profile.addYourName')}
           accessibilityRole="button"
           onPress={handleEditNamePress}
           style={({ pressed }) => [styles.nameRow, { opacity: pressed ? 0.7 : 1 }]}>
@@ -132,7 +131,7 @@ export function UserCard() {
               lightColor={textSecondaryColor}
               darkColor={textSecondaryColor}
               style={styles.addName}>
-              Add your name
+              {t('profile.addYourName')}
             </ThemedText>
           )}
           <IconSymbol name="pencil" size={16} color={textSecondaryColor} />

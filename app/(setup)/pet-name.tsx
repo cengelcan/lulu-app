@@ -5,13 +5,16 @@ import { StyleSheet, TextInput } from 'react-native';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { PET_NAME_MAX_LENGTH } from '@/types/pet';
 import { useSetupStore, validatePetName } from '@/stores/setup.store';
+import { translateValidationError } from '@/utils/translate-error';
 
 export default function PetNameScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
   const { onBack } = useSetupScreenBack(2, mode);
@@ -40,18 +43,18 @@ export default function PetNameScreen() {
     <SetupScreen
       step={2}
       totalSteps={totalSteps}
-      title="What's your pet's name?"
-      description={`Enter a name between 1 and ${PET_NAME_MAX_LENGTH} characters.`}
+      title={t('setup.petName.title')}
+      description={t('setup.petName.description', { max: PET_NAME_MAX_LENGTH })}
       onContinue={handleContinue}
       onBack={onBack}
       continueDisabled={!name.trim()}
-      error={error}>
+      error={translateValidationError(t, error)}>
       <TextInput
-        accessibilityLabel="Pet name"
+        accessibilityLabel={t('pet.fields.petName')}
         autoCapitalize="words"
         autoCorrect={false}
         maxLength={PET_NAME_MAX_LENGTH}
-        placeholder="Pet name"
+        placeholder={t('setup.petName.placeholder')}
         placeholderTextColor={textSecondaryColor}
         returnKeyType="done"
         style={[

@@ -3,12 +3,14 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { TimePickerField } from '@/components/ui/TimePickerField';
+import { useTranslation } from '@/hooks/use-translation';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_REMINDER_TIME, type ReminderTime } from '@/types/reminder';
 
 export default function CheckInPrefsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { onBack } = useSetupScreenBack(6, 'initial');
   const savedReminderTime = useNotificationStore((state) => state.reminderTime);
   const saveReminderTime = useNotificationStore((state) => state.saveReminderTime);
@@ -52,14 +54,14 @@ export default function CheckInPrefsScreen() {
   return (
     <SetupScreen
       step={6}
-      title="When should we remind you?"
-      description="Choose your preferred daily reminder time."
+      title={t('setup.checkInPrefs.title')}
+      description={t('setup.checkInPrefs.description')}
       onContinue={() => void handleContinue()}
       onBack={onBack}
       isLoading={isLoading}
       error={error ?? storeError}>
       <TimePickerField
-        accessibilityLabel="Reminder time"
+        accessibilityLabel={t('settings.reminderTime')}
         value={reminderTime}
         onChange={setReminderTime}
       />

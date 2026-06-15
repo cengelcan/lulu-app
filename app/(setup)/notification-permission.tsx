@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { Button } from '@/components/ui/Button';
 import { Spacing } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
 import { setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import {
@@ -15,9 +16,11 @@ import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
+import { translateValidationError } from '@/utils/translate-error';
 
 export default function NotificationPermissionScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
   const { onBack } = useSetupScreenBack(7, mode);
@@ -43,7 +46,7 @@ export default function NotificationPermissionScreen() {
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const isLoading = petIsLoading || notificationIsLoading;
-  const error = validationError ?? petError ?? notificationError;
+  const error = translateValidationError(t, validationError) ?? petError ?? notificationError;
 
   const completeSetup = useCallback(
     async (permission: NotificationPermissionStatus) => {
@@ -95,19 +98,19 @@ export default function NotificationPermissionScreen() {
     <SetupScreen
       step={7}
       totalSteps={totalSteps}
-      title="Stay on track with reminders"
-      description="We can send gentle reminders for daily check-ins. You can change this later in settings."
+      title={t('setup.notifications.title')}
+      description={t('setup.notifications.description')}
       onBack={onBack}
       error={error}
       footer={
         <View style={styles.actions}>
           <Button
-            title="Allow Notifications"
+            title={t('setup.notifications.allow')}
             disabled={isLoading}
             onPress={() => void completeSetup('allowed')}
           />
           <Button
-            title="Maybe Later"
+            title={t('setup.notifications.maybeLater')}
             variant="ghost"
             disabled={isLoading}
             onPress={() => void completeSetup('later')}

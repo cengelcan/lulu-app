@@ -3,8 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '@/constants/storage-keys';
 import type { AppAppearance } from '@/types/appearance';
 import { DEFAULT_APP_APPEARANCE } from '@/types/appearance';
-import type { AppLanguage } from '@/types/language';
-import { DEFAULT_APP_LANGUAGE } from '@/types/language';
+import type { AppLanguagePreference, ResolvedLanguage } from '@/types/language';
+import {
+  DEFAULT_APP_LANGUAGE_PREFERENCE,
+  resolveLanguagePreference,
+} from '@/types/language';
 import type { ReminderTime } from '@/types/reminder';
 import { DEFAULT_REMINDER_TIME } from '@/types/reminder';
 import { isValidReminderTime } from '@/utils/time';
@@ -115,17 +118,29 @@ export async function removeAppAppearance(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.appAppearance);
 }
 
-export async function getAppLanguage(): Promise<AppLanguage> {
+export async function getAppLanguagePreference(): Promise<AppLanguagePreference> {
   const value = await AsyncStorage.getItem(StorageKeys.appLanguage);
-  if (value === 'en' || value === 'tr') {
+  if (value === 'system' || value === 'en' || value === 'tr') {
     return value;
   }
 
-  return DEFAULT_APP_LANGUAGE;
+  return DEFAULT_APP_LANGUAGE_PREFERENCE;
 }
 
-export async function setAppLanguage(language: AppLanguage): Promise<void> {
-  await AsyncStorage.setItem(StorageKeys.appLanguage, language);
+export async function getAppLanguage(): Promise<ResolvedLanguage> {
+  const preference = await getAppLanguagePreference();
+  return resolveLanguagePreference(preference);
+}
+
+export async function setAppLanguagePreference(
+  preference: AppLanguagePreference
+): Promise<void> {
+  await AsyncStorage.setItem(StorageKeys.appLanguage, preference);
+}
+
+/** @deprecated Use setAppLanguagePreference. */
+export async function setAppLanguage(language: ResolvedLanguage): Promise<void> {
+  await setAppLanguagePreference(language);
 }
 
 export async function removeAppLanguage(): Promise<void> {

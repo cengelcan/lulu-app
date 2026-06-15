@@ -1,16 +1,17 @@
 import { useCallback } from 'react';
 
 import { translate } from '@/i18n';
-import { useLanguageStore } from '@/stores/language.store';
 import type { TranslationParams } from '@/i18n/types';
+import { useLanguageStore } from '@/stores/language.store';
 
 export function useTranslation() {
-  const language = useLanguageStore((state) => state.language);
+  const resolvedLanguage = useLanguageStore((state) => state.resolvedLanguage);
+  const languagePreference = useLanguageStore((state) => state.languagePreference);
 
   const t = useCallback(
-    (key: string, params?: TranslationParams) => translate(language, key, params),
-    [language]
+    (key: string, params?: TranslationParams) => translate(resolvedLanguage, key, params),
+    [resolvedLanguage]
   );
 
-  return { t, language };
+  return { t, language: resolvedLanguage, languagePreference };
 }

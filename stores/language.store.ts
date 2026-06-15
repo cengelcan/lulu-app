@@ -1,33 +1,52 @@
 import { create } from 'zustand';
 
-import { getAppLanguage, setAppLanguage } from '@/storage/prefs.storage';
-import type { AppLanguage } from '@/types/language';
-import { DEFAULT_APP_LANGUAGE } from '@/types/language';
+import {
+  getAppLanguagePreference,
+  setAppLanguagePreference,
+} from '@/storage/prefs.storage';
+import type { AppLanguagePreference, ResolvedLanguage } from '@/types/language';
+import {
+  DEFAULT_APP_LANGUAGE_PREFERENCE,
+  resolveLanguagePreference,
+} from '@/types/language';
 
 type LanguageState = {
-  language: AppLanguage;
+  languagePreference: AppLanguagePreference;
+  resolvedLanguage: ResolvedLanguage;
   isLoading: boolean;
   loadLanguage: () => Promise<void>;
-  saveLanguage: (language: AppLanguage) => Promise<void>;
+  saveLanguage: (preference: AppLanguagePreference) => Promise<void>;
 };
 
 export const useLanguageStore = create<LanguageState>((set) => ({
-  language: DEFAULT_APP_LANGUAGE,
+  languagePreference: DEFAULT_APP_LANGUAGE_PREFERENCE,
+  resolvedLanguage: resolveLanguagePreference(DEFAULT_APP_LANGUAGE_PREFERENCE),
   isLoading: false,
 
   loadLanguage: async () => {
     set({ isLoading: true });
 
     try {
-      const language = await getAppLanguage();
-      set({ language, isLoading: false });
+      const languagePreference = await getAppLanguagePreference();
+      set({
+        languagePreference,
+        resolvedLanguage: resolveLanguagePreference(languagePreference),
+        isLoading: false,
+      });
     } catch {
-      set({ language: DEFAULT_APP_LANGUAGE, isLoading: false });
+      set({
+        languagePreference: DEFAULT_APP_LANGUAGE_PREFERENCE,
+        resolvedLanguage: resolveLanguagePreference(DEFAULT_APP_LANGUAGE_PREFERENCE),
+        isLoading: false,
+      });
     }
   },
 
-  saveLanguage: async (language) => {
-    await setAppLanguage(language);
-    set({ language });
+  saveLanguage: async (languagePreference) => {
+    await setAppLanguagePreference(languagePreference);
+    set({
+      languagePreference,
+      resolvedLanguage: resolveLanguagePreference(languagePreference),
+    });
   },
 }));

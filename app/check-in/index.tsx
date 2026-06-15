@@ -9,6 +9,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES, CHECK_IN_NOTES_MAX_LENGTH } from '@/constants/check-in';
+import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -295,7 +296,13 @@ export default function CheckInScreen() {
   if (petIsLoading || !pet) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: true, title: t('checkIn.title') }} />
+        <Stack.Screen
+          options={{
+            ...STACK_BACK_ONLY_OPTIONS,
+            headerShown: true,
+            title: t('checkIn.title'),
+          }}
+        />
         <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
           <ActivityIndicator color={primaryColor} size="large" />
         </ScreenContainer>

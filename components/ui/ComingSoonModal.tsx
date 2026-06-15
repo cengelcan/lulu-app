@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 type ComingSoonModalProps = {
@@ -11,6 +12,7 @@ type ComingSoonModalProps = {
 };
 
 export function ComingSoonModal({ visible, onDismiss }: ComingSoonModalProps) {
+  const { t } = useTranslation();
   const surfaceColor = useThemeColor({}, 'surface');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -25,15 +27,15 @@ export function ComingSoonModal({ visible, onDismiss }: ComingSoonModalProps) {
           style={[styles.card, { backgroundColor: surfaceColor }]}
           onPress={(event) => event.stopPropagation()}>
           <ThemedText type="subtitle" style={styles.title}>
-            Coming Soon
+            {t('modals.comingSoonTitle')}
           </ThemedText>
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.message}>
-            Available in a future update.
+            {t('modals.comingSoonMessage')}
           </ThemedText>
-          <Button title="OK" onPress={onDismiss} style={styles.button} />
+          <Button title={t('common.ok')} onPress={onDismiss} style={styles.button} />
         </Pressable>
       </Pressable>
     </Modal>

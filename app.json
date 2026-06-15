@@ -43,7 +43,9 @@
       [
         "expo-notifications",
         {
-          "sounds": ["./assets/sounds/bell-ring.wav"]
+          "sounds": [
+            "./assets/sounds/bell-ring.wav"
+          ]
         }
       ],
       [
@@ -52,7 +54,8 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to set profile pictures."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

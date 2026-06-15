@@ -6,6 +6,7 @@ import { ProfileListRow } from '@/components/profile/ProfileListRow';
 import { Card } from '@/components/ui/Card';
 import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { INSTAGRAM_URL, SHARE_MESSAGE, SHARE_URL } from '@/constants/social';
+import { useTranslation } from '@/hooks/use-translation';
 import {
   getLastStoreReviewPromptAt,
   setLastStoreReviewPromptAt,
@@ -14,6 +15,7 @@ import {
 const REVIEW_COOLDOWN_MS = 90 * 24 * 60 * 60 * 1000;
 
 export function CommunityCard() {
+  const { t } = useTranslation();
   const [isComingSoonVisible, setIsComingSoonVisible] = useState(false);
 
   const handleRate = async () => {
@@ -51,17 +53,17 @@ export function CommunityCard() {
     <>
       <Card style={styles.card}>
         <ProfileListRow
-          label="Rate Lulu"
+          label={t('profile.rateLulu')}
           icon="star.fill"
           onPress={() => void handleRate()}
         />
         <ProfileListRow
-          label="Share Lulu"
+          label={t('profile.shareLulu')}
           icon="square.and.arrow.up"
           onPress={() => void handleShare()}
         />
         <ProfileListRow
-          label="Follow us on Instagram"
+          label={t('profile.followInstagram')}
           icon="camera.fill"
           showExternalIcon
           isLast

@@ -11,7 +11,9 @@ export const CHECK_IN_NOTIFICATION_DATA = {
 
 export const CHECK_IN_REMINDER_NOTIFICATION_ID = 'pet-health-check-in-reminder';
 
-export const ANDROID_CHECK_IN_CHANNEL_ID = 'check-in-reminders';
+export const ANDROID_CHECK_IN_CHANNEL_ID = 'check-in-reminders-v2';
+
+export const CHECK_IN_REMINDER_SOUND = 'bell-ring.wav';
 
 /** Legacy slot IDs — cancelled on sync to clean up pre-migration schedules. */
 export const LEGACY_CHECK_IN_REMINDER_SLOT_IDS = [

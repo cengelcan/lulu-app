@@ -40,7 +40,12 @@
         }
       ],
       "expo-sqlite",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "sounds": ["./assets/sounds/bell-ring.wav"]
+        }
+      ],
       [
         "expo-image-picker",
         {

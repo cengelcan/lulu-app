@@ -1,7 +1,10 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-import { ANDROID_CHECK_IN_CHANNEL_ID } from '@/services/notifications/constants';
+import {
+  ANDROID_CHECK_IN_CHANNEL_ID,
+  CHECK_IN_REMINDER_SOUND,
+} from '@/services/notifications/constants';
 
 export { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
 
@@ -13,6 +16,7 @@ export async function ensureAndroidNotificationChannel(): Promise<void> {
   await Notifications.setNotificationChannelAsync(ANDROID_CHECK_IN_CHANNEL_ID, {
     name: 'Check-in reminders',
     importance: Notifications.AndroidImportance.DEFAULT,
+    sound: CHECK_IN_REMINDER_SOUND,
   });
 }
 

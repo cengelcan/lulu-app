@@ -6,6 +6,7 @@ import {
   ANDROID_CHECK_IN_CHANNEL_ID,
   CHECK_IN_NOTIFICATION_DATA,
   CHECK_IN_REMINDER_NOTIFICATION_ID,
+  CHECK_IN_REMINDER_SOUND,
 } from '@/services/notifications/constants';
 import { getCheckInReminderContent } from '@/services/notifications/content';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
@@ -41,7 +42,7 @@ async function scheduleDailyCheckInReminder(
     content: {
       title,
       body,
-      sound: true,
+      sound: CHECK_IN_REMINDER_SOUND,
       data: { ...CHECK_IN_NOTIFICATION_DATA },
       ...(Platform.OS === 'android' ? { channelId: ANDROID_CHECK_IN_CHANNEL_ID } : {}),
     },

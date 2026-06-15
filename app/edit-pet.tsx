@@ -1,6 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import { Stack, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
@@ -79,7 +79,6 @@ function normalizeOptionalDate(value: string): string | null {
 export default function EditPetScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const allowExitRef = useRef(false);
 
   const pet = usePetStore((state) => state.pet);
   const petIsLoading = usePetStore((state) => state.isLoading);
@@ -108,6 +107,7 @@ export default function EditPetScreen() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPickingPhoto, setIsPickingPhoto] = useState(false);
+  const [canLeave, setCanLeave] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textColor = useThemeColor({}, 'text');
@@ -184,29 +184,24 @@ export default function EditPetScreen() {
     setOwnerName(pet.ownerName ?? '');
   }, [pet?.id]);
 
+  usePreventRemove(isDirty && !isSaving && !canLeave, ({ data }) => {
+    Alert.alert('Discard changes?', 'You have unsaved changes to this pet profile.', [
+      { text: 'Keep Editing', style: 'cancel' },
+      {
+        text: 'Discard',
+        style: 'destructive',
+        onPress: () => navigation.dispatch(data.action),
+      },
+    ]);
+  });
+
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
-      if (allowExitRef.current || !isDirty || isSaving) {
-        return;
-      }
+    if (!canLeave) {
+      return;
+    }
 
-      event.preventDefault();
-
-      Alert.alert('Discard changes?', 'You have unsaved changes to this pet profile.', [
-        { text: 'Keep Editing', style: 'cancel' },
-        {
-          text: 'Discard',
-          style: 'destructive',
-          onPress: () => {
-            allowExitRef.current = true;
-            navigation.dispatch(event.data.action);
-          },
-        },
-      ]);
-    });
-
-    return unsubscribe;
-  }, [isDirty, isSaving, navigation]);
+    router.back();
+  }, [canLeave, router]);
 
   const handleChangePhoto = useCallback(async () => {
     setValidationError(null);
@@ -307,8 +302,7 @@ export default function EditPetScreen() {
         microchipId: normalizeOptionalText(microchipId),
         ownerName: normalizeOptionalText(ownerName),
       });
-      allowExitRef.current = true;
-      router.back();
+      setCanLeave(true);
     } catch {
       // Store already sets error state.
     } finally {
@@ -327,7 +321,6 @@ export default function EditPetScreen() {
     ownerName,
     pet,
     photoUri,
-    router,
     sex,
     spayNeuterStatus,
     species,
@@ -354,6 +347,7 @@ export default function EditPetScreen() {
         options={{
           headerShown: true,
           title: 'Edit Pet',
+          headerBackButtonMenuEnabled: false,
           headerRight: () => (
             <Pressable
               accessibilityRole="button"
@@ -565,21 +559,16 @@ export default function EditPetScreen() {
           <GroupedSection title="Additional Information">
             <View style={styles.formSectionBody}>
               <ThemedText type="defaultSemiBold">Adoption Date</ThemedText>
-              <ThemedText style={styles.optionalHint}>Optional · YYYY-MM-DD</ThemedText>
-              <TextInput
+              <ThemedText style={styles.optionalHint}>Optional</ThemedText>
+              <DatePickerField
                 accessibilityLabel="Adoption date"
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="numbers-and-punctuation"
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={textSecondaryColor}
-                returnKeyType="done"
-                style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
+                disabled={isSaving}
+                placeholder="Select adoption date"
                 value={adoptionDate}
-                onChangeText={(value) => {
+                onChange={(nextValue) => {
                   setValidationError(null);
                   clearError();
-                  setAdoptionDate(value);
+                  setAdoptionDate(nextValue);
                 }}
               />
               <ThemedText type="defaultSemiBold">Microchip ID</ThemedText>

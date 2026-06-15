@@ -1,17 +1,24 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useNotificationResponse } from '@/hooks/use-notification-response';
 import { configureNotificationHandler } from '@/services/notifications';
+import { useAppearanceStore } from '@/stores/appearance.store';
 
 configureNotificationHandler();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const loadAppearance = useAppearanceStore((state) => state.loadAppearance);
   useNotificationResponse();
+
+  useEffect(() => {
+    void loadAppearance();
+  }, [loadAppearance]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

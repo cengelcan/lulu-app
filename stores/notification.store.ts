@@ -7,21 +7,21 @@ import {
 } from '@/services/notifications';
 import { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
 import {
-  getCheckInPreferences,
+  getCheckInReminderTime,
   getNotificationPermission,
-  setCheckInPreferences,
+  setCheckInReminderTime,
   setNotificationPermission,
   type NotificationPermissionStatus,
 } from '@/storage/prefs.storage';
-import type { CheckInPreference } from '@/types/check-in';
+import type { ReminderTime } from '@/types/reminder';
 
 type NotificationState = {
-  preference: CheckInPreference | null;
+  reminderTime: ReminderTime | null;
   permission: NotificationPermissionStatus | null;
   isLoading: boolean;
   error: string | null;
   loadNotificationSettings: () => Promise<void>;
-  savePreference: (preference: CheckInPreference) => Promise<void>;
+  saveReminderTime: (reminderTime: ReminderTime) => Promise<void>;
   savePermission: (permission: NotificationPermissionStatus) => Promise<NotificationPermissionStatus>;
   clearError: () => void;
 };
@@ -31,7 +31,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
-  preference: null,
+  reminderTime: null,
   permission: null,
   isLoading: false,
   error: null,
@@ -40,12 +40,12 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const [preference, permission] = await Promise.all([
-        getCheckInPreferences(),
+      const [reminderTime, permission] = await Promise.all([
+        getCheckInReminderTime(),
         getNotificationPermission(),
       ]);
 
-      set({ preference, permission, isLoading: false });
+      set({ reminderTime, permission, isLoading: false });
     } catch (error) {
       set({
         isLoading: false,
@@ -54,17 +54,17 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     }
   },
 
-  savePreference: async (preference) => {
+  saveReminderTime: async (reminderTime) => {
     set({ isLoading: true, error: null });
 
     try {
-      await setCheckInPreferences(preference);
-      set({ preference, isLoading: false });
-      await syncCheckInReminderSchedule({ preference });
+      await setCheckInReminderTime(reminderTime);
+      set({ reminderTime, isLoading: false });
+      await syncCheckInReminderSchedule({ reminderTime });
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to save check-in preference'),
+        error: getErrorMessage(error, 'Failed to save reminder time'),
       });
       throw error;
     }

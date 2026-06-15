@@ -2,18 +2,21 @@ import { cancelCheckInReminder } from '@/services/notifications';
 import * as petStorage from '@/storage/pet.storage';
 import {
   removeActivePetId,
-  removeCheckInPreferences,
+  removeAppAppearance,
+  removeCheckInReminderTime,
   removeCurrentUserId,
   removeNotificationPermission,
   setOnboardingCompleted,
 } from '@/storage/prefs.storage';
 import { clearLastStoreReviewPromptAt, clearUserProfile } from '@/storage/user.storage';
+import { useAppearanceStore } from '@/stores/appearance.store';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
+import { DEFAULT_APP_APPEARANCE } from '@/types/appearance';
 
 export async function deleteAllLocalData(): Promise<void> {
   await cancelCheckInReminder();
@@ -23,7 +26,8 @@ export async function deleteAllLocalData(): Promise<void> {
     removeActivePetId(),
     setOnboardingCompleted(false),
     removeCurrentUserId(),
-    removeCheckInPreferences(),
+    removeCheckInReminderTime(),
+    removeAppAppearance(),
     removeNotificationPermission(),
     clearUserProfile(),
     clearLastStoreReviewPromptAt(),
@@ -50,10 +54,14 @@ export function resetAppStoresAfterDataDeletion(): void {
     error: null,
   });
   useNotificationStore.setState({
-    preference: null,
+    reminderTime: null,
     permission: null,
     isLoading: false,
     error: null,
+  });
+  useAppearanceStore.setState({
+    appearance: DEFAULT_APP_APPEARANCE,
+    isLoading: false,
   });
   useSetupStore.getState().resetDraft();
   useUserStore.setState({

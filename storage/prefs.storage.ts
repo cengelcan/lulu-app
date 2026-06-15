@@ -1,9 +1,53 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { StorageKeys } from '@/constants/storage-keys';
-import type { CheckInPreference } from '@/types/check-in';
+import type { AppAppearance } from '@/types/appearance';
+import { DEFAULT_APP_APPEARANCE } from '@/types/appearance';
+import type { ReminderTime } from '@/types/reminder';
+import { DEFAULT_REMINDER_TIME } from '@/types/reminder';
+import { isValidReminderTime } from '@/utils/time';
 
 export type NotificationPermissionStatus = 'allowed' | 'later' | 'denied';
+
+/** @deprecated Legacy check-in preference slots — used only for migration. */
+type LegacyCheckInPreference = 'morning' | 'afternoon' | 'evening' | 'multiple_times_daily';
+
+const LEGACY_PREFERENCE_TO_TIME: Record<LegacyCheckInPreference, ReminderTime> = {
+  morning: { hour: 9, minute: 0 },
+  afternoon: { hour: 18, minute: 0 },
+  evening: { hour: 21, minute: 0 },
+  multiple_times_daily: { hour: 9, minute: 0 },
+};
+
+function parseReminderTimeJson(value: string): ReminderTime | null {
+  try {
+    const parsed = JSON.parse(value) as ReminderTime;
+    return isValidReminderTime(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function isLegacyCheckInPreference(value: string): value is LegacyCheckInPreference {
+  return (
+    value === 'morning' ||
+    value === 'afternoon' ||
+    value === 'evening' ||
+    value === 'multiple_times_daily'
+  );
+}
+
+async function migrateLegacyCheckInPreference(): Promise<ReminderTime | null> {
+  const legacyValue = await AsyncStorage.getItem(StorageKeys.checkInPreferences);
+  if (!legacyValue || !isLegacyCheckInPreference(legacyValue)) {
+    return null;
+  }
+
+  const reminderTime = LEGACY_PREFERENCE_TO_TIME[legacyValue];
+  await setCheckInReminderTime(reminderTime);
+  await AsyncStorage.removeItem(StorageKeys.checkInPreferences);
+  return reminderTime;
+}
 
 export async function getOnboardingCompleted(): Promise<boolean> {
   const value = await AsyncStorage.getItem(StorageKeys.onboardingCompleted);
@@ -26,17 +70,47 @@ export async function removeCurrentUserId(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.currentUserId);
 }
 
-export async function getCheckInPreferences(): Promise<CheckInPreference | null> {
-  const value = await AsyncStorage.getItem(StorageKeys.checkInPreferences);
-  return value as CheckInPreference | null;
+export async function getCheckInReminderTime(): Promise<ReminderTime> {
+  const value = await AsyncStorage.getItem(StorageKeys.checkInReminderTime);
+  if (value) {
+    const parsed = parseReminderTimeJson(value);
+    if (parsed) {
+      return parsed;
+    }
+  }
+
+  const migrated = await migrateLegacyCheckInPreference();
+  if (migrated) {
+    return migrated;
+  }
+
+  return DEFAULT_REMINDER_TIME;
 }
 
-export async function setCheckInPreferences(preference: CheckInPreference): Promise<void> {
-  await AsyncStorage.setItem(StorageKeys.checkInPreferences, preference);
+export async function setCheckInReminderTime(reminderTime: ReminderTime): Promise<void> {
+  await AsyncStorage.setItem(StorageKeys.checkInReminderTime, JSON.stringify(reminderTime));
 }
 
-export async function removeCheckInPreferences(): Promise<void> {
+export async function removeCheckInReminderTime(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.checkInReminderTime);
   await AsyncStorage.removeItem(StorageKeys.checkInPreferences);
+}
+
+export async function getAppAppearance(): Promise<AppAppearance> {
+  const value = await AsyncStorage.getItem(StorageKeys.appAppearance);
+  if (value === 'system' || value === 'light' || value === 'dark') {
+    return value;
+  }
+
+  return DEFAULT_APP_APPEARANCE;
+}
+
+export async function setAppAppearance(appearance: AppAppearance): Promise<void> {
+  await AsyncStorage.setItem(StorageKeys.appAppearance, appearance);
+}
+
+export async function removeAppAppearance(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.appAppearance);
 }
 
 export async function getNotificationPermission(): Promise<NotificationPermissionStatus | null> {

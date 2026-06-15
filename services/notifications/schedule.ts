@@ -6,22 +6,16 @@ import {
   ANDROID_CHECK_IN_CHANNEL_ID,
   CHECK_IN_NOTIFICATION_DATA,
   CHECK_IN_REMINDER_NOTIFICATION_ID,
-  CHECK_IN_REMINDER_SCHEDULE,
-  CHECK_IN_REMINDER_SLOT_IDS,
-  isNotificationSchedulablePreference,
-  isSchedulableCheckInPreference,
-  MULTIPLE_TIMES_DAILY_SLOTS,
-  type SchedulableCheckInPreference,
 } from '@/services/notifications/constants';
 import { getCheckInReminderContent } from '@/services/notifications/content';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
 import { getActivePet } from '@/storage/pet.storage';
 import {
-  getCheckInPreferences,
+  getCheckInReminderTime,
   getNotificationPermission,
   type NotificationPermissionStatus,
 } from '@/storage/prefs.storage';
-import type { CheckInPreference } from '@/types/check-in';
+import type { ReminderTime } from '@/types/reminder';
 
 export async function cancelCheckInReminder(): Promise<void> {
   if (Platform.OS === 'web') {
@@ -36,15 +30,14 @@ export async function cancelCheckInReminder(): Promise<void> {
 }
 
 async function scheduleDailyCheckInReminder(
-  slot: SchedulableCheckInPreference,
-  petName: string,
-  identifier: string
+  reminderTime: ReminderTime,
+  petName: string
 ): Promise<void> {
-  const { hour, minute } = CHECK_IN_REMINDER_SCHEDULE[slot];
-  const { title, body } = getCheckInReminderContent(slot, petName);
+  const { hour, minute } = reminderTime;
+  const { title, body } = getCheckInReminderContent(petName);
 
   await Notifications.scheduleNotificationAsync({
-    identifier,
+    identifier: CHECK_IN_REMINDER_NOTIFICATION_ID,
     content: {
       title,
       body,
@@ -62,7 +55,7 @@ async function scheduleDailyCheckInReminder(
 }
 
 export async function syncCheckInReminderSchedule(input?: {
-  preference?: CheckInPreference | null;
+  reminderTime?: ReminderTime | null;
   permission?: NotificationPermissionStatus | null;
   petName?: string | null;
 }): Promise<void> {
@@ -70,8 +63,8 @@ export async function syncCheckInReminderSchedule(input?: {
     return;
   }
 
-  const [preference, permission, pet] = await Promise.all([
-    input?.preference !== undefined ? Promise.resolve(input.preference) : getCheckInPreferences(),
+  const [reminderTime, permission, pet] = await Promise.all([
+    input?.reminderTime !== undefined ? Promise.resolve(input.reminderTime) : getCheckInReminderTime(),
     input?.permission !== undefined ? Promise.resolve(input.permission) : getNotificationPermission(),
     input?.petName !== undefined
       ? Promise.resolve(input.petName ? { name: input.petName } : null)
@@ -80,7 +73,7 @@ export async function syncCheckInReminderSchedule(input?: {
 
   await cancelCheckInReminder();
 
-  if (permission !== 'allowed' || !isNotificationSchedulablePreference(preference)) {
+  if (permission !== 'allowed') {
     return;
   }
 
@@ -94,16 +87,5 @@ export async function syncCheckInReminderSchedule(input?: {
     return;
   }
 
-  if (preference === 'multiple_times_daily') {
-    await Promise.all(
-      MULTIPLE_TIMES_DAILY_SLOTS.map((slot) =>
-        scheduleDailyCheckInReminder(slot, petName, CHECK_IN_REMINDER_SLOT_IDS[slot])
-      )
-    );
-    return;
-  }
-
-  if (isSchedulableCheckInPreference(preference)) {
-    await scheduleDailyCheckInReminder(preference, petName, CHECK_IN_REMINDER_NOTIFICATION_ID);
-  }
+  await scheduleDailyCheckInReminder(reminderTime, petName);
 }

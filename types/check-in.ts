@@ -4,12 +4,6 @@ export type Energy = 'high' | 'normal' | 'low';
 
 export type Symptom = 'none' | 'vomiting' | 'diarrhea' | 'other';
 
-export type CheckInPreference =
-  | 'morning'
-  | 'afternoon'
-  | 'evening'
-  | 'multiple_times_daily';
-
 export type CheckIn = {
   id: string;
   petId: string;

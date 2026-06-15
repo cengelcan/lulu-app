@@ -157,7 +157,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
   const clearCheckInError = useCheckInStore((state) => state.clearError);
 
-  const reminderPreference = useNotificationStore((state) => state.preference);
+  const reminderTime = useNotificationStore((state) => state.reminderTime);
   const reminderPermission = useNotificationStore((state) => state.permission);
   const reminderIsLoading = useNotificationStore((state) => state.isLoading);
   const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
@@ -194,7 +194,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   }, [loadNotificationSettings, pet?.id]);
 
   const upcomingReminder =
-    reminderPermission === 'allowed' ? getUpcomingReminder(reminderPreference) : null;
+    reminderPermission === 'allowed' ? getUpcomingReminder(reminderTime) : null;
 
   const handleRetry = () => {
     clearError();

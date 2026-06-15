@@ -1,4 +1,4 @@
-import type { Appetite, CheckInPreference, Energy, Symptom } from '@/types/check-in';
+import type { Appetite, Energy, Symptom } from '@/types/check-in';
 import type {
   HealthCondition,
   PetAgeGroup,
@@ -47,13 +47,6 @@ export const HEALTH_CONDITION_OPTIONS: Option<HealthCondition>[] = [
   { value: 'arthritis', label: 'Arthritis' },
   { value: 'other', label: 'Other' },
   { value: 'not_sure', label: 'Not Sure' },
-];
-
-export const CHECK_IN_PREFERENCE_OPTIONS: Option<CheckInPreference>[] = [
-  { value: 'morning', label: 'Morning' },
-  { value: 'afternoon', label: 'Afternoon' },
-  { value: 'evening', label: 'Evening' },
-  { value: 'multiple_times_daily', label: 'Multiple Times Daily' },
 ];
 
 export const APPETITE_OPTIONS: Option<Appetite>[] = [

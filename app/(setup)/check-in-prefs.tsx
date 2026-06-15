@@ -1,36 +1,43 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
-import { CHECK_IN_PREFERENCE_OPTIONS } from '@/constants/check-in';
+import { TimePickerField } from '@/components/ui/TimePickerField';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { useNotificationStore } from '@/stores/notification.store';
-import type { CheckInPreference } from '@/types/check-in';
+import { DEFAULT_REMINDER_TIME, type ReminderTime } from '@/types/reminder';
 
 export default function CheckInPrefsScreen() {
   const router = useRouter();
   const { onBack } = useSetupScreenBack(6, 'initial');
-  const savedPreference = useNotificationStore((state) => state.preference);
-  const savePreference = useNotificationStore((state) => state.savePreference);
+  const savedReminderTime = useNotificationStore((state) => state.reminderTime);
+  const saveReminderTime = useNotificationStore((state) => state.saveReminderTime);
+  const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
   const isLoading = useNotificationStore((state) => state.isLoading);
   const storeError = useNotificationStore((state) => state.error);
   const clearError = useNotificationStore((state) => state.clearError);
 
-  const [preference, setPreference] = useState<CheckInPreference | null>(savedPreference);
+  const [reminderTime, setReminderTime] = useState<ReminderTime>(
+    savedReminderTime ?? DEFAULT_REMINDER_TIME
+  );
   const [error, setError] = useState<string | null>(null);
 
-  const handleContinue = useCallback(async () => {
-    if (!preference) {
-      setError('Please select a check-in preference');
-      return;
-    }
+  useEffect(() => {
+    void loadNotificationSettings();
+  }, [loadNotificationSettings]);
 
+  useEffect(() => {
+    if (savedReminderTime) {
+      setReminderTime(savedReminderTime);
+    }
+  }, [savedReminderTime]);
+
+  const handleContinue = useCallback(async () => {
     clearError();
     setError(null);
 
     try {
-      await savePreference(preference);
+      await saveReminderTime(reminderTime);
 
       if (useNotificationStore.getState().error) {
         return;
@@ -40,30 +47,22 @@ export default function CheckInPrefsScreen() {
     } catch {
       // Store sets error state.
     }
-  }, [clearError, preference, router, savePreference]);
+  }, [clearError, reminderTime, router, saveReminderTime]);
 
   return (
     <SetupScreen
       step={6}
       title="When should we remind you?"
-      description="Choose your preferred check-in time."
+      description="Choose your preferred daily reminder time."
       onContinue={() => void handleContinue()}
       onBack={onBack}
-      continueDisabled={!preference}
       isLoading={isLoading}
       error={error ?? storeError}>
-      {CHECK_IN_PREFERENCE_OPTIONS.map((option) => (
-        <SelectableOption
-          key={option.value}
-          label={option.label}
-          selected={preference === option.value}
-          onPress={() => {
-            setError(null);
-            clearError();
-            setPreference(option.value);
-          }}
-        />
-      ))}
+      <TimePickerField
+        accessibilityLabel="Reminder time"
+        value={reminderTime}
+        onChange={setReminderTime}
+      />
     </SetupScreen>
   );
 }

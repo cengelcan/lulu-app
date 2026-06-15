@@ -1,108 +1,45 @@
-import {
-  CHECK_IN_REMINDER_SCHEDULE,
-  isNotificationSchedulablePreference,
-  isSchedulableCheckInPreference,
-  MULTIPLE_TIMES_DAILY_SLOTS,
-  type SchedulableCheckInPreference,
-} from '@/services/notifications/constants';
 import { addDays, formatLocalDate } from '@/services/notifications/date';
-import type { CheckInPreference } from '@/types/check-in';
+import type { ReminderTime } from '@/types/reminder';
+import { formatReminderTime } from '@/utils/time';
 
 export type UpcomingReminderDisplay = {
   dateLabel: 'Today' | 'Tomorrow';
   timeLabel: string;
-  slot: SchedulableCheckInPreference;
   date: string;
 };
-
-function formatTimeLabel(hour: number, minute: number): string {
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-}
 
 function getDateLabel(date: string, now: Date): 'Today' | 'Tomorrow' {
   return date === formatLocalDate(now) ? 'Today' : 'Tomorrow';
 }
 
-function isSlotAfterNow(
-  slot: SchedulableCheckInPreference,
-  day: Date,
-  now: Date
-): boolean {
-  const { hour, minute } = CHECK_IN_REMINDER_SCHEDULE[slot];
+function isTimeAfterNow(reminderTime: ReminderTime, day: Date, now: Date): boolean {
   const slotTime = new Date(day);
-  slotTime.setHours(hour, minute, 0, 0);
-
+  slotTime.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
   return now < slotTime;
 }
 
-function getUpcomingFromSlot(
-  slot: SchedulableCheckInPreference,
-  date: string,
-  now: Date
-): UpcomingReminderDisplay {
-  const { hour, minute } = CHECK_IN_REMINDER_SCHEDULE[slot];
-
-  return {
-    slot,
-    date,
-    dateLabel: getDateLabel(date, now),
-    timeLabel: formatTimeLabel(hour, minute),
-  };
-}
-
-function resolveUpcomingSlot(
-  preference: CheckInPreference | null,
-  now: Date = new Date()
-): { slot: SchedulableCheckInPreference; date: string } | null {
-  if (!isNotificationSchedulablePreference(preference)) {
-    return null;
-  }
-
-  if (preference === 'multiple_times_daily') {
-    for (let dayOffset = 0; dayOffset < 2; dayOffset += 1) {
-      const day = addDays(now, dayOffset);
-      const date = formatLocalDate(day);
-      const slots =
-        dayOffset === 0
-          ? MULTIPLE_TIMES_DAILY_SLOTS.filter((slot) => isSlotAfterNow(slot, day, now))
-          : MULTIPLE_TIMES_DAILY_SLOTS;
-
-      const slot = slots[0];
-      if (slot) {
-        return { slot, date };
-      }
-    }
-
-    return null;
-  }
-
-  if (isSchedulableCheckInPreference(preference)) {
-    const today = formatLocalDate(now);
-    const { hour, minute } = CHECK_IN_REMINDER_SCHEDULE[preference];
-    const slotToday = new Date(now);
-    slotToday.setHours(hour, minute, 0, 0);
-
-    if (now < slotToday) {
-      return { slot: preference, date: today };
-    }
-
-    const tomorrow = formatLocalDate(addDays(now, 1));
-
-    return { slot: preference, date: tomorrow };
-  }
-
-  return null;
-}
-
 export function getUpcomingReminder(
-  preference: CheckInPreference | null,
+  reminderTime: ReminderTime | null,
   now: Date = new Date()
 ): UpcomingReminderDisplay | null {
-  const upcoming = resolveUpcomingSlot(preference, now);
-
-  if (!upcoming) {
+  if (!reminderTime) {
     return null;
   }
 
-  return getUpcomingFromSlot(upcoming.slot, upcoming.date, now);
+  const today = formatLocalDate(now);
+  if (isTimeAfterNow(reminderTime, now, now)) {
+    return {
+      date: today,
+      dateLabel: getDateLabel(today, now),
+      timeLabel: formatReminderTime(reminderTime),
+    };
+  }
+
+  const tomorrow = formatLocalDate(addDays(now, 1));
+
+  return {
+    date: tomorrow,
+    dateLabel: getDateLabel(tomorrow, now),
+    timeLabel: formatReminderTime(reminderTime),
+  };
 }

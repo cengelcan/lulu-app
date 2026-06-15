@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -14,6 +15,7 @@ type OnboardingScreenProps = {
   description: string;
   buttonTitle: string;
   onContinue: () => void;
+  onBack?: () => void;
   isLoading?: boolean;
   error?: string | null;
 };
@@ -24,6 +26,7 @@ export function OnboardingScreen({
   description,
   buttonTitle,
   onContinue,
+  onBack,
   isLoading = false,
   error = null,
 }: OnboardingScreenProps) {
@@ -34,6 +37,7 @@ export function OnboardingScreen({
   return (
     <ScreenContainer contentStyle={styles.content}>
       <View style={styles.body}>
+        {onBack ? <ScreenHeader onBack={onBack} /> : null}
         <View
           accessibilityRole="progressbar"
           accessibilityLabel={`Step ${step} of ${TOTAL_STEPS}`}

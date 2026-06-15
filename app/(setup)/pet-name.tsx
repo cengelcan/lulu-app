@@ -6,6 +6,7 @@ import { SetupScreen } from '@/components/setup/setup-screen';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
+import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { PET_NAME_MAX_LENGTH } from '@/types/pet';
 import { useSetupStore, validatePetName } from '@/stores/setup.store';
 
@@ -13,6 +14,7 @@ export default function PetNameScreen() {
   const router = useRouter();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
+  const { onBack } = useSetupScreenBack(2, mode);
 
   const name = useSetupStore((state) => state.name);
   const setName = useSetupStore((state) => state.setName);
@@ -41,6 +43,7 @@ export default function PetNameScreen() {
       title="What's your pet's name?"
       description={`Enter a name between 1 and ${PET_NAME_MAX_LENGTH} characters.`}
       onContinue={handleContinue}
+      onBack={onBack}
       continueDisabled={!name.trim()}
       error={error}>
       <TextInput

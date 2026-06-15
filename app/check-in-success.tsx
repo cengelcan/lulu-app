@@ -1,10 +1,12 @@
 import { useRouter } from 'expo-router';
+import { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
+import { useAndroidBackHandler } from '@/hooks/use-android-back-handler';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCheckInStore } from '@/stores/check-in.store';
 
@@ -18,6 +20,17 @@ export default function CheckInSuccessScreen() {
     ? "You've completed your first health check-in."
     : "Your check-in is saved. Thanks for keeping track.";
 
+  const handleGoHome = useCallback(() => {
+    router.dismissTo('/(tabs)/home');
+  }, [router]);
+
+  useAndroidBackHandler(
+    useCallback(() => {
+      handleGoHome();
+      return true;
+    }, [handleGoHome])
+  );
+
   return (
     <ScreenContainer contentStyle={styles.content}>
       <ThemedText type="title" style={styles.title}>
@@ -29,11 +42,7 @@ export default function CheckInSuccessScreen() {
         style={styles.message}>
         {message}
       </ThemedText>
-      <Button
-        title="Go Home"
-        onPress={() => router.replace('/(tabs)/home')}
-        style={styles.button}
-      />
+      <Button title="Go Home" onPress={handleGoHome} style={styles.button} />
     </ScreenContainer>
   );
 }

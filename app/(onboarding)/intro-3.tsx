@@ -12,6 +12,7 @@ export default function Onboarding3Screen() {
       description="Build a simple health history that helps you notice changes early."
       buttonTitle="I'm Ready"
       onContinue={() => router.push('/(onboarding)/intro-4')}
+      onBack={() => router.back()}
     />
   );
 }

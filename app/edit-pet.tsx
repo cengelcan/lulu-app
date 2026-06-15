@@ -143,7 +143,7 @@ export default function EditPetScreen() {
 
   useEffect(() => {
     if (!petIsLoading && !pet) {
-      router.replace('/(tabs)/home');
+      router.dismissTo('/(tabs)/home');
     }
   }, [pet, petIsLoading, router]);
 

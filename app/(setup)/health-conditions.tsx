@@ -5,6 +5,7 @@ import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { HEALTH_CONDITION_OPTIONS } from '@/constants/check-in';
 import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
+import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { finalizeAddModePet, validateSetupDraft } from '@/services/setup/finalize-pet-creation';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
@@ -14,6 +15,7 @@ export default function HealthConditionsScreen() {
   const router = useRouter();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
+  const { onBack } = useSetupScreenBack(4, mode);
 
   const species = useSetupStore((state) => state.species);
   const name = useSetupStore((state) => state.name);
@@ -90,6 +92,7 @@ export default function HealthConditionsScreen() {
       title="Any health conditions?"
       description="Select all that apply. You can skip this if none apply."
       onContinue={handleContinue}
+      onBack={onBack}
       buttonTitle={mode === 'add' ? 'Add Pet' : 'Continue'}
       isLoading={mode === 'add' ? petIsLoading : false}
       error={error}>

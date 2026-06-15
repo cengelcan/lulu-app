@@ -12,6 +12,7 @@ export default function Onboarding2Screen() {
       description="Record how your pet is doing in under 10 seconds — anytime, anywhere."
       buttonTitle="Sounds Good"
       onContinue={() => router.push('/(onboarding)/intro-3')}
+      onBack={() => router.back()}
     />
   );
 }

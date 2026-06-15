@@ -6,6 +6,7 @@ import { SetupScreen } from '@/components/setup/setup-screen';
 import { Button } from '@/components/ui/Button';
 import { Spacing } from '@/constants/theme';
 import { setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
+import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import {
   finalizeInitialModePet,
   validateSetupDraft,
@@ -19,6 +20,7 @@ export default function NotificationPermissionScreen() {
   const router = useRouter();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
+  const { onBack } = useSetupScreenBack(6, mode);
 
   const species = useSetupStore((state) => state.species);
   const name = useSetupStore((state) => state.name);
@@ -93,6 +95,7 @@ export default function NotificationPermissionScreen() {
       totalSteps={totalSteps}
       title="Stay on track with reminders"
       description="We can send gentle reminders for daily check-ins. You can change this later in settings."
+      onBack={onBack}
       error={error}
       footer={
         <View style={styles.actions}>

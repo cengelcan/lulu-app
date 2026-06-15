@@ -5,12 +5,14 @@ import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { PET_SPECIES_OPTIONS } from '@/constants/check-in';
 import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
+import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { useSetupStore, validateSpecies } from '@/stores/setup.store';
 
 export default function PetTypeScreen() {
   const router = useRouter();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
+  const { showBack, onBack } = useSetupScreenBack(1, mode);
 
   const species = useSetupStore((state) => state.species);
   const setSpecies = useSetupStore((state) => state.setSpecies);
@@ -40,6 +42,7 @@ export default function PetTypeScreen() {
       title="What type of pet do you have?"
       description="Select one option to continue."
       onContinue={handleContinue}
+      onBack={showBack ? onBack : undefined}
       continueDisabled={!species}
       error={error}>
       {PET_SPECIES_OPTIONS.map((option) => (

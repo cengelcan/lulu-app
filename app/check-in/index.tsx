@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
@@ -210,7 +210,7 @@ export default function CheckInScreen() {
 
   useEffect(() => {
     if (!petIsLoading && !pet) {
-      router.replace('/(tabs)/home');
+      router.dismissTo('/(tabs)/home');
     }
   }, [pet, petIsLoading, router]);
 
@@ -338,14 +338,19 @@ export default function CheckInScreen() {
 
   if (petIsLoading || !pet) {
     return (
-      <ScreenContainer contentStyle={styles.centered}>
-        <ActivityIndicator color={primaryColor} size="large" />
-      </ScreenContainer>
+      <>
+        <Stack.Screen options={{ headerShown: true, title: 'Check-In' }} />
+        <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
+          <ActivityIndicator color={primaryColor} size="large" />
+        </ScreenContainer>
+      </>
     );
   }
 
   return (
-    <ScreenContainer scrollable contentStyle={styles.content}>
+    <>
+      <Stack.Screen options={{ headerShown: true, title: 'Check-In' }} />
+      <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
       <View style={styles.body}>
         <ThemedText type="title">{screenTitle}</ThemedText>
         <ThemedText
@@ -463,6 +468,7 @@ export default function CheckInScreen() {
         style={styles.button}
       />
     </ScreenContainer>
+    </>
   );
 }
 

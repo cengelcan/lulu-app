@@ -29,6 +29,7 @@ export default function Onboarding4Screen() {
       description="Bring organized notes and health records when your pet needs care."
       buttonTitle="Start Tracking"
       onContinue={() => void handleContinue()}
+      onBack={() => router.back()}
       isLoading={isLoading}
       error={error}
     />

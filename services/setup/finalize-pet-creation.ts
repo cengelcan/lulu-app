@@ -74,7 +74,7 @@ export async function finalizeAddModePet(
   await deps.loadCheckIns(pet.id);
 
   deps.resetDraft();
-  deps.router.replace('/(tabs)/home');
+  deps.router.dismissTo('/(tabs)/home');
 }
 
 export async function finalizeInitialModePet(
@@ -89,7 +89,7 @@ export async function finalizeInitialModePet(
   await deps.setActivePet(pet.id);
 
   deps.resetDraft();
-  deps.router.replace('/(tabs)/home');
+  deps.router.dismissTo('/(tabs)/home');
 
   return resolvedPermission;
 }

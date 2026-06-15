@@ -4,11 +4,13 @@ import { useCallback, useState } from 'react';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { CHECK_IN_PREFERENCE_OPTIONS } from '@/constants/check-in';
+import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { useNotificationStore } from '@/stores/notification.store';
 import type { CheckInPreference } from '@/types/check-in';
 
 export default function CheckInPrefsScreen() {
   const router = useRouter();
+  const { onBack } = useSetupScreenBack(5, 'initial');
   const savePreference = useNotificationStore((state) => state.savePreference);
   const isLoading = useNotificationStore((state) => state.isLoading);
   const storeError = useNotificationStore((state) => state.error);
@@ -45,6 +47,7 @@ export default function CheckInPrefsScreen() {
       title="When should we remind you?"
       description="Choose your preferred check-in time."
       onContinue={() => void handleContinue()}
+      onBack={onBack}
       continueDisabled={!preference}
       isLoading={isLoading}
       error={error ?? storeError}>

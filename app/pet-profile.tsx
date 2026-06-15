@@ -1,6 +1,5 @@
-import { HeaderBackButton } from '@react-navigation/elements';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { PetAvatar } from '@/components/pet/PetAvatar';
@@ -61,26 +60,10 @@ export default function PetProfileScreen() {
     }
   }, [isLoading, pet, router]);
 
-  const handleGoHome = useCallback(() => {
-    router.dismissTo('/(tabs)/home');
-  }, [router]);
-
-  const screenOptions = useMemo(
-    () => ({
-      headerShown: true as const,
-      title: 'Pet Profile',
-      headerBackTitle: 'Home',
-      headerLeft: (props: { tintColor?: string }) => (
-        <HeaderBackButton
-          {...props}
-          label="Home"
-          tintColor={props.tintColor ?? primaryColor}
-          onPress={handleGoHome}
-        />
-      ),
-    }),
-    [handleGoHome, primaryColor]
-  );
+  const screenOptions = {
+    headerShown: true as const,
+    title: 'Pet Profile',
+  };
 
   const handleEditProfile = () => {
     router.push('/edit-pet');

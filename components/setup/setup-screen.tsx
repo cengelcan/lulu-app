@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -16,6 +17,7 @@ type SetupScreenProps = {
   children?: React.ReactNode;
   buttonTitle?: string;
   onContinue?: () => void;
+  onBack?: () => void;
   continueDisabled?: boolean;
   isLoading?: boolean;
   error?: string | null;
@@ -30,6 +32,7 @@ export function SetupScreen({
   children,
   buttonTitle = 'Continue',
   onContinue,
+  onBack,
   continueDisabled = false,
   isLoading = false,
   error = null,
@@ -42,6 +45,7 @@ export function SetupScreen({
   return (
     <ScreenContainer scrollable contentStyle={styles.content}>
       <View style={styles.body}>
+        {onBack ? <ScreenHeader onBack={onBack} /> : null}
         <View
           accessibilityRole="progressbar"
           accessibilityLabel={`Step ${step} of ${totalSteps}`}

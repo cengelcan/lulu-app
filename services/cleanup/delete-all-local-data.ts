@@ -7,11 +7,13 @@ import {
   removeNotificationPermission,
   setOnboardingCompleted,
 } from '@/storage/prefs.storage';
+import { clearLastStoreReviewPromptAt, clearUserProfile } from '@/storage/user.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
+import { useUserStore } from '@/stores/user.store';
 
 export async function deleteAllLocalData(): Promise<void> {
   await cancelCheckInReminder();
@@ -23,6 +25,8 @@ export async function deleteAllLocalData(): Promise<void> {
     removeCurrentUserId(),
     removeCheckInPreferences(),
     removeNotificationPermission(),
+    clearUserProfile(),
+    clearLastStoreReviewPromptAt(),
   ]);
 }
 
@@ -52,4 +56,13 @@ export function resetAppStoresAfterDataDeletion(): void {
     error: null,
   });
   useSetupStore.getState().resetDraft();
+  useUserStore.setState({
+    displayName: null,
+    avatarUri: null,
+    provider: 'guest',
+    email: null,
+    isPlusActive: false,
+    isLoading: false,
+    error: null,
+  });
 }

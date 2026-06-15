@@ -6,3 +6,10 @@ export type User = {
   provider: AuthProvider;
   createdAt: string;
 };
+
+export type UserProfile = {
+  displayName: string | null;
+  avatarUri: string | null;
+};
+
+export const DISPLAY_NAME_MAX_LENGTH = 50;

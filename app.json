@@ -44,7 +44,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to set your pet's profile picture."
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to set profile pictures."
         }
       ]
     ],

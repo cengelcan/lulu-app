@@ -4,6 +4,8 @@ export const StorageKeys = {
   checkInPreferences: '@pet_health_journal/check_in_preferences',
   notificationPermission: '@pet_health_journal/notification_permission',
   activePetId: '@pet_health_journal/active_pet_id',
+  userProfile: '@pet_health_journal/user_profile',
+  lastStoreReviewPromptAt: '@pet_health_journal/last_store_review_prompt_at',
 } as const;
 
 export type StorageKey = (typeof StorageKeys)[keyof typeof StorageKeys];

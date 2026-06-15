@@ -120,7 +120,7 @@ export async function removeAppAppearance(): Promise<void> {
 
 export async function getAppLanguagePreference(): Promise<AppLanguagePreference> {
   const value = await AsyncStorage.getItem(StorageKeys.appLanguage);
-  if (value === 'system' || value === 'en' || value === 'tr') {
+  if (value === 'system' || value === 'en' || value === 'tr' || value === 'de') {
     return value;
   }
 

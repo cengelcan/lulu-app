@@ -3,7 +3,7 @@
 Uygulamanın bir sonraki geliştirme döngüsü için önceliklendirilmiş yol haritası.
 
 **Son güncelleme:** 2026-06-15  
-**Durum:** Sprint 1 tamamlandı
+**Durum:** Sprint 2 tamamlandı
 
 ---
 

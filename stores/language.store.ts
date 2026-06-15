@@ -4,6 +4,7 @@ import {
   getAppLanguagePreference,
   setAppLanguagePreference,
 } from '@/storage/prefs.storage';
+import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
 import type { AppLanguagePreference, ResolvedLanguage } from '@/types/language';
 import {
   DEFAULT_APP_LANGUAGE_PREFERENCE,
@@ -48,5 +49,6 @@ export const useLanguageStore = create<LanguageState>((set) => ({
       languagePreference,
       resolvedLanguage: resolveLanguagePreference(languagePreference),
     });
+    void syncCheckInReminderSchedule();
   },
 }));

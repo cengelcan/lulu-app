@@ -9,9 +9,11 @@ import type {
   PetSpecies,
 } from '@/types/pet';
 import { formatCheckInTitleDate } from '@/utils/date';
+import { getLocaleTag } from '@/utils/locale';
 
 export function usePetDisplay() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const locale = getLocaleTag(language);
 
   const displayPetText = useCallback(
     (value: string | null | undefined): string => {
@@ -73,9 +75,9 @@ export function usePetDisplay() {
         return t('pet.notSet');
       }
 
-      return formatCheckInTitleDate(trimmed);
+      return formatCheckInTitleDate(trimmed, locale);
     },
-    [t]
+    [locale, t]
   );
 
   const displayHealthConditions = useCallback(

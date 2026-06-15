@@ -150,7 +150,7 @@ type DashboardScreenProps = {
 
 export default function DashboardScreen({ edges = ['top', 'bottom'] }: DashboardScreenProps) {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { displayPetSpecies } = usePetDisplay();
   const pet = usePetStore((state) => state.pet);
   const isLoading = usePetStore((state) => state.isLoading);
@@ -201,7 +201,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   }, [loadNotificationSettings, pet?.id]);
 
   const upcomingReminder =
-    reminderPermission === 'allowed' ? getUpcomingReminder(reminderTime) : null;
+    reminderPermission === 'allowed' ? getUpcomingReminder(reminderTime, language) : null;
 
   const handleRetry = () => {
     clearError();
@@ -210,10 +210,6 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
   const handleSetupPet = () => {
     router.replace('/(setup)/pet-type');
-  };
-
-  const handleStartCheckIn = () => {
-    router.push('/check-in');
   };
 
   const handleOpenTodaysCheckIn = () => {
@@ -296,8 +292,6 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
             </View>
             <IconSymbol name="chevron.right" size={20} color={textSecondaryColor} />
           </Pressable>
-
-          <Button title={t('dashboard.startCheckIn')} onPress={handleStartCheckIn} />
 
           <DailyCheckInProgress />
 

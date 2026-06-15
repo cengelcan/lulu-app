@@ -9,5 +9,9 @@ export function resolveDeviceLanguage(): ResolvedLanguage {
     return 'tr';
   }
 
+  if (languageCode === 'de') {
+    return 'de';
+  }
+
   return 'en';
 }

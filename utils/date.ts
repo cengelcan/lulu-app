@@ -14,8 +14,8 @@ export function isSameLocalDate(a: Date, b: Date): boolean {
   );
 }
 
-export function formatWeekdayShort(date: Date): string {
-  return date.toLocaleDateString('en-US', { weekday: 'short' });
+export function formatWeekdayShort(date: Date, locale = 'en-US'): string {
+  return date.toLocaleDateString(locale, { weekday: 'short' });
 }
 
 export function getCurrentWeekDays(referenceDate: Date = new Date()): Date[] {
@@ -79,13 +79,13 @@ export function isTodayLocalDate(dateString: string): boolean {
   return isSameLocalDate(parsed, getTodayStart());
 }
 
-export function formatCheckInTitleDate(dateString: string): string {
+export function formatCheckInTitleDate(dateString: string, locale?: string): string {
   const parsed = parseLocalDate(dateString);
   if (!parsed) {
     return dateString;
   }
 
-  return parsed.toLocaleDateString(undefined, {
+  return parsed.toLocaleDateString(locale, {
     weekday: 'long',
     month: 'short',
     day: 'numeric',

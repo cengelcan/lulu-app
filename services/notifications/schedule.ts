@@ -13,6 +13,7 @@ import { hasNotificationPermission } from '@/services/notifications/permissions'
 import { getActivePet } from '@/storage/pet.storage';
 import {
   getCheckInReminderTime,
+  getAppLanguage,
   getNotificationPermission,
   type NotificationPermissionStatus,
 } from '@/storage/prefs.storage';
@@ -32,10 +33,11 @@ export async function cancelCheckInReminder(): Promise<void> {
 
 async function scheduleDailyCheckInReminder(
   reminderTime: ReminderTime,
-  petName: string
+  petName: string,
+  language: Awaited<ReturnType<typeof getAppLanguage>>
 ): Promise<void> {
   const { hour, minute } = reminderTime;
-  const { title, body } = getCheckInReminderContent(petName);
+  const { title, body } = getCheckInReminderContent(petName, language);
 
   await Notifications.scheduleNotificationAsync({
     identifier: CHECK_IN_REMINDER_NOTIFICATION_ID,
@@ -64,12 +66,13 @@ export async function syncCheckInReminderSchedule(input?: {
     return;
   }
 
-  const [reminderTime, permission, pet] = await Promise.all([
+  const [reminderTime, permission, pet, language] = await Promise.all([
     input?.reminderTime !== undefined ? Promise.resolve(input.reminderTime) : getCheckInReminderTime(),
     input?.permission !== undefined ? Promise.resolve(input.permission) : getNotificationPermission(),
     input?.petName !== undefined
       ? Promise.resolve(input.petName ? { name: input.petName } : null)
       : getActivePet(),
+    getAppLanguage(),
   ]);
 
   await cancelCheckInReminder();
@@ -88,5 +91,5 @@ export async function syncCheckInReminderSchedule(input?: {
     return;
   }
 
-  await scheduleDailyCheckInReminder(reminderTime, petName);
+  await scheduleDailyCheckInReminder(reminderTime, petName, language);
 }

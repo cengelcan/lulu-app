@@ -18,6 +18,8 @@ export type Translations = {
     setUpPet: string;
     date: string;
     time: string;
+    today: string;
+    tomorrow: string;
   };
   tabs: {
     home: string;
@@ -41,6 +43,7 @@ export type Translations = {
     languageSystem: string;
     languageEnglish: string;
     languageTurkish: string;
+    languageGerman: string;
   };
   onboarding: {
     intro1: { title: string; description: string; button: string };
@@ -123,6 +126,13 @@ export type Translations = {
     reports: string;
     records: string;
     medication: string;
+    missedCheckInToday: string;
+    missedCheckInYesterday: string;
+    missedCheckInCta: string;
+  };
+  notifications: {
+    reminderTitle: string;
+    reminderBody: string;
   };
   myPets: {
     noPetsTitle: string;

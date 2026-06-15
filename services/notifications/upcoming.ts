@@ -1,15 +1,18 @@
+import { translate } from '@/i18n';
 import { addDays, formatLocalDate } from '@/services/notifications/date';
+import type { ResolvedLanguage } from '@/types/language';
 import type { ReminderTime } from '@/types/reminder';
 import { formatReminderTime } from '@/utils/time';
 
 export type UpcomingReminderDisplay = {
-  dateLabel: 'Today' | 'Tomorrow';
+  dateLabel: string;
   timeLabel: string;
   date: string;
 };
 
-function getDateLabel(date: string, now: Date): 'Today' | 'Tomorrow' {
-  return date === formatLocalDate(now) ? 'Today' : 'Tomorrow';
+function getDateLabel(date: string, now: Date, language: ResolvedLanguage): string {
+  const key = date === formatLocalDate(now) ? 'common.today' : 'common.tomorrow';
+  return translate(language, key);
 }
 
 function isTimeAfterNow(reminderTime: ReminderTime, day: Date, now: Date): boolean {
@@ -20,6 +23,7 @@ function isTimeAfterNow(reminderTime: ReminderTime, day: Date, now: Date): boole
 
 export function getUpcomingReminder(
   reminderTime: ReminderTime | null,
+  language: ResolvedLanguage = 'en',
   now: Date = new Date()
 ): UpcomingReminderDisplay | null {
   if (!reminderTime) {
@@ -30,7 +34,7 @@ export function getUpcomingReminder(
   if (isTimeAfterNow(reminderTime, now, now)) {
     return {
       date: today,
-      dateLabel: getDateLabel(today, now),
+      dateLabel: getDateLabel(today, now, language),
       timeLabel: formatReminderTime(reminderTime),
     };
   }
@@ -39,7 +43,7 @@ export function getUpcomingReminder(
 
   return {
     date: tomorrow,
-    dateLabel: getDateLabel(tomorrow, now),
+    dateLabel: getDateLabel(tomorrow, now, language),
     timeLabel: formatReminderTime(reminderTime),
   };
 }

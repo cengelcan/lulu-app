@@ -11,7 +11,7 @@ type LanguageSectionProps = {
   onSelect: (language: AppLanguagePreference) => void;
 };
 
-const LANGUAGE_OPTIONS: AppLanguagePreference[] = ['system', 'en', 'tr'];
+const LANGUAGE_OPTIONS: AppLanguagePreference[] = ['system', 'en', 'tr', 'de'];
 
 function getLanguageLabel(
   t: (key: string) => string,
@@ -24,6 +24,8 @@ function getLanguageLabel(
       return t('settings.languageEnglish');
     case 'tr':
       return t('settings.languageTurkish');
+    case 'de':
+      return t('settings.languageGerman');
   }
 }
 

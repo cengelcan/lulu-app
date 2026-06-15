@@ -16,6 +16,8 @@ export const tr: Translations = {
     setUpPet: 'Pet Kur',
     date: 'Tarih',
     time: 'Saat',
+    today: 'Bugün',
+    tomorrow: 'Yarın',
   },
   tabs: {
     home: 'Ana Sayfa',
@@ -39,6 +41,7 @@ export const tr: Translations = {
     languageSystem: 'Sistem',
     languageEnglish: 'English',
     languageTurkish: 'Türkçe',
+    languageGerman: 'Deutsch',
   },
   onboarding: {
     intro1: {
@@ -195,6 +198,13 @@ export const tr: Translations = {
     reports: 'Raporlar',
     records: 'Kayıtlar',
     medication: 'İlaç',
+    missedCheckInToday: 'Bugün check-in yapmadın.',
+    missedCheckInYesterday: 'Dünkü check-in eksik.',
+    missedCheckInCta: 'Şimdi yap',
+  },
+  notifications: {
+    reminderTitle: 'Pet Health Journal',
+    reminderBody: 'Bugün {{name}} nasıl?',
   },
   myPets: {
     noPetsTitle: 'Henüz pet yok',

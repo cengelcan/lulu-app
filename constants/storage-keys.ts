@@ -4,6 +4,7 @@ export const StorageKeys = {
   checkInPreferences: '@pet_health_journal/check_in_preferences',
   checkInReminderTime: '@pet_health_journal/check_in_reminder_time',
   appAppearance: '@pet_health_journal/app_appearance',
+  appLanguage: '@pet_health_journal/app_language',
   notificationPermission: '@pet_health_journal/notification_permission',
   activePetId: '@pet_health_journal/active_pet_id',
   userProfile: '@pet_health_journal/user_profile',

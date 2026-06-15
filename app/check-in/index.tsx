@@ -1,22 +1,30 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { SelectableOption } from '@/components/setup/selectable-option';
+import { CheckInCategorySection } from '@/components/check-in/CheckInCategorySection';
+import { CheckInNotesSection } from '@/components/check-in/CheckInNotesSection';
+import { CheckInProgress } from '@/components/check-in/CheckInProgress';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import {
-  APPETITE_OPTIONS,
-  CHECK_IN_NOTES_MAX_LENGTH,
-  ENERGY_OPTIONS,
-  SYMPTOM_OPTIONS,
-} from '@/constants/check-in';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { CHECK_IN_CATEGORIES, CHECK_IN_NOTES_MAX_LENGTH } from '@/constants/check-in';
+import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
-import type { Appetite, CheckIn, Energy, Symptom } from '@/types/check-in';
+import type {
+  Appetite,
+  CheckIn,
+  CheckInFormValues,
+  Energy,
+  Mood,
+  Pee,
+  Poop,
+  WaterIntake,
+} from '@/types/check-in';
+import { countCompletedCheckInFields, isCheckInFormComplete } from '@/utils/check-in';
 import {
   formatCheckInTitleDate,
   formatLocalDate,
@@ -39,36 +47,9 @@ function getTodayDateString(): string {
   return formatLocalDate(getTodayStart());
 }
 
-type OptionSectionProps<T extends string> = {
-  title: string;
-  options: { value: T; label: string }[];
-  selected: T | null;
-  onSelect: (value: T) => void;
-};
-
-function OptionSection<T extends string>({
-  title,
-  options,
-  selected,
-  onSelect,
-}: OptionSectionProps<T>) {
-  return (
-    <View style={styles.section}>
-      <ThemedText type="subtitle">{title}</ThemedText>
-      {options.map((option) => (
-        <SelectableOption
-          key={option.value}
-          label={option.label}
-          selected={selected === option.value}
-          onPress={() => onSelect(option.value)}
-        />
-      ))}
-    </View>
-  );
-}
-
 export default function CheckInScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { date: dateParam } = useLocalSearchParams<{ date?: string | string[] }>();
 
   const pet = usePetStore((state) => state.pet);
@@ -84,16 +65,16 @@ export default function CheckInScreen() {
   const clearCheckInError = useCheckInStore((state) => state.clearError);
 
   const [appetite, setAppetite] = useState<Appetite | null>(null);
+  const [waterIntake, setWaterIntake] = useState<WaterIntake | null>(null);
   const [energy, setEnergy] = useState<Energy | null>(null);
-  const [symptom, setSymptom] = useState<Symptom | null>(null);
+  const [mood, setMood] = useState<Mood | null>(null);
+  const [pee, setPee] = useState<Pee | null>(null);
+  const [poop, setPoop] = useState<Poop | null>(null);
   const [notes, setNotes] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const primaryColor = useThemeColor({}, 'primary');
-  const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const surfaceColor = useThemeColor({}, 'surface');
-  const borderColor = useThemeColor({}, 'border');
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
   const selectedDate = useMemo(() => {
@@ -112,11 +93,27 @@ export default function CheckInScreen() {
     [checkIns, selectedDate]
   );
 
+  const formValues = useMemo(
+    () => ({
+      appetite,
+      waterIntake,
+      energy,
+      mood,
+      pee,
+      poop,
+      notes,
+    }),
+    [appetite, energy, mood, notes, pee, poop, waterIntake]
+  );
+
   const prefillFromCheckIn = useCallback(
     (checkIn: CheckIn) => {
       setAppetite(checkIn.appetite);
+      setWaterIntake(checkIn.waterIntake);
       setEnergy(checkIn.energy);
-      setSymptom(checkIn.symptom);
+      setMood(checkIn.mood);
+      setPee(checkIn.pee);
+      setPoop(checkIn.poop);
       setNotes(checkIn.notes ?? '');
       setValidationError(null);
       clearCheckInError();
@@ -126,8 +123,11 @@ export default function CheckInScreen() {
 
   const resetForm = useCallback(() => {
     setAppetite(null);
+    setWaterIntake(null);
     setEnergy(null);
-    setSymptom(null);
+    setMood(null);
+    setPee(null);
+    setPoop(null);
     setNotes('');
     setValidationError(null);
     clearCheckInError();
@@ -166,19 +166,28 @@ export default function CheckInScreen() {
     }
 
     if (isTodayLocalDate(selectedDate)) {
-      return `How is ${pet.name} today?`;
+      return t('checkIn.titleToday', { name: pet.name });
     }
 
-    return `How was ${pet.name} on ${formatCheckInTitleDate(selectedDate)}?`;
-  }, [pet, selectedDate]);
+    return t('checkIn.titlePast', {
+      name: pet.name,
+      date: formatCheckInTitleDate(selectedDate),
+    });
+  }, [pet, selectedDate, t]);
 
   const trimmedNotes = notes.trim();
   const notesLength = notes.length;
   const isNotesOverLimit = notesLength > CHECK_IN_NOTES_MAX_LENGTH;
-  const isFormComplete = appetite !== null && energy !== null && symptom !== null;
+  const isFormComplete = isCheckInFormComplete(formValues);
+  const completedCount = countCompletedCheckInFields(formValues);
   const isUpdating = existingCheckIn !== null;
-  const saveButtonTitle = isUpdating ? 'Update Check-In' : 'Save Check-In';
+  const saveButtonTitle = isUpdating ? t('checkIn.update') : t('checkIn.save');
   const normalizedNotes = trimmedNotes.length > 0 ? trimmedNotes : null;
+
+  const clearErrors = useCallback(() => {
+    setValidationError(null);
+    clearCheckInError();
+  }, [clearCheckInError]);
 
   const handleSave = useCallback(async () => {
     if (!pet || isFutureDate) {
@@ -186,26 +195,28 @@ export default function CheckInScreen() {
     }
 
     if (!isFormComplete) {
-      setValidationError('Please answer all questions before saving.');
+      setValidationError(t('checkIn.validationIncomplete'));
       return;
     }
 
     if (isNotesOverLimit) {
-      setValidationError(`Notes must be ${CHECK_IN_NOTES_MAX_LENGTH} characters or fewer.`);
+      setValidationError(
+        t('checkIn.validationNotesLength', { max: CHECK_IN_NOTES_MAX_LENGTH })
+      );
       return;
     }
 
     setValidationError(null);
     clearCheckInError();
 
+    const completedValues: CheckInFormValues = formValues;
+
     try {
       if (existingCheckIn) {
         await updateCheckIn({
           ...existingCheckIn,
           date: selectedDate,
-          appetite,
-          energy,
-          symptom,
+          ...completedValues,
           notes: normalizedNotes,
         });
       } else {
@@ -213,9 +224,7 @@ export default function CheckInScreen() {
           id: createCheckInId(),
           petId: pet.id,
           date: selectedDate,
-          appetite,
-          energy,
-          symptom,
+          ...completedValues,
           notes: normalizedNotes,
           createdAt: new Date().toISOString(),
         };
@@ -228,11 +237,10 @@ export default function CheckInScreen() {
       // Store already sets error state.
     }
   }, [
-    appetite,
     clearCheckInError,
     createCheckIn,
-    energy,
     existingCheckIn,
+    formValues,
     isFormComplete,
     isFutureDate,
     isNotesOverLimit,
@@ -240,19 +248,54 @@ export default function CheckInScreen() {
     pet,
     router,
     selectedDate,
-    symptom,
+    t,
     updateCheckIn,
   ]);
 
   const errorMessage =
     validationError ??
     checkInError ??
-    (isFutureDate ? 'You can only add check-ins for today or past days.' : null);
+    (isFutureDate ? t('checkIn.futureDateError') : null);
+
+  const categoryState = {
+    appetite: { value: appetite, onChange: setAppetite },
+    waterIntake: { value: waterIntake, onChange: setWaterIntake },
+    energy: { value: energy, onChange: setEnergy },
+    mood: { value: mood, onChange: setMood },
+    pee: { value: pee, onChange: setPee },
+    poop: { value: poop, onChange: setPoop },
+  } as const;
+
+  const handleCategorySelect = (category: (typeof CHECK_IN_CATEGORIES)[number]['key'], value: string) => {
+    clearErrors();
+    switch (category) {
+      case 'appetite':
+        setAppetite(value as Appetite);
+        break;
+      case 'waterIntake':
+        setWaterIntake(value as WaterIntake);
+        break;
+      case 'energy':
+        setEnergy(value as Energy);
+        break;
+      case 'mood':
+        setMood(value as Mood);
+        break;
+      case 'pee':
+        setPee(value as Pee);
+        break;
+      case 'poop':
+        setPoop(value as Poop);
+        break;
+      default:
+        break;
+    }
+  };
 
   if (petIsLoading || !pet) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: true, title: 'Check-In' }} />
+        <Stack.Screen options={{ headerShown: true, title: t('checkIn.title') }} />
         <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
           <ActivityIndicator color={primaryColor} size="large" />
         </ScreenContainer>
@@ -262,107 +305,58 @@ export default function CheckInScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: 'Check-In' }} />
+      <Stack.Screen options={{ headerShown: true, title: t('checkIn.title') }} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         <View style={styles.body}>
-          <ThemedText type="title">{screenTitle}</ThemedText>
-          <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.description}>
-            {isUpdating
-              ? 'Update your answers for this day.'
-              : 'Select one option for each question.'}
-          </ThemedText>
-
-          <OptionSection
-            title="Appetite"
-            options={APPETITE_OPTIONS}
-            selected={appetite}
-            onSelect={(value) => {
-              setValidationError(null);
-              clearCheckInError();
-              setAppetite(value);
-            }}
-          />
-
-          <OptionSection
-            title="Energy"
-            options={ENERGY_OPTIONS}
-            selected={energy}
-            onSelect={(value) => {
-              setValidationError(null);
-              clearCheckInError();
-              setEnergy(value);
-            }}
-          />
-
-          <OptionSection
-            title="Symptoms"
-            options={SYMPTOM_OPTIONS}
-            selected={symptom}
-            onSelect={(value) => {
-              setValidationError(null);
-              clearCheckInError();
-              setSymptom(value);
-            }}
-          />
-
-          <View style={styles.section}>
-            <ThemedText type="subtitle">Anything else you&apos;d like to remember?</ThemedText>
+          <View style={styles.header}>
+            <ThemedText type="title">{screenTitle}</ThemedText>
             <ThemedText
               lightColor={textSecondaryColor}
               darkColor={textSecondaryColor}
-              style={styles.notesSubtitle}>
-              Optional notes for future vet visits.
+              style={styles.description}>
+              {isUpdating ? t('checkIn.subtitleUpdate') : t('checkIn.subtitle')}
             </ThemedText>
-            <TextInput
-              accessibilityLabel="Additional notes"
-              multiline
-              placeholder="Example: Limping slightly after the afternoon walk."
-              placeholderTextColor={textSecondaryColor}
-              style={[
-                styles.notesInput,
-                {
-                  color: textColor,
-                  backgroundColor: surfaceColor,
-                  borderColor: isNotesOverLimit ? primaryColor : borderColor,
-                },
-              ]}
-              textAlignVertical="top"
-              value={notes}
-              onChangeText={(value) => {
-                setValidationError(null);
-                clearCheckInError();
-                setNotes(value);
-              }}
-            />
-            <ThemedText
-              accessibilityLiveRegion="polite"
-              accessibilityLabel={`${notesLength} of ${CHECK_IN_NOTES_MAX_LENGTH} characters`}
-              lightColor={isNotesOverLimit ? primaryColor : textSecondaryColor}
-              darkColor={isNotesOverLimit ? primaryColor : textSecondaryColor}
-              style={styles.notesCounter}>
-              {notesLength} / {CHECK_IN_NOTES_MAX_LENGTH}
-            </ThemedText>
+            <CheckInProgress completedCount={completedCount} totalCount={CHECK_IN_CATEGORIES.length} />
           </View>
+
+          {CHECK_IN_CATEGORIES.map((category) => (
+            <CheckInCategorySection
+              key={category.key}
+              emoji={category.emoji}
+              category={category.key}
+              titleTranslationKey={category.translationKey}
+              optionsTranslationKey={category.optionsTranslationKey}
+              selected={categoryState[category.key].value}
+              onSelect={(value) => handleCategorySelect(category.key, value)}
+            />
+          ))}
+
+          <CheckInNotesSection
+            notes={notes}
+            isOverLimit={isNotesOverLimit}
+            onChangeNotes={(value) => {
+              clearErrors();
+              setNotes(value);
+            }}
+          />
         </View>
 
-        {errorMessage ? (
-          <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.error}>
-            {errorMessage}
-          </ThemedText>
-        ) : null}
+        <View style={styles.footer}>
+          {errorMessage ? (
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.error}>
+              {errorMessage}
+            </ThemedText>
+          ) : null}
 
-        <Button
-          title={saveButtonTitle}
-          onPress={() => void handleSave()}
-          disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit}
-          style={styles.button}
-        />
+          <Button
+            title={saveButtonTitle}
+            onPress={() => void handleSave()}
+            disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit}
+          />
+        </View>
       </ScreenContainer>
     </>
   );
@@ -375,8 +369,11 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
-    gap: Spacing.lg,
+    gap: Spacing.xl,
     paddingTop: Spacing.sm,
+  },
+  header: {
+    gap: Spacing.sm,
   },
   centered: {
     flex: 1,
@@ -386,29 +383,12 @@ const styles = StyleSheet.create({
   description: {
     ...Typography.body,
   },
-  section: {
+  footer: {
     gap: Spacing.sm,
-  },
-  notesSubtitle: {
-    ...Typography.body,
-  },
-  notesInput: {
-    ...Typography.body,
-    borderWidth: 1,
-    borderRadius: Radius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    minHeight: 120,
-  },
-  notesCounter: {
-    ...Typography.caption,
-    textAlign: 'right',
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   error: {
     textAlign: 'center',
-    marginBottom: Spacing.sm,
-  },
-  button: {
-    marginBottom: Spacing.md,
   },
 });

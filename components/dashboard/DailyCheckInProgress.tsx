@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
 import {
   formatLocalDate,
@@ -74,6 +75,7 @@ function DayPill({ date, isCompleted, isToday, isFuture, onPress }: DayPillProps
 
 export function DailyCheckInProgress() {
   const router = useRouter();
+  const { t } = useTranslation();
   const checkIns = useCheckInStore((state) => state.checkIns);
   const isLoading = useCheckInStore((state) => state.isLoading);
 
@@ -102,7 +104,7 @@ export function DailyCheckInProgress() {
 
   return (
     <Card>
-      <ThemedText type="subtitle">Daily Check-In Progress</ThemedText>
+      <ThemedText type="subtitle">{t('dashboard.dailyCheckInProgress')}</ThemedText>
       {isLoading && checkIns.length === 0 ? (
         <ActivityIndicator color={primaryColor} style={styles.loading} />
       ) : (

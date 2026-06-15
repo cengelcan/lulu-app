@@ -1,0 +1,4 @@
+ALTER TABLE check_ins ADD COLUMN water_intake TEXT;
+ALTER TABLE check_ins ADD COLUMN mood TEXT;
+ALTER TABLE check_ins ADD COLUMN pee TEXT;
+ALTER TABLE check_ins ADD COLUMN poop TEXT;

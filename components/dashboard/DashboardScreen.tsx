@@ -13,27 +13,17 @@ import { Card } from '@/components/ui/Card';
 import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import {
-  APPETITE_OPTIONS,
-  ENERGY_OPTIONS,
-  SYMPTOM_OPTIONS,
-} from '@/constants/check-in';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import { getUpcomingReminder } from '@/services/notifications/upcoming';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
 import type { CheckIn } from '@/types/check-in';
+import { getAbnormalCheckInFields } from '@/utils/check-in';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { displayPetSpecies } from '@/utils/pet-display';
-
-function getOptionLabel<T extends string>(
-  options: { value: T; label: string }[],
-  value: T
-): string {
-  return options.find((option) => option.value === value)?.label ?? value;
-}
 
 type DetailRowProps = {
   label: string;
@@ -61,6 +51,7 @@ type NotesPreviewProps = {
 };
 
 function NotesPreview({ notes }: NotesPreviewProps) {
+  const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   return (
@@ -69,7 +60,7 @@ function NotesPreview({ notes }: NotesPreviewProps) {
         lightColor={textSecondaryColor}
         darkColor={textSecondaryColor}
         style={styles.detailLabel}>
-        Notes
+        {t('dashboard.notes')}
       </ThemedText>
       <ThemedText type="defaultSemiBold" numberOfLines={2} ellipsizeMode="tail">
         &ldquo;{notes}&rdquo;
@@ -93,20 +84,24 @@ function TodaysCheckInCard({
   onPress,
   onRetry,
 }: TodaysCheckInCardProps) {
+  const { t } = useTranslation();
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const successColor = useThemeColor({}, 'success');
+
+  const abnormalFields = checkIn ? getAbnormalCheckInFields(checkIn) : [];
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={
-        checkIn ? "Today's check-in. Tap to update." : "Today's check-in. Tap to start."
+        checkIn ? t('dashboard.todaysCheckInUpdate') : t('dashboard.todaysCheckInStart')
       }
       onPress={onPress}
       style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}>
       <Card>
         <View style={styles.cardHeader}>
-          <ThemedText type="subtitle">Today&apos;s Check-In</ThemedText>
+          <ThemedText type="subtitle">{t('dashboard.todaysCheckIn')}</ThemedText>
           <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
         </View>
         {isLoading && !checkIn ? (
@@ -114,16 +109,26 @@ function TodaysCheckInCard({
         ) : error ? (
           <View style={styles.checkInError}>
             <ThemedText style={styles.message}>{error}</ThemedText>
-            <Button title="Try Again" variant="secondary" onPress={onRetry} />
+            <Button title={t('common.tryAgain')} variant="secondary" onPress={onRetry} />
           </View>
         ) : checkIn ? (
           <>
-            <DetailRow
-              label="Appetite"
-              value={getOptionLabel(APPETITE_OPTIONS, checkIn.appetite)}
-            />
-            <DetailRow label="Energy" value={getOptionLabel(ENERGY_OPTIONS, checkIn.energy)} />
-            <DetailRow label="Symptoms" value={getOptionLabel(SYMPTOM_OPTIONS, checkIn.symptom)} />
+            {abnormalFields.length === 0 ? (
+              <View style={styles.allNormalRow}>
+                <IconSymbol name="checkmark.circle" size={18} color={successColor} />
+                <ThemedText type="defaultSemiBold" style={styles.allNormalText}>
+                  {t('dashboard.allNormalToday')}
+                </ThemedText>
+              </View>
+            ) : (
+              abnormalFields.map((field) => (
+                <DetailRow
+                  key={field.category}
+                  label={t(field.categoryTranslationKey)}
+                  value={t(field.valueTranslationKey)}
+                />
+              ))
+            )}
             {checkIn.notes ? <NotesPreview notes={checkIn.notes} /> : null}
           </>
         ) : (
@@ -131,7 +136,7 @@ function TodaysCheckInCard({
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.message}>
-            Not checked in yet. Tap to start today&apos;s check-in.
+            {t('dashboard.notCheckedIn')}
           </ThemedText>
         )}
       </Card>
@@ -145,6 +150,7 @@ type DashboardScreenProps = {
 
 export default function DashboardScreen({ edges = ['top', 'bottom'] }: DashboardScreenProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const pet = usePetStore((state) => state.pet);
   const isLoading = usePetStore((state) => state.isLoading);
   const error = usePetStore((state) => state.error);
@@ -290,7 +296,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
             <IconSymbol name="chevron.right" size={20} color={textSecondaryColor} />
           </Pressable>
 
-          <Button title="Start Check-In" onPress={handleStartCheckIn} />
+          <Button title={t('dashboard.startCheckIn')} onPress={handleStartCheckIn} />
 
           <DailyCheckInProgress />
 
@@ -428,6 +434,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  allNormalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  allNormalText: {
+    ...Typography.body,
   },
   checkInLoading: {
     alignSelf: 'flex-start',

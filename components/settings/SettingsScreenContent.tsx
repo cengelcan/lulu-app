@@ -4,11 +4,13 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
 import { AppearanceSection } from '@/components/settings/AppearanceSection';
+import { LanguageSection } from '@/components/settings/LanguageSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useAppearanceStore } from '@/stores/appearance.store';
+import { useLanguageStore } from '@/stores/language.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import type { ReminderTime } from '@/types/reminder';
 
@@ -30,6 +32,9 @@ export function SettingsScreenContent({
 
   const appearance = useAppearanceStore((state) => state.appearance);
   const saveAppearance = useAppearanceStore((state) => state.saveAppearance);
+
+  const language = useLanguageStore((state) => state.language);
+  const saveLanguage = useLanguageStore((state) => state.saveLanguage);
 
   const primaryColor = useThemeColor({}, 'primary');
 
@@ -63,6 +68,10 @@ export function SettingsScreenContent({
     void saveAppearance(nextAppearance);
   };
 
+  const handleLanguageSelect = (nextLanguage: typeof language) => {
+    void saveLanguage(nextLanguage);
+  };
+
   const isInitialLoading = isLoading && permission === null;
 
   return (
@@ -84,6 +93,7 @@ export function SettingsScreenContent({
               appearance={appearance}
               onSelect={handleAppearanceSelect}
             />
+            <LanguageSection language={language} onSelect={handleLanguageSelect} />
           </>
         )}
       </View>

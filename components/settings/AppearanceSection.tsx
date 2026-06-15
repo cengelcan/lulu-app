@@ -3,8 +3,8 @@ import { ActionSheetIOS, Alert, Platform } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { SettingsValueRow } from '@/components/settings/SettingsValueRow';
+import { useTranslation } from '@/hooks/use-translation';
 import {
-  APP_APPEARANCE_LABELS,
   type AppAppearance,
 } from '@/types/appearance';
 
@@ -17,15 +17,18 @@ const APPEARANCE_OPTIONS: AppAppearance[] = ['system', 'light', 'dark'];
 
 function showAppearancePicker(
   current: AppAppearance,
-  onSelect: (appearance: AppAppearance) => void
+  onSelect: (appearance: AppAppearance) => void,
+  title: string,
+  labels: Record<AppAppearance, string>,
+  cancelLabel: string
 ): void {
   if (Platform.OS === 'ios') {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     ActionSheetIOS.showActionSheetWithOptions(
       {
-        title: 'Theme',
-        options: [...APPEARANCE_OPTIONS.map((key) => APP_APPEARANCE_LABELS[key]), 'Cancel'],
+        title,
+        options: [...APPEARANCE_OPTIONS.map((key) => labels[key]), cancelLabel],
         cancelButtonIndex: 3,
       },
       (buttonIndex) => {
@@ -37,26 +40,34 @@ function showAppearancePicker(
     return;
   }
 
-  Alert.alert('Theme', undefined, [
+  Alert.alert(title, undefined, [
     ...APPEARANCE_OPTIONS.map((option) => ({
-      text: APP_APPEARANCE_LABELS[option],
+      text: labels[option],
       onPress: () => onSelect(option),
       ...(option === current ? { isPreferred: true } : {}),
     })),
-    { text: 'Cancel', style: 'cancel' },
+    { text: cancelLabel, style: 'cancel' },
   ]);
 }
 
 export function AppearanceSection({ appearance, onSelect }: AppearanceSectionProps) {
+  const { t } = useTranslation();
+
+  const labels: Record<AppAppearance, string> = {
+    system: t('settings.themeSystem'),
+    light: t('settings.themeLight'),
+    dark: t('settings.themeDark'),
+  };
+
   const handlePress = () => {
-    showAppearancePicker(appearance, onSelect);
+    showAppearancePicker(appearance, onSelect, t('settings.theme'), labels, t('common.cancel'));
   };
 
   return (
-    <GroupedSection title="Appearance">
+    <GroupedSection title={t('settings.appearance')}>
       <SettingsValueRow
-        label="Theme"
-        value={APP_APPEARANCE_LABELS[appearance]}
+        label={t('settings.theme')}
+        value={labels[appearance]}
         onPress={handlePress}
         isLast
       />

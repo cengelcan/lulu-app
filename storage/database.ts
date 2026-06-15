@@ -12,7 +12,7 @@ let database: SQLite.SQLiteDatabase | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 6;
+const CURRENT_SCHEMA_VERSION = 7;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -69,6 +69,65 @@ async function ensureCheckInNotesColumn(db: SQLite.SQLiteDatabase): Promise<void
   if (!hasNotes) {
     await db.execAsync('ALTER TABLE check_ins ADD COLUMN notes TEXT;');
   }
+}
+
+async function ensureCheckInV7Columns(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(check_ins)');
+  const existingNames = new Set(columns.map((column) => column.name));
+
+  if (!existingNames.has('water_intake')) {
+    await db.execAsync('ALTER TABLE check_ins ADD COLUMN water_intake TEXT;');
+  }
+
+  if (!existingNames.has('mood')) {
+    await db.execAsync('ALTER TABLE check_ins ADD COLUMN mood TEXT;');
+  }
+
+  if (!existingNames.has('pee')) {
+    await db.execAsync('ALTER TABLE check_ins ADD COLUMN pee TEXT;');
+  }
+
+  if (!existingNames.has('poop')) {
+    await db.execAsync('ALTER TABLE check_ins ADD COLUMN poop TEXT;');
+  }
+
+  await db.execAsync(`
+    UPDATE check_ins
+    SET
+      water_intake = COALESCE(water_intake, 'normal'),
+      mood = COALESCE(mood, 'normal'),
+      pee = COALESCE(
+        pee,
+        CASE
+          WHEN symptom = 'none' OR symptom IS NULL THEN 'normal'
+          ELSE 'not_observed'
+        END
+      ),
+      poop = COALESCE(
+        poop,
+        CASE
+          WHEN symptom = 'diarrhea' THEN 'diarrhea'
+          WHEN symptom = 'none' OR symptom IS NULL THEN 'normal'
+          ELSE 'not_observed'
+        END
+      ),
+      appetite = CASE appetite
+        WHEN 'good' THEN 'increased'
+        WHEN 'not_eating' THEN 'no_appetite'
+        ELSE appetite
+      END,
+      energy = CASE energy
+        WHEN 'high' THEN 'high'
+        WHEN 'low' THEN 'low'
+        ELSE energy
+      END
+    WHERE water_intake IS NULL
+       OR mood IS NULL
+       OR pee IS NULL
+       OR poop IS NULL
+       OR appetite IN ('good', 'not_eating')
+       OR energy IN ('high', 'low');
+  `);
 }
 
 const PET_IDENTITY_COLUMNS = [
@@ -132,6 +191,12 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_check_ins_pet_date ON check_ins (pet_id, date);'
     );
     version = 6;
+    await setSchemaVersion(db, version);
+  }
+
+  if (version < 7) {
+    await ensureCheckInV7Columns(db);
+    version = 7;
     await setSchemaVersion(db, version);
   }
 }

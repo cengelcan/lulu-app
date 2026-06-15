@@ -1,4 +1,13 @@
-import type { Appetite, Energy, Symptom } from '@/types/check-in';
+import type {
+  Appetite,
+  CheckInCategory,
+  Energy,
+  Mood,
+  Pee,
+  Poop,
+  WaterIntake,
+} from '@/types/check-in';
+import type { IconSymbolName } from '@/components/ui/icon-symbol';
 import type {
   HealthCondition,
   PetAgeGroup,
@@ -10,6 +19,11 @@ import type {
 type Option<T extends string> = {
   value: T;
   label: string;
+};
+
+type CheckInOption<T extends string> = {
+  value: T;
+  icon: IconSymbolName;
 };
 
 export const PET_SPECIES_OPTIONS: Option<PetSpecies>[] = [
@@ -49,24 +63,114 @@ export const HEALTH_CONDITION_OPTIONS: Option<HealthCondition>[] = [
   { value: 'not_sure', label: 'Not Sure' },
 ];
 
-export const APPETITE_OPTIONS: Option<Appetite>[] = [
-  { value: 'good', label: 'Good' },
-  { value: 'normal', label: 'Normal' },
-  { value: 'reduced', label: 'Reduced' },
-  { value: 'not_eating', label: 'Not Eating' },
+export const CHECK_IN_CATEGORIES: {
+  key: CheckInCategory;
+  emoji: string;
+  translationKey: string;
+  optionsTranslationKey: string;
+}[] = [
+  {
+    key: 'appetite',
+    emoji: '🍗',
+    translationKey: 'checkIn.categories.appetite',
+    optionsTranslationKey: 'checkIn.options.appetite',
+  },
+  {
+    key: 'waterIntake',
+    emoji: '💧',
+    translationKey: 'checkIn.categories.waterIntake',
+    optionsTranslationKey: 'checkIn.options.waterIntake',
+  },
+  {
+    key: 'energy',
+    emoji: '⚡',
+    translationKey: 'checkIn.categories.energy',
+    optionsTranslationKey: 'checkIn.options.energy',
+  },
+  {
+    key: 'mood',
+    emoji: '😊',
+    translationKey: 'checkIn.categories.mood',
+    optionsTranslationKey: 'checkIn.options.mood',
+  },
+  {
+    key: 'pee',
+    emoji: '🚽',
+    translationKey: 'checkIn.categories.pee',
+    optionsTranslationKey: 'checkIn.options.pee',
+  },
+  {
+    key: 'poop',
+    emoji: '💩',
+    translationKey: 'checkIn.categories.poop',
+    optionsTranslationKey: 'checkIn.options.poop',
+  },
 ];
 
-export const ENERGY_OPTIONS: Option<Energy>[] = [
-  { value: 'high', label: 'High' },
-  { value: 'normal', label: 'Normal' },
-  { value: 'low', label: 'Low' },
+export const APPETITE_OPTIONS: CheckInOption<Appetite>[] = [
+  { value: 'no_appetite', icon: 'fork.knife.circle' },
+  { value: 'reduced', icon: 'arrow.down.circle' },
+  { value: 'normal', icon: 'checkmark.circle' },
+  { value: 'increased', icon: 'arrow.up.circle' },
 ];
 
-export const SYMPTOM_OPTIONS: Option<Symptom>[] = [
-  { value: 'none', label: 'None' },
-  { value: 'vomiting', label: 'Vomiting' },
-  { value: 'diarrhea', label: 'Diarrhea' },
-  { value: 'other', label: 'Other' },
+export const WATER_INTAKE_OPTIONS: CheckInOption<WaterIntake>[] = [
+  { value: 'very_low', icon: 'drop' },
+  { value: 'low', icon: 'drop.halffull' },
+  { value: 'normal', icon: 'drop.fill' },
+  { value: 'high', icon: 'drop.triangle.fill' },
+  { value: 'very_high', icon: 'humidity.fill' },
 ];
+
+export const ENERGY_OPTIONS: CheckInOption<Energy>[] = [
+  { value: 'very_low', icon: 'battery.0percent' },
+  { value: 'low', icon: 'battery.25percent' },
+  { value: 'normal', icon: 'battery.50percent' },
+  { value: 'high', icon: 'battery.75percent' },
+  { value: 'very_high', icon: 'bolt.fill' },
+];
+
+export const MOOD_OPTIONS: CheckInOption<Mood>[] = [
+  { value: 'restless', icon: 'wind' },
+  { value: 'irritable', icon: 'cloud.bolt' },
+  { value: 'normal', icon: 'face.smiling' },
+  { value: 'happy', icon: 'heart.fill' },
+  { value: 'playful', icon: 'sparkles' },
+];
+
+export const PEE_OPTIONS: CheckInOption<Pee>[] = [
+  { value: 'straining', icon: 'exclamationmark.triangle' },
+  { value: 'less_than_normal', icon: 'arrow.down' },
+  { value: 'normal', icon: 'checkmark' },
+  { value: 'more_than_normal', icon: 'arrow.up' },
+  { value: 'not_observed', icon: 'eye.slash' },
+];
+
+export const POOP_OPTIONS: CheckInOption<Poop>[] = [
+  { value: 'diarrhea', icon: 'drop.fill' },
+  { value: 'soft', icon: 'circle.lefthalf.filled' },
+  { value: 'normal', icon: 'checkmark.circle' },
+  { value: 'hard', icon: 'circle.righthalf.filled' },
+  { value: 'none', icon: 'xmark.circle' },
+  { value: 'not_observed', icon: 'eye.slash' },
+];
+
+export const CHECK_IN_OPTIONS_BY_CATEGORY = {
+  appetite: APPETITE_OPTIONS,
+  waterIntake: WATER_INTAKE_OPTIONS,
+  energy: ENERGY_OPTIONS,
+  mood: MOOD_OPTIONS,
+  pee: PEE_OPTIONS,
+  poop: POOP_OPTIONS,
+} as const;
 
 export const CHECK_IN_NOTES_MAX_LENGTH = 500;
+
+export const CHECK_IN_NORMAL_VALUES = {
+  appetite: 'normal',
+  waterIntake: 'normal',
+  energy: 'normal',
+  mood: 'normal',
+  pee: 'normal',
+  poop: 'normal',
+} as const;

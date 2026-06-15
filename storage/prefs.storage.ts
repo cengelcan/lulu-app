@@ -3,6 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '@/constants/storage-keys';
 import type { AppAppearance } from '@/types/appearance';
 import { DEFAULT_APP_APPEARANCE } from '@/types/appearance';
+import type { AppLanguage } from '@/types/language';
+import { DEFAULT_APP_LANGUAGE } from '@/types/language';
 import type { ReminderTime } from '@/types/reminder';
 import { DEFAULT_REMINDER_TIME } from '@/types/reminder';
 import { isValidReminderTime } from '@/utils/time';
@@ -111,6 +113,23 @@ export async function setAppAppearance(appearance: AppAppearance): Promise<void>
 
 export async function removeAppAppearance(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.appAppearance);
+}
+
+export async function getAppLanguage(): Promise<AppLanguage> {
+  const value = await AsyncStorage.getItem(StorageKeys.appLanguage);
+  if (value === 'en' || value === 'tr') {
+    return value;
+  }
+
+  return DEFAULT_APP_LANGUAGE;
+}
+
+export async function setAppLanguage(language: AppLanguage): Promise<void> {
+  await AsyncStorage.setItem(StorageKeys.appLanguage, language);
+}
+
+export async function removeAppLanguage(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.appLanguage);
 }
 
 export async function getNotificationPermission(): Promise<NotificationPermissionStatus | null> {

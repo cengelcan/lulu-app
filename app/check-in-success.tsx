@@ -8,17 +8,17 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
 import { useAndroidBackHandler } from '@/hooks/use-android-back-handler';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
 
 export default function CheckInSuccessScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const checkInCount = useCheckInStore((state) => state.checkIns.length);
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const isFirstCheckIn = checkInCount === 1;
-  const message = isFirstCheckIn
-    ? "You've completed your first health check-in."
-    : "Your check-in is saved. Thanks for keeping track.";
+  const message = isFirstCheckIn ? t('checkInSuccess.firstMessage') : t('checkInSuccess.message');
 
   const handleGoHome = useCallback(() => {
     router.dismissTo('/(tabs)/home');
@@ -34,7 +34,7 @@ export default function CheckInSuccessScreen() {
   return (
     <ScreenContainer contentStyle={styles.content}>
       <ThemedText type="title" style={styles.title}>
-        Great!
+        {t('checkInSuccess.title')}
       </ThemedText>
       <ThemedText
         lightColor={textSecondaryColor}
@@ -42,7 +42,7 @@ export default function CheckInSuccessScreen() {
         style={styles.message}>
         {message}
       </ThemedText>
-      <Button title="Go Home" onPress={handleGoHome} style={styles.button} />
+      <Button title={t('checkInSuccess.goHome')} onPress={handleGoHome} style={styles.button} />
     </ScreenContainer>
   );
 }

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { TimePickerField } from '@/components/ui/TimePickerField';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
 import type { ReminderTime } from '@/types/reminder';
 
@@ -27,6 +28,7 @@ export function NotificationSection({
   onToggle,
   onTimeChange,
 }: NotificationSectionProps) {
+  const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const remindersEnabled = permission === 'allowed';
   const isDenied = permission === 'denied';
@@ -39,9 +41,9 @@ export function NotificationSection({
 
   return (
     <View style={styles.section}>
-      <GroupedSection title="Notifications">
+      <GroupedSection title={t('settings.notifications')}>
         <SettingsToggleRow
-          label="Daily Check-In Reminder"
+          label={t('settings.dailyCheckInReminder')}
           value={remindersEnabled}
           disabled={toggleDisabled}
           onValueChange={onToggle}
@@ -49,8 +51,8 @@ export function NotificationSection({
         />
         {remindersEnabled ? (
           <TimePickerField
-            accessibilityLabel="Reminder time"
-            label="Reminder Time"
+            accessibilityLabel={t('settings.reminderTime')}
+            label={t('settings.reminderTime')}
             value={time}
             disabled={isLoading}
             variant="row"
@@ -68,11 +70,11 @@ export function NotificationSection({
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.footerText}>
-            Notifications are disabled in system settings.
+            {t('settings.notificationsDisabledFooter')}
           </ThemedText>
           <Button
-            accessibilityLabel="Open Settings"
-            title="Open Settings"
+            accessibilityLabel={t('settings.openSettings')}
+            title={t('settings.openSettings')}
             variant="secondary"
             onPress={handleOpenSystemSettings}
           />

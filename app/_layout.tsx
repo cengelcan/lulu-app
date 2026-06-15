@@ -8,17 +8,20 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useNotificationResponse } from '@/hooks/use-notification-response';
 import { configureNotificationHandler } from '@/services/notifications';
 import { useAppearanceStore } from '@/stores/appearance.store';
+import { useLanguageStore } from '@/stores/language.store';
 
 configureNotificationHandler();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const loadAppearance = useAppearanceStore((state) => state.loadAppearance);
+  const loadLanguage = useLanguageStore((state) => state.loadLanguage);
   useNotificationResponse();
 
   useEffect(() => {
     void loadAppearance();
-  }, [loadAppearance]);
+    void loadLanguage();
+  }, [loadAppearance, loadLanguage]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

@@ -10,6 +10,7 @@ import {
 
 export type SetupDraft = {
   species: PetSpecies | null;
+  breed: string | null;
   name: string;
   ageGroup: PetAgeGroup | null;
   healthConditions: HealthCondition[];
@@ -41,6 +42,7 @@ function buildPetFromDraft(draft: SetupDraft): Pet {
     id: createPetId(),
     name: draft.name.trim(),
     species: draft.species!,
+    breed: draft.breed,
     ageGroup: draft.ageGroup!,
     healthConditions: draft.healthConditions.length > 0 ? draft.healthConditions : ['none'],
     createdAt: new Date().toISOString(),

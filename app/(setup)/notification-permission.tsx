@@ -20,9 +20,10 @@ export default function NotificationPermissionScreen() {
   const router = useRouter();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
-  const { onBack } = useSetupScreenBack(6, mode);
+  const { onBack } = useSetupScreenBack(7, mode);
 
   const species = useSetupStore((state) => state.species);
+  const breed = useSetupStore((state) => state.breed);
   const name = useSetupStore((state) => state.name);
   const ageGroup = useSetupStore((state) => state.ageGroup);
   const healthConditions = useSetupStore((state) => state.healthConditions);
@@ -46,7 +47,7 @@ export default function NotificationPermissionScreen() {
 
   const completeSetup = useCallback(
     async (permission: NotificationPermissionStatus) => {
-      const draft = { species, name, ageGroup, healthConditions };
+      const draft = { species, breed, name, ageGroup, healthConditions };
       const draftError = validateSetupDraft(draft);
 
       if (draftError) {
@@ -76,6 +77,7 @@ export default function NotificationPermissionScreen() {
     },
     [
       ageGroup,
+      breed,
       clearNotificationError,
       clearPetError,
       createPet,
@@ -91,7 +93,7 @@ export default function NotificationPermissionScreen() {
 
   return (
     <SetupScreen
-      step={6}
+      step={7}
       totalSteps={totalSteps}
       title="Stay on track with reminders"
       description="We can send gentle reminders for daily check-ins. You can change this later in settings."

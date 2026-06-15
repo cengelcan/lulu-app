@@ -15,9 +15,10 @@ export default function HealthConditionsScreen() {
   const router = useRouter();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
-  const { onBack } = useSetupScreenBack(4, mode);
+  const { onBack } = useSetupScreenBack(5, mode);
 
   const species = useSetupStore((state) => state.species);
+  const breed = useSetupStore((state) => state.breed);
   const name = useSetupStore((state) => state.name);
   const ageGroup = useSetupStore((state) => state.ageGroup);
   const healthConditions = useSetupStore((state) => state.healthConditions);
@@ -39,7 +40,7 @@ export default function HealthConditionsScreen() {
   }, [mode, router]);
 
   const handleContinueAdd = useCallback(async () => {
-    const draft = { species, name, ageGroup, healthConditions };
+    const draft = { species, breed, name, ageGroup, healthConditions };
     const draftError = validateSetupDraft(draft);
 
     if (draftError) {
@@ -63,6 +64,7 @@ export default function HealthConditionsScreen() {
     }
   }, [
     ageGroup,
+    breed,
     clearPetError,
     createPet,
     healthConditions,
@@ -87,7 +89,7 @@ export default function HealthConditionsScreen() {
 
   return (
     <SetupScreen
-      step={4}
+      step={5}
       totalSteps={totalSteps}
       title="Any health conditions?"
       description="Select all that apply. You can skip this if none apply."

@@ -1,11 +1,12 @@
+import { useNavigation } from '@react-navigation/native';
 import { Stack, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
   HEALTH_CONDITION_OPTIONS,
@@ -14,6 +15,7 @@ import {
   PET_SPAY_NEUTER_STATUS_OPTIONS,
   PET_SPECIES_OPTIONS,
 } from '@/constants/check-in';
+import { getBreedOptionsForSpecies, isBreedValidForSpecies } from '@/constants/pet-breeds';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import {
@@ -40,39 +42,11 @@ import {
   PET_NAME_MAX_LENGTH,
   PET_OWNER_MAX_LENGTH,
 } from '@/types/pet';
-
-type OptionSectionProps<T extends string> = {
-  title: string;
-  options: { value: T; label: string }[];
-  selected: T | null;
-  onSelect: (value: T | null) => void;
-  optional?: boolean;
-};
-
-function OptionSection<T extends string>({
-  title,
-  options,
-  selected,
-  onSelect,
-  optional = false,
-}: OptionSectionProps<T>) {
-  return (
-    <View style={styles.section}>
-      <ThemedText type="subtitle">{title}</ThemedText>
-      {optional ? (
-        <ThemedText style={styles.optionalHint}>Optional</ThemedText>
-      ) : null}
-      {options.map((option) => (
-        <SelectableOption
-          key={option.value}
-          label={option.label}
-          selected={selected === option.value}
-          onPress={() => onSelect(selected === option.value && optional ? null : option.value)}
-        />
-      ))}
-    </View>
-  );
-}
+import {
+  arePetFormSnapshotsEqual,
+  buildPetFormSnapshot,
+  getPetFormSnapshot,
+} from '@/utils/pet-form-snapshot';
 
 function toggleHealthCondition(
   current: HealthCondition[],
@@ -103,6 +77,8 @@ function normalizeOptionalDate(value: string): string | null {
 
 export default function EditPetScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
+  const allowExitRef = useRef(false);
 
   const pet = usePetStore((state) => state.pet);
   const petIsLoading = usePetStore((state) => state.isLoading);
@@ -112,6 +88,7 @@ export default function EditPetScreen() {
   const clearError = usePetStore((state) => state.clearError);
 
   const [species, setSpecies] = useState<PetSpecies | null>(() => pet?.species ?? null);
+  const [breed, setBreed] = useState<string | null>(() => pet?.breed ?? null);
   const [name, setName] = useState(() => pet?.name ?? '');
   const [ageGroup, setAgeGroup] = useState<PetAgeGroup | null>(() => pet?.ageGroup ?? null);
   const [healthConditions, setHealthConditions] = useState<HealthCondition[]>(
@@ -137,6 +114,45 @@ export default function EditPetScreen() {
   const surfaceColor = useThemeColor({}, 'surface');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
+  const isDirty = useMemo(() => {
+    if (!pet || species === null || ageGroup === null) {
+      return false;
+    }
+
+    const currentSnapshot = buildPetFormSnapshot({
+      name,
+      species,
+      breed,
+      ageGroup,
+      healthConditions,
+      photoUri,
+      color,
+      sex,
+      spayNeuterStatus,
+      birthDate,
+      adoptionDate,
+      microchipId,
+      ownerName,
+    });
+
+    return !arePetFormSnapshotsEqual(currentSnapshot, getPetFormSnapshot(pet));
+  }, [
+    adoptionDate,
+    ageGroup,
+    birthDate,
+    breed,
+    color,
+    healthConditions,
+    microchipId,
+    name,
+    ownerName,
+    pet,
+    photoUri,
+    sex,
+    spayNeuterStatus,
+    species,
+  ]);
+
   useEffect(() => {
     void loadPet();
   }, [loadPet]);
@@ -153,6 +169,7 @@ export default function EditPetScreen() {
     }
 
     setSpecies(pet.species);
+    setBreed(pet.breed ?? null);
     setName(pet.name);
     setAgeGroup(pet.ageGroup);
     setHealthConditions(pet.healthConditions);
@@ -165,6 +182,30 @@ export default function EditPetScreen() {
     setMicrochipId(pet.microchipId ?? '');
     setOwnerName(pet.ownerName ?? '');
   }, [pet?.id]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
+      if (allowExitRef.current || !isDirty || isSaving) {
+        return;
+      }
+
+      event.preventDefault();
+
+      Alert.alert('Discard changes?', 'You have unsaved changes to this pet profile.', [
+        { text: 'Keep Editing', style: 'cancel' },
+        {
+          text: 'Discard',
+          style: 'destructive',
+          onPress: () => {
+            allowExitRef.current = true;
+            navigation.dispatch(event.data.action);
+          },
+        },
+      ]);
+    });
+
+    return unsubscribe;
+  }, [isDirty, isSaving, navigation]);
 
   const handleChangePhoto = useCallback(async () => {
     setValidationError(null);
@@ -253,6 +294,7 @@ export default function EditPetScreen() {
         ...pet,
         name: name.trim(),
         species,
+        breed,
         ageGroup,
         healthConditions,
         photoUri,
@@ -264,6 +306,7 @@ export default function EditPetScreen() {
         microchipId: normalizeOptionalText(microchipId),
         ownerName: normalizeOptionalText(ownerName),
       });
+      allowExitRef.current = true;
       router.back();
     } catch {
       // Store already sets error state.
@@ -274,6 +317,7 @@ export default function EditPetScreen() {
     adoptionDate,
     ageGroup,
     birthDate,
+    breed,
     clearError,
     color,
     healthConditions,
@@ -290,6 +334,7 @@ export default function EditPetScreen() {
   ]);
 
   const errorMessage = validationError ?? petError;
+  const canSave = isDirty && !isSaving;
 
   if (petIsLoading || !pet) {
     return (
@@ -304,288 +349,292 @@ export default function EditPetScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: 'Edit Pet' }} />
-      <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
-      <View style={styles.body}>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.description}>
-          Update your pet&apos;s profile information.
-        </ThemedText>
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Profile Photo</ThemedText>
-          <View style={styles.photoRow}>
-            <PetAvatar photoUri={photoUri} size={88} />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: 'Edit Pet',
+          headerRight: () => (
             <Pressable
-              accessibilityLabel="Change photo"
               accessibilityRole="button"
-              disabled={isPickingPhoto || isSaving}
-              onPress={() => void handleChangePhoto()}
+              accessibilityLabel="Save"
+              disabled={!canSave}
+              hitSlop={8}
+              onPress={() => void handleSave()}
               style={({ pressed }) => [
-                styles.changePhotoButton,
                 {
-                  backgroundColor: surfaceColor,
-                  borderColor,
-                  opacity: pressed || isPickingPhoto || isSaving ? 0.7 : 1,
+                  opacity: !canSave ? 0.4 : pressed ? 0.6 : 1,
+                  paddingHorizontal: Spacing.sm,
                 },
               ]}>
-              {isPickingPhoto ? (
-                <ActivityIndicator color={primaryColor} size="small" />
-              ) : (
-                <ThemedText type="defaultSemiBold">Change Photo</ThemedText>
-              )}
+              <ThemedText lightColor={primaryColor} darkColor={primaryColor} type="defaultSemiBold">
+                Save
+              </ThemedText>
             </Pressable>
-          </View>
-        </View>
-
-        <OptionSection
-          title="Pet Type"
-          options={PET_SPECIES_OPTIONS}
-          selected={species}
-          onSelect={(value) => {
-            setValidationError(null);
-            clearError();
-            setSpecies(value);
-          }}
-        />
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Pet Name</ThemedText>
-          <TextInput
-            accessibilityLabel="Pet name"
-            autoCapitalize="words"
-            autoCorrect={false}
-            maxLength={PET_NAME_MAX_LENGTH}
-            placeholder="Pet name"
-            placeholderTextColor={textSecondaryColor}
-            returnKeyType="done"
-            style={[
-              styles.input,
-              {
-                color: textColor,
-                backgroundColor: surfaceColor,
-                borderColor,
-              },
-            ]}
-            value={name}
-            onChangeText={(value) => {
-              setValidationError(null);
-              clearError();
-              setName(value);
-            }}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Color</ThemedText>
-          <ThemedText style={styles.optionalHint}>Optional</ThemedText>
-          <TextInput
-            accessibilityLabel="Pet color"
-            autoCapitalize="words"
-            autoCorrect={false}
-            maxLength={PET_COLOR_MAX_LENGTH}
-            placeholder="e.g. Golden, Black and white"
-            placeholderTextColor={textSecondaryColor}
-            returnKeyType="done"
-            style={[
-              styles.input,
-              {
-                color: textColor,
-                backgroundColor: surfaceColor,
-                borderColor,
-              },
-            ]}
-            value={color}
-            onChangeText={(value) => {
-              setValidationError(null);
-              clearError();
-              setColor(value);
-            }}
-          />
-        </View>
-
-        <OptionSection
-          title="Sex"
-          options={PET_SEX_OPTIONS}
-          selected={sex}
-          optional
-          onSelect={(value) => {
-            setValidationError(null);
-            clearError();
-            setSex(value);
-          }}
-        />
-
-        <OptionSection
-          title="Spay / Neuter Status"
-          options={PET_SPAY_NEUTER_STATUS_OPTIONS}
-          selected={spayNeuterStatus}
-          optional
-          onSelect={(value) => {
-            setValidationError(null);
-            clearError();
-            setSpayNeuterStatus(value);
-          }}
-        />
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Birth Date</ThemedText>
-          <ThemedText style={styles.optionalHint}>Optional</ThemedText>
-          <TextInput
-            accessibilityLabel="Birth date"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="numbers-and-punctuation"
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={textSecondaryColor}
-            returnKeyType="done"
-            style={[
-              styles.input,
-              {
-                color: textColor,
-                backgroundColor: surfaceColor,
-                borderColor,
-              },
-            ]}
-            value={birthDate}
-            onChangeText={(value) => {
-              setValidationError(null);
-              clearError();
-              setBirthDate(value);
-            }}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Adoption Date</ThemedText>
-          <ThemedText style={styles.optionalHint}>Optional</ThemedText>
-          <TextInput
-            accessibilityLabel="Adoption date"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="numbers-and-punctuation"
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={textSecondaryColor}
-            returnKeyType="done"
-            style={[
-              styles.input,
-              {
-                color: textColor,
-                backgroundColor: surfaceColor,
-                borderColor,
-              },
-            ]}
-            value={adoptionDate}
-            onChangeText={(value) => {
-              setValidationError(null);
-              clearError();
-              setAdoptionDate(value);
-            }}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Microchip ID</ThemedText>
-          <ThemedText style={styles.optionalHint}>Optional</ThemedText>
-          <TextInput
-            accessibilityLabel="Microchip ID"
-            autoCapitalize="none"
-            autoCorrect={false}
-            maxLength={PET_MICROCHIP_MAX_LENGTH}
-            placeholder="Microchip ID"
-            placeholderTextColor={textSecondaryColor}
-            returnKeyType="done"
-            style={[
-              styles.input,
-              {
-                color: textColor,
-                backgroundColor: surfaceColor,
-                borderColor,
-              },
-            ]}
-            value={microchipId}
-            onChangeText={(value) => {
-              setValidationError(null);
-              clearError();
-              setMicrochipId(value);
-            }}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Owner Name</ThemedText>
-          <ThemedText style={styles.optionalHint}>Optional</ThemedText>
-          <TextInput
-            accessibilityLabel="Owner name"
-            autoCapitalize="words"
-            autoCorrect={false}
-            maxLength={PET_OWNER_MAX_LENGTH}
-            placeholder="Owner name"
-            placeholderTextColor={textSecondaryColor}
-            returnKeyType="done"
-            style={[
-              styles.input,
-              {
-                color: textColor,
-                backgroundColor: surfaceColor,
-                borderColor,
-              },
-            ]}
-            value={ownerName}
-            onChangeText={(value) => {
-              setValidationError(null);
-              clearError();
-              setOwnerName(value);
-            }}
-          />
-        </View>
-
-        <OptionSection
-          title="Age Group"
-          options={PET_AGE_GROUP_OPTIONS}
-          selected={ageGroup}
-          onSelect={(value) => {
-            setValidationError(null);
-            clearError();
-            setAgeGroup(value);
-          }}
-        />
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Health Conditions</ThemedText>
-          {HEALTH_CONDITION_OPTIONS.map((option) => (
-            <SelectableOption
-              key={option.value}
-              label={option.label}
-              selected={healthConditions.includes(option.value)}
-              onPress={() => {
-                setValidationError(null);
-                clearError();
-                setHealthConditions((current) => toggleHealthCondition(current, option.value));
-              }}
-            />
-          ))}
-        </View>
-      </View>
-
-      {errorMessage ? (
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.error}>
-          {errorMessage}
-        </ThemedText>
-      ) : null}
-
-      <Button
-        title="Save"
-        onPress={() => void handleSave()}
-        disabled={isSaving}
-        style={styles.button}
+          ),
+        }}
       />
-    </ScreenContainer>
+      <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
+        <View style={styles.body}>
+          <GroupedSection title="Profile Photo">
+            <View style={styles.formSectionBody}>
+              <View style={styles.photoRow}>
+                <PetAvatar photoUri={photoUri} size={88} />
+                <Pressable
+                  accessibilityLabel="Change photo"
+                  accessibilityRole="button"
+                  disabled={isPickingPhoto || isSaving}
+                  onPress={() => void handleChangePhoto()}
+                  style={({ pressed }) => [
+                    styles.changePhotoButton,
+                    {
+                      backgroundColor: surfaceColor,
+                      borderColor,
+                      opacity: pressed || isPickingPhoto || isSaving ? 0.7 : 1,
+                    },
+                  ]}>
+                  {isPickingPhoto ? (
+                    <ActivityIndicator color={primaryColor} size="small" />
+                  ) : (
+                    <ThemedText type="defaultSemiBold">Change Photo</ThemedText>
+                  )}
+                </Pressable>
+              </View>
+            </View>
+          </GroupedSection>
+
+          <GroupedSection title="Pet Type">
+            <View style={styles.formSectionBody}>
+              {PET_SPECIES_OPTIONS.map((option) => (
+                <SelectableOption
+                  key={option.value}
+                  label={option.label}
+                  selected={species === option.value}
+                  onPress={() => {
+                    setValidationError(null);
+                    clearError();
+                    if (breed && !isBreedValidForSpecies(breed, option.value)) {
+                      setBreed(null);
+                    }
+                    setSpecies(option.value);
+                  }}
+                />
+              ))}
+            </View>
+          </GroupedSection>
+
+          {species ? (
+            <GroupedSection title="Breed">
+              <View style={styles.formSectionBody}>
+                <ThemedText
+                  lightColor={textSecondaryColor}
+                  darkColor={textSecondaryColor}
+                  style={styles.optionalHint}>
+                  Optional
+                </ThemedText>
+                {getBreedOptionsForSpecies(species).map((option) => (
+                  <SelectableOption
+                    key={option.value}
+                    label={option.label}
+                    selected={breed === option.value}
+                    onPress={() => {
+                      setValidationError(null);
+                      clearError();
+                      setBreed(breed === option.value ? null : option.value);
+                    }}
+                  />
+                ))}
+              </View>
+            </GroupedSection>
+          ) : null}
+
+          <GroupedSection title="Basic Information">
+            <View style={styles.formSectionBody}>
+              <ThemedText type="defaultSemiBold">Pet Name</ThemedText>
+              <TextInput
+                accessibilityLabel="Pet name"
+                autoCapitalize="words"
+                autoCorrect={false}
+                maxLength={PET_NAME_MAX_LENGTH}
+                placeholder="Pet name"
+                placeholderTextColor={textSecondaryColor}
+                returnKeyType="done"
+                style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
+                value={name}
+                onChangeText={(value) => {
+                  setValidationError(null);
+                  clearError();
+                  setName(value);
+                }}
+              />
+              <ThemedText type="defaultSemiBold">Color</ThemedText>
+              <ThemedText style={styles.optionalHint}>Optional</ThemedText>
+              <TextInput
+                accessibilityLabel="Pet color"
+                autoCapitalize="words"
+                autoCorrect={false}
+                maxLength={PET_COLOR_MAX_LENGTH}
+                placeholder="e.g. Golden, Black and white"
+                placeholderTextColor={textSecondaryColor}
+                returnKeyType="done"
+                style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
+                value={color}
+                onChangeText={(value) => {
+                  setValidationError(null);
+                  clearError();
+                  setColor(value);
+                }}
+              />
+              <ThemedText type="defaultSemiBold">Age Group</ThemedText>
+              {PET_AGE_GROUP_OPTIONS.map((option) => (
+                <SelectableOption
+                  key={option.value}
+                  label={option.label}
+                  selected={ageGroup === option.value}
+                  onPress={() => {
+                    setValidationError(null);
+                    clearError();
+                    setAgeGroup(option.value);
+                  }}
+                />
+              ))}
+            </View>
+          </GroupedSection>
+
+          <GroupedSection title="Health Information">
+            <View style={styles.formSectionBody}>
+              <ThemedText type="defaultSemiBold">Sex</ThemedText>
+              <ThemedText style={styles.optionalHint}>Optional</ThemedText>
+              {PET_SEX_OPTIONS.map((option) => (
+                <SelectableOption
+                  key={option.value}
+                  label={option.label}
+                  selected={sex === option.value}
+                  onPress={() => {
+                    setValidationError(null);
+                    clearError();
+                    setSex(sex === option.value ? null : option.value);
+                  }}
+                />
+              ))}
+              <ThemedText type="defaultSemiBold">Spay / Neuter Status</ThemedText>
+              <ThemedText style={styles.optionalHint}>Optional</ThemedText>
+              {PET_SPAY_NEUTER_STATUS_OPTIONS.map((option) => (
+                <SelectableOption
+                  key={option.value}
+                  label={option.label}
+                  selected={spayNeuterStatus === option.value}
+                  onPress={() => {
+                    setValidationError(null);
+                    clearError();
+                    setSpayNeuterStatus(
+                      spayNeuterStatus === option.value ? null : option.value
+                    );
+                  }}
+                />
+              ))}
+              <ThemedText type="defaultSemiBold">Birth Date</ThemedText>
+              <ThemedText style={styles.optionalHint}>Optional · YYYY-MM-DD</ThemedText>
+              <TextInput
+                accessibilityLabel="Birth date"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="numbers-and-punctuation"
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={textSecondaryColor}
+                returnKeyType="done"
+                style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
+                value={birthDate}
+                onChangeText={(value) => {
+                  setValidationError(null);
+                  clearError();
+                  setBirthDate(value);
+                }}
+              />
+              <ThemedText type="defaultSemiBold">Health Conditions</ThemedText>
+              {HEALTH_CONDITION_OPTIONS.map((option) => (
+                <SelectableOption
+                  key={option.value}
+                  label={option.label}
+                  selected={healthConditions.includes(option.value)}
+                  onPress={() => {
+                    setValidationError(null);
+                    clearError();
+                    setHealthConditions((current) => toggleHealthCondition(current, option.value));
+                  }}
+                />
+              ))}
+            </View>
+          </GroupedSection>
+
+          <GroupedSection title="Additional Information">
+            <View style={styles.formSectionBody}>
+              <ThemedText type="defaultSemiBold">Adoption Date</ThemedText>
+              <ThemedText style={styles.optionalHint}>Optional · YYYY-MM-DD</ThemedText>
+              <TextInput
+                accessibilityLabel="Adoption date"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="numbers-and-punctuation"
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={textSecondaryColor}
+                returnKeyType="done"
+                style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
+                value={adoptionDate}
+                onChangeText={(value) => {
+                  setValidationError(null);
+                  clearError();
+                  setAdoptionDate(value);
+                }}
+              />
+              <ThemedText type="defaultSemiBold">Microchip ID</ThemedText>
+              <ThemedText style={styles.optionalHint}>Optional</ThemedText>
+              <TextInput
+                accessibilityLabel="Microchip ID"
+                autoCapitalize="none"
+                autoCorrect={false}
+                maxLength={PET_MICROCHIP_MAX_LENGTH}
+                placeholder="Microchip ID"
+                placeholderTextColor={textSecondaryColor}
+                returnKeyType="done"
+                style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
+                value={microchipId}
+                onChangeText={(value) => {
+                  setValidationError(null);
+                  clearError();
+                  setMicrochipId(value);
+                }}
+              />
+              <ThemedText type="defaultSemiBold">Owner Name</ThemedText>
+              <ThemedText style={styles.optionalHint}>Optional</ThemedText>
+              <TextInput
+                accessibilityLabel="Owner name"
+                autoCapitalize="words"
+                autoCorrect={false}
+                maxLength={PET_OWNER_MAX_LENGTH}
+                placeholder="Owner name"
+                placeholderTextColor={textSecondaryColor}
+                returnKeyType="done"
+                style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
+                value={ownerName}
+                onChangeText={(value) => {
+                  setValidationError(null);
+                  clearError();
+                  setOwnerName(value);
+                }}
+              />
+            </View>
+          </GroupedSection>
+        </View>
+
+        {errorMessage ? (
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.error}>
+            {errorMessage}
+          </ThemedText>
+        ) : null}
+      </ScreenContainer>
     </>
   );
 }
@@ -593,22 +642,19 @@ export default function EditPetScreen() {
 const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
-    justifyContent: 'space-between',
   },
   body: {
-    flex: 1,
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
+    paddingBottom: Spacing.lg,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  description: {
-    ...Typography.body,
-  },
-  section: {
+  formSectionBody: {
+    padding: Spacing.md,
     gap: Spacing.sm,
   },
   optionalHint: {
@@ -639,9 +685,6 @@ const styles = StyleSheet.create({
   },
   error: {
     textAlign: 'center',
-    marginBottom: Spacing.sm,
-  },
-  button: {
     marginBottom: Spacing.md,
   },
 });

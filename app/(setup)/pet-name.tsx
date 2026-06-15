@@ -33,7 +33,7 @@ export default function PetNameScreen() {
     }
 
     setName(name.trim());
-    router.push(setupRoute('/(setup)/pet-age', mode));
+    router.push(setupRoute('/(setup)/pet-breed', mode));
   }, [mode, name, router, setName]);
 
   return (

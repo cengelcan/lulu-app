@@ -7,10 +7,10 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-const DEFAULT_TOTAL_STEPS = 6;
+const DEFAULT_TOTAL_STEPS = 7;
 
 type SetupScreenProps = {
-  step: 1 | 2 | 3 | 4 | 5 | 6;
+  step: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   totalSteps?: number;
   title: string;
   description?: string;

@@ -4,6 +4,7 @@ export type SetupMode = 'initial' | 'add';
 
 type SetupRoutePath =
   | '/(setup)/pet-name'
+  | '/(setup)/pet-breed'
   | '/(setup)/pet-age'
   | '/(setup)/health-conditions'
   | '/(setup)/check-in-prefs';
@@ -20,9 +21,9 @@ export function setupRoute(path: SetupRoutePath, mode: SetupMode): Href {
     return `${path}?mode=${ADD_MODE_PARAM}` as Href;
   }
 
-  return path;
+  return path as Href;
 }
 
 export function setupTotalSteps(mode: SetupMode): number {
-  return mode === 'add' ? 4 : 6;
+  return mode === 'add' ? 5 : 7;
 }

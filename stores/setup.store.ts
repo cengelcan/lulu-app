@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { isBreedValidForSpecies } from '@/constants/pet-breeds';
 import { isValidLocalDateString } from '@/utils/date';
 
 import {
@@ -15,10 +16,12 @@ import {
 
 type SetupDraftState = {
   species: PetSpecies | null;
+  breed: string | null;
   name: string;
   ageGroup: PetAgeGroup | null;
   healthConditions: HealthCondition[];
   setSpecies: (species: PetSpecies) => void;
+  setBreed: (breed: string | null) => void;
   setName: (name: string) => void;
   setAgeGroup: (ageGroup: PetAgeGroup) => void;
   toggleHealthCondition: (condition: HealthCondition) => void;
@@ -101,6 +104,7 @@ export function validateOptionalMicrochipId(microchipId: string): string | null 
 
 const initialDraft = {
   species: null,
+  breed: null as string | null,
   name: '',
   ageGroup: null,
   healthConditions: [] as HealthCondition[],
@@ -109,7 +113,13 @@ const initialDraft = {
 export const useSetupStore = create<SetupDraftState>((set, get) => ({
   ...initialDraft,
 
-  setSpecies: (species) => set({ species }),
+  setSpecies: (species) => {
+    const { breed } = get();
+    const nextBreed = breed && !isBreedValidForSpecies(breed, species) ? null : breed;
+    set({ species, breed: nextBreed });
+  },
+
+  setBreed: (breed) => set({ breed }),
 
   setName: (name) => set({ name }),
 

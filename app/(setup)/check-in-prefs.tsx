@@ -10,7 +10,7 @@ import type { CheckInPreference } from '@/types/check-in';
 
 export default function CheckInPrefsScreen() {
   const router = useRouter();
-  const { onBack } = useSetupScreenBack(5, 'initial');
+  const { onBack } = useSetupScreenBack(6, 'initial');
   const savedPreference = useNotificationStore((state) => state.preference);
   const savePreference = useNotificationStore((state) => state.savePreference);
   const isLoading = useNotificationStore((state) => state.isLoading);
@@ -44,7 +44,7 @@ export default function CheckInPrefsScreen() {
 
   return (
     <SetupScreen
-      step={5}
+      step={6}
       title="When should we remind you?"
       description="Choose your preferred check-in time."
       onContinue={() => void handleContinue()}

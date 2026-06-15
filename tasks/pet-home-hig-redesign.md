@@ -7,7 +7,7 @@ Home, My Pets, Pet Details ve Edit Pet ekranlarını ürün kararları + iOS HIG
 - **Günde 1 check-in** — aynı gün için güncelleme; çoklu kayıt yok
 - **View All / History listesi yok** — Home özet ekranı kalır
 
-**Mevcut durum:** ✅ Faz 1 tamamlandı. Faz 2–3 bekliyor.
+**Mevcut durum:** ✅ Faz 1–2 tamamlandı. Faz 3 bekliyor.
 
 **Önerilen uygulama sırası:** Faz 1 → Faz 2 → Faz 3
 
@@ -69,12 +69,12 @@ Kaldırılacak: "View History" bölümü ve tüm geçmiş kart listesi.
 
 ## Faz 2 — Görsel dil birliği (Profil ile hizala)
 
-- [ ] `ProfileDetailRow` / `GroupedSection` primitive (pet ekranları)
-- [ ] Pet Profile: inset grouped kartlar, yatay label–value
-- [ ] Edit Pet: grouped sections, Save navigation bar sağ üst, unsaved changes uyarısı
-- [ ] My Pets: liste satırı, checkmark accessory, chevron → profile
-- [ ] My Pets: çift başlık kaldır; alt satırda breed/species
-- [ ] Setup: opsiyonel breed adımı
+- [x] `ProfileDetailRow` / `GroupedSection` primitive (pet ekranları)
+- [x] Pet Profile: inset grouped kartlar, yatay label–value
+- [x] Edit Pet: grouped sections, Save navigation bar sağ üst, unsaved changes uyarısı
+- [x] My Pets: liste satırı, checkmark accessory, chevron → profile
+- [x] My Pets: çift başlık kaldır; alt satırda breed/species
+- [x] Setup: opsiyonel breed adımı
 
 ---
 

@@ -12,7 +12,7 @@ export default function PetAgeScreen() {
   const router = useRouter();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
-  const { onBack } = useSetupScreenBack(3, mode);
+  const { onBack } = useSetupScreenBack(4, mode);
 
   const ageGroup = useSetupStore((state) => state.ageGroup);
   const setAgeGroup = useSetupStore((state) => state.setAgeGroup);
@@ -30,7 +30,7 @@ export default function PetAgeScreen() {
 
   return (
     <SetupScreen
-      step={3}
+      step={4}
       totalSteps={totalSteps}
       title="How old is your pet?"
       description="Select the age group that best fits."

@@ -1,15 +1,14 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import * as Haptics from 'expo-haptics';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
-import { PetAvatar } from '@/components/pet/PetAvatar';
+import { PetListRow } from '@/components/pet/PetListRow';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
@@ -19,51 +18,6 @@ import type { Pet } from '@/types/pet';
 type MyPetsScreenContentProps = {
   edges?: Edge[];
 };
-
-type PetListItemProps = {
-  pet: Pet;
-  isActive: boolean;
-  onPress: () => void;
-  disabled?: boolean;
-};
-
-function PetListItem({ pet, isActive, onPress, disabled = false }: PetListItemProps) {
-  const primaryColor = useThemeColor({}, 'primary');
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={
-        isActive ? `${pet.name}, current pet. Tap to go to Home.` : `${pet.name}. Tap to select.`
-      }
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [{ opacity: disabled ? 0.6 : pressed ? 0.7 : 1 }]}>
-      <Card
-        style={[
-          styles.petRow,
-          isActive && { borderColor: primaryColor, borderWidth: 2 },
-        ]}>
-        <PetAvatar photoUri={pet.photoUri} size={56} />
-        <View style={styles.petInfo}>
-          <ThemedText type="defaultSemiBold" style={styles.petName}>
-            {pet.name}
-          </ThemedText>
-        </View>
-        {isActive ? (
-          <View style={[styles.currentBadge, { backgroundColor: `${primaryColor}1A` }]}>
-            <ThemedText
-              lightColor={primaryColor}
-              darkColor={primaryColor}
-              style={styles.currentBadgeText}>
-              Current
-            </ThemedText>
-          </View>
-        ) : null}
-      </Card>
-    </Pressable>
-  );
-}
 
 export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenContentProps) {
   const router = useRouter();
@@ -82,6 +36,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
   const resetDraft = useSetupStore((state) => state.resetDraft);
 
   const [isSwitching, setIsSwitching] = useState(false);
+  const [switchingPetId, setSwitchingPetId] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -109,16 +64,13 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         return;
       }
 
-      if (process.env.EXPO_OS === 'ios') {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-
       if (activePet?.id === pet.id) {
         router.replace('/(tabs)/home');
         return;
       }
 
       setIsSwitching(true);
+      setSwitchingPetId(pet.id);
 
       void (async () => {
         try {
@@ -129,6 +81,34 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
           // Error is stored in pet store for retry flows.
         } finally {
           setIsSwitching(false);
+          setSwitchingPetId(null);
+        }
+      })();
+    },
+    [activePet?.id, isSwitching, loadCheckIns, router, setActivePet]
+  );
+
+  const handleOpenProfile = useCallback(
+    (pet: Pet) => {
+      if (isSwitching) {
+        return;
+      }
+
+      void (async () => {
+        setIsSwitching(true);
+        setSwitchingPetId(pet.id);
+
+        try {
+          if (activePet?.id !== pet.id) {
+            await setActivePet(pet.id);
+            await loadCheckIns(pet.id);
+          }
+          router.push('/pet-profile');
+        } catch {
+          // Error is stored in pet store for retry flows.
+        } finally {
+          setIsSwitching(false);
+          setSwitchingPetId(null);
         }
       })();
     },
@@ -161,18 +141,20 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         </View>
       ) : (
         <View style={styles.body}>
-          <ThemedText type="title">My Pets</ThemedText>
-          <View style={styles.petList}>
-            {pets.map((pet) => (
-              <PetListItem
+          <Card style={styles.listCard}>
+            {pets.map((pet, index) => (
+              <PetListRow
                 key={pet.id}
                 pet={pet}
-                isActive={activePet?.id === pet.id}
                 disabled={isSwitching}
-                onPress={() => handleSelectPet(pet)}
+                isActive={activePet?.id === pet.id}
+                isLast={index === pets.length - 1}
+                isSwitching={isSwitching && switchingPetId === pet.id}
+                onOpenProfile={() => handleOpenProfile(pet)}
+                onSelect={() => handleSelectPet(pet)}
               />
             ))}
-          </View>
+          </Card>
           <Button title="Add Pet" variant="secondary" onPress={handleAddPet} />
         </View>
       )}
@@ -188,28 +170,10 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
   },
-  petList: {
-    gap: Spacing.md,
-  },
-  petRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  petInfo: {
-    flex: 1,
-  },
-  petName: {
-    flexShrink: 1,
-  },
-  currentBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.full,
-  },
-  currentBadgeText: {
-    ...Typography.caption,
-    fontWeight: '600',
+  listCard: {
+    padding: 0,
+    gap: 0,
+    overflow: 'hidden',
   },
   centered: {
     flex: 1,

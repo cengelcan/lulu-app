@@ -7,6 +7,7 @@ import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
+import { DatePickerField } from '@/components/ui/DatePickerField';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
   HEALTH_CONDITION_OPTIONS,
@@ -533,21 +534,16 @@ export default function EditPetScreen() {
                 />
               ))}
               <ThemedText type="defaultSemiBold">Birth Date</ThemedText>
-              <ThemedText style={styles.optionalHint}>Optional · YYYY-MM-DD</ThemedText>
-              <TextInput
+              <ThemedText style={styles.optionalHint}>Optional</ThemedText>
+              <DatePickerField
                 accessibilityLabel="Birth date"
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="numbers-and-punctuation"
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={textSecondaryColor}
-                returnKeyType="done"
-                style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
+                disabled={isSaving}
+                placeholder="Select birth date"
                 value={birthDate}
-                onChangeText={(value) => {
+                onChange={(nextValue) => {
                   setValidationError(null);
                   clearError();
-                  setBirthDate(value);
+                  setBirthDate(nextValue);
                 }}
               />
               <ThemedText type="defaultSemiBold">Health Conditions</ThemedText>

@@ -7,7 +7,7 @@ Home, My Pets, Pet Details ve Edit Pet ekranlarını ürün kararları + iOS HIG
 - **Günde 1 check-in** — aynı gün için güncelleme; çoklu kayıt yok
 - **View All / History listesi yok** — Home özet ekranı kalır
 
-**Mevcut durum:** ✅ Faz 1–2 tamamlandı. Faz 3 bekliyor.
+**Mevcut durum:** ✅ Faz 1–3 tamamlandı.
 
 **Önerilen uygulama sırası:** Faz 1 → Faz 2 → Faz 3
 
@@ -80,10 +80,10 @@ Kaldırılacak: "View History" bölümü ve tüm geçmiş kart listesi.
 
 ## Faz 3 — Polish
 
-- [ ] Edit Pet: native date picker
-- [ ] Dynamic Type
-- [ ] Tab bar `HapticTab`
-- [ ] Kilitli Quick Actions: Coming Soon badge
+- [x] Edit Pet: native date picker
+- [x] Dynamic Type
+- [x] Tab bar `HapticTab`
+- [x] Kilitli Quick Actions: Coming Soon badge
 
 ---
 

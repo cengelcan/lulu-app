@@ -6,11 +6,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-type QuickActionIconName =
-  | 'chart.line.uptrend.xyaxis'
-  | 'doc.text.fill'
-  | 'pills.fill'
-  | 'lock.fill';
+type QuickActionIconName = 'chart.line.uptrend.xyaxis' | 'doc.text.fill' | 'pills.fill';
 
 type QuickActionItemProps = {
   label: string;
@@ -35,27 +31,41 @@ export function QuickActionItem({ label, icon, locked = false, onPress }: QuickA
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityHint={locked ? 'Available in a future update' : undefined}
+      accessibilityHint={locked ? 'Coming soon' : undefined}
       onPress={handlePress}
       style={({ pressed }) => [
         styles.item,
         {
           backgroundColor: surfaceColor,
           borderColor,
-          opacity: pressed ? 0.85 : locked ? 0.72 : 1,
+          opacity: pressed ? 0.85 : locked ? 0.88 : 1,
         },
       ]}>
-      <View style={[styles.iconContainer, { backgroundColor: `${primaryColor}1A` }]}>
-        <IconSymbol name={icon} size={22} color={primaryColor} />
-      </View>
-      <ThemedText type="defaultSemiBold" style={styles.label}>
-        {label}
-      </ThemedText>
       {locked ? (
-        <View style={styles.lockIcon}>
-          <IconSymbol name="lock.fill" size={16} color={textSecondaryColor} />
+        <View style={[styles.badge, { backgroundColor: `${primaryColor}1A` }]}>
+          <ThemedText
+            lightColor={primaryColor}
+            darkColor={primaryColor}
+            maxFontSizeMultiplier={1.2}
+            style={styles.badgeText}>
+            Coming Soon
+          </ThemedText>
         </View>
       ) : null}
+      <View style={[styles.iconContainer, { backgroundColor: `${primaryColor}1A` }]}>
+        <IconSymbol
+          name={icon}
+          size={22}
+          color={locked ? textSecondaryColor : primaryColor}
+        />
+      </View>
+      <ThemedText
+        type="defaultSemiBold"
+        lightColor={locked ? textSecondaryColor : undefined}
+        darkColor={locked ? textSecondaryColor : undefined}
+        style={styles.label}>
+        {label}
+      </ThemedText>
     </Pressable>
   );
 }
@@ -72,6 +82,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.sm,
   },
+  badge: {
+    position: 'absolute',
+    top: Spacing.sm,
+    alignSelf: 'center',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: Radius.full,
+  },
+  badgeText: {
+    ...Typography.caption,
+    fontWeight: '600',
+  },
   iconContainer: {
     width: 44,
     height: 44,
@@ -82,10 +104,5 @@ const styles = StyleSheet.create({
   label: {
     ...Typography.caption,
     textAlign: 'center',
-  },
-  lockIcon: {
-    position: 'absolute',
-    top: Spacing.sm,
-    right: Spacing.sm,
   },
 });

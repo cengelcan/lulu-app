@@ -46,7 +46,8 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to set profile pictures."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

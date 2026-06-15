@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 
+import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -15,6 +16,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor,
         tabBarInactiveTintColor,
+        tabBarButton: (props) => <HapticTab {...props} />,
         tabBarStyle: {
           backgroundColor,
           borderTopColor: borderColor,

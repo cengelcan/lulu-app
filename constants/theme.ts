@@ -73,33 +73,42 @@ export const Typography = {
     fontSize: 32,
     lineHeight: 38,
     fontWeight: '700' as const,
+    maxFontSizeMultiplier: 1.35,
   },
   subtitle: {
     fontSize: 20,
     lineHeight: 26,
     fontWeight: '600' as const,
+    maxFontSizeMultiplier: 1.4,
   },
   body: {
     fontSize: 16,
     lineHeight: 24,
     fontWeight: '400' as const,
+    maxFontSizeMultiplier: 2,
   },
   bodySemiBold: {
     fontSize: 16,
     lineHeight: 24,
     fontWeight: '600' as const,
+    maxFontSizeMultiplier: 2,
   },
   caption: {
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '400' as const,
+    maxFontSizeMultiplier: 2,
   },
   button: {
     fontSize: 16,
     lineHeight: 22,
     fontWeight: '600' as const,
+    maxFontSizeMultiplier: 1.5,
   },
 } as const;
+
+/** Default Dynamic Type cap for themed text without an explicit type style. */
+export const DEFAULT_MAX_FONT_SIZE_MULTIPLIER = 2;
 
 export const Fonts = Platform.select({
   ios: {

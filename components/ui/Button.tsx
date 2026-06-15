@@ -66,7 +66,12 @@ export function Button({ title, variant = 'primary', disabled, style, onPress, .
         style,
       ]}
       {...rest}>
-      <Text style={[styles.label, { color: textColor }]}>{title}</Text>
+      <Text
+        allowFontScaling
+        maxFontSizeMultiplier={Typography.button.maxFontSizeMultiplier}
+        style={[styles.label, { color: textColor }]}>
+        {title}
+      </Text>
     </Pressable>
   );
 }

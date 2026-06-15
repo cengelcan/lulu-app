@@ -103,7 +103,7 @@ export function DailyCheckInProgress() {
   return (
     <Card>
       <ThemedText type="subtitle">Daily Check-In Progress</ThemedText>
-      {isLoading ? (
+      {isLoading && checkIns.length === 0 ? (
         <ActivityIndicator color={primaryColor} style={styles.loading} />
       ) : (
         <View style={styles.weekRow}>

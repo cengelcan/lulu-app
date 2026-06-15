@@ -1,5 +1,5 @@
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect } from 'react';
+import { Stack, useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { PetAvatar } from '@/components/pet/PetAvatar';
@@ -48,11 +48,9 @@ export default function PetProfileScreen() {
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
-  useFocusEffect(
-    useCallback(() => {
-      void loadPet();
-    }, [loadPet])
-  );
+  useEffect(() => {
+    void loadPet();
+  }, [loadPet]);
 
   useEffect(() => {
     if (!isLoading && !pet) {
@@ -69,7 +67,7 @@ export default function PetProfileScreen() {
     router.push('/edit-pet');
   };
 
-  if (isLoading || !pet) {
+  if (isLoading && !pet) {
     return (
       <>
         <Stack.Screen options={screenOptions} />

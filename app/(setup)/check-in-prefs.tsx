@@ -11,12 +11,13 @@ import type { CheckInPreference } from '@/types/check-in';
 export default function CheckInPrefsScreen() {
   const router = useRouter();
   const { onBack } = useSetupScreenBack(5, 'initial');
+  const savedPreference = useNotificationStore((state) => state.preference);
   const savePreference = useNotificationStore((state) => state.savePreference);
   const isLoading = useNotificationStore((state) => state.isLoading);
   const storeError = useNotificationStore((state) => state.error);
   const clearError = useNotificationStore((state) => state.clearError);
 
-  const [preference, setPreference] = useState<CheckInPreference | null>(null);
+  const [preference, setPreference] = useState<CheckInPreference | null>(savedPreference);
   const [error, setError] = useState<string | null>(null);
 
   const handleContinue = useCallback(async () => {

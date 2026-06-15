@@ -33,7 +33,8 @@ export const usePetStore = create<PetState>((set, get) => ({
   error: null,
 
   loadPets: async () => {
-    set({ isLoading: true, error: null });
+    const hasCachedPet = get().pet !== null;
+    set({ isLoading: !hasCachedPet, error: null });
 
     try {
       const [pets, activePet] = await Promise.all([

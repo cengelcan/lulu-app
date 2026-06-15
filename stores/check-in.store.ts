@@ -42,7 +42,8 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
   },
 
   loadCheckIns: async (petId) => {
-    set({ checkIns: [], latestCheckIn: null, isLoading: true, error: null });
+    const hasCachedData = get().checkIns.length > 0;
+    set({ isLoading: !hasCachedData, error: null });
 
     try {
       const checkIns = await checkInStorage.getCheckInsByPetId(petId);
@@ -59,7 +60,8 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
   clearCheckIns: () => set({ checkIns: [], latestCheckIn: null, error: null }),
 
   createCheckIn: async (checkIn) => {
-    set({ isLoading: true, error: null });
+    const hasCachedData = get().checkIns.length > 0;
+    set({ isLoading: !hasCachedData, error: null });
 
     try {
       await checkInStorage.createCheckIn(checkIn);
@@ -78,7 +80,8 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
   },
 
   updateCheckIn: async (checkIn) => {
-    set({ isLoading: true, error: null });
+    const hasCachedData = get().checkIns.length > 0;
+    set({ isLoading: !hasCachedData, error: null });
 
     try {
       await checkInStorage.updateCheckIn(checkIn);

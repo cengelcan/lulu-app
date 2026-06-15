@@ -1,5 +1,5 @@
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
@@ -131,16 +131,6 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     void loadCheckIns(pet.id);
   }, [loadCheckIns, pet?.id]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!pet?.id) {
-        return;
-      }
-
-      void loadCheckIns(pet.id);
-    }, [loadCheckIns, pet?.id])
-  );
-
   useEffect(() => {
     if (!pet?.id) {
       return;
@@ -195,7 +185,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
   return (
     <ScreenContainer scrollable edges={edges} contentStyle={styles.content}>
-      {isLoading ? (
+      {isLoading && !pet ? (
         <View style={styles.centered}>
           <ActivityIndicator color={primaryColor} size="large" />
         </View>
@@ -307,7 +297,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
           <Card>
             <ThemedText type="subtitle">Latest Check-In</ThemedText>
-            {checkInIsLoading ? (
+            {checkInIsLoading && checkIns.length === 0 ? (
               <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
             ) : checkInError ? (
               <View style={styles.checkInError}>
@@ -348,7 +338,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
           <View style={styles.historySection}>
             <ThemedText type="subtitle">View History</ThemedText>
-            {checkInIsLoading ? (
+            {checkInIsLoading && checkIns.length === 0 ? (
               <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
             ) : checkInError ? (
               <View style={styles.checkInError}>

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { SetupScreen } from '@/components/setup/setup-screen';
@@ -16,14 +16,7 @@ export default function PetTypeScreen() {
 
   const species = useSetupStore((state) => state.species);
   const setSpecies = useSetupStore((state) => state.setSpecies);
-  const resetDraft = useSetupStore((state) => state.resetDraft);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (mode === 'add') {
-      resetDraft();
-    }
-  }, [mode, resetDraft]);
 
   const handleContinue = useCallback(() => {
     const validationError = validateSpecies(species);

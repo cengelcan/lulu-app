@@ -204,9 +204,48 @@ export const en: Translations = {
   },
   reports: {
     title: 'Reports',
-    comingSoonTitle: 'Report builder coming soon',
-    comingSoonMessage:
-      'Create custom date-range reports and export PDFs in a future update.',
+    noPet: 'Add a pet profile before creating a report.',
+    next: 'Next',
+    back: 'Back',
+    exportPdf: 'Export PDF',
+    exportFailed: 'Could not export the report. Please try again.',
+    steps: {
+      label: 'Step {{current}} of {{total}}',
+      rangeTitle: 'Choose a date range',
+      dataTitle: 'Choose what to include',
+      previewTitle: 'Preview report',
+    },
+    range: {
+      sectionTitle: 'Date range',
+      customTitle: 'Custom range',
+      startDate: 'Start date',
+      endDate: 'End date',
+      presets: {
+        '7d': 'Last 7 days',
+        '30d': 'Last 30 days',
+        '90d': 'Last 3 months',
+        custom: 'Custom range',
+      },
+    },
+    data: {
+      checkInsSection: 'Daily Check-In data',
+      recordsSection: 'Records',
+    },
+    preview: {
+      petSection: 'Pet summary',
+      checkInsSection: 'Check-In history',
+      recordsSection: 'Health records',
+      empty: 'No data found for the selected range and filters.',
+    },
+    validation: {
+      invalidRange: 'Please choose a valid date range.',
+      noDataSelected: 'Select at least one data type to include.',
+    },
+    pdf: {
+      title: 'Pet Health Report',
+      generatedFor: 'Generated for',
+      dateRange: 'Date range',
+    },
   },
   records: {
     title: 'Records',

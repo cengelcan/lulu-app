@@ -3,7 +3,7 @@
 Uygulamanın bir sonraki geliştirme döngüsü için önceliklendirilmiş yol haritası.
 
 **Son güncelleme:** 2026-06-21  
-**Durum:** Sprint 3 tamamlandı — **Sprint 4 sırada**
+**Durum:** Sprint 4 tamamlandı — **Sprint 5 sırada**
 
 ---
 
@@ -358,18 +358,18 @@ Adım 4: PDF Export / Share
 ### Yapılacaklar
 
 #### Faz A — Sihirbaz
-- [ ] `app/reports/index.tsx` — çok adımlı akış
-- [ ] Tarih aralığı seçici
-- [ ] Veri seçimi: check-in kategorileri + records tipleri (ayrı ayrı seçilebilir)
+- [x] `app/reports/index.tsx` — çok adımlı akış
+- [x] Tarih aralığı seçici
+- [x] Veri seçimi: check-in kategorileri + records tipleri (ayrı ayrı seçilebilir)
 
 #### Faz B — Rapor şablonu
-- [ ] Yalnızca seçilen verileri içeren önizleme
-- [ ] Pet bilgisi header (isim, tür, ırk, yaş)
-- [ ] Veteriner paylaşımına uygun statik layout
+- [x] Yalnızca seçilen verileri içeren önizleme
+- [x] Pet bilgisi header (isim, tür, ırk, yaş)
+- [x] Veteriner paylaşımına uygun statik layout
 
 #### Faz C — PDF export
-- [ ] PDF oluşturma (ör. `expo-print` veya `react-native-html-to-pdf`)
-- [ ] `Share.share` ile paylaşım
+- [x] PDF oluşturma (`expo-print`)
+- [x] `Share.share` ile paylaşım (`expo-sharing`)
 
 #### Faz D — Tier (gelecek)
 - [ ] Free vs Plus rapor özellik farkları — şimdilik tümü açık veya basit gating
@@ -504,8 +504,8 @@ Splash
 | **Sprint 1 — Cila** | 5, 3, 1 (Faz A) | Geri okları + System dili + TR ekran çevirileri | ✅ Tamamlandı |
 | **Sprint 2 — Dil & Home** | 1 (Faz B–C), 2, 4 | Breed locale + DE + streak kartı + kaçırılan CTA | ✅ Tamamlandı |
 | **Sprint 3 — Navigasyon & Records** | 6, 8 (Faz A) | Quick Actions (2 tile) + Records hub butonları | ✅ Tamamlandı |
-| **Sprint 4 — Records & Reports** | 8 (Faz B–C), 7 | Record formları + Reports sihirbazı + PDF | 🔵 Aktif |
-| **Sprint 5 — Auth & Paylaşım** | 9, 10 | Supabase auth (guest kaldır) + Plus aile paylaşımı | ⬜ Bekliyor |
+| **Sprint 4 — Records & Reports** | 8 (Faz B–C), 7 | Record formları + Reports sihirbazı + PDF | ✅ Tamamlandı |
+| **Sprint 5 — Auth & Paylaşım** | 9, 10 | Supabase auth (guest kaldır) + Plus aile paylaşımı | 🔵 Aktif |
 
 *Sprint süreleri ekip hızına göre ayarlanır.*
 
@@ -533,42 +533,36 @@ Splash
 
 ---
 
-## Sprint 4 — Records & Reports (aktif)
+## Sprint 4 — Records & Reports ✅
 
-**Hedef:** Record formları + veri modeli (SQLite) + Reports çok adımlı sihirbaz + PDF export.
+**Tamamlandı:** 2026-06-21
 
-**Kapsam:** İş #8 Faz B–C + İş #7
+**Yapılanlar:**
+- `pet_records` veri modeli + CRUD
+- 7 record tipi için dinamik formlar + hub'da son kayıtlar
+- Reports 3 adımlı sihirbaz (tarih → veri seçimi → önizleme)
+- PDF export (`expo-print` + `expo-sharing`)
 
-### Adım 1 — Veri modeli (İş #8 Faz B)
+---
 
-1. **`types/pet-record.ts`** — record type enum, tarih, petId, metadata
-2. **SQLite migration** — `pet_records` tablosu
-3. **`storage/` + `stores/`** CRUD
+## Sprint 5 — Auth & Paylaşım (aktif)
 
-### Adım 2 — Record formları (İş #8 Faz C)
+**Hedef:** Supabase auth (guest kaldır) + Free/Plus tier + aile paylaşımı hazırlığı.
 
-Kademeli açılım — öncelik sırası:
-1. Vet Visit
-2. Vaccine
-3. Medication
-4. Parasite, Weight, Vomiting, Other
+**Kapsam:** İş #9 + İş #10
 
-Her form: tarih, pet bağlantısı, tip-specific alanlar; fotoğraf UI placeholder (K11).
+### Adım 1 — Supabase kurulum
+- `@supabase/supabase-js` + `expo-secure-store`
+- Env config + Auth providers
 
-### Adım 3 — Reports sihirbazı (İş #7)
+### Adım 2 — Zorunlu auth ekranı
+- Guest kaldır, onboarding sonrası auth guard
 
-1. **`app/reports/index.tsx`** — çok adımlı akış (placeholder'ı değiştir)
-   - Adım 1: Tarih aralığı (7 gün / 30 gün / 3 ay / özel)
-   - Adım 2: Veri seçimi (check-in kategorileri + record tipleri)
-   - Adım 3: Önizleme
-   - Adım 4: PDF export + Share
+### Adım 3 — User lifecycle + tier temeli
+- Session, sign out, delete account sync
 
-2. **PDF** — `expo-print` veya benzeri
-
-### Sprint 4 dışında
-
-- Auth / Supabase → **Sprint 5**
-- Aile paylaşımı → **Sprint 5**
+### Adım 4 — Aile paylaşımı (Plus)
+- Domain model, RLS, davet UI
 
 ---
 

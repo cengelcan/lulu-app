@@ -57,6 +57,7 @@ const MAPPING = {
   'circle.lefthalf.filled': 'contrast',
   'circle.righthalf.filled': 'contrast',
   'xmark.circle': 'cancel',
+  circle: 'radio-button-unchecked',
   'cross.case.fill': 'local-hospital',
   'syringe.fill': 'vaccines',
   'ant.fill': 'pest-control',

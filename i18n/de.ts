@@ -204,9 +204,48 @@ export const de: Translations = {
   },
   reports: {
     title: 'Berichte',
-    comingSoonTitle: 'Berichtsgenerator demnächst',
-    comingSoonMessage:
-      'Individuelle Berichte mit Datumsbereich und PDF-Export kommen in einem künftigen Update.',
+    noPet: 'Füge zuerst ein Haustierprofil hinzu, um einen Bericht zu erstellen.',
+    next: 'Weiter',
+    back: 'Zurück',
+    exportPdf: 'PDF exportieren',
+    exportFailed: 'Bericht konnte nicht exportiert werden. Bitte erneut versuchen.',
+    steps: {
+      label: 'Schritt {{current}} von {{total}}',
+      rangeTitle: 'Datumsbereich wählen',
+      dataTitle: 'Daten auswählen',
+      previewTitle: 'Berichtsvorschau',
+    },
+    range: {
+      sectionTitle: 'Datumsbereich',
+      customTitle: 'Eigener Bereich',
+      startDate: 'Startdatum',
+      endDate: 'Enddatum',
+      presets: {
+        '7d': 'Letzte 7 Tage',
+        '30d': 'Letzte 30 Tage',
+        '90d': 'Letzte 3 Monate',
+        custom: 'Eigener Bereich',
+      },
+    },
+    data: {
+      checkInsSection: 'Daily Check-In Daten',
+      recordsSection: 'Einträge',
+    },
+    preview: {
+      petSection: 'Haustierübersicht',
+      checkInsSection: 'Check-In Verlauf',
+      recordsSection: 'Gesundheitseinträge',
+      empty: 'Keine Daten für den gewählten Bereich und Filter gefunden.',
+    },
+    validation: {
+      invalidRange: 'Bitte einen gültigen Datumsbereich wählen.',
+      noDataSelected: 'Wähle mindestens einen Datentyp aus.',
+    },
+    pdf: {
+      title: 'Gesundheitsbericht',
+      generatedFor: 'Erstellt für',
+      dateRange: 'Datumsbereich',
+    },
   },
   records: {
     title: 'Einträge',

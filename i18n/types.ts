@@ -132,8 +132,48 @@ export type Translations = {
   };
   reports: {
     title: string;
-    comingSoonTitle: string;
-    comingSoonMessage: string;
+    noPet: string;
+    next: string;
+    back: string;
+    exportPdf: string;
+    exportFailed: string;
+    steps: {
+      label: string;
+      rangeTitle: string;
+      dataTitle: string;
+      previewTitle: string;
+    };
+    range: {
+      sectionTitle: string;
+      customTitle: string;
+      startDate: string;
+      endDate: string;
+      presets: {
+        '7d': string;
+        '30d': string;
+        '90d': string;
+        custom: string;
+      };
+    };
+    data: {
+      checkInsSection: string;
+      recordsSection: string;
+    };
+    preview: {
+      petSection: string;
+      checkInsSection: string;
+      recordsSection: string;
+      empty: string;
+    };
+    validation: {
+      invalidRange: string;
+      noDataSelected: string;
+    };
+    pdf: {
+      title: string;
+      generatedFor: string;
+      dateRange: string;
+    };
   };
   records: {
     title: string;

@@ -204,9 +204,48 @@ export const tr: Translations = {
   },
   reports: {
     title: 'Raporlar',
-    comingSoonTitle: 'Rapor oluşturucu yakında',
-    comingSoonMessage:
-      'Özel tarih aralığı raporları ve PDF dışa aktarma gelecek bir güncellemede eklenecek.',
+    noPet: 'Rapor oluşturmak için önce bir pet profili ekle.',
+    next: 'İleri',
+    back: 'Geri',
+    exportPdf: 'PDF Dışa Aktar',
+    exportFailed: 'Rapor dışa aktarılamadı. Lütfen tekrar dene.',
+    steps: {
+      label: 'Adım {{current}} / {{total}}',
+      rangeTitle: 'Tarih aralığı seç',
+      dataTitle: 'Dahil edilecek verileri seç',
+      previewTitle: 'Rapor önizlemesi',
+    },
+    range: {
+      sectionTitle: 'Tarih aralığı',
+      customTitle: 'Özel aralık',
+      startDate: 'Başlangıç',
+      endDate: 'Bitiş',
+      presets: {
+        '7d': 'Son 7 gün',
+        '30d': 'Son 30 gün',
+        '90d': 'Son 3 ay',
+        custom: 'Özel aralık',
+      },
+    },
+    data: {
+      checkInsSection: 'Daily Check-In verileri',
+      recordsSection: 'Kayıtlar',
+    },
+    preview: {
+      petSection: 'Pet özeti',
+      checkInsSection: 'Check-In geçmişi',
+      recordsSection: 'Sağlık kayıtları',
+      empty: 'Seçilen aralık ve filtreler için veri bulunamadı.',
+    },
+    validation: {
+      invalidRange: 'Lütfen geçerli bir tarih aralığı seç.',
+      noDataSelected: 'En az bir veri türü seçmelisin.',
+    },
+    pdf: {
+      title: 'Pet Sağlık Raporu',
+      generatedFor: 'Hazırlanan',
+      dateRange: 'Tarih aralığı',
+    },
   },
   records: {
     title: 'Kayıtlar',

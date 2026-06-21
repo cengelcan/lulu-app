@@ -163,10 +163,34 @@ export async function createCheckIn(checkIn: CheckIn): Promise<void> {
     throw new Error('A check-in already exists for this day. Use update instead.');
   }
 
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(check_ins)');
+  const hasLegacySymptomColumn = columns.some((column) => column.name === 'symptom');
+
+  if (hasLegacySymptomColumn) {
+    await db.runAsync(
+      `INSERT INTO check_ins (
+        id, pet_id, date, appetite, water_intake, energy, mood, pee, poop, symptom, notes, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      checkIn.id,
+      checkIn.petId,
+      checkIn.date,
+      checkIn.appetite,
+      checkIn.waterIntake,
+      checkIn.energy,
+      checkIn.mood,
+      checkIn.pee,
+      checkIn.poop,
+      'none',
+      checkIn.notes ?? null,
+      checkIn.createdAt
+    );
+    return;
+  }
+
   await db.runAsync(
     `INSERT INTO check_ins (
-      id, pet_id, date, appetite, water_intake, energy, mood, pee, poop, symptom, notes, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      id, pet_id, date, appetite, water_intake, energy, mood, pee, poop, notes, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     checkIn.id,
     checkIn.petId,
     checkIn.date,
@@ -176,7 +200,6 @@ export async function createCheckIn(checkIn: CheckIn): Promise<void> {
     checkIn.mood,
     checkIn.pee,
     checkIn.poop,
-    null,
     checkIn.notes ?? null,
     checkIn.createdAt
   );

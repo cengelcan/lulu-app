@@ -12,7 +12,7 @@ let database: SQLite.SQLiteDatabase | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 7;
+const CURRENT_SCHEMA_VERSION = 8;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -199,6 +199,55 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     version = 7;
     await setSchemaVersion(db, version);
   }
+
+  if (version < 8) {
+    await dropDeprecatedCheckInSymptomColumn(db);
+    version = 8;
+    await setSchemaVersion(db, version);
+  }
+}
+
+async function dropDeprecatedCheckInSymptomColumn(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(check_ins)');
+  const hasSymptom = columns.some((column) => column.name === 'symptom');
+
+  if (!hasSymptom) {
+    return;
+  }
+
+  await db.execAsync(`
+    PRAGMA foreign_keys = OFF;
+
+    CREATE TABLE check_ins_v8 (
+      id TEXT PRIMARY KEY NOT NULL,
+      pet_id TEXT NOT NULL,
+      date TEXT NOT NULL,
+      appetite TEXT NOT NULL,
+      water_intake TEXT,
+      energy TEXT NOT NULL,
+      mood TEXT,
+      pee TEXT,
+      poop TEXT,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (pet_id) REFERENCES pets (id) ON DELETE CASCADE
+    );
+
+    INSERT INTO check_ins_v8 (
+      id, pet_id, date, appetite, water_intake, energy, mood, pee, poop, notes, created_at
+    )
+    SELECT
+      id, pet_id, date, appetite, water_intake, energy, mood, pee, poop, notes, created_at
+    FROM check_ins;
+
+    DROP TABLE check_ins;
+    ALTER TABLE check_ins_v8 RENAME TO check_ins;
+
+    CREATE INDEX IF NOT EXISTS idx_check_ins_pet_created_at ON check_ins (pet_id, created_at DESC);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_check_ins_pet_date ON check_ins (pet_id, date);
+
+    PRAGMA foreign_keys = ON;
+  `);
 }
 
 async function ensurePetBreedColumn(db: SQLite.SQLiteDatabase): Promise<void> {

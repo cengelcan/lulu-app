@@ -202,6 +202,26 @@ export const de: Translations = {
     missedCheckInYesterday: 'Der Check-In von gestern fehlt.',
     missedCheckInCta: 'Jetzt einchecken',
   },
+  reports: {
+    title: 'Berichte',
+    comingSoonTitle: 'Berichtsgenerator demnächst',
+    comingSoonMessage:
+      'Individuelle Berichte mit Datumsbereich und PDF-Export kommen in einem künftigen Update.',
+  },
+  records: {
+    title: 'Einträge',
+    addRecord: 'Eintrag hinzufügen',
+    sectionTitle: 'Eintragstypen',
+    types: {
+      vetVisit: 'Tierarztbesuch',
+      vaccine: 'Impfung',
+      parasite: 'Parasitenbehandlung',
+      medication: 'Medikament',
+      vomiting: 'Erbrechen',
+      weight: 'Gewicht',
+      other: 'Sonstiges',
+    },
+  },
   notifications: {
     reminderTitle: 'Pet Health Journal',
     reminderBody: 'Wie geht es {{name}} heute?',

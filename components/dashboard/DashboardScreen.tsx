@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
@@ -10,9 +10,9 @@ import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
+import { QUICK_ACTIONS } from '@/constants/quick-actions';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePetDisplay } from '@/hooks/use-pet-display';
@@ -169,8 +169,6 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   const reminderIsLoading = useNotificationStore((state) => state.isLoading);
   const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
 
-  const [comingSoonVisible, setComingSoonVisible] = useState(false);
-
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -235,12 +233,11 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     void loadCheckIns(pet.id);
   };
 
-  const handleLockedQuickAction = () => {
-    setComingSoonVisible(true);
-  };
-
-  const handleDismissComingSoon = () => {
-    setComingSoonVisible(false);
+  const handleQuickActionPress = (route: (typeof QUICK_ACTIONS)[number]['route']) => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push(route);
   };
 
   const handleOpenNotificationSettings = () => {
@@ -353,29 +350,18 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
           <Card>
             <ThemedText type="subtitle">{t('dashboard.quickActions')}</ThemedText>
             <View style={styles.quickActionsGrid}>
-              <QuickActionItem
-                label={t('dashboard.reports')}
-                icon="chart.line.uptrend.xyaxis"
-                locked
-                onPress={handleLockedQuickAction}
-              />
-              <QuickActionItem
-                label={t('dashboard.records')}
-                icon="doc.text.fill"
-                locked
-                onPress={handleLockedQuickAction}
-              />
-              <QuickActionItem
-                label={t('dashboard.medication')}
-                icon="pills.fill"
-                locked
-                onPress={handleLockedQuickAction}
-              />
+              {QUICK_ACTIONS.map((action) => (
+                <QuickActionItem
+                  key={action.id}
+                  label={t(action.labelKey)}
+                  icon={action.icon}
+                  onPress={() => handleQuickActionPress(action.route)}
+                />
+              ))}
             </View>
           </Card>
         </View>
       )}
-      <ComingSoonModal visible={comingSoonVisible} onDismiss={handleDismissComingSoon} />
     </ScreenContainer>
   );
 }
@@ -452,7 +438,6 @@ const styles = StyleSheet.create({
   },
   quickActionsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: Spacing.sm,
   },
 });

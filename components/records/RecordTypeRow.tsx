@@ -3,23 +3,24 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-type QuickActionItemProps = {
+type RecordTypeRowProps = {
   label: string;
   icon: IconSymbolName;
   onPress: () => void;
+  isLast?: boolean;
 };
 
-export function QuickActionItem({ label, icon, onPress }: QuickActionItemProps) {
+export function RecordTypeRow({ label, icon, onPress, isLast = false }: RecordTypeRowProps) {
   const primaryColor = useThemeColor({}, 'primary');
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
-  const surfaceColor = useThemeColor({}, 'surface');
 
   const handlePress = () => {
     if (process.env.EXPO_OS === 'ios') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     onPress();
   };
@@ -27,45 +28,39 @@ export function QuickActionItem({ label, icon, onPress }: QuickActionItemProps) 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={label}
       onPress={handlePress}
       style={({ pressed }) => [
-        styles.item,
-        {
-          backgroundColor: surfaceColor,
-          borderColor,
-          opacity: pressed ? 0.85 : 1,
-        },
+        styles.row,
+        !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: borderColor },
+        { opacity: pressed ? 0.7 : 1 },
       ]}>
-      <View style={[styles.iconContainer, { backgroundColor: `${primaryColor}1A` }]}>
-        <IconSymbol name={icon} size={22} color={primaryColor} />
+      <View style={styles.leadingIcon}>
+        <IconSymbol name={icon} size={20} color={primaryColor} />
       </View>
       <ThemedText type="defaultSemiBold" style={styles.label}>
         {label}
       </ThemedText>
+      <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  item: {
-    flex: 1,
-    minHeight: 96,
-    borderRadius: Radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: Spacing.md,
+  row: {
+    minHeight: 48,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
     gap: Spacing.sm,
   },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: Radius.full,
+  leadingIcon: {
+    width: 24,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   label: {
-    ...Typography.caption,
-    textAlign: 'center',
+    ...Typography.body,
+    flex: 1,
   },
 });

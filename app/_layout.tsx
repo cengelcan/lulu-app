@@ -36,6 +36,8 @@ export default function RootLayout() {
         <Stack.Screen name="pet-profile" />
         <Stack.Screen name="edit-pet" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="reports" />
+        <Stack.Screen name="records" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

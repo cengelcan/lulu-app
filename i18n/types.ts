@@ -130,6 +130,25 @@ export type Translations = {
     missedCheckInYesterday: string;
     missedCheckInCta: string;
   };
+  reports: {
+    title: string;
+    comingSoonTitle: string;
+    comingSoonMessage: string;
+  };
+  records: {
+    title: string;
+    addRecord: string;
+    sectionTitle: string;
+    types: {
+      vetVisit: string;
+      vaccine: string;
+      parasite: string;
+      medication: string;
+      vomiting: string;
+      weight: string;
+      other: string;
+    };
+  };
   notifications: {
     reminderTitle: string;
     reminderBody: string;

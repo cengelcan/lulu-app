@@ -202,6 +202,26 @@ export const tr: Translations = {
     missedCheckInYesterday: 'Dünkü check-in eksik.',
     missedCheckInCta: 'Şimdi yap',
   },
+  reports: {
+    title: 'Raporlar',
+    comingSoonTitle: 'Rapor oluşturucu yakında',
+    comingSoonMessage:
+      'Özel tarih aralığı raporları ve PDF dışa aktarma gelecek bir güncellemede eklenecek.',
+  },
+  records: {
+    title: 'Kayıtlar',
+    addRecord: 'Kayıt ekle',
+    sectionTitle: 'Kayıt Türleri',
+    types: {
+      vetVisit: 'Veteriner Ziyareti',
+      vaccine: 'Aşı',
+      parasite: 'Parazit Tedavisi',
+      medication: 'İlaç',
+      vomiting: 'Kusma',
+      weight: 'Kilo',
+      other: 'Diğer',
+    },
+  },
   notifications: {
     reminderTitle: 'Pet Health Journal',
     reminderBody: 'Bugün {{name}} nasıl?',

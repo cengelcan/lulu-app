@@ -202,6 +202,26 @@ export const en: Translations = {
     missedCheckInYesterday: "You missed yesterday's check-in.",
     missedCheckInCta: 'Check in now',
   },
+  reports: {
+    title: 'Reports',
+    comingSoonTitle: 'Report builder coming soon',
+    comingSoonMessage:
+      'Create custom date-range reports and export PDFs in a future update.',
+  },
+  records: {
+    title: 'Records',
+    addRecord: 'Add a record',
+    sectionTitle: 'Record Types',
+    types: {
+      vetVisit: 'Vet Visit',
+      vaccine: 'Vaccine',
+      parasite: 'Parasite Treatment',
+      medication: 'Medication',
+      vomiting: 'Vomiting',
+      weight: 'Weight',
+      other: 'Other',
+    },
+  },
   notifications: {
     reminderTitle: 'Pet Health Journal',
     reminderBody: 'How is {{name}} today?',

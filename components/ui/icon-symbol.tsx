@@ -57,6 +57,11 @@ const MAPPING = {
   'circle.lefthalf.filled': 'contrast',
   'circle.righthalf.filled': 'contrast',
   'xmark.circle': 'cancel',
+  'cross.case.fill': 'local-hospital',
+  'syringe.fill': 'vaccines',
+  'ant.fill': 'pest-control',
+  'scalemass.fill': 'monitor-weight',
+  'ellipsis.circle.fill': 'more-horiz',
 } as IconMapping;
 
 /**

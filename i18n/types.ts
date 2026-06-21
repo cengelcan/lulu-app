@@ -149,6 +149,9 @@ export type Translations = {
       owner: string;
       microchip: string;
       weightRecorded: string;
+      ageYearsMonths: string;
+      ageYears: string;
+      ageMonths: string;
     };
     review: {
       hint: string;
@@ -158,6 +161,12 @@ export type Translations = {
       empty: string;
       generatedOn: string;
       pageOf: string;
+      dayStatusNormal: string;
+      dayStatusAlert: string;
+      summaryTitle: string;
+      summaryObservedDays: string;
+      summaryAttentionDays: string;
+      summaryAllNormal: string;
     };
     range: {
       sectionTitle: string;

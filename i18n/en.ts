@@ -220,7 +220,10 @@ export const en: Translations = {
     petCard: {
       owner: 'Owner',
       microchip: 'Microchip',
-      weightRecorded: '{{value}} (recorded on {{date}})',
+      weightRecorded: '{{value}} ({{date}})',
+      ageYearsMonths: '{{years}}y {{months}}mo',
+      ageYears: '{{years}}y',
+      ageMonths: '{{months}}mo',
     },
     review: {
       hint: 'Review the report below before sharing or exporting.',
@@ -230,6 +233,12 @@ export const en: Translations = {
       empty: 'No data found for the selected range and filters.',
       generatedOn: '{{timestamp}}',
       pageOf: '{{current}} of {{total}}',
+      dayStatusNormal: 'Normal',
+      dayStatusAlert: 'Attention',
+      summaryTitle: 'Summary',
+      summaryObservedDays: '{{count}} days observed',
+      summaryAttentionDays: '{{count}} days need attention',
+      summaryAllNormal: 'All observations normal',
     },
     range: {
       sectionTitle: 'Date range',

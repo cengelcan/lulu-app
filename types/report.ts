@@ -72,7 +72,6 @@ export type ReportPetSummary = {
 };
 
 export type ReportDocumentLabels = {
-  appStoreBadge: string;
   dailyObservations: string;
   recordsSection: string;
   notes: string;
@@ -84,6 +83,17 @@ export type ReportDocumentLabels = {
   birthDate: string;
   sterilization: string;
   weight: string;
-  generatedOn: string;
-  pageOf: string;
+  dayStatusNormal: string;
+  dayStatusAlert: string;
+  summaryTitle: string;
+};
+
+export type ReportSummaryLine = {
+  /** 'normal' renders a positive accent, 'alert' a warning accent. */
+  tone: 'normal' | 'alert' | 'neutral';
+  text: string;
+};
+
+export type ReportSummary = {
+  lines: ReportSummaryLine[];
 };

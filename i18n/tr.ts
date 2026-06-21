@@ -220,7 +220,10 @@ export const tr: Translations = {
     petCard: {
       owner: 'Sahip',
       microchip: 'Mikroçip',
-      weightRecorded: '{{value}} ({{date}} tarihinde kaydedildi)',
+      weightRecorded: '{{value}} ({{date}})',
+      ageYearsMonths: '{{years}} yıl {{months}} ay',
+      ageYears: '{{years}} yıl',
+      ageMonths: '{{months}} ay',
     },
     review: {
       hint: 'Paylaşmadan veya dışa aktarmadan önce raporu aşağıda incele.',
@@ -230,6 +233,12 @@ export const tr: Translations = {
       empty: 'Seçilen aralık ve filtreler için veri bulunamadı.',
       generatedOn: '{{timestamp}}',
       pageOf: '{{current}} / {{total}}',
+      dayStatusNormal: 'Normal',
+      dayStatusAlert: 'Dikkat',
+      summaryTitle: 'Özet',
+      summaryObservedDays: '{{count}} gün gözlemlendi',
+      summaryAttentionDays: '{{count}} gün dikkat gerektiriyor',
+      summaryAllNormal: 'Tüm gözlemler normal',
     },
     range: {
       sectionTitle: 'Tarih aralığı',

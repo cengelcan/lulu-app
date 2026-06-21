@@ -1,7 +1,7 @@
 import type { ReportPetSummary } from '@/types/report';
 import type { Pet } from '@/types/pet';
 import type { PetRecord } from '@/types/pet-record';
-import { formatPetAgeFromBirthDate } from '@/utils/pet-age';
+import { getPetAgeParts } from '@/utils/pet-age';
 import { formatCheckInTitleDate } from '@/utils/date';
 
 type PetDisplayHelpers = {
@@ -14,6 +14,21 @@ type PetDisplayHelpers = {
   t: (key: string, params?: Record<string, string | number>) => string;
   locale: string;
 };
+
+function formatLocalizedAge(
+  { years, months }: { years: number; months: number },
+  t: PetDisplayHelpers['t']
+): string {
+  if (years === 0) {
+    return t('reports.petCard.ageMonths', { months });
+  }
+
+  if (months === 0) {
+    return t('reports.petCard.ageYears', { years });
+  }
+
+  return t('reports.petCard.ageYearsMonths', { years, months });
+}
 
 function getLatestWeightRecord(records: PetRecord[]): PetRecord | null {
   const weightRecords = records.filter((record) => record.type === 'weight');
@@ -33,11 +48,12 @@ export function buildReportPetSummary(
     helpers;
 
   const latestWeight = getLatestWeightRecord(records);
-  const ageFromBirth = pet.birthDate ? formatPetAgeFromBirthDate(pet.birthDate) : null;
+  const ageParts = pet.birthDate ? getPetAgeParts(pet.birthDate) : null;
+  const ageLabel = ageParts ? formatLocalizedAge(ageParts, t) : null;
 
   let birthDateLabel = displayPetDate(pet.birthDate);
-  if (pet.birthDate && ageFromBirth) {
-    birthDateLabel = `${birthDateLabel} (${ageFromBirth})`;
+  if (pet.birthDate && ageLabel) {
+    birthDateLabel = `${birthDateLabel} (${ageLabel})`;
   }
 
   let weightLabel = displayPetText(null);

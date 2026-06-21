@@ -23,6 +23,7 @@ import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { buildReportPreviewContent } from '@/services/reports/build-report-preview';
+import { buildReportSummary } from '@/services/reports/build-report-summary';
 import { exportReportPdf } from '@/services/reports/export-report-pdf';
 import { generateReportHtml } from '@/services/reports/generate-report-html';
 import * as checkInStorage from '@/storage/check-in.storage';
@@ -37,12 +38,13 @@ import type {
   ReportPreviewContent,
   ReportRangePreset,
   ReportRecordDataKey,
+  ReportSummary,
   ReportWizardStep,
 } from '@/types/report';
 import { formatCheckInTitleDate } from '@/utils/date';
 import { getLocaleTag } from '@/utils/locale';
 import { buildReportPetSummary } from '@/utils/report-pet-summary';
-import { resolveReportExportAssets } from '@/utils/report-export-assets';
+import { resolveReportExportAssets, type ReportExportAssets } from '@/utils/report-export-assets';
 import { getPresetDateRange, isReportDateRangeValid, resolveReportDateRange } from '@/utils/report-range';
 
 const WIZARD_STEPS: ReportWizardStep[] = ['range', 'data', 'review'];
@@ -67,6 +69,8 @@ export function ReportsWizardContent() {
   const [selection, setSelection] = useState<ReportDataSelection>(createDefaultReportDataSelection);
   const [petSummary, setPetSummary] = useState<ReportPetSummary | null>(null);
   const [previewContent, setPreviewContent] = useState<ReportPreviewContent | null>(null);
+  const [summary, setSummary] = useState<ReportSummary | null>(null);
+  const [exportAssets, setExportAssets] = useState<ReportExportAssets | null>(null);
   const [isLoadingReview, setIsLoadingReview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -87,7 +91,6 @@ export function ReportsWizardContent() {
 
   const documentLabels = useMemo<ReportDocumentLabels>(
     () => ({
-      appStoreBadge: t('reports.review.appStoreBadge'),
       dailyObservations: t('reports.review.dailyObservations'),
       recordsSection: t('reports.review.recordsSection'),
       notes: t('records.fields.notes'),
@@ -99,8 +102,9 @@ export function ReportsWizardContent() {
       birthDate: t('pet.fields.birthDate'),
       sterilization: t('pet.fields.spayNeuter'),
       weight: t('records.types.weight'),
-      generatedOn: t('reports.review.generatedOn'),
-      pageOf: t('reports.review.pageOf'),
+      dayStatusNormal: t('reports.review.dayStatusNormal'),
+      dayStatusAlert: t('reports.review.dayStatusAlert'),
+      summaryTitle: t('reports.review.summaryTitle'),
     }),
     [t]
   );
@@ -111,11 +115,19 @@ export function ReportsWizardContent() {
   }, [formatDate, range]);
 
   const generatedAtLabel = useMemo(() => {
-    const timestamp = new Date().toLocaleString(locale);
-    return t('reports.review.generatedOn', { timestamp });
-  }, [locale, t]);
+    return new Date().toLocaleString(locale, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }, [locale]);
 
-  const footerPageLabel = t('reports.review.pageOf', { current: 1, total: 1 });
+  const formatPageLabel = useCallback(
+    (current: number, total: number) => t('reports.review.pageOf', { current, total }),
+    [t]
+  );
 
   const handlePresetChange = (preset: ReportRangePreset) => {
     setValidationError(null);
@@ -171,28 +183,32 @@ export function ReportsWizardContent() {
         petRecordStorage.getPetRecordsByPetId(pet.id),
       ]);
 
-      setPetSummary(
-        buildReportPetSummary(pet, records, {
-          ...petDisplay,
-          t,
-          locale,
-        })
-      );
+      const nextPetSummary = buildReportPetSummary(pet, records, {
+        ...petDisplay,
+        t,
+        locale,
+      });
 
-      setPreviewContent(
-        buildReportPreviewContent({
-          range,
-          selection,
-          checkIns,
-          records,
-          t,
-          locale,
-        })
-      );
+      setPetSummary(nextPetSummary);
+
+      const content = buildReportPreviewContent({
+        range,
+        selection,
+        checkIns,
+        records,
+        t,
+        locale,
+      });
+
+      setPreviewContent(content);
+      setSummary(buildReportSummary({ content, t }));
+      setExportAssets(await resolveReportExportAssets(nextPetSummary.photoUri));
     } catch {
       setValidationError(t('reports.exportFailed'));
       setPreviewContent(null);
       setPetSummary(null);
+      setSummary(null);
+      setExportAssets(null);
     } finally {
       setIsLoadingReview(false);
     }
@@ -249,17 +265,19 @@ export function ReportsWizardContent() {
     setValidationError(null);
 
     try {
-      const { photoDataUri, qrCodeDataUri } = await resolveReportExportAssets(petSummary.photoUri);
+      const { photoDataUri, qrCodeDataUri } =
+        exportAssets ?? (await resolveReportExportAssets(petSummary.photoUri));
       const html = generateReportHtml({
         pet: petSummary,
         content: previewContent,
         labels: documentLabels,
         formatDate,
         generatedAtLabel,
-        footerPageLabel,
+        formatPageLabel,
         photoDataUri,
         qrCodeDataUri,
         primaryColor,
+        summary,
       });
 
       await exportReportPdf(html);
@@ -309,11 +327,15 @@ export function ReportsWizardContent() {
           ) : previewContent && petSummary ? (
             <ReportDocumentPreview
               content={previewContent}
-              footerPageLabel={footerPageLabel}
               formatDate={formatDate}
+              formatPageLabel={formatPageLabel}
               generatedAtLabel={generatedAtLabel}
               labels={documentLabels}
               pet={petSummary}
+              primaryColor={primaryColor}
+              photoDataUri={exportAssets?.photoDataUri ?? null}
+              qrCodeDataUri={exportAssets?.qrCodeDataUri ?? null}
+              summary={summary}
             />
           ) : null}
 

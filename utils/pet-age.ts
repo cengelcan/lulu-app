@@ -1,9 +1,14 @@
 import { parseLocalDate } from '@/utils/date';
 
-export function formatPetAgeFromBirthDate(
+export type PetAgeParts = {
+  years: number;
+  months: number;
+};
+
+export function getPetAgeParts(
   birthDate: string,
   referenceDate: Date = new Date()
-): string | null {
+): PetAgeParts | null {
   const birth = parseLocalDate(birthDate);
   if (!birth) {
     return null;
@@ -24,6 +29,20 @@ export function formatPetAgeFromBirthDate(
   if (years < 0) {
     return null;
   }
+
+  return { years, months };
+}
+
+export function formatPetAgeFromBirthDate(
+  birthDate: string,
+  referenceDate: Date = new Date()
+): string | null {
+  const parts = getPetAgeParts(birthDate, referenceDate);
+  if (!parts) {
+    return null;
+  }
+
+  const { years, months } = parts;
 
   if (years === 0) {
     return `${months}mo`;

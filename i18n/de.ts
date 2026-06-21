@@ -208,12 +208,28 @@ export const de: Translations = {
     next: 'Weiter',
     back: 'Zurück',
     exportPdf: 'PDF exportieren',
+    shareReport: 'Bericht teilen',
     exportFailed: 'Bericht konnte nicht exportiert werden. Bitte erneut versuchen.',
     steps: {
       label: 'Schritt {{current}} von {{total}}',
       rangeTitle: 'Datumsbereich wählen',
       dataTitle: 'Daten auswählen',
       previewTitle: 'Berichtsvorschau',
+      reviewTitle: 'Vorschau',
+    },
+    petCard: {
+      owner: 'Besitzer',
+      microchip: 'Mikrochip',
+      weightRecorded: '{{value}} (erfasst am {{date}})',
+    },
+    review: {
+      hint: 'Prüfe den Bericht unten, bevor du ihn teilst oder exportierst.',
+      appStoreBadge: 'Im App Store erhältlich',
+      dailyObservations: 'Tägliche Beobachtungen',
+      recordsSection: 'Einträge',
+      empty: 'Keine Daten für den gewählten Bereich und Filter gefunden.',
+      generatedOn: '{{timestamp}}',
+      pageOf: '{{current}} von {{total}}',
     },
     range: {
       sectionTitle: 'Datumsbereich',

@@ -208,12 +208,28 @@ export const tr: Translations = {
     next: 'İleri',
     back: 'Geri',
     exportPdf: 'PDF Dışa Aktar',
+    shareReport: 'Raporu Paylaş',
     exportFailed: 'Rapor dışa aktarılamadı. Lütfen tekrar dene.',
     steps: {
       label: 'Adım {{current}} / {{total}}',
       rangeTitle: 'Tarih aralığı seç',
       dataTitle: 'Dahil edilecek verileri seç',
       previewTitle: 'Rapor önizlemesi',
+      reviewTitle: 'Önizleme',
+    },
+    petCard: {
+      owner: 'Sahip',
+      microchip: 'Mikroçip',
+      weightRecorded: '{{value}} ({{date}} tarihinde kaydedildi)',
+    },
+    review: {
+      hint: 'Paylaşmadan veya dışa aktarmadan önce raporu aşağıda incele.',
+      appStoreBadge: 'App Store\'da',
+      dailyObservations: 'Günlük Gözlemler',
+      recordsSection: 'Kayıtlar',
+      empty: 'Seçilen aralık ve filtreler için veri bulunamadı.',
+      generatedOn: '{{timestamp}}',
+      pageOf: '{{current}} / {{total}}',
     },
     range: {
       sectionTitle: 'Tarih aralığı',

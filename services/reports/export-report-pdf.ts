@@ -2,9 +2,14 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
 export async function exportReportPdf(html: string): Promise<void> {
-  const { uri } = await Print.printToFileAsync({ html });
+  const { uri } = await Print.printToFileAsync({
+    html,
+    width: 612,
+    height: 792,
+  });
 
-  if (!(await Sharing.isAvailableAsync())) {
+  const canShare = await Sharing.isAvailableAsync();
+  if (!canShare) {
     throw new Error('Sharing is not available on this device');
   }
 

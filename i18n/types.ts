@@ -136,12 +136,28 @@ export type Translations = {
     next: string;
     back: string;
     exportPdf: string;
+    shareReport: string;
     exportFailed: string;
     steps: {
       label: string;
       rangeTitle: string;
       dataTitle: string;
       previewTitle: string;
+      reviewTitle: string;
+    };
+    petCard: {
+      owner: string;
+      microchip: string;
+      weightRecorded: string;
+    };
+    review: {
+      hint: string;
+      appStoreBadge: string;
+      dailyObservations: string;
+      recordsSection: string;
+      empty: string;
+      generatedOn: string;
+      pageOf: string;
     };
     range: {
       sectionTitle: string;

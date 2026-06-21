@@ -84,3 +84,7 @@ export function IconSymbol({
 }) {
   return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
 }
+
+export function getMaterialIconName(name: IconSymbolName): ComponentProps<typeof MaterialIcons>['name'] {
+  return MAPPING[name];
+}

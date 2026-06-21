@@ -208,12 +208,28 @@ export const en: Translations = {
     next: 'Next',
     back: 'Back',
     exportPdf: 'Export PDF',
+    shareReport: 'Share Report',
     exportFailed: 'Could not export the report. Please try again.',
     steps: {
       label: 'Step {{current}} of {{total}}',
       rangeTitle: 'Choose a date range',
       dataTitle: 'Choose what to include',
       previewTitle: 'Preview report',
+      reviewTitle: 'Preview',
+    },
+    petCard: {
+      owner: 'Owner',
+      microchip: 'Microchip',
+      weightRecorded: '{{value}} (recorded on {{date}})',
+    },
+    review: {
+      hint: 'Review the report below before sharing or exporting.',
+      appStoreBadge: 'Available on the App Store',
+      dailyObservations: 'Daily Observations',
+      recordsSection: 'Records',
+      empty: 'No data found for the selected range and filters.',
+      generatedOn: '{{timestamp}}',
+      pageOf: '{{current}} of {{total}}',
     },
     range: {
       sectionTitle: 'Date range',

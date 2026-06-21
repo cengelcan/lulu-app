@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { ReportCheckboxRow } from '@/components/reports/ReportCheckboxRow';
+import { ReportDocumentPreview } from '@/components/reports/ReportDocumentPreview';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -31,6 +32,8 @@ import type {
   ReportCheckInDataKey,
   ReportDataSelection,
   ReportDateRange,
+  ReportDocumentLabels,
+  ReportPetSummary,
   ReportPreviewContent,
   ReportRangePreset,
   ReportRecordDataKey,
@@ -38,9 +41,11 @@ import type {
 } from '@/types/report';
 import { formatCheckInTitleDate } from '@/utils/date';
 import { getLocaleTag } from '@/utils/locale';
+import { buildReportPetSummary } from '@/utils/report-pet-summary';
+import { resolveReportExportAssets } from '@/utils/report-export-assets';
 import { getPresetDateRange, isReportDateRangeValid, resolveReportDateRange } from '@/utils/report-range';
 
-const WIZARD_STEPS: ReportWizardStep[] = ['range', 'data', 'preview'];
+const WIZARD_STEPS: ReportWizardStep[] = ['range', 'data', 'review'];
 
 function getStepIndex(step: ReportWizardStep): number {
   return WIZARD_STEPS.indexOf(step);
@@ -49,7 +54,7 @@ function getStepIndex(step: ReportWizardStep): number {
 export function ReportsWizardContent() {
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
-  const { displayPetSpecies, displayPetBreed, displayPetAgeGroup } = usePetDisplay();
+  const petDisplay = usePetDisplay();
 
   const pet = usePetStore((state) => state.pet);
   const loadPet = usePetStore((state) => state.loadPet);
@@ -60,13 +65,16 @@ export function ReportsWizardContent() {
     ...getPresetDateRange('30d'),
   }));
   const [selection, setSelection] = useState<ReportDataSelection>(createDefaultReportDataSelection);
+  const [petSummary, setPetSummary] = useState<ReportPetSummary | null>(null);
   const [previewContent, setPreviewContent] = useState<ReportPreviewContent | null>(null);
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [isLoadingReview, setIsLoadingReview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const surfaceColor = useThemeColor({}, 'surface');
+  const borderColor = useThemeColor({}, 'border');
 
   useEffect(() => {
     void loadPet();
@@ -77,10 +85,37 @@ export function ReportsWizardContent() {
     [locale]
   );
 
+  const documentLabels = useMemo<ReportDocumentLabels>(
+    () => ({
+      appStoreBadge: t('reports.review.appStoreBadge'),
+      dailyObservations: t('reports.review.dailyObservations'),
+      recordsSection: t('reports.review.recordsSection'),
+      notes: t('records.fields.notes'),
+      empty: t('reports.review.empty'),
+      owner: t('reports.petCard.owner'),
+      microchip: t('reports.petCard.microchip'),
+      species: t('pet.sections.petType'),
+      sex: t('pet.fields.sex'),
+      birthDate: t('pet.fields.birthDate'),
+      sterilization: t('pet.fields.spayNeuter'),
+      weight: t('records.types.weight'),
+      generatedOn: t('reports.review.generatedOn'),
+      pageOf: t('reports.review.pageOf'),
+    }),
+    [t]
+  );
+
   const resolvedRangeLabel = useMemo(() => {
     const resolved = resolveReportDateRange(range);
     return `${formatDate(resolved.startDate)} – ${formatDate(resolved.endDate)}`;
   }, [formatDate, range]);
+
+  const generatedAtLabel = useMemo(() => {
+    const timestamp = new Date().toLocaleString(locale);
+    return t('reports.review.generatedOn', { timestamp });
+  }, [locale, t]);
+
+  const footerPageLabel = t('reports.review.pageOf', { current: 1, total: 1 });
 
   const handlePresetChange = (preset: ReportRangePreset) => {
     setValidationError(null);
@@ -122,12 +157,12 @@ export function ReportsWizardContent() {
     }));
   };
 
-  const loadPreview = useCallback(async () => {
+  const loadReview = useCallback(async () => {
     if (!pet?.id) {
       return;
     }
 
-    setIsLoadingPreview(true);
+    setIsLoadingReview(true);
     setValidationError(null);
 
     try {
@@ -136,28 +171,38 @@ export function ReportsWizardContent() {
         petRecordStorage.getPetRecordsByPetId(pet.id),
       ]);
 
-      const content = buildReportPreviewContent({
-        range,
-        selection,
-        checkIns,
-        records,
-        t,
-      });
+      setPetSummary(
+        buildReportPetSummary(pet, records, {
+          ...petDisplay,
+          t,
+          locale,
+        })
+      );
 
-      setPreviewContent(content);
+      setPreviewContent(
+        buildReportPreviewContent({
+          range,
+          selection,
+          checkIns,
+          records,
+          t,
+          locale,
+        })
+      );
     } catch {
       setValidationError(t('reports.exportFailed'));
       setPreviewContent(null);
+      setPetSummary(null);
     } finally {
-      setIsLoadingPreview(false);
+      setIsLoadingReview(false);
     }
-  }, [pet?.id, range, selection, t]);
+  }, [locale, pet, petDisplay, range, selection, t]);
 
   useEffect(() => {
-    if (step === 'preview') {
-      void loadPreview();
+    if (step === 'review') {
+      void loadReview();
     }
-  }, [loadPreview, step]);
+  }, [loadReview, step]);
 
   const handleNext = () => {
     setValidationError(null);
@@ -178,7 +223,7 @@ export function ReportsWizardContent() {
         return;
       }
 
-      setStep('preview');
+      setStep('review');
     }
   };
 
@@ -190,13 +235,13 @@ export function ReportsWizardContent() {
       return;
     }
 
-    if (step === 'preview') {
+    if (step === 'review') {
       setStep('data');
     }
   };
 
-  const handleExportPdf = async () => {
-    if (!pet || !previewContent) {
+  const handleShareReport = async () => {
+    if (!pet || !previewContent || !petSummary) {
       return;
     }
 
@@ -204,31 +249,24 @@ export function ReportsWizardContent() {
     setValidationError(null);
 
     try {
+      const { photoDataUri, qrCodeDataUri } = await resolveReportExportAssets(petSummary.photoUri);
       const html = generateReportHtml({
-        pet: {
-          name: pet.name,
-          species: displayPetSpecies(pet.species),
-          breed: displayPetBreed(pet.breed),
-          ageGroup: displayPetAgeGroup(pet.ageGroup),
-        },
+        pet: petSummary,
         content: previewContent,
+        labels: documentLabels,
         formatDate,
-        labels: {
-          title: t('reports.pdf.title'),
-          generatedFor: t('reports.pdf.generatedFor'),
-          dateRange: t('reports.pdf.dateRange'),
-          species: t('pet.sections.petType'),
-          breed: t('pet.fields.breed'),
-          ageGroup: t('pet.fields.ageGroup'),
-          checkInsSection: t('reports.preview.checkInsSection'),
-          recordsSection: t('reports.preview.recordsSection'),
-          notes: t('records.fields.notes'),
-          empty: t('reports.preview.empty'),
-        },
+        generatedAtLabel,
+        footerPageLabel,
+        photoDataUri,
+        qrCodeDataUri,
+        primaryColor,
       });
 
       await exportReportPdf(html);
-    } catch {
+    } catch (error) {
+      if (__DEV__) {
+        console.error('Report export failed:', error);
+      }
       setValidationError(t('reports.exportFailed'));
     } finally {
       setIsExporting(false);
@@ -240,6 +278,62 @@ export function ReportsWizardContent() {
       <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
         <ThemedText style={styles.message}>{t('reports.noPet')}</ThemedText>
       </ScreenContainer>
+    );
+  }
+
+  if (step === 'review') {
+    return (
+      <View style={styles.reviewRoot}>
+        <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.reviewContent}>
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.stepLabel}>
+            {t('reports.steps.label', {
+              current: getStepIndex(step) + 1,
+              total: WIZARD_STEPS.length,
+            })}
+          </ThemedText>
+          <ThemedText type="subtitle">{t('reports.steps.reviewTitle')}</ThemedText>
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.reviewHint}>
+            {t('reports.review.hint')}
+          </ThemedText>
+
+          {isLoadingReview ? (
+            <View style={styles.centered}>
+              <ActivityIndicator color={primaryColor} size="large" />
+            </View>
+          ) : previewContent && petSummary ? (
+            <ReportDocumentPreview
+              content={previewContent}
+              footerPageLabel={footerPageLabel}
+              formatDate={formatDate}
+              generatedAtLabel={generatedAtLabel}
+              labels={documentLabels}
+              pet={petSummary}
+            />
+          ) : null}
+
+          {validationError ? (
+            <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.error}>
+              {validationError}
+            </ThemedText>
+          ) : null}
+
+          <Button title={t('reports.back')} variant="secondary" onPress={handleBack} />
+        </ScreenContainer>
+
+        <View style={[styles.shareFooter, { backgroundColor: surfaceColor, borderTopColor: borderColor }]}>
+          <Button
+            title={t('reports.shareReport')}
+            disabled={isExporting || isLoadingReview || !previewContent || previewContent.isEmpty}
+            onPress={() => void handleShareReport()}
+          />
+        </View>
+      </View>
     );
   }
 
@@ -354,123 +448,41 @@ export function ReportsWizardContent() {
         </>
       ) : null}
 
-      {step === 'preview' ? (
-        <>
-          <ThemedText type="subtitle">{t('reports.steps.previewTitle')}</ThemedText>
-          {isLoadingPreview ? (
-            <View style={styles.centered}>
-              <ActivityIndicator color={primaryColor} size="large" />
-            </View>
-          ) : previewContent ? (
-            <>
-              <GroupedSection title={t('reports.preview.petSection')}>
-                <View style={styles.previewBody}>
-                  <ThemedText type="defaultSemiBold">{pet.name}</ThemedText>
-                  <ThemedText
-                    lightColor={textSecondaryColor}
-                    darkColor={textSecondaryColor}
-                    style={styles.previewMeta}>
-                    {displayPetSpecies(pet.species)} · {displayPetBreed(pet.breed)}
-                  </ThemedText>
-                  <ThemedText
-                    lightColor={textSecondaryColor}
-                    darkColor={textSecondaryColor}
-                    style={styles.previewMeta}>
-                    {resolvedRangeLabel}
-                  </ThemedText>
-                </View>
-              </GroupedSection>
-
-              {previewContent.isEmpty ? (
-                <ThemedText
-                  lightColor={textSecondaryColor}
-                  darkColor={textSecondaryColor}
-                  style={styles.empty}>
-                  {t('reports.preview.empty')}
-                </ThemedText>
-              ) : (
-                <>
-                  {previewContent.checkIns.length > 0 ? (
-                    <GroupedSection title={t('reports.preview.checkInsSection')}>
-                      <View style={styles.previewBody}>
-                        {previewContent.checkIns.map((entry) => (
-                          <View key={entry.date} style={styles.previewEntry}>
-                            <ThemedText type="defaultSemiBold">{formatDate(entry.date)}</ThemedText>
-                            {entry.fields.map((field) => (
-                              <ThemedText key={`${entry.date}-${field.label}`} style={styles.previewLine}>
-                                {field.label}: {field.value}
-                              </ThemedText>
-                            ))}
-                            {entry.notes ? (
-                              <ThemedText
-                                lightColor={textSecondaryColor}
-                                darkColor={textSecondaryColor}
-                                style={styles.previewNotes}>
-                                {t('records.fields.notes')}: {entry.notes}
-                              </ThemedText>
-                            ) : null}
-                          </View>
-                        ))}
-                      </View>
-                    </GroupedSection>
-                  ) : null}
-
-                  {previewContent.records.length > 0 ? (
-                    <GroupedSection title={t('reports.preview.recordsSection')}>
-                      <View style={styles.previewBody}>
-                        {previewContent.records.map((entry, index) => (
-                          <View key={`${entry.date}-${entry.typeLabel}-${index}`} style={styles.previewEntry}>
-                            <ThemedText type="defaultSemiBold">
-                              {formatDate(entry.date)} · {entry.typeLabel}
-                            </ThemedText>
-                            <ThemedText style={styles.previewLine}>{entry.detail}</ThemedText>
-                            {entry.notes ? (
-                              <ThemedText
-                                lightColor={textSecondaryColor}
-                                darkColor={textSecondaryColor}
-                                style={styles.previewNotes}>
-                                {t('records.fields.notes')}: {entry.notes}
-                              </ThemedText>
-                            ) : null}
-                          </View>
-                        ))}
-                      </View>
-                    </GroupedSection>
-                  ) : null}
-                </>
-              )}
-
-              <Button
-                title={t('reports.exportPdf')}
-                disabled={isExporting || previewContent.isEmpty}
-                onPress={() => void handleExportPdf()}
-              />
-            </>
-          ) : null}
-        </>
-      ) : null}
-
       {validationError ? (
         <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.error}>
           {validationError}
         </ThemedText>
       ) : null}
 
-      {step !== 'preview' ? (
-        <View style={styles.actions}>
-          {step !== 'range' ? (
-            <Button title={t('reports.back')} variant="secondary" onPress={handleBack} style={styles.actionButton} />
-          ) : null}
-          <Button title={t('reports.next')} onPress={handleNext} style={styles.actionButton} />
-        </View>
-      ) : (
-        <Button title={t('reports.back')} variant="secondary" onPress={handleBack} />
-      )}
+      <View style={styles.actions}>
+        {step !== 'range' ? (
+          <Button title={t('reports.back')} variant="secondary" onPress={handleBack} style={styles.actionButton} />
+        ) : null}
+        <Button title={t('reports.next')} onPress={handleNext} style={styles.actionButton} />
+      </View>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  reviewRoot: {
+    flex: 1,
+  },
+  reviewContent: {
+    gap: Spacing.lg,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
+  },
+  reviewHint: {
+    ...Typography.body,
+    paddingHorizontal: Spacing.xs,
+  },
+  shareFooter: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.lg,
+  },
   content: {
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
@@ -501,30 +513,6 @@ const styles = StyleSheet.create({
   message: {
     ...Typography.body,
     textAlign: 'center',
-  },
-  previewBody: {
-    padding: Spacing.md,
-    gap: Spacing.sm,
-  },
-  previewMeta: {
-    ...Typography.body,
-  },
-  previewEntry: {
-    gap: Spacing.xs,
-    paddingBottom: Spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(127,127,127,0.25)',
-  },
-  previewLine: {
-    ...Typography.body,
-  },
-  previewNotes: {
-    ...Typography.caption,
-  },
-  empty: {
-    ...Typography.body,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.lg,
   },
   error: {
     ...Typography.body,

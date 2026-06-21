@@ -1,30 +1,70 @@
-import { Stack } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import type { Href } from 'expo-router';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { useCallback } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
+import { RecordHistoryRow } from '@/components/records/RecordHistoryRow';
 import { RecordTypeRow } from '@/components/records/RecordTypeRow';
 import { ThemedText } from '@/components/themed-text';
-import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { RECORD_TYPES } from '@/constants/record-types';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { usePetRecordStore } from '@/stores/pet-record.store';
+import { usePetStore } from '@/stores/pet.store';
+import type { RecordTypeId } from '@/types/pet-record';
+import { getLocaleTag } from '@/utils/locale';
+import {
+  formatRecordDate,
+  getRecordFormRoute,
+  getRecordSummary,
+  getRecordTypeLabelKey,
+} from '@/utils/pet-record-display';
+
+const RECENT_RECORDS_LIMIT = 8;
 
 export default function RecordsScreen() {
-  const { t } = useTranslation();
+  const router = useRouter();
+  const { t, language } = useTranslation();
+  const locale = getLocaleTag(language);
+
+  const pet = usePetStore((state) => state.pet);
+  const loadPet = usePetStore((state) => state.loadPet);
+  const records = usePetRecordStore((state) => state.records);
+  const isLoading = usePetRecordStore((state) => state.isLoading);
+  const loadRecords = usePetRecordStore((state) => state.loadRecords);
+
+  const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const [comingSoonVisible, setComingSoonVisible] = useState(false);
 
-  const handleRecordTypePress = () => {
-    setComingSoonVisible(true);
+  useFocusEffect(
+    useCallback(() => {
+      void loadPet();
+    }, [loadPet])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!pet?.id) {
+        return;
+      }
+
+      void loadRecords(pet.id);
+    }, [loadRecords, pet?.id])
+  );
+
+  const handleRecordTypePress = (type: RecordTypeId) => {
+    router.push(getRecordFormRoute(type) as Href);
   };
 
-  const handleDismissComingSoon = () => {
-    setComingSoonVisible(false);
+  const handleHistoryPress = (type: RecordTypeId, id: string) => {
+    router.push(getRecordFormRoute(type, id) as Href);
   };
+
+  const recentRecords = records.slice(0, RECENT_RECORDS_LIMIT);
 
   return (
     <>
@@ -36,6 +76,27 @@ export default function RecordsScreen() {
         }}
       />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
+        {recentRecords.length > 0 ? (
+          <GroupedSection title={t('records.recentTitle')}>
+            {isLoading && recentRecords.length === 0 ? (
+              <View style={styles.loadingRow}>
+                <ActivityIndicator color={primaryColor} />
+              </View>
+            ) : (
+              recentRecords.map((record, index) => (
+                <RecordHistoryRow
+                  key={record.id}
+                  dateLabel={formatRecordDate(record.date, locale)}
+                  isLast={index === recentRecords.length - 1}
+                  subtitle={getRecordSummary(record, t)}
+                  title={t(getRecordTypeLabelKey(record.type))}
+                  onPress={() => handleHistoryPress(record.type, record.id)}
+                />
+              ))
+            )}
+          </GroupedSection>
+        ) : null}
+
         <ThemedText
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
@@ -49,12 +110,11 @@ export default function RecordsScreen() {
               label={t(recordType.labelKey)}
               icon={recordType.icon}
               isLast={index === RECORD_TYPES.length - 1}
-              onPress={handleRecordTypePress}
+              onPress={() => handleRecordTypePress(recordType.id)}
             />
           ))}
         </GroupedSection>
       </ScreenContainer>
-      <ComingSoonModal visible={comingSoonVisible} onDismiss={handleDismissComingSoon} />
     </>
   );
 }
@@ -67,5 +127,9 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.body,
     paddingHorizontal: Spacing.xs,
+  },
+  loadingRow: {
+    padding: Spacing.lg,
+    alignItems: 'center',
   },
 });

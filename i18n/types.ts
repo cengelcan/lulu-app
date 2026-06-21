@@ -138,7 +138,80 @@ export type Translations = {
   records: {
     title: string;
     addRecord: string;
+    addRecordType: string;
+    editRecord: string;
+    saveRecord: string;
+    saveChanges: string;
+    saveFailed: string;
+    recentTitle: string;
     sectionTitle: string;
+    sections: {
+      details: string;
+      notes: string;
+      attachments: string;
+    };
+    fields: {
+      date: string;
+      datePlaceholder: string;
+      notes: string;
+      notesPlaceholder: string;
+      clinicName: string;
+      clinicNamePlaceholder: string;
+      reason: string;
+      reasonPlaceholder: string;
+      vaccineName: string;
+      vaccineNamePlaceholder: string;
+      batchNumber: string;
+      batchNumberPlaceholder: string;
+      nextDueDate: string;
+      productName: string;
+      productNamePlaceholder: string;
+      medicationName: string;
+      medicationNamePlaceholder: string;
+      dosage: string;
+      dosagePlaceholder: string;
+      frequency: string;
+      frequencyPlaceholder: string;
+      endDate: string;
+      severity: string;
+      weightValue: string;
+      weightValuePlaceholder: string;
+      weightUnit: string;
+      title: string;
+      titlePlaceholder: string;
+    };
+    severity: {
+      mild: string;
+      moderate: string;
+      severe: string;
+    };
+    units: {
+      kg: string;
+      lb: string;
+    };
+    summary: {
+      vetVisit: string;
+      vaccine: string;
+      parasite: string;
+      medication: string;
+      vomiting: string;
+      weightValue: string;
+      other: string;
+    };
+    attachment: {
+      title: string;
+      subtitle: string;
+    };
+    validation: {
+      dateRequired: string;
+      dateInvalid: string;
+      vaccineNameRequired: string;
+      medicationNameRequired: string;
+      weightValueRequired: string;
+      weightValueInvalid: string;
+      titleRequired: string;
+      notesTooLong: string;
+    };
     types: {
       vetVisit: string;
       vaccine: string;

@@ -78,6 +78,8 @@ export type PetRecordInput<T extends RecordTypeId = RecordTypeId> = Omit<
   'id' | 'createdAt' | 'updatedAt'
 >;
 
+export const PET_RECORD_NOTES_MAX_LENGTH = 500;
+
 export const RECORD_TYPE_IDS: readonly RecordTypeId[] = [
   'vet_visit',
   'vaccine',

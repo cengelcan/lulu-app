@@ -312,15 +312,15 @@ Quick Actions yalnızca **Reports** ve **Records** — 2 tile'lı grid.
 - [x] `storage/` + `stores/` CRUD
 
 #### Faz C — Şablon formları (kademeli)
-- [ ] Vet Visit formu
-- [ ] Vaccine formu
-- [ ] Parasite formu
-- [ ] Medication formu
-- [ ] Diğer tipler
+- [x] Vet Visit formu
+- [x] Vaccine formu
+- [x] Parasite formu
+- [x] Medication formu
+- [x] Diğer tipler (Vomiting, Weight, Other — dinamik `[type]` ekranı)
 
 #### Faz D — Ekler
-- [ ] Fotoğraf / dosya ekleme UI — **placeholder** (K11)
-- [ ] i18n TR / DE / EN
+- [x] Fotoğraf / dosya ekleme UI — **placeholder** (K11)
+- [x] i18n TR / DE / EN
 
 ### Kabul kriterleri
 

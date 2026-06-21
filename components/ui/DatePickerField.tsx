@@ -14,6 +14,9 @@ type DatePickerFieldProps = {
   onChange: (value: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  /** Defaults to today. Pass `null` to allow any future date. */
+  maximumDate?: Date | null;
+  minimumDate?: Date | null;
 };
 
 function getPickerDate(value: string): Date {
@@ -34,6 +37,8 @@ export function DatePickerField({
   onChange,
   disabled = false,
   placeholder = 'Select date',
+  maximumDate = getTodayStart(),
+  minimumDate = null,
 }: DatePickerFieldProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [pickerDate, setPickerDate] = useState(() => getPickerDate(value));
@@ -114,7 +119,8 @@ export function DatePickerField({
       {Platform.OS === 'android' && showPicker ? (
         <DateTimePicker
           display="default"
-          maximumDate={getTodayStart()}
+          maximumDate={maximumDate ?? undefined}
+          minimumDate={minimumDate ?? undefined}
           mode="date"
           value={pickerDate}
           onChange={handleAndroidChange}
@@ -140,7 +146,8 @@ export function DatePickerField({
               </View>
               <DateTimePicker
                 display="spinner"
-                maximumDate={getTodayStart()}
+                maximumDate={maximumDate ?? undefined}
+                minimumDate={minimumDate ?? undefined}
                 mode="date"
                 themeVariant={colorScheme === 'dark' ? 'dark' : 'light'}
                 value={pickerDate}

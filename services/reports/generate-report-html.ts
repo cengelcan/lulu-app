@@ -86,12 +86,14 @@ export function generateReportHtml({
 
       return `
       <div class="report-page">
-        ${renderReportHeader({ qrCodeHtml, appStoreBadgeHtml })}
-        <div class="report-page-body">${pageBody}</div>
-        ${renderReportFooter({
-          generatedAtLabel,
-          pageLabel: formatPageLabel(pageNumber, totalPages),
-        })}
+        <div class="report-sheet">
+          ${renderReportHeader({ qrCodeHtml, appStoreBadgeHtml })}
+          <div class="report-page-body">${pageBody}</div>
+          ${renderReportFooter({
+            generatedAtLabel,
+            pageLabel: formatPageLabel(pageNumber, totalPages),
+          })}
+        </div>
       </div>`;
     })
     .join('');

@@ -103,7 +103,7 @@ export function ReportDocumentPreview({
 
   const scale = containerWidth > 0 ? containerWidth / REPORT_PAGE_WIDTH : 0;
   const contentHeight = measuredContentHeight ?? estimatedContentHeight;
-  const webViewHeight = scale > 0 ? Math.ceil(contentHeight * scale) : 0;
+  const scaledHeight = scale > 0 ? Math.ceil(contentHeight * scale) : 0;
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const width = event.nativeEvent.layout.width;
@@ -122,17 +122,27 @@ export function ReportDocumentPreview({
   return (
     <View style={styles.container} onLayout={handleLayout}>
       {scale > 0 ? (
-        <WebView
-          originWhitelist={['*']}
-          source={{ html }}
-          style={[styles.webView, { height: webViewHeight }]}
-          scrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-          injectedJavaScript={HEIGHT_REPORTER}
-          onMessage={handleMessage}
-          androidLayerType="software"
-          setBuiltInZoomControls={false}
-        />
+        <View style={{ height: scaledHeight, overflow: 'hidden' }}>
+          <View
+            style={{
+              width: REPORT_PAGE_WIDTH,
+              height: contentHeight,
+              transform: [{ scale }],
+              transformOrigin: 'top left',
+            }}>
+            <WebView
+              originWhitelist={['*']}
+              source={{ html }}
+              style={{ width: REPORT_PAGE_WIDTH, height: contentHeight, backgroundColor: 'transparent' }}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+              injectedJavaScript={HEIGHT_REPORTER}
+              onMessage={handleMessage}
+              androidLayerType="software"
+              setBuiltInZoomControls={false}
+            />
+          </View>
+        </View>
       ) : null}
     </View>
   );
@@ -144,9 +154,5 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     overflow: 'hidden',
     backgroundColor: '#e7eae8',
-  },
-  webView: {
-    width: '100%',
-    backgroundColor: 'transparent',
   },
 });

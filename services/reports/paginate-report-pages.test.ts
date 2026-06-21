@@ -8,6 +8,13 @@ import type {
 } from '@/types/report';
 
 import { buildReportSummary } from './build-report-summary';
+import {
+  PX_PER_PT,
+  REPORT_PAGE_HEIGHT,
+  REPORT_PAGE_WIDTH,
+  REPORT_PDF_PAGE_HEIGHT_PT,
+  REPORT_PDF_PAGE_WIDTH_PT,
+} from './html/report-layout';
 import { paginateReportContent } from './paginate-report-pages';
 
 function makeField(overrides: Partial<ReportCheckInFieldEntry> = {}): ReportCheckInFieldEntry {
@@ -76,6 +83,22 @@ describe('paginateReportContent', () => {
     const pages = paginateReportContent(makeContent(days), { hasSummary: true });
     const headingCount = pages.filter((page) => page.showCheckInsHeading).length;
     assert.equal(headingCount, 1);
+  });
+});
+
+describe('report page geometry', () => {
+  it('keeps the CSS page box aligned with the physical PDF sheet', () => {
+    // The fixed-height `.report-page` box (CSS px @96 PPI) must fill the PDF
+    // sheet (points @72 PPI). If this drifts, every printed page gets an empty
+    // band at the bottom and right.
+    assert.equal(REPORT_PAGE_WIDTH, Math.round(REPORT_PDF_PAGE_WIDTH_PT * PX_PER_PT));
+    assert.equal(REPORT_PAGE_HEIGHT, Math.round(REPORT_PDF_PAGE_HEIGHT_PT * PX_PER_PT));
+  });
+
+  it('preserves the US Letter aspect ratio between px and pt', () => {
+    const pxRatio = REPORT_PAGE_WIDTH / REPORT_PAGE_HEIGHT;
+    const ptRatio = REPORT_PDF_PAGE_WIDTH_PT / REPORT_PDF_PAGE_HEIGHT_PT;
+    assert.ok(Math.abs(pxRatio - ptRatio) < 0.005, 'page aspect ratio drifted');
   });
 });
 

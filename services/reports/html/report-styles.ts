@@ -6,7 +6,11 @@ import {
   REPORT_FOOTER_HEIGHT,
   REPORT_HEADER_HEIGHT,
   REPORT_PAGE_HEIGHT,
+  REPORT_PAGE_MARGIN,
   REPORT_PAGE_WIDTH,
+  REPORT_SHEET_HEIGHT,
+  REPORT_SHEET_RADIUS,
+  REPORT_SHEET_WIDTH,
 } from './report-layout';
 
 type ReportStylesParams = {
@@ -63,11 +67,25 @@ export function buildReportStyles({ primaryColor, forScreen = false }: ReportSty
         page-break-after: auto;
         break-after: auto;
       }
+      .report-sheet {
+        position: absolute;
+        top: ${REPORT_PAGE_MARGIN}px;
+        left: ${REPORT_PAGE_MARGIN}px;
+        width: ${REPORT_SHEET_WIDTH}px;
+        height: ${REPORT_SHEET_HEIGHT}px;
+        border-radius: ${REPORT_SHEET_RADIUS}px;
+        border: 1px solid #e4e8e4;
+        background: #ffffff;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(26, 31, 28, 0.06);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
       .report-header {
         position: absolute;
         top: 0;
         left: 0;
-        width: ${REPORT_PAGE_WIDTH}px;
+        width: ${REPORT_SHEET_WIDTH}px;
         height: ${REPORT_HEADER_HEIGHT}px;
         background: ${primaryColor};
         color: #fff;
@@ -111,7 +129,7 @@ export function buildReportStyles({ primaryColor, forScreen = false }: ReportSty
         top: ${REPORT_HEADER_HEIGHT}px;
         bottom: ${REPORT_FOOTER_HEIGHT}px;
         left: 0;
-        width: ${REPORT_PAGE_WIDTH}px;
+        width: ${REPORT_SHEET_WIDTH}px;
         padding: ${REPORT_BODY_PADDING_Y}px ${REPORT_BODY_PADDING_X}px;
         overflow: hidden;
         display: flex;
@@ -123,7 +141,7 @@ export function buildReportStyles({ primaryColor, forScreen = false }: ReportSty
         position: absolute;
         bottom: 0;
         left: 0;
-        width: ${REPORT_PAGE_WIDTH}px;
+        width: ${REPORT_SHEET_WIDTH}px;
         height: ${REPORT_FOOTER_HEIGHT}px;
         background: ${primaryColor};
         color: #fff;

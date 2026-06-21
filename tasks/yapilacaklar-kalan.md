@@ -2,8 +2,8 @@
 
 Uygulamanın bir sonraki geliştirme döngüsü için önceliklendirilmiş yol haritası.
 
-**Son güncelleme:** 2026-06-15  
-**Durum:** Sprint 2 tamamlandı
+**Son güncelleme:** 2026-06-21  
+**Durum:** Sprint 3 tamamlandı — **Sprint 4 sırada**
 
 ---
 
@@ -71,9 +71,9 @@ flowchart TD
 
 ### Yapılacaklar
 
-- [ ] Tüm stack ekranlarında `headerBackTitleVisible: false` (iOS)
-- [ ] Android tutarlılık kontrolü
-- [ ] `ScreenHeader` içindeki kullanılmayan `backLabel` prop'unu temizle
+- [x] Tüm stack ekranlarında minimal geri butonu (`headerBackButtonDisplayMode: 'minimal'` — `STACK_BACK_ONLY_OPTIONS`)
+- [x] Android tutarlılık kontrolü (aynı `STACK_BACK_ONLY_OPTIONS` kullanılıyor)
+- [x] `ScreenHeader` içindeki kullanılmayan `backLabel` prop'unu temizle
 
 ### Kabul kriterleri
 
@@ -95,12 +95,12 @@ flowchart TD
 
 ### Yapılacaklar
 
-- [ ] `expo-localization` ekle (Expo SDK 54 uyumlu sürüm)
-- [ ] `AppLanguage` genişlet: `'system' | 'en' | 'tr' | 'de'`
-- [ ] `getDeviceLanguage()` — cihaz locale → desteklenen dil eşlemesi
-- [ ] İlk açılış (kayıt yok): `system` → cihaz dili
-- [ ] `LanguageSection`: System, English, Türkçe, Deutsch
-- [ ] Delete Account sonrası → `system` (cihaz diline dön)
+- [x] `expo-localization` ekle (Expo SDK 54 uyumlu sürüm)
+- [x] `AppLanguagePreference` genişlet: `'system' | 'en' | 'tr' | 'de'`
+- [x] `resolveDeviceLanguage()` — cihaz locale → desteklenen dil eşlemesi
+- [x] İlk açılış (kayıt yok): `system` → cihaz dili
+- [x] `LanguageSection`: System, English, Türkçe, Deutsch
+- [x] Delete Account sonrası → `system` (cihaz diline dön)
 
 ### Kabul kriterleri
 
@@ -123,17 +123,17 @@ flowchart TD
 ### Yapılacaklar
 
 #### Faz A — Ekran kapsamı
-- [ ] Tab bar, Onboarding, Setup, Profile, My Pets, Dashboard, Pet Profile / Edit Pet
-- [ ] Ortak UI modalları ve alert metinleri
+- [x] Tab bar, Onboarding, Setup, Profile, My Pets, Dashboard, Pet Profile / Edit Pet
+- [x] Ortak UI modalları ve alert metinleri
 
 #### Faz B — Dinamik içerik
-- [ ] Push bildirim metinleri
-- [ ] Tarih / gün kısaltmaları → seçili locale
-- [ ] Breed listesi: locale-aware gösterim katmanı (TR karşılıklar)
+- [x] Push bildirim metinleri
+- [x] Tarih / gün kısaltmaları → seçili locale
+- [x] Breed listesi: locale-aware gösterim katmanı (`usePetDisplay().displayPetBreed`)
 
 #### Faz C — Kalite
-- [ ] Kart taşma düzeltmeleri (K4 ile koordineli)
-- [ ] EN ↔ TR geçiş QA
+- [x] Kart taşma düzeltmeleri (streak kartı + Today's Summary — K4 ile koordineli)
+- [ ] EN ↔ TR geçiş QA (manuel)
 
 ### Kabul kriterleri
 
@@ -154,10 +154,10 @@ flowchart TD
 
 ### Yapılacaklar
 
-- [ ] `i18n/de.ts` — tam `Translations` implementasyonu
-- [ ] Settings → Deutsch
-- [ ] Cihaz dili eşlemesi: `de`, `de-DE`, `de-AT`, `de-CH` → `de`
-- [ ] Breed listesi DE karşılıkları
+- [x] `i18n/de.ts` — tam `Translations` implementasyonu
+- [x] Settings → Deutsch
+- [x] Cihaz dili eşlemesi: `de` → `de` (`resolveDeviceLanguage`)
+- [x] Breed listesi DE karşılıkları
 
 ### Kabul kriterleri
 
@@ -199,13 +199,13 @@ flowchart TD
 
 ### Yapılacaklar
 
-- [ ] `DailyCheckInProgress` — spacing, taşma, tipografi, tamamlanma oku
-- [ ] Kaçırılan gün tespiti: bugün / dün / daha eski
-- [ ] Bağlamsal CTA metinleri (i18n): *"Bugün check-in yapmadın — şimdi yap"*, *"Dünü tamamla"*
-- [ ] CTA tap → `/check-in` veya `/check-in?date=YYYY-MM-DD`
-- [ ] `TodaysCheckInCard` layout düzeltmesi (taşma)
-- [ ] Dashboard'dan **Start Check-In** primary butonunu kaldır
-- [ ] Gün etiketleri → seçili locale
+- [x] `DailyCheckInProgress` — spacing, taşma, tipografi, tamamlanma oku
+- [x] Kaçırılan gün tespiti: bugün / dün
+- [x] Bağlamsal CTA metinleri (i18n): *"Bugün check-in yapmadın"*, *"Dünü tamamla"*
+- [x] CTA tap → `/check-in?date=YYYY-MM-DD`
+- [x] `TodaysCheckInCard` layout düzeltmesi (taşma)
+- [x] Dashboard'dan **Start Check-In** primary butonunu kaldır
+- [x] Gün etiketleri → seçili locale (`formatWeekdayShort` + `getLocaleTag`)
 
 ### Kabul kriterleri
 
@@ -241,12 +241,12 @@ Quick Actions yalnızca **Reports** ve **Records** — 2 tile'lı grid.
 
 ### Yapılacaklar
 
-- [ ] Medication tile kaldır
-- [ ] Start Check-In primary buton kaldır (streak kartına taşındı)
-- [ ] `constants/quick-actions.ts` — Reports + Records tanımları
-- [ ] Reports → `/reports`, Records → `/records`
-- [ ] i18n etiketleri
-- [ ] 2'li grid layout
+- [x] Medication tile kaldır
+- [x] Start Check-In primary buton kaldır (streak kartına taşındı — Sprint 2)
+- [x] `constants/quick-actions.ts` — Reports + Records tanımları
+- [x] Reports → `/reports`, Records → `/records`
+- [x] i18n etiketleri (mevcut `dashboard.reports` / `dashboard.records`)
+- [x] 2'li grid layout
 
 ### Kabul kriterleri
 
@@ -302,9 +302,9 @@ Quick Actions yalnızca **Reports** ve **Records** — 2 tile'lı grid.
 ### Yapılacaklar
 
 #### Faz A — Hub (şimdilik)
-- [ ] `app/records/index.tsx` — olay tipi buton listesi
-- [ ] `constants/record-types.ts` — tip tanımları (ikon, i18n key, route)
-- [ ] Her buton → placeholder form veya `ComingSoonModal` (kademeli açılım)
+- [x] `app/records/index.tsx` — olay tipi buton listesi
+- [x] `constants/record-types.ts` — tip tanımları (ikon, i18n key)
+- [x] Her buton → `ComingSoonModal` (formlar Sprint 4'te)
 
 #### Faz B — Veri modeli (şablonlar açılırken)
 - [ ] `types/pet-record.ts` — record type enum, tarih, petId, metadata
@@ -499,15 +499,76 @@ Splash
 
 ## Önerilen sprint gruplaması
 
-| Sprint | İşler | Kapsam |
-|--------|-------|--------|
-| **Sprint 1 — Cila** | 5, 3, 1 (Faz A) | Geri okları + System dili + TR ekran çevirileri |
-| **Sprint 2 — Dil & Home** | 1 (Faz B–C), 2, 4 | Breed locale + DE + streak kartı + kaçırılan CTA |
-| **Sprint 3 — Navigasyon & Records** | 6, 8 (Faz A) | Quick Actions (2 tile) + Records hub butonları |
-| **Sprint 4 — Records & Reports** | 8 (Faz B–C), 7 | Record formları + Reports sihirbazı + PDF |
-| **Sprint 5 — Auth & Paylaşım** | 9, 10 | Supabase auth (guest kaldır) + Plus aile paylaşımı |
+| Sprint | İşler | Kapsam | Durum |
+|--------|-------|--------|-------|
+| **Sprint 1 — Cila** | 5, 3, 1 (Faz A) | Geri okları + System dili + TR ekran çevirileri | ✅ Tamamlandı |
+| **Sprint 2 — Dil & Home** | 1 (Faz B–C), 2, 4 | Breed locale + DE + streak kartı + kaçırılan CTA | ✅ Tamamlandı |
+| **Sprint 3 — Navigasyon & Records** | 6, 8 (Faz A) | Quick Actions (2 tile) + Records hub butonları | ✅ Tamamlandı |
+| **Sprint 4 — Records & Reports** | 8 (Faz B–C), 7 | Record formları + Reports sihirbazı + PDF | 🔵 Aktif |
+| **Sprint 5 — Auth & Paylaşım** | 9, 10 | Supabase auth (guest kaldır) + Plus aile paylaşımı | ⬜ Bekliyor |
 
 *Sprint süreleri ekip hızına göre ayarlanır.*
+
+---
+
+## Sprint 3 — Navigasyon & Records ✅
+
+**Tamamlandı:** 2026-06-21
+
+**Yapılanlar:**
+- Quick Actions: Reports + Records (2 tile, kilit yok)
+- `app/reports/index.tsx` — placeholder ekran
+- `app/records/index.tsx` — olay tipi hub + `ComingSoonModal`
+- `constants/quick-actions.ts`, `constants/record-types.ts`
+- i18n `reports.*` ve `records.*` (EN / TR / DE)
+
+### Adım 4 — QA
+
+- [x] Dashboard'da yalnızca 2 tile (Reports + Records)
+- [x] Medication Quick Action'da görünmüyor
+- [x] Reports tap → `/reports` açılıyor
+- [x] Records tap → olay tipi listesi görünüyor
+- [x] TR / DE dilde etiketler doğru
+- [x] Geri navigasyon tutarlı (minimal ok)
+
+---
+
+## Sprint 4 — Records & Reports (aktif)
+
+**Hedef:** Record formları + veri modeli (SQLite) + Reports çok adımlı sihirbaz + PDF export.
+
+**Kapsam:** İş #8 Faz B–C + İş #7
+
+### Adım 1 — Veri modeli (İş #8 Faz B)
+
+1. **`types/pet-record.ts`** — record type enum, tarih, petId, metadata
+2. **SQLite migration** — `pet_records` tablosu
+3. **`storage/` + `stores/`** CRUD
+
+### Adım 2 — Record formları (İş #8 Faz C)
+
+Kademeli açılım — öncelik sırası:
+1. Vet Visit
+2. Vaccine
+3. Medication
+4. Parasite, Weight, Vomiting, Other
+
+Her form: tarih, pet bağlantısı, tip-specific alanlar; fotoğraf UI placeholder (K11).
+
+### Adım 3 — Reports sihirbazı (İş #7)
+
+1. **`app/reports/index.tsx`** — çok adımlı akış (placeholder'ı değiştir)
+   - Adım 1: Tarih aralığı (7 gün / 30 gün / 3 ay / özel)
+   - Adım 2: Veri seçimi (check-in kategorileri + record tipleri)
+   - Adım 3: Önizleme
+   - Adım 4: PDF export + Share
+
+2. **PDF** — `expo-print` veya benzeri
+
+### Sprint 4 dışında
+
+- Auth / Supabase → **Sprint 5**
+- Aile paylaşımı → **Sprint 5**
 
 ---
 

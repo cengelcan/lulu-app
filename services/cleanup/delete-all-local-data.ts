@@ -1,4 +1,5 @@
 import { cancelCheckInReminder } from '@/services/notifications';
+import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
 import {
   removeActivePetId,
@@ -15,6 +16,7 @@ import { useCheckInStore } from '@/stores/check-in.store';
 import { useLanguageStore } from '@/stores/language.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useOnboardingStore } from '@/stores/onboarding.store';
+import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
@@ -23,6 +25,7 @@ import { DEFAULT_APP_LANGUAGE_PREFERENCE, resolveLanguagePreference } from '@/ty
 
 export async function deleteAllLocalData(): Promise<void> {
   await cancelCheckInReminder();
+  await petRecordStorage.deleteAllPetRecords();
   await petStorage.deleteAllPets();
 
   await Promise.all([
@@ -49,6 +52,11 @@ export function resetAppStoresAfterDataDeletion(): void {
   useCheckInStore.setState({
     latestCheckIn: null,
     checkIns: [],
+    isLoading: false,
+    error: null,
+  });
+  usePetRecordStore.setState({
+    records: [],
     isLoading: false,
     error: null,
   });

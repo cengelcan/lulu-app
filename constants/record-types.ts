@@ -1,13 +1,7 @@
 import type { IconSymbolName } from '@/components/ui/icon-symbol';
+import type { RecordTypeId } from '@/types/pet-record';
 
-export type RecordTypeId =
-  | 'vet_visit'
-  | 'vaccine'
-  | 'parasite'
-  | 'medication'
-  | 'vomiting'
-  | 'weight'
-  | 'other';
+export type { RecordTypeId };
 
 export type RecordTypeLabelKey =
   | 'records.types.vetVisit'

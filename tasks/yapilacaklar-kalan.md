@@ -307,9 +307,9 @@ Quick Actions yalnızca **Reports** ve **Records** — 2 tile'lı grid.
 - [x] Her buton → `ComingSoonModal` (formlar Sprint 4'te)
 
 #### Faz B — Veri modeli (şablonlar açılırken)
-- [ ] `types/pet-record.ts` — record type enum, tarih, petId, metadata
-- [ ] SQLite migration — `pet_records` tablosu
-- [ ] `storage/` + `stores/` CRUD
+- [x] `types/pet-record.ts` — record type enum, tarih, petId, metadata
+- [x] SQLite migration — `pet_records` tablosu
+- [x] `storage/` + `stores/` CRUD
 
 #### Faz C — Şablon formları (kademeli)
 - [ ] Vet Visit formu

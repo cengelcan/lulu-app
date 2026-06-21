@@ -210,6 +210,7 @@ export const de: Translations = {
     exportPdf: 'PDF exportieren',
     shareReport: 'Bericht teilen',
     exportFailed: 'Bericht konnte nicht exportiert werden. Bitte erneut versuchen.',
+    exportFileName: 'Gesundheitsbericht',
     steps: {
       label: 'Schritt {{current}} von {{total}}',
       rangeTitle: 'Datumsbereich wählen',

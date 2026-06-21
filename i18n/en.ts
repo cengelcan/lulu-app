@@ -210,6 +210,7 @@ export const en: Translations = {
     exportPdf: 'Export PDF',
     shareReport: 'Share Report',
     exportFailed: 'Could not export the report. Please try again.',
+    exportFileName: 'Health Report',
     steps: {
       label: 'Step {{current}} of {{total}}',
       rangeTitle: 'Choose a date range',

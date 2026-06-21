@@ -138,6 +138,7 @@ export type Translations = {
     exportPdf: string;
     shareReport: string;
     exportFailed: string;
+    exportFileName: string;
     steps: {
       label: string;
       rangeTitle: string;

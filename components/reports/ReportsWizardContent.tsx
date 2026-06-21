@@ -280,7 +280,11 @@ export function ReportsWizardContent() {
         summary,
       });
 
-      await exportReportPdf(html);
+      const resolvedRange = resolveReportDateRange(range);
+      const rangeFileLabel = `${formatDate(resolvedRange.startDate)} - ${formatDate(resolvedRange.endDate)}`;
+      const fileName = `${petSummary.name} - ${t('reports.exportFileName')} (${rangeFileLabel})`;
+
+      await exportReportPdf(html, fileName);
     } catch (error) {
       if (__DEV__) {
         console.error('Report export failed:', error);

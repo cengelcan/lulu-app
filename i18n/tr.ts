@@ -210,6 +210,7 @@ export const tr: Translations = {
     exportPdf: 'PDF Dışa Aktar',
     shareReport: 'Raporu Paylaş',
     exportFailed: 'Rapor dışa aktarılamadı. Lütfen tekrar dene.',
+    exportFileName: 'Sağlık Raporu',
     steps: {
       label: 'Adım {{current}} / {{total}}',
       rangeTitle: 'Tarih aralığı seç',

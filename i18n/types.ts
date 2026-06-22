@@ -51,6 +51,34 @@ export type Translations = {
     intro3: { title: string; description: string; button: string };
     intro4: { title: string; description: string; button: string };
   };
+  auth: {
+    title: string;
+    subtitle: string;
+    titleSignUp: string;
+    subtitleSignUp: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    passwordLabel: string;
+    passwordPlaceholder: string;
+    signInButton: string;
+    signUpButton: string;
+    toggleToSignUp: string;
+    toggleToSignIn: string;
+    confirmEmailTitle: string;
+    confirmEmailMessage: string;
+    errors: {
+      emailRequired: string;
+      emailInvalid: string;
+      passwordRequired: string;
+      passwordTooShort: string;
+      invalid_credentials: string;
+      email_taken: string;
+      weak_password: string;
+      email_not_confirmed: string;
+      network: string;
+      unknown: string;
+    };
+  };
   setup: {
     petType: { title: string; description: string };
     petName: { title: string; description: string; placeholder: string };

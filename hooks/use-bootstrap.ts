@@ -5,6 +5,7 @@ import { getNotificationLaunchRoute, syncCheckInReminderSchedule } from '@/servi
 import * as petStorage from '@/storage/pet.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
+import { useUserStore } from '@/stores/user.store';
 
 export type BootstrapPhase = 'loading' | 'error' | 'redirecting';
 
@@ -13,10 +14,15 @@ export const SPLASH_MIN_DURATION_MS = 1000;
 
 function resolveBootstrapRoute(
   hasCompletedOnboarding: boolean,
+  isAuthenticated: boolean,
   hasAnyPet: boolean
 ): Href {
   if (!hasCompletedOnboarding) {
     return '/(onboarding)/intro-1';
+  }
+
+  if (!isAuthenticated) {
+    return '/(auth)';
   }
 
   if (!hasAnyPet) {
@@ -39,6 +45,7 @@ export function useBootstrap() {
   const router = useRouter();
   const loadOnboardingStatus = useOnboardingStore((state) => state.loadOnboardingStatus);
   const loadPet = usePetStore((state) => state.loadPet);
+  const initializeAuth = useUserStore((state) => state.initializeAuth);
   const clearOnboardingError = useOnboardingStore((state) => state.clearError);
   const clearPetError = usePetStore((state) => state.clearError);
 
@@ -53,7 +60,7 @@ export function useBootstrap() {
     clearOnboardingError();
     clearPetError();
 
-    await Promise.all([loadOnboardingStatus(), loadPet()]);
+    await Promise.all([loadOnboardingStatus(), loadPet(), initializeAuth()]);
 
     const { pet } = usePetStore.getState();
 
@@ -80,21 +87,23 @@ export function useBootstrap() {
       return;
     }
 
+    const isAuthenticated = useUserStore.getState().authStatus === 'authenticated';
     const hasAnyPet = await petStorage.hasAnyPet();
     const notificationRoute = await getNotificationLaunchRoute();
     await waitForMinSplashDuration(startedAt);
 
-    if (notificationRoute) {
+    if (notificationRoute && isAuthenticated && hasAnyPet) {
       setPhase('redirecting');
       router.replace(notificationRoute);
       return;
     }
 
     setPhase('redirecting');
-    router.replace(resolveBootstrapRoute(hasCompletedOnboarding, hasAnyPet));
+    router.replace(resolveBootstrapRoute(hasCompletedOnboarding, isAuthenticated, hasAnyPet));
   }, [
     clearOnboardingError,
     clearPetError,
+    initializeAuth,
     loadOnboardingStatus,
     loadPet,
     router,

@@ -82,6 +82,8 @@ export function resetAppStoresAfterDataDeletion(): void {
   });
   useSetupStore.getState().resetDraft();
   useUserStore.setState({
+    userId: null,
+    authStatus: 'unauthenticated',
     displayName: null,
     avatarUri: null,
     provider: 'guest',

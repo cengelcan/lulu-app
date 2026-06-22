@@ -21,7 +21,7 @@ export default function Onboarding4Screen() {
       return;
     }
 
-    router.replace('/(setup)/pet-type');
+    router.replace('/(auth)');
   }, [clearError, completeOnboarding, router]);
 
   return (

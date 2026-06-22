@@ -106,25 +106,17 @@ export default function RecordsScreen() {
             {t('records.deceasedReadOnly')}
           </ThemedText>
         ) : (
-          <>
-            <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
-              style={styles.subtitle}>
-              {t('records.addRecord')}
-            </ThemedText>
-            <GroupedSection title={t('records.sectionTitle')}>
-              {RECORD_TYPES.map((recordType, index) => (
-                <RecordTypeRow
-                  key={recordType.id}
-                  label={t(recordType.labelKey)}
-                  icon={recordType.icon}
-                  isLast={index === RECORD_TYPES.length - 1}
-                  onPress={() => handleRecordTypePress(recordType.id)}
-                />
-              ))}
-            </GroupedSection>
-          </>
+          <GroupedSection title={t('records.sectionTitle')}>
+            {RECORD_TYPES.map((recordType, index) => (
+              <RecordTypeRow
+                key={recordType.id}
+                label={t(recordType.labelKey)}
+                icon={recordType.icon}
+                isLast={index === RECORD_TYPES.length - 1}
+                onPress={() => handleRecordTypePress(recordType.id)}
+              />
+            ))}
+          </GroupedSection>
         )}
       </ScreenContainer>
     </>

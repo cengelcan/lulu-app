@@ -23,7 +23,7 @@ export function UserCard() {
   const avatarUri = useUserStore((state) => state.avatarUri);
   const email = useUserStore((state) => state.email);
   const updateDisplayName = useUserStore((state) => state.updateDisplayName);
-  const updateAvatarUri = useUserStore((state) => state.updateAvatarUri);
+  const updateAvatar = useUserStore((state) => state.updateAvatar);
 
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const primaryColor = useThemeColor({}, 'primary');
@@ -55,7 +55,11 @@ export function UserCard() {
       const result = await pickImageFromGallery();
 
       if (result.ok) {
-        await updateAvatarUri(result.uri);
+        await updateAvatar({
+          uri: result.uri,
+          base64: result.base64,
+          mimeType: result.mimeType,
+        });
       } else if (result.reason === 'permission_denied') {
         Alert.alert(t('profile.photoAccessTitle'), t('profile.photoAccessMessage'));
       }

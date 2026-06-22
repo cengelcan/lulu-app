@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 
+import { deleteRemoteCheckIn, pushCheckIn } from '@/services/sync/check-ins-sync';
 import * as checkInStorage from '@/storage/check-in.storage';
+import { useUserStore } from '@/stores/user.store';
 import type { CheckIn } from '@/types/check-in';
+
+function getActiveUserId(): string | null {
+  return useUserStore.getState().userId;
+}
 
 type CheckInState = {
   latestCheckIn: CheckIn | null;
@@ -66,6 +72,15 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
     try {
       await checkInStorage.createCheckIn(checkIn);
 
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushCheckIn(userId, checkIn);
+        } catch (syncError) {
+          console.warn('Failed to sync new check-in to cloud', syncError);
+        }
+      }
+
       const checkIns = await checkInStorage.getCheckInsByPetId(checkIn.petId);
       const latestCheckIn = checkIns[0] ?? null;
 
@@ -86,6 +101,15 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
     try {
       await checkInStorage.updateCheckIn(checkIn);
 
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushCheckIn(userId, checkIn);
+        } catch (syncError) {
+          console.warn('Failed to sync updated check-in to cloud', syncError);
+        }
+      }
+
       const checkIns = await checkInStorage.getCheckInsByPetId(checkIn.petId);
       const latestCheckIn = checkIns[0] ?? null;
 
@@ -104,6 +128,14 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
 
     try {
       await checkInStorage.deleteCheckIn(id);
+
+      if (getActiveUserId()) {
+        try {
+          await deleteRemoteCheckIn(id);
+        } catch (syncError) {
+          console.warn('Failed to delete check-in from cloud', syncError);
+        }
+      }
 
       const checkIns = get().checkIns.filter((checkIn) => checkIn.id !== id);
       const latestCheckIn = await checkInStorage.getLatestCheckInByPetId(petId);

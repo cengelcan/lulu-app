@@ -10,7 +10,10 @@ import {
   signUpWithEmail as authSignUpWithEmail,
 } from '@/services/auth';
 import { wipeUserScopedData } from '@/services/cleanup/wipe-user-scoped-data';
+import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
 import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
+import { pullProfileIntoLocal, pushProfile, uploadAvatar } from '@/services/sync/profile-sync';
+import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
 import { getCurrentUserId, setCurrentUserId } from '@/storage/prefs.storage';
 import { getUserProfile, setUserProfile } from '@/storage/user.storage';
 import type { AuthProvider, UserProfile } from '@/types/user';
@@ -36,7 +39,11 @@ type UserState = {
   signOut: () => Promise<void>;
   loadUserProfile: () => Promise<void>;
   updateDisplayName: (displayName: string | null) => Promise<void>;
-  updateAvatarUri: (avatarUri: string | null) => Promise<void>;
+  updateAvatar: (input: {
+    uri: string;
+    base64: string | null;
+    mimeType: string | null;
+  }) => Promise<void>;
   clearError: () => void;
 };
 
@@ -81,12 +88,25 @@ async function enforceUserDataIsolation(userId: string): Promise<boolean> {
   return wiped;
 }
 
-/** Pulls the user's pets from Supabase into the local cache. Best-effort (offline-safe). */
-async function syncPetsFromCloud(userId: string): Promise<void> {
+/**
+ * Pulls the user's cloud data into the local cache. Best-effort (offline-safe).
+ *
+ * Order matters: pets first so check-ins/records satisfy the cloud FK
+ * (their pet_id must exist in the cloud pets table before they are pushed up
+ * during the first-sync migration).
+ */
+async function syncUserDataFromCloud(userId: string): Promise<void> {
   try {
     await pullPetsIntoLocal(userId);
+    await pullCheckInsIntoLocal(userId);
+    await pullPetRecordsIntoLocal(userId);
+    const profile = await pullProfileIntoLocal(userId);
+    useUserStore.setState({
+      displayName: profile.displayName,
+      avatarUri: profile.avatarUri,
+    });
   } catch (error) {
-    console.warn('Failed to sync pets from cloud', error);
+    console.warn('Failed to sync user data from cloud', error);
   }
 }
 
@@ -127,7 +147,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       // Account isolation is still enforced at the sign-in transition.
       if (session) {
         await setCurrentUserId(session.user.id);
-        await syncPetsFromCloud(session.user.id);
+        await syncUserDataFromCloud(session.user.id);
       }
 
       applySession(session);
@@ -142,7 +162,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       const session = await authSignInWithEmail(email, password);
       const wiped = await enforceUserDataIsolation(session.user.id);
-      await syncPetsFromCloud(session.user.id);
+      await syncUserDataFromCloud(session.user.id);
       set({
         userId: session.user.id,
         email: session.user.email ?? null,
@@ -164,7 +184,7 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       if (session) {
         const wiped = await enforceUserDataIsolation(session.user.id);
-        await syncPetsFromCloud(session.user.id);
+        await syncUserDataFromCloud(session.user.id);
         set({
           userId: session.user.id,
           email: session.user.email ?? null,
@@ -231,14 +251,36 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       await setUserProfile(profile);
       set({ displayName: nextDisplayName });
+
+      const userId = get().userId;
+      if (userId) {
+        try {
+          await pushProfile(userId, profile);
+        } catch (syncError) {
+          console.warn('Failed to sync display name to cloud', syncError);
+        }
+      }
     } catch (error) {
       set({ error: getErrorMessage(error, 'Failed to save name') });
       throw error;
     }
   },
 
-  updateAvatarUri: async (avatarUri) => {
+  updateAvatar: async ({ uri, base64, mimeType }) => {
     set({ error: null });
+
+    const userId = get().userId;
+    let avatarUri = uri;
+    let remoteSynced = false;
+
+    if (userId && base64) {
+      try {
+        avatarUri = await uploadAvatar(userId, base64, mimeType);
+        remoteSynced = true;
+      } catch (syncError) {
+        console.warn('Failed to upload avatar to cloud', syncError);
+      }
+    }
 
     try {
       const profile: UserProfile = {
@@ -248,6 +290,15 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       await setUserProfile(profile);
       set({ avatarUri });
+
+      // Only persist a cloud-resolvable URL; skip pushing a local file:// uri.
+      if (userId && remoteSynced) {
+        try {
+          await pushProfile(userId, profile);
+        } catch (syncError) {
+          console.warn('Failed to sync avatar to cloud', syncError);
+        }
+      }
     } catch (error) {
       set({ error: getErrorMessage(error, 'Failed to save photo') });
       throw error;

@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 
+import { deleteRemotePetRecord, pushPetRecord } from '@/services/sync/records-sync';
 import * as petRecordStorage from '@/storage/pet-record.storage';
+import { useUserStore } from '@/stores/user.store';
 import type { PetRecord, RecordTypeId } from '@/types/pet-record';
+
+function getActiveUserId(): string | null {
+  return useUserStore.getState().userId;
+}
 
 type PetRecordState = {
   records: PetRecord[];
@@ -62,6 +68,16 @@ export const usePetRecordStore = create<PetRecordState>((set, get) => ({
 
     try {
       await petRecordStorage.createPetRecord(record);
+
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushPetRecord(userId, record);
+        } catch (syncError) {
+          console.warn('Failed to sync new record to cloud', syncError);
+        }
+      }
+
       const records = await petRecordStorage.getPetRecordsByPetId(record.petId);
       set({ records, isLoading: false });
     } catch (error) {
@@ -79,6 +95,16 @@ export const usePetRecordStore = create<PetRecordState>((set, get) => ({
 
     try {
       await petRecordStorage.updatePetRecord(record);
+
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushPetRecord(userId, record);
+        } catch (syncError) {
+          console.warn('Failed to sync updated record to cloud', syncError);
+        }
+      }
+
       const records = await petRecordStorage.getPetRecordsByPetId(record.petId);
       set({ records, isLoading: false });
     } catch (error) {
@@ -95,6 +121,15 @@ export const usePetRecordStore = create<PetRecordState>((set, get) => ({
 
     try {
       await petRecordStorage.deletePetRecord(id);
+
+      if (getActiveUserId()) {
+        try {
+          await deleteRemotePetRecord(id);
+        } catch (syncError) {
+          console.warn('Failed to delete record from cloud', syncError);
+        }
+      }
+
       const records = get().records.filter((record) => record.id !== id);
       set({ records, isLoading: false });
     } catch (error) {

@@ -237,6 +237,15 @@ export async function getCheckInsByPetId(petId: string): Promise<CheckIn[]> {
   return rows.map(mapCheckInRow);
 }
 
+export async function getAllCheckIns(): Promise<CheckIn[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<CheckInRow>(
+    'SELECT * FROM check_ins ORDER BY created_at DESC'
+  );
+
+  return rows.map(mapCheckInRow);
+}
+
 export async function updateCheckIn(checkIn: CheckIn): Promise<void> {
   const db = await getDatabase();
 
@@ -259,4 +268,9 @@ export async function updateCheckIn(checkIn: CheckIn): Promise<void> {
 export async function deleteCheckIn(id: string): Promise<void> {
   const db = await getDatabase();
   await db.runAsync('DELETE FROM check_ins WHERE id = ?', id);
+}
+
+export async function deleteAllCheckIns(): Promise<void> {
+  const db = await getDatabase();
+  await db.execAsync('DELETE FROM check_ins');
 }

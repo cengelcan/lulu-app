@@ -91,6 +91,15 @@ export async function getPetRecordsByPetId(petId: string): Promise<PetRecord[]> 
   return rows.map(mapPetRecordRow);
 }
 
+export async function getAllPetRecords(): Promise<PetRecord[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<PetRecordRow>(
+    'SELECT * FROM pet_records ORDER BY date DESC, created_at DESC'
+  );
+
+  return rows.map(mapPetRecordRow);
+}
+
 export async function getPetRecordsByPetIdAndType(
   petId: string,
   type: RecordTypeId

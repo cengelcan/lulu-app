@@ -9,14 +9,17 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 
 ## Mevcut durum (doğrulama)
 
+**Son güncelleme:** 2026-06-22 — Aşama 1 büyük ölçüde tamamlandı (email auth + pet cloud sync).
+
 | Alan | Durum |
 |------|-------|
-| TypeScript | `npx tsc --noEmit` → **5 hata / 4 dosya** (doğrulandı) |
-| Auth | `app/(auth)/index.tsx` placeholder; "Continue as Guest" → doğrudan `(setup)/pet-type` |
-| Bootstrap | `hooks/use-bootstrap.ts` auth'u atlıyor: `onboarding → setup → home` |
-| User store | `provider: 'guest'`; `signIn/signOut/session` yok; Supabase SDK yok |
+| TypeScript | `npx tsc --noEmit` → **temiz (0 hata)** |
+| Auth | `app/(auth)/index.tsx` gerçek email/şifre UI; "Continue as Guest" kaldırıldı; Apple/Google kaldı |
+| Bootstrap | `hooks/use-bootstrap.ts` auth guard aktif: `splash → onboarding → auth → setup → home` |
+| User store | `signIn/signOut/session listener` + `currentUserId↔user.id`; Supabase client (`lib/supabase.ts`) |
+| Sync | Pet'ler Supabase kaynak-doğruluk (write-through + pull); check-in/records hâlâ yerel |
 
-> **Guest kararı:** Canlı kullanıcı var ancak mevcut local veri korunmak zorunda değil (kullanıcılar yeniden profil oluşturacak). → Auth geçişinde **guest→hesap migration gerekmez**; temiz wipe yeterli.
+> **Guest kararı:** Canlı kullanıcı var ancak mevcut local veri korunmak zorunda değil (kullanıcılar yeniden profil oluşturacak). → Auth geçişinde **guest→hesap migration gerekmez**; temiz wipe yeterli. (Hesap izolasyonu: farklı hesap girişinde yerel veri wipe; pet'ler buluttan geri gelir.)
 
 ---
 
@@ -59,39 +62,46 @@ Auth'a başlamadan kod tabanını yeşile çekmek. **Tahmini: ~0.5–1 gün.**
 
 ---
 
-## Aşama 1 — Auth / Supabase (başlanmamış, en kritik blok)
+## Aşama 1 — Auth / Supabase (devam ediyor — email + pet sync tamam)
 
-Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı. **Tahmini: ~3–5 gün.**
+Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 
-> Başlamadan önce `https://docs.expo.dev/versions/v54.0.0/` üzerinden `expo-secure-store`, Apple/Google auth ve Supabase Expo entegrasyonunu doğrula.
+> Native auth kararı: Apple = `expo-apple-authentication`, Google = `@react-native-google-signin/google-signin`, ardından `supabase.auth.signInWithIdToken`. Native test için **development build** gerekir (Expo Go yetmez).
 
-### Faz A — Supabase kurulum
-- [ ] `@supabase/supabase-js` + `expo-secure-store` ekle
-- [ ] Supabase projesi: Auth provider'lar (Apple, Google, Email)
-- [ ] Env: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] `lib/supabase.ts` client (SecureStore session adaptörü)
+### Faz A — Supabase kurulum ✅
+- [x] `@supabase/supabase-js` + `expo-secure-store` (+ apple-auth, google-signin, dev-client, aes-js, url-polyfill, get-random-values)
+- [x] Env: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` (`.env` + `.env.example`)
+- [x] `lib/supabase.ts` client (`LargeSecureStore` — AES'li SecureStore session adaptörü)
+- [x] `app.json`: bundle id `com.luluapp.app`, `usesAppleSignIn`, plugin'ler; `eas.json` dev build profilleri
+- [ ] Supabase provider'lar: **Email açık** ✅; **Apple/Google kapalı** (credential + dashboard ayarı kaldı)
 
-### Faz B — Auth ekranı (zorunlu)
-- [ ] `app/(auth)/index.tsx` gerçek UI: Apple / Google / Email
-- [ ] **"Continue as Guest" kaldır**
-- [ ] `use-bootstrap.ts`'e auth guard: oturum yoksa → `(auth)`, ana ekranlara erişim yok
-- [ ] Hedef akış: `Splash → Onboarding → Auth (zorunlu) → Setup (pet yoksa) → Home`
+### Faz B — Auth ekranı (zorunlu) ✅ (email)
+- [x] `app/(auth)/index.tsx` gerçek email/şifre UI (giriş ↔ kayıt, validasyon, i18n en/tr/de)
+- [x] **"Continue as Guest" kaldırıldı**
+- [x] `use-bootstrap.ts` auth guard: oturum yoksa → `(auth)`
+- [x] Akış: `Splash → Onboarding → Auth → Setup (pet yoksa) → Home`
+- ⏬ Apple / Google butonları → **yayın öncesi son adıma ertelendi** (bkz. "Yayın öncesi" bölümü)
 
-### Faz C — User lifecycle
-- [ ] `user.store`: `signIn`, `signOut`, session listener
-- [ ] `currentUserId` ↔ Supabase `user.id`
-- [ ] Pet → `ownerId` (Supabase user ID)
-- [ ] Log Out → `(auth)`'a dön
-- [ ] Delete Account → Supabase user sil + local wipe
-- [ ] *(Guest migration gerekmez — temiz wipe)*
+### Faz C — User lifecycle 🟡
+- [x] `user.store`: `signInWithEmail`, `signUpWithEmail`, `signOut`, session listener
+- [x] `currentUserId` ↔ Supabase `user.id`
+- [x] Pet → `user_id` (Supabase user ID; cloud `pets` tablosu)
+- [x] Log Out → `(auth)`'a dön (LegalCard bağlandı)
+- [ ] Delete Account → Supabase user sil + local wipe (edge function/RPC gerekir)
 
-### Faz D — Free / Plus tier temeli
+### Faz D — Free / Plus tier temeli ⬜
 - [ ] `isPlusActive` (şimdilik Supabase metadata; RevenueCat sonra)
 - [ ] Tier bazlı feature gating altyapısı (hook)
 
-### Faz E — Sync (hazırlık)
-- [ ] pets / check-ins / records → Supabase tabloları
-- [ ] Offline-first strateji kararı: local store + cloud sync
+### Faz E — Sync 🟡 (pet + check-in + record tamam)
+- [x] Supabase şeması: `pets` / `check_ins` / `pet_records` + RLS + `updated_at` trigger (`supabase/migrations/0001_init.sql`)
+- [x] **Pets sync**: kaynak-doğruluk; write-through (create/update/delete) + giriş/açılışta pull; ilk açılışta yerel→bulut migrasyon
+- [x] **Check-ins sync** (`services/sync/check-ins-sync.ts`): write-through + pull; yerel→bulut migrasyon
+- [x] **Records sync** (`services/sync/records-sync.ts`): write-through + pull; yerel→bulut migrasyon
+- [x] **Profil sync** (`services/sync/profile-sync.ts`): isim + avatar; avatar → Supabase Storage (`avatars` bucket), `profiles` tablosu (`0002_profiles.sql`)
+- [x] Pull sırası: pets → check-ins → records → profile; hesap izolasyonu/pet silme yerel cascade temizliği
+- [ ] Pet fotoğrafı → Supabase Storage (avatar altyapısı hazır; aynı `uploadAvatar` deseni kullanılacak)
+- [ ] *(İleri faz)* Gerçek offline-first kuyruk + last-write-wins çakışma çözümü (şimdilik online write-through best-effort)
 
 ---
 
@@ -130,12 +140,23 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı. **Tahmini: ~3–5 gü
 
 ---
 
+## Yayın öncesi son adım — Apple + Google native giriş
+
+> **Karar:** Tüm uygulama özellikleri tamamlandıktan sonra, yayına çıkmadan hemen önce eklenecek. Email/şifre auth geliştirme boyunca yeterli; Apple/Google native test development build + credential gerektirdiği için en sona bırakıldı.
+
+- [ ] Apple Developer + Google Cloud OAuth credential'ları
+- [ ] Supabase dashboard: Apple + Google provider'ları aç
+- [ ] `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` + `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
+- [ ] `app/(auth)/index.tsx`: Apple + Google butonları → `signInWithIdToken`
+- [ ] EAS development build ile native test (Expo Go yetmez)
+
+---
+
 ## Gelecek (kapsam dışı, bağlantı noktaları)
 
 | Konu | Bağımlılık |
 |------|------------|
 | StoreKit / RevenueCat | Lulu Plus gerçek IAP |
 | Cloud sync / cross-device active pet | Auth + Supabase |
-| Display name cloud sync | Auth + Supabase |
 | My Pets'ten tek pet silme UI | v1 dışı |
 | Pet başına notification prefs | v1 dışı |

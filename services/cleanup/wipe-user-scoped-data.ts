@@ -1,4 +1,5 @@
 import { cancelCheckInReminder } from '@/services/notifications';
+import * as checkInStorage from '@/storage/check-in.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { removeActivePetId, removeCheckInReminderTime } from '@/storage/prefs.storage';
@@ -17,6 +18,7 @@ import { usePetStore } from '@/stores/pet.store';
 export async function wipeUserScopedData(): Promise<void> {
   await cancelCheckInReminder();
   await petRecordStorage.deleteAllPetRecords();
+  await checkInStorage.deleteAllCheckIns();
   await petStorage.deleteAllPets();
 
   await Promise.all([

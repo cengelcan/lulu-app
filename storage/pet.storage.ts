@@ -170,6 +170,10 @@ export async function updatePet(pet: Pet): Promise<void> {
 
 export async function deletePet(id: string): Promise<void> {
   const db = await getDatabase();
+  // Foreign keys are not enforced on this connection, so cascade the delete to
+  // dependent rows manually to avoid orphaned check-ins/records locally.
+  await db.runAsync('DELETE FROM check_ins WHERE pet_id = ?', id);
+  await db.runAsync('DELETE FROM pet_records WHERE pet_id = ?', id);
   await db.runAsync('DELETE FROM pets WHERE id = ?', id);
 }
 

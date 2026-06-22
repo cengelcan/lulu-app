@@ -110,7 +110,15 @@ export default function EditPetScreen() {
     getHealthConditionLabel,
   } = usePetDisplay();
 
-  const pet = usePetStore((state) => state.pet);
+  const pets = usePetStore((state) => state.pets);
+  const activePet = usePetStore((state) => state.pet);
+  const pet = useMemo(() => {
+    if (petId) {
+      return pets.find((entry) => entry.id === petId) ?? null;
+    }
+
+    return activePet;
+  }, [activePet, petId, pets]);
   const petIsLoading = usePetStore((state) => state.isLoading);
   const petError = usePetStore((state) => state.error);
   const loadPet = usePetStore((state) => state.loadPet);
@@ -166,10 +174,22 @@ export default function EditPetScreen() {
       // tears the modal down cleanly, so navigate on the next tick instead.
       if (Platform.OS !== 'ios') {
         runPendingNav();
+        return;
       }
+
+      // Fallback when the modal unmounts without onDismiss (e.g. a loading swap).
+      setTimeout(() => {
+        if (pendingNavRef.current) {
+          runPendingNav();
+        }
+      }, 700);
     },
     [runPendingNav]
   );
+
+  const navigateToMyPets = useCallback(() => {
+    router.dismissTo('/(tabs)/my-pets');
+  }, [router]);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textColor = useThemeColor({}, 'text');
@@ -416,35 +436,40 @@ export default function EditPetScreen() {
 
     try {
       await deletePet(pet.id);
-      leaveAfterModalClose(() => router.dismissTo('/(tabs)/my-pets'));
+      leaveAfterModalClose(navigateToMyPets);
       setIsDeleteModalVisible(false);
     } catch {
       // Store already sets error state; keep the user on the screen to retry.
       setIsDeleting(false);
     }
-  }, [deletePet, leaveAfterModalClose, pet, router]);
+  }, [deletePet, leaveAfterModalClose, navigateToMyPets, pet]);
 
   const handleConfirmStatusChange = useCallback(async () => {
     if (!pet) {
       return;
     }
 
+    const markingDeceased = pet.status !== 'deceased';
     setIsUpdatingStatus(true);
 
     try {
-      await setPetStatus(pet.id, pet.status === 'deceased' ? 'active' : 'deceased');
-      leaveAfterModalClose(() => router.dismissTo('/(tabs)/my-pets'));
+      await setPetStatus(pet.id, markingDeceased ? 'deceased' : 'active');
+      leaveAfterModalClose(navigateToMyPets);
       setIsStatusModalVisible(false);
     } catch {
       // Store already sets error state; keep the user on the screen to retry.
       setIsUpdatingStatus(false);
     }
-  }, [leaveAfterModalClose, pet, router, setPetStatus]);
+  }, [leaveAfterModalClose, navigateToMyPets, pet, setPetStatus]);
 
   const errorMessage = translateValidationError(t, validationError) ?? petError;
   const canSave = isDirty && !isSaving;
 
-  if (petIsLoading || !pet) {
+  const showFullScreenLoader =
+    (!pet && !isUpdatingStatus && !isDeleting) ||
+    (petIsLoading && !isUpdatingStatus && !isDeleting);
+
+  if (showFullScreenLoader) {
     return (
       <>
         <Stack.Screen

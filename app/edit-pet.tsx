@@ -1,7 +1,15 @@
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
-import { Stack, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
@@ -87,6 +95,11 @@ function normalizeOptionalDate(value: string): string | null {
 export default function EditPetScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { id: idParam } = useLocalSearchParams<{ id?: string | string[] }>();
+  const petId = useMemo(
+    () => (Array.isArray(idParam) ? idParam[0] : idParam),
+    [idParam]
+  );
   const { t } = useTranslation();
   const {
     getSpeciesLabel,
@@ -101,8 +114,10 @@ export default function EditPetScreen() {
   const petIsLoading = usePetStore((state) => state.isLoading);
   const petError = usePetStore((state) => state.error);
   const loadPet = usePetStore((state) => state.loadPet);
+  const loadPetById = usePetStore((state) => state.loadPetById);
   const updatePet = usePetStore((state) => state.updatePet);
   const deletePet = usePetStore((state) => state.deletePet);
+  const setPetStatus = usePetStore((state) => state.setPetStatus);
   const clearError = usePetStore((state) => state.clearError);
 
   const [species, setSpecies] = useState<PetSpecies | null>(() => pet?.species ?? null);
@@ -128,6 +143,33 @@ export default function EditPetScreen() {
   const [canLeave, setCanLeave] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  const isDeceased = pet?.status === 'deceased';
+
+  // Navigation that must wait until the confirm modal is fully dismissed.
+  // Navigating away while a React Native <Modal> is still mounted leaves a
+  // lingering overlay on iOS that swallows all touches (frozen screen).
+  const pendingNavRef = useRef<(() => void) | null>(null);
+
+  const runPendingNav = useCallback(() => {
+    const navigate = pendingNavRef.current;
+    pendingNavRef.current = null;
+    navigate?.();
+  }, []);
+
+  const leaveAfterModalClose = useCallback(
+    (navigate: () => void) => {
+      pendingNavRef.current = navigate;
+      // iOS fires the modal's onDismiss after the dismissal animation; Android
+      // tears the modal down cleanly, so navigate on the next tick instead.
+      if (Platform.OS !== 'ios') {
+        runPendingNav();
+      }
+    },
+    [runPendingNav]
+  );
 
   const primaryColor = useThemeColor({}, 'primary');
   const textColor = useThemeColor({}, 'text');
@@ -175,14 +217,19 @@ export default function EditPetScreen() {
   ]);
 
   useEffect(() => {
+    if (petId) {
+      void loadPetById(petId);
+      return;
+    }
+
     void loadPet();
-  }, [loadPet]);
+  }, [loadPet, loadPetById, petId]);
 
   useEffect(() => {
-    if (!petIsLoading && !pet && !isDeleting) {
+    if (!petIsLoading && !pet && !isDeleting && !isUpdatingStatus) {
       router.dismissTo('/(tabs)/home');
     }
-  }, [pet, petIsLoading, router, isDeleting]);
+  }, [pet, petIsLoading, router, isDeleting, isUpdatingStatus]);
 
   useEffect(() => {
     if (!pet) {
@@ -204,7 +251,7 @@ export default function EditPetScreen() {
     setOwnerName(pet.ownerName ?? '');
   }, [pet?.id]);
 
-  usePreventRemove(isDirty && !isSaving && !isDeleting && !canLeave, ({ data }) => {
+  usePreventRemove(isDirty && !isSaving && !isDeleting && !isUpdatingStatus && !canLeave, ({ data }) => {
     Alert.alert(t('pet.discardTitle'), t('pet.discardMessage'), [
       { text: t('pet.keepEditing'), style: 'cancel' },
       {
@@ -369,13 +416,30 @@ export default function EditPetScreen() {
 
     try {
       await deletePet(pet.id);
+      leaveAfterModalClose(() => router.dismissTo('/(tabs)/my-pets'));
       setIsDeleteModalVisible(false);
-      router.dismissTo('/(tabs)/my-pets');
     } catch {
       // Store already sets error state; keep the user on the screen to retry.
       setIsDeleting(false);
     }
-  }, [deletePet, pet, router]);
+  }, [deletePet, leaveAfterModalClose, pet, router]);
+
+  const handleConfirmStatusChange = useCallback(async () => {
+    if (!pet) {
+      return;
+    }
+
+    setIsUpdatingStatus(true);
+
+    try {
+      await setPetStatus(pet.id, pet.status === 'deceased' ? 'active' : 'deceased');
+      leaveAfterModalClose(() => router.dismissTo('/(tabs)/my-pets'));
+      setIsStatusModalVisible(false);
+    } catch {
+      // Store already sets error state; keep the user on the screen to retry.
+      setIsUpdatingStatus(false);
+    }
+  }, [leaveAfterModalClose, pet, router, setPetStatus]);
 
   const errorMessage = translateValidationError(t, validationError) ?? petError;
   const canSave = isDirty && !isSaving;
@@ -667,11 +731,29 @@ export default function EditPetScreen() {
             </View>
           </GroupedSection>
 
+          {isDeceased ? (
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.memorialNote}>
+              {t('pet.memorialNote', { name: pet.name })}
+            </ThemedText>
+          ) : null}
+
+          <Button
+            accessibilityLabel={isDeceased ? t('pet.restorePetA11y') : t('pet.markDeceasedA11y')}
+            title={isDeceased ? t('pet.restorePet') : t('pet.markDeceased')}
+            variant="secondary"
+            disabled={isSaving || isDeleting || isUpdatingStatus}
+            onPress={() => setIsStatusModalVisible(true)}
+            style={styles.statusButton}
+          />
+
           <Button
             accessibilityLabel={t('pet.deletePetA11y')}
             title={t('pet.deletePet')}
             variant="destructive"
-            disabled={isSaving || isDeleting}
+            disabled={isSaving || isDeleting || isUpdatingStatus}
             onPress={() => setIsDeleteModalVisible(true)}
             style={styles.deleteButton}
           />
@@ -696,9 +778,28 @@ export default function EditPetScreen() {
         destructive
         isLoading={isDeleting}
         onConfirm={() => void handleConfirmDelete()}
+        onDismiss={runPendingNav}
         onCancel={() => {
           if (!isDeleting) {
             setIsDeleteModalVisible(false);
+          }
+        }}
+      />
+
+      <ConfirmModal
+        visible={isStatusModalVisible}
+        title={t(isDeceased ? 'pet.restorePetTitle' : 'pet.markDeceasedTitle', { name: pet.name })}
+        message={t(isDeceased ? 'pet.restorePetMessage' : 'pet.markDeceasedMessage', {
+          name: pet.name,
+        })}
+        confirmLabel={t(isDeceased ? 'pet.restorePet' : 'pet.markDeceased')}
+        cancelLabel={t('common.cancel')}
+        isLoading={isUpdatingStatus}
+        onConfirm={() => void handleConfirmStatusChange()}
+        onDismiss={runPendingNav}
+        onCancel={() => {
+          if (!isUpdatingStatus) {
+            setIsStatusModalVisible(false);
           }
         }}
       />
@@ -753,6 +854,13 @@ const styles = StyleSheet.create({
   error: {
     textAlign: 'center',
     marginBottom: Spacing.md,
+  },
+  memorialNote: {
+    ...Typography.caption,
+    marginTop: Spacing.sm,
+  },
+  statusButton: {
+    marginTop: Spacing.sm,
   },
   deleteButton: {
     marginTop: Spacing.sm,

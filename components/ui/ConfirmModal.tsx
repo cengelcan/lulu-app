@@ -15,6 +15,10 @@ type ConfirmModalProps = {
   isLoading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  /** iOS only: fired after the modal has finished dismissing. Use this to run
+   *  navigation that must wait until the native modal is gone (avoids a frozen,
+   *  unresponsive screen from a lingering modal overlay). */
+  onDismiss?: () => void;
 };
 
 export function ConfirmModal({
@@ -27,6 +31,7 @@ export function ConfirmModal({
   isLoading = false,
   onConfirm,
   onCancel,
+  onDismiss,
 }: ConfirmModalProps) {
   const surfaceColor = useThemeColor({}, 'surfaceElevated');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -36,6 +41,7 @@ export function ConfirmModal({
       animationType="fade"
       transparent
       visible={visible}
+      onDismiss={onDismiss}
       onRequestClose={onCancel}>
       <Pressable
         accessibilityLabel="Dismiss dialog"

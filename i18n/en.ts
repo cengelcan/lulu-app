@@ -147,6 +147,7 @@ export const en: Translations = {
     validationIncomplete: 'Please answer all questions before saving.',
     validationNotesLength: 'Notes must be {{max}} characters or fewer.',
     futureDateError: 'You can only add check-ins for today or past days.',
+    deceasedReadOnly: 'Check-ins are off for a pet marked as deceased.',
     categories: {
       appetite: 'Appetite',
       waterIntake: 'Water Intake',
@@ -223,6 +224,8 @@ export const en: Translations = {
     notificationsDisabled: 'Notifications are disabled.',
     enableInSettings: 'Enable them in Settings.',
     noReminderScheduled: 'No reminder scheduled',
+    memorialTitle: 'In Loving Memory',
+    memorialMessage: 'Check-ins and reminders are off for {{name}}. Records stay viewable.',
     quickActions: 'Quick Actions',
     reports: 'Reports',
     records: 'Records',
@@ -312,6 +315,7 @@ export const en: Translations = {
     saveFailed: 'Could not save this record. Please try again.',
     recentTitle: 'Recent Records',
     sectionTitle: 'Record Types',
+    deceasedReadOnly: 'This pet is marked as deceased. Records are read-only.',
     sections: {
       details: 'Details',
       notes: 'Notes',
@@ -396,6 +400,8 @@ export const en: Translations = {
   myPets: {
     noPetsTitle: 'No pets yet',
     noPetsMessage: 'Add your first pet to begin tracking.',
+    petsSection: 'Pets',
+    memorialSection: 'In Loving Memory',
   },
   profile: {
     addYourName: 'Add your name',
@@ -452,6 +458,19 @@ export const en: Translations = {
     deletePetTitle: 'Delete {{name}}?',
     deletePetMessage:
       'This permanently removes {{name}} along with all check-ins and records. This cannot be undone.',
+    markDeceased: 'Mark as Deceased',
+    markDeceasedA11y: 'Mark pet as deceased',
+    markDeceasedTitle: 'Mark {{name}} as deceased?',
+    markDeceasedMessage:
+      'Reminders will be turned off and you can no longer add check-ins for {{name}}. Past check-ins and records stay viewable. You can undo this anytime.',
+    restorePet: 'Restore Pet',
+    restorePetA11y: 'Restore pet',
+    restorePetTitle: 'Restore {{name}}?',
+    restorePetMessage:
+      'This marks {{name}} as active again, so you can add check-ins and reminders.',
+    memorialNote:
+      '{{name}} is marked as deceased. Check-ins and reminders are off; records stay viewable.',
+    deceasedBadge: 'In loving memory',
     sections: {
       profilePhoto: 'Profile Photo',
       petType: 'Pet Type',

@@ -25,6 +25,8 @@ export type PetSpayNeuterStatus =
   | 'not_spayed_neutered'
   | 'unknown';
 
+export type PetStatus = 'active' | 'deceased';
+
 export type Pet = {
   id: string;
   name: string;
@@ -40,8 +42,14 @@ export type Pet = {
   adoptionDate?: string | null;
   microchipId?: string | null;
   ownerName?: string | null;
+  status: PetStatus;
+  deceasedAt?: string | null;
   createdAt: string;
 };
+
+export function isPetDeceased(pet: Pick<Pet, 'status'> | null | undefined): boolean {
+  return pet?.status === 'deceased';
+}
 
 export const PET_NAME_MIN_LENGTH = 1;
 export const PET_NAME_MAX_LENGTH = 30;

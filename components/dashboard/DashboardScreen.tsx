@@ -172,6 +172,8 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
+  const isDeceased = pet?.status === 'deceased';
+
   const todayDateString = useMemo(() => formatLocalDate(getTodayStart()), []);
   const todayCheckIn = useMemo(
     () => checkIns.find((checkIn) => checkIn.date === todayDateString) ?? null,
@@ -290,19 +292,31 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
             <IconSymbol name="chevron.right" size={20} color={textSecondaryColor} />
           </Pressable>
 
-          <DailyCheckInProgress />
+          {isDeceased ? (
+            <Card>
+              <ThemedText type="subtitle">{t('dashboard.memorialTitle')}</ThemedText>
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.message}>
+                {t('dashboard.memorialMessage', { name: pet.name })}
+              </ThemedText>
+            </Card>
+          ) : (
+            <>
+              <DailyCheckInProgress />
 
-          <TodaysCheckInCard
-            checkIn={todayCheckIn}
-            error={checkInError}
-            isLoading={checkInIsLoading}
-            onPress={handleOpenTodaysCheckIn}
-            onRetry={handleRetryCheckIn}
-          />
+              <TodaysCheckInCard
+                checkIn={todayCheckIn}
+                error={checkInError}
+                isLoading={checkInIsLoading}
+                onPress={handleOpenTodaysCheckIn}
+                onRetry={handleRetryCheckIn}
+              />
 
-          <Card>
-            <ThemedText type="subtitle">{t('dashboard.upcomingReminder')}</ThemedText>
-            {reminderIsLoading ? (
+              <Card>
+                <ThemedText type="subtitle">{t('dashboard.upcomingReminder')}</ThemedText>
+                {reminderIsLoading ? (
               <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
             ) : reminderPermission === 'later' ? (
               <ThemedText
@@ -337,15 +351,17 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
                 <DetailRow label={t('common.date')} value={upcomingReminder.dateLabel} />
                 <DetailRow label={t('common.time')} value={upcomingReminder.timeLabel} />
               </>
-            ) : (
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.message}>
-                {t('dashboard.noReminderScheduled')}
-              </ThemedText>
-            )}
-          </Card>
+                ) : (
+                  <ThemedText
+                    lightColor={textSecondaryColor}
+                    darkColor={textSecondaryColor}
+                    style={styles.message}>
+                    {t('dashboard.noReminderScheduled')}
+                  </ThemedText>
+                )}
+              </Card>
+            </>
+          )}
 
           <Card>
             <ThemedText type="subtitle">{t('dashboard.quickActions')}</ThemedText>

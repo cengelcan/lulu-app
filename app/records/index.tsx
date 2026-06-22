@@ -65,6 +65,7 @@ export default function RecordsScreen() {
   };
 
   const recentRecords = records.slice(0, RECENT_RECORDS_LIMIT);
+  const isReadOnly = pet?.status === 'deceased';
 
   return (
     <>
@@ -97,23 +98,34 @@ export default function RecordsScreen() {
           </GroupedSection>
         ) : null}
 
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.subtitle}>
-          {t('records.addRecord')}
-        </ThemedText>
-        <GroupedSection title={t('records.sectionTitle')}>
-          {RECORD_TYPES.map((recordType, index) => (
-            <RecordTypeRow
-              key={recordType.id}
-              label={t(recordType.labelKey)}
-              icon={recordType.icon}
-              isLast={index === RECORD_TYPES.length - 1}
-              onPress={() => handleRecordTypePress(recordType.id)}
-            />
-          ))}
-        </GroupedSection>
+        {isReadOnly ? (
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.subtitle}>
+            {t('records.deceasedReadOnly')}
+          </ThemedText>
+        ) : (
+          <>
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.subtitle}>
+              {t('records.addRecord')}
+            </ThemedText>
+            <GroupedSection title={t('records.sectionTitle')}>
+              {RECORD_TYPES.map((recordType, index) => (
+                <RecordTypeRow
+                  key={recordType.id}
+                  label={t(recordType.labelKey)}
+                  icon={recordType.icon}
+                  isLast={index === RECORD_TYPES.length - 1}
+                  onPress={() => handleRecordTypePress(recordType.id)}
+                />
+              ))}
+            </GroupedSection>
+          </>
+        )}
       </ScreenContainer>
     </>
   );

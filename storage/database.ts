@@ -12,7 +12,7 @@ let database: SQLite.SQLiteDatabase | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 9;
+const CURRENT_SCHEMA_VERSION = 10;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -210,6 +210,25 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     await ensurePetRecordsTable(db);
     version = 9;
     await setSchemaVersion(db, version);
+  }
+
+  if (version < 10) {
+    await ensurePetStatusColumns(db);
+    version = 10;
+    await setSchemaVersion(db, version);
+  }
+}
+
+async function ensurePetStatusColumns(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(pets)');
+  const existingNames = new Set(columns.map((column) => column.name));
+
+  if (!existingNames.has('status')) {
+    await db.execAsync("ALTER TABLE pets ADD COLUMN status TEXT NOT NULL DEFAULT 'active';");
+  }
+
+  if (!existingNames.has('deceased_at')) {
+    await db.execAsync('ALTER TABLE pets ADD COLUMN deceased_at TEXT;');
   }
 }
 

@@ -52,7 +52,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | Sıra | Yeni iş paketi | Durum |
 |------|-----|-------|
 | A | Eksik/placeholder özelliklerin tespiti & kararı | 🟢 A2 + A3 yapıldı; A1 bilinçli ertelendi |
-| B | My Pets: pet silme + aktif/vefat eden ayrımı | 🟡 B1 (silme) yapıldı; B2 (status) kaldı |
+| B | My Pets: pet silme + aktif/vefat eden ayrımı | ✅ B1 (silme) + B2 (status/anma) yapıldı |
 | C | Records tasarım & listeleme güncellemeleri | ⬜ Detay bekleniyor |
 | D | Genel tasarım yenileme (`design.md`) | ⬜ `design.md` bekleniyor |
 | E | Beslenme/aktivite plan sistemi (günlük/haftalık) | ⬜ Başlanmadı (karar gerekli) |
@@ -130,20 +130,19 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
 - [x] Silme sırasında "kaydedilmemiş değişiklik" guard'ı ve `!pet` yönlendirmesi atlanıyor; sonrasında `my-pets`'e dönülüyor
 - [ ] *(QA)* Son pet / aktif pet silme akışını cihazda doğrula
 
-**B2 — Aktif / vefat eden (memorial) ayrımı**
-- [ ] Veri modeli: `Pet`'e `status: 'active' | 'deceased'` (+ ops. `deceasedAt`) — `types/pet.ts`, `storage/pet.storage.ts`
-- [ ] Supabase migration: `pets` tablosuna `status` / `deceased_at` kolonu (`0005_pet_status.sql`) + sync (`pets-sync.ts`)
-- [ ] My Pets ekranında iki bölüm: **Aktif** ve **Anma / Vefat edenler**
-- [ ] Vefat eden pet davranışı (karar gerekli):
-  - Check-in kapalı / gizli mi?
-  - Reminder'lar otomatik iptal
-  - Records read-only mu, yoksa hâlâ görüntülenebilir mi?
-  - Aktif pet seçilemez (sadece geçmiş görüntüleme)
-- [ ] "Mark as deceased" aksiyonu (silmeden farklı, geri alınabilir)
+**B2 — Aktif / vefat eden (memorial) ayrımı ✅ (Yapıldı)**
+- [x] Veri modeli: `Pet`'e `status: 'active' | 'deceased'` (+ `deceasedAt`) — `types/pet.ts`, `storage/pet.storage.ts`, yerel migration v10 (`storage/database.ts`)
+- [x] Supabase migration: `pets` tablosuna `status` / `deceased_at` kolonu (`0005_pet_status.sql`) + sync (`pets-sync.ts`)
+- [x] My Pets ekranında iki bölüm: **Aktif** (`myPets.petsSection`) ve **Anma** (`myPets.memorialSection`) — basit ayrım; D ile cilalanacak
+- [x] Vefat eden pet davranışı (kullanıcı kararı):
+  - Reminder'lar otomatik iptal (`setPetStatus` → `cancelCheckInReminder` / aktif pet devri)
+  - Aktif pet seçilemez / yeni check-in eklenemez (`getActivePet` aktif tercih + check-in salt-okunur)
+  - Geçmiş check-in & records **salt-okunur** (Home memorial kartı, check-in & record form gating)
+- [x] "Mark as deceased" + "Restore" aksiyonu (geri alınabilir) — **Edit Pet** ekranında, Delete'in üstünde + `ConfirmModal` + i18n (en/tr/de)
 
-**Açık sorular:**
-- Silme tetikleyici nerede? (satır swipe vs profil ekranı)
-- Vefat eden pet'in verisi tamamen read-only mu olsun?
+**Kalan (QA):**
+- [ ] Tek pet'i vefat etti işaretleyip cihazda doğrula (reminder iptal, Home memorial, records salt-okunur, restore)
+- [ ] Çok pet: aktif pet'i vefat etti işaretleyince aktif slotun başka canlı pet'e geçtiğini doğrula
 
 ---
 

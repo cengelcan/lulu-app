@@ -110,6 +110,7 @@ export type Translations = {
     validationIncomplete: string;
     validationNotesLength: string;
     futureDateError: string;
+    deceasedReadOnly: string;
     categories: {
       appetite: string;
       waterIntake: string;
@@ -150,6 +151,8 @@ export type Translations = {
     notificationsDisabled: string;
     enableInSettings: string;
     noReminderScheduled: string;
+    memorialTitle: string;
+    memorialMessage: string;
     quickActions: string;
     reports: string;
     records: string;
@@ -239,6 +242,7 @@ export type Translations = {
     saveFailed: string;
     recentTitle: string;
     sectionTitle: string;
+    deceasedReadOnly: string;
     sections: {
       details: string;
       notes: string;
@@ -323,6 +327,8 @@ export type Translations = {
   myPets: {
     noPetsTitle: string;
     noPetsMessage: string;
+    petsSection: string;
+    memorialSection: string;
   };
   profile: {
     addYourName: string;
@@ -377,6 +383,16 @@ export type Translations = {
     deletePetA11y: string;
     deletePetTitle: string;
     deletePetMessage: string;
+    markDeceased: string;
+    markDeceasedA11y: string;
+    markDeceasedTitle: string;
+    markDeceasedMessage: string;
+    restorePet: string;
+    restorePetA11y: string;
+    restorePetTitle: string;
+    restorePetMessage: string;
+    memorialNote: string;
+    deceasedBadge: string;
     sections: {
       profilePhoto: string;
       petType: string;

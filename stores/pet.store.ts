@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 
-import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
+import { cancelCheckInReminder, syncCheckInReminderSchedule } from '@/services/notifications/schedule';
 import { deletePetPhotoFiles, deleteRemotePet, pushPet } from '@/services/sync/pets-sync';
 import { removeActivePetId } from '@/storage/prefs.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useUserStore } from '@/stores/user.store';
-import type { Pet } from '@/types/pet';
+import type { Pet, PetStatus } from '@/types/pet';
 
 function getActiveUserId(): string | null {
   return useUserStore.getState().userId;
@@ -20,9 +20,13 @@ type PetState = {
   error: string | null;
   loadPet: () => Promise<void>;
   loadPets: () => Promise<void>;
+  /** Load a specific pet for profile/edit. Active pets become the app context;
+   *  deceased pets are shown read-only without changing the persisted active pet. */
+  loadPetById: (id: string) => Promise<void>;
   setActivePet: (petId: string) => Promise<void>;
   createPet: (pet: Pet) => Promise<void>;
   updatePet: (pet: Pet) => Promise<void>;
+  setPetStatus: (id: string, status: PetStatus) => Promise<void>;
   deletePet: (id: string) => Promise<void>;
   clearError: () => void;
 };
@@ -66,6 +70,35 @@ export const usePetStore = create<PetState>((set, get) => ({
     await get().loadPets();
   },
 
+  loadPetById: async (id) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const [pet, pets] = await Promise.all([petStorage.getPetById(id), petStorage.getPets()]);
+
+      if (!pet) {
+        throw new Error('Pet not found');
+      }
+
+      if (pet.status === 'deceased') {
+        // Memorial view: show this pet without changing the persisted active pet.
+        set({ pets, pet, isLoading: false });
+        return;
+      }
+
+      useCheckInStore.getState().clearCheckIns();
+      await petStorage.setActivePet(id);
+      set({ pets, pet, activePetId: pet.id, isLoading: false });
+      await syncCheckInReminderSchedule({ petName: pet.name });
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: getErrorMessage(error, 'Failed to load pet'),
+      });
+      throw error;
+    }
+  },
+
   setActivePet: async (petId) => {
     set({ error: null });
     useCheckInStore.getState().clearCheckIns();
@@ -73,7 +106,14 @@ export const usePetStore = create<PetState>((set, get) => ({
     try {
       const pet = await petStorage.setActivePet(petId);
       set({ pet, activePetId: pet.id });
-      await syncCheckInReminderSchedule({ petName: pet.name });
+
+      // Never schedule check-in reminders for a deceased pet (e.g. when opening
+      // its memorial profile temporarily makes it the active context).
+      if (pet.status === 'deceased') {
+        await cancelCheckInReminder();
+      } else {
+        await syncCheckInReminderSchedule({ petName: pet.name });
+      }
     } catch (error) {
       set({ error: getErrorMessage(error, 'Failed to switch pet') });
       throw error;
@@ -133,6 +173,66 @@ export const usePetStore = create<PetState>((set, get) => ({
       set({
         isLoading: false,
         error: getErrorMessage(error, 'Failed to update pet'),
+      });
+      throw error;
+    }
+  },
+
+  setPetStatus: async (id, status) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const target = get().pets.find((entry) => entry.id === id) ?? get().pet;
+
+      if (!target || target.id !== id) {
+        throw new Error('Pet not found');
+      }
+
+      const updated: Pet = {
+        ...target,
+        status,
+        deceasedAt:
+          status === 'deceased' ? target.deceasedAt ?? new Date().toISOString() : null,
+      };
+
+      await petStorage.updatePet(updated);
+
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushPet(userId, updated);
+        } catch (syncError) {
+          console.warn('Failed to sync pet status to cloud', syncError);
+        }
+      }
+
+      const pets = get().pets.map((entry) => (entry.id === id ? updated : entry));
+      const wasActive = get().pet?.id === id;
+
+      set({
+        pets,
+        pet: wasActive ? updated : get().pet,
+        isLoading: false,
+      });
+
+      if (status === 'deceased' && wasActive) {
+        // A deceased pet can't be the active context for new check-ins. Hand the
+        // active slot to another living pet when one exists; otherwise just stop
+        // its reminders and keep it as a read-only context.
+        const nextActive = pets.find((entry) => entry.id !== id && entry.status === 'active');
+
+        if (nextActive) {
+          await get().setActivePet(nextActive.id);
+        } else {
+          await cancelCheckInReminder();
+        }
+      } else if (status === 'active' && wasActive) {
+        await syncCheckInReminderSchedule({ petName: updated.name });
+      }
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: getErrorMessage(error, 'Failed to update pet status'),
       });
       throw error;
     }

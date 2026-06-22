@@ -88,6 +88,7 @@ export default function CheckInScreen() {
 
   const selectedDateObject = useMemo(() => parseLocalDate(selectedDate), [selectedDate]);
   const isFutureDate = selectedDateObject ? isFutureLocalDate(selectedDateObject) : false;
+  const isReadOnly = pet?.status === 'deceased';
 
   const existingCheckIn = useMemo(
     () => checkIns.find((checkIn) => checkIn.date === selectedDate) ?? null,
@@ -191,7 +192,7 @@ export default function CheckInScreen() {
   }, [clearCheckInError]);
 
   const handleSave = useCallback(async () => {
-    if (!pet || isFutureDate) {
+    if (!pet || isFutureDate || isReadOnly) {
       return;
     }
 
@@ -245,6 +246,7 @@ export default function CheckInScreen() {
     isFormComplete,
     isFutureDate,
     isNotesOverLimit,
+    isReadOnly,
     normalizedNotes,
     pet,
     router,
@@ -256,6 +258,7 @@ export default function CheckInScreen() {
   const errorMessage =
     validationError ??
     checkInError ??
+    (isReadOnly ? t('checkIn.deceasedReadOnly') : null) ??
     (isFutureDate ? t('checkIn.futureDateError') : null);
 
   const categoryState = {
@@ -268,6 +271,10 @@ export default function CheckInScreen() {
   } as const;
 
   const handleCategorySelect = (category: (typeof CHECK_IN_CATEGORIES)[number]['key'], value: string) => {
+    if (isReadOnly) {
+      return;
+    }
+
     clearErrors();
     switch (category) {
       case 'appetite':
@@ -342,6 +349,9 @@ export default function CheckInScreen() {
             notes={notes}
             isOverLimit={isNotesOverLimit}
             onChangeNotes={(value) => {
+              if (isReadOnly) {
+                return;
+              }
               clearErrors();
               setNotes(value);
             }}
@@ -361,7 +371,9 @@ export default function CheckInScreen() {
           <Button
             title={saveButtonTitle}
             onPress={() => void handleSave()}
-            disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit}
+            disabled={
+              !isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly
+            }
           />
         </View>
       </ScreenContainer>

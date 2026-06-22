@@ -9,6 +9,7 @@ import type {
   PetSex,
   PetSpayNeuterStatus,
   PetSpecies,
+  PetStatus,
 } from '@/types/pet';
 
 const PET_PHOTO_BUCKET = 'pet-photos';
@@ -43,6 +44,8 @@ type RemotePetRow = {
   adoption_date: string | null;
   microchip_id: string | null;
   owner_name: string | null;
+  status: string | null;
+  deceased_at: string | null;
   created_at: string;
 };
 
@@ -63,6 +66,8 @@ function toRemoteRow(pet: Pet, userId: string): Record<string, unknown> {
     adoption_date: pet.adoptionDate ?? null,
     microchip_id: pet.microchipId ?? null,
     owner_name: pet.ownerName ?? null,
+    status: pet.status ?? 'active',
+    deceased_at: pet.deceasedAt ?? null,
     created_at: pet.createdAt,
   };
 }
@@ -83,6 +88,8 @@ function fromRemoteRow(row: RemotePetRow): Pet {
     adoptionDate: row.adoption_date,
     microchipId: row.microchip_id,
     ownerName: row.owner_name,
+    status: (row.status as PetStatus | null) ?? 'active',
+    deceasedAt: row.deceased_at,
     createdAt: row.created_at,
   };
 }

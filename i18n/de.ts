@@ -147,6 +147,7 @@ export const de: Translations = {
     validationIncomplete: 'Please answer all questions before saving.',
     validationNotesLength: 'Notes must be {{max}} characters or fewer.',
     futureDateError: 'You can only add check-ins for today or past days.',
+    deceasedReadOnly: 'Check-ins sind für ein als verstorben markiertes Tier deaktiviert.',
     categories: {
       appetite: 'Appetite',
       waterIntake: 'Water Intake',
@@ -223,6 +224,9 @@ export const de: Translations = {
     notificationsDisabled: 'Notifications are disabled.',
     enableInSettings: 'Enable them in Settings.',
     noReminderScheduled: 'No reminder scheduled',
+    memorialTitle: 'In liebevoller Erinnerung',
+    memorialMessage:
+      'Check-ins und Erinnerungen sind für {{name}} deaktiviert. Einträge bleiben sichtbar.',
     quickActions: 'Schnellaktionen',
     reports: 'Berichte',
     records: 'Aufzeichnungen',
@@ -312,6 +316,7 @@ export const de: Translations = {
     saveFailed: 'Eintrag konnte nicht gespeichert werden. Bitte erneut versuchen.',
     recentTitle: 'Letzte Einträge',
     sectionTitle: 'Eintragstypen',
+    deceasedReadOnly: 'Dieses Tier ist als verstorben markiert. Einträge sind schreibgeschützt.',
     sections: {
       details: 'Details',
       notes: 'Notizen',
@@ -396,6 +401,8 @@ export const de: Translations = {
   myPets: {
     noPetsTitle: 'Noch keine Haustiere',
     noPetsMessage: 'Add your first pet to begin tracking.',
+    petsSection: 'Tiere',
+    memorialSection: 'In liebevoller Erinnerung',
   },
   profile: {
     addYourName: 'Namen hinzufügen',
@@ -452,6 +459,19 @@ export const de: Translations = {
     deletePetTitle: '{{name}} löschen?',
     deletePetMessage:
       'Dadurch werden {{name}} sowie alle Check-ins und Einträge dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.',
+    markDeceased: 'Als verstorben markieren',
+    markDeceasedA11y: 'Haustier als verstorben markieren',
+    markDeceasedTitle: '{{name}} als verstorben markieren?',
+    markDeceasedMessage:
+      'Erinnerungen werden deaktiviert und du kannst keine Check-ins mehr für {{name}} hinzufügen. Frühere Check-ins und Einträge bleiben sichtbar. Du kannst dies jederzeit rückgängig machen.',
+    restorePet: 'Haustier wiederherstellen',
+    restorePetA11y: 'Haustier wiederherstellen',
+    restorePetTitle: '{{name}} wiederherstellen?',
+    restorePetMessage:
+      'Dadurch wird {{name}} wieder als aktiv markiert, sodass du Check-ins und Erinnerungen hinzufügen kannst.',
+    memorialNote:
+      '{{name}} ist als verstorben markiert. Check-ins und Erinnerungen sind deaktiviert; Einträge bleiben sichtbar.',
+    deceasedBadge: 'In liebevoller Erinnerung',
     sections: {
       profilePhoto: 'Profile Photo',
       petType: 'Pet Type',

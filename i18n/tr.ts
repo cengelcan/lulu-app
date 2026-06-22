@@ -147,6 +147,7 @@ export const tr: Translations = {
     validationIncomplete: 'Kaydetmeden önce tüm soruları yanıtla.',
     validationNotesLength: 'Notlar en fazla {{max}} karakter olabilir.',
     futureDateError: 'Yalnızca bugün veya geçmiş günler için check-in ekleyebilirsin.',
+    deceasedReadOnly: 'Vefat etmiş olarak işaretlenen bir pet için check-in kapalıdır.',
     categories: {
       appetite: 'İştah',
       waterIntake: 'Su Tüketimi',
@@ -223,6 +224,8 @@ export const tr: Translations = {
     notificationsDisabled: 'Bildirimler kapalı.',
     enableInSettings: 'Ayarlardan etkinleştir.',
     noReminderScheduled: 'Planlanmış hatırlatıcı yok',
+    memorialTitle: 'Sevgiyle Anıyoruz',
+    memorialMessage: '{{name}} için check-in ve hatırlatıcılar kapalı. Kayıtlar görüntülenebilir.',
     quickActions: 'Hızlı İşlemler',
     reports: 'Raporlar',
     records: 'Kayıtlar',
@@ -312,6 +315,7 @@ export const tr: Translations = {
     saveFailed: 'Kayıt kaydedilemedi. Lütfen tekrar dene.',
     recentTitle: 'Son Kayıtlar',
     sectionTitle: 'Kayıt Türleri',
+    deceasedReadOnly: 'Bu pet vefat etmiş olarak işaretli. Kayıtlar salt-okunur.',
     sections: {
       details: 'Detaylar',
       notes: 'Notlar',
@@ -396,6 +400,8 @@ export const tr: Translations = {
   myPets: {
     noPetsTitle: 'Henüz pet yok',
     noPetsMessage: 'Takibe başlamak için ilk petini ekle.',
+    petsSection: 'Petler',
+    memorialSection: 'Sevgiyle Anıyoruz',
   },
   profile: {
     addYourName: 'Adını ekle',
@@ -452,6 +458,19 @@ export const tr: Translations = {
     deletePetTitle: '{{name}} silinsin mi?',
     deletePetMessage:
       'Bu işlem {{name}} ile birlikte tüm check-in\'leri ve kayıtları kalıcı olarak siler. Geri alınamaz.',
+    markDeceased: 'Vefat Etti Olarak İşaretle',
+    markDeceasedA11y: 'Pet\'i vefat etti olarak işaretle',
+    markDeceasedTitle: '{{name}} vefat etti olarak işaretlensin mi?',
+    markDeceasedMessage:
+      'Hatırlatıcılar kapatılır ve {{name}} için artık check-in ekleyemezsin. Geçmiş check-in\'ler ve kayıtlar görüntülenebilir kalır. Bunu istediğin zaman geri alabilirsin.',
+    restorePet: 'Pet\'i Geri Al',
+    restorePetA11y: 'Pet\'i geri al',
+    restorePetTitle: '{{name}} geri alınsın mı?',
+    restorePetMessage:
+      'Bu, {{name}} öğesini yeniden aktif olarak işaretler; böylece check-in ve hatırlatıcı ekleyebilirsin.',
+    memorialNote:
+      '{{name}} vefat etti olarak işaretli. Check-in ve hatırlatıcılar kapalı; kayıtlar görüntülenebilir.',
+    deceasedBadge: 'Sevgiyle anıyoruz',
     sections: {
       profilePhoto: 'Profil Fotoğrafı',
       petType: 'Pet Türü',

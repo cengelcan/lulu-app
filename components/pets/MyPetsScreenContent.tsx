@@ -3,10 +3,10 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
+import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetListRow } from '@/components/pet/PetListRow';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
@@ -31,6 +31,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
   const isLoading = usePetStore((state) => state.isLoading);
   const error = usePetStore((state) => state.error);
   const loadPets = usePetStore((state) => state.loadPets);
+  const loadPetById = usePetStore((state) => state.loadPetById);
   const setActivePet = usePetStore((state) => state.setActivePet);
   const clearError = usePetStore((state) => state.clearError);
 
@@ -39,6 +40,9 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
 
   const [isSwitching, setIsSwitching] = useState(false);
   const [switchingPetId, setSwitchingPetId] = useState<string | null>(null);
+
+  const activePets = pets.filter((pet) => pet.status !== 'deceased');
+  const deceasedPets = pets.filter((pet) => pet.status === 'deceased');
 
   useFocusEffect(
     useCallback(() => {
@@ -101,11 +105,8 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         setSwitchingPetId(pet.id);
 
         try {
-          if (activePet?.id !== pet.id) {
-            await setActivePet(pet.id);
-            await loadCheckIns(pet.id);
-          }
-          router.push('/pet-profile');
+          await loadPetById(pet.id);
+          router.push(`/pet-profile?id=${pet.id}`);
         } catch {
           // Error is stored in pet store for retry flows.
         } finally {
@@ -114,7 +115,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         }
       })();
     },
-    [activePet?.id, isSwitching, loadCheckIns, router, setActivePet]
+    [isSwitching, loadPetById, router]
   );
 
   return (
@@ -143,20 +144,55 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         </View>
       ) : (
         <View style={styles.body}>
-          <Card style={styles.listCard}>
-            {pets.map((pet, index) => (
-              <PetListRow
-                key={pet.id}
-                pet={pet}
-                disabled={isSwitching}
-                isActive={activePet?.id === pet.id}
-                isLast={index === pets.length - 1}
-                isSwitching={isSwitching && switchingPetId === pet.id}
-                onOpenProfile={() => handleOpenProfile(pet)}
-                onSelect={() => handleSelectPet(pet)}
-              />
-            ))}
-          </Card>
+          {deceasedPets.length === 0 ? (
+            <GroupedSection title={t('myPets.petsSection')}>
+              {activePets.map((pet, index) => (
+                <PetListRow
+                  key={pet.id}
+                  pet={pet}
+                  disabled={isSwitching}
+                  isActive={activePet?.id === pet.id}
+                  isLast={index === activePets.length - 1}
+                  isSwitching={isSwitching && switchingPetId === pet.id}
+                  onOpenProfile={() => handleOpenProfile(pet)}
+                  onSelect={() => handleSelectPet(pet)}
+                />
+              ))}
+            </GroupedSection>
+          ) : (
+            <>
+              {activePets.length > 0 ? (
+                <GroupedSection title={t('myPets.petsSection')}>
+                  {activePets.map((pet, index) => (
+                    <PetListRow
+                      key={pet.id}
+                      pet={pet}
+                      disabled={isSwitching}
+                      isActive={activePet?.id === pet.id}
+                      isLast={index === activePets.length - 1}
+                      isSwitching={isSwitching && switchingPetId === pet.id}
+                      onOpenProfile={() => handleOpenProfile(pet)}
+                      onSelect={() => handleSelectPet(pet)}
+                    />
+                  ))}
+                </GroupedSection>
+              ) : null}
+              <GroupedSection title={t('myPets.memorialSection')}>
+                {deceasedPets.map((pet, index) => (
+                  <PetListRow
+                    key={pet.id}
+                    pet={pet}
+                    disabled={isSwitching}
+                    isActive={false}
+                    isLast={index === deceasedPets.length - 1}
+                    isSwitching={isSwitching && switchingPetId === pet.id}
+                    onOpenProfile={() => handleOpenProfile(pet)}
+                    onSelect={() => handleOpenProfile(pet)}
+                  />
+                ))}
+              </GroupedSection>
+            </>
+          )}
           <Button title={t('common.addPet')} variant="secondary" onPress={handleAddPet} />
         </View>
       )}
@@ -171,11 +207,6 @@ const styles = StyleSheet.create({
   body: {
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
-  },
-  listCard: {
-    padding: 0,
-    gap: 0,
-    overflow: 'hidden',
   },
   centered: {
     flex: 1,

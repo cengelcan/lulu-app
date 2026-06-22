@@ -5,6 +5,7 @@ import type {
   PetSex,
   PetSpayNeuterStatus,
   PetSpecies,
+  PetStatus,
 } from '@/types/pet';
 
 import {
@@ -30,6 +31,8 @@ type PetRow = {
   microchip_id: string | null;
   owner_name: string | null;
   breed: string | null;
+  status: string | null;
+  deceased_at: string | null;
   created_at: string;
 };
 
@@ -49,6 +52,8 @@ function mapPetRow(row: PetRow): Pet {
     adoptionDate: row.adoption_date,
     microchipId: row.microchip_id,
     ownerName: row.owner_name,
+    status: (row.status as PetStatus | null) ?? 'active',
+    deceasedAt: row.deceased_at,
     createdAt: row.created_at,
   };
 }
@@ -60,9 +65,9 @@ export async function createPet(pet: Pet): Promise<void> {
     `INSERT INTO pets (
        id, name, species, breed, age_group, health_conditions, photo_uri,
        color, sex, spay_neuter_status, birth_date, adoption_date, microchip_id, owner_name,
-       created_at
+       status, deceased_at, created_at
      )
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     pet.id,
     pet.name,
     pet.species,
@@ -77,6 +82,8 @@ export async function createPet(pet: Pet): Promise<void> {
     pet.adoptionDate ?? null,
     pet.microchipId ?? null,
     pet.ownerName ?? null,
+    pet.status ?? 'active',
+    pet.deceasedAt ?? null,
     pet.createdAt
   );
 }
@@ -99,6 +106,15 @@ export async function getFirstPet(): Promise<Pet | null> {
   const db = await getDatabase();
   const row = await db.getFirstAsync<PetRow>(
     'SELECT * FROM pets ORDER BY created_at ASC LIMIT 1'
+  );
+
+  return row ? mapPetRow(row) : null;
+}
+
+export async function getFirstActivePet(): Promise<Pet | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<PetRow>(
+    "SELECT * FROM pets WHERE status = 'active' OR status IS NULL ORDER BY created_at ASC LIMIT 1"
   );
 
   return row ? mapPetRow(row) : null;
@@ -127,8 +143,29 @@ export async function getActivePet(): Promise<Pet | null> {
     const activePet = await getPetById(activePetId);
 
     if (activePet) {
+      // Deceased pets shouldn't be the default context when an active pet is
+      // available; fall through to pick an active one. If every pet is deceased
+      // we still surface the stored pet so the app has a (read-only) context.
+      if (activePet.status !== 'deceased') {
+        return activePet;
+      }
+
+      const firstActive = await getFirstActivePet();
+
+      if (firstActive) {
+        await setActivePetId(firstActive.id);
+        return firstActive;
+      }
+
       return activePet;
     }
+  }
+
+  const firstActive = await getFirstActivePet();
+
+  if (firstActive) {
+    await setActivePetId(firstActive.id);
+    return firstActive;
   }
 
   const firstPet = await getFirstPet();
@@ -149,7 +186,7 @@ export async function updatePet(pet: Pet): Promise<void> {
     `UPDATE pets
      SET name = ?, species = ?, breed = ?, age_group = ?, health_conditions = ?, photo_uri = ?,
          color = ?, sex = ?, spay_neuter_status = ?, birth_date = ?, adoption_date = ?,
-         microchip_id = ?, owner_name = ?
+         microchip_id = ?, owner_name = ?, status = ?, deceased_at = ?
      WHERE id = ?`,
     pet.name,
     pet.species,
@@ -164,6 +201,8 @@ export async function updatePet(pet: Pet): Promise<void> {
     pet.adoptionDate ?? null,
     pet.microchipId ?? null,
     pet.ownerName ?? null,
+    pet.status ?? 'active',
+    pet.deceasedAt ?? null,
     pet.id
   );
 }

@@ -1,6 +1,6 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
@@ -17,6 +17,11 @@ import { useTranslation } from '@/hooks/use-translation';
 
 export default function PetProfileScreen() {
   const router = useRouter();
+  const { id: idParam } = useLocalSearchParams<{ id?: string | string[] }>();
+  const petId = useMemo(
+    () => (Array.isArray(idParam) ? idParam[0] : idParam),
+    [idParam]
+  );
   const { t } = useTranslation();
   const {
     displayPetSpecies,
@@ -31,13 +36,19 @@ export default function PetProfileScreen() {
   const pet = usePetStore((state) => state.pet);
   const isLoading = usePetStore((state) => state.isLoading);
   const loadPet = usePetStore((state) => state.loadPet);
+  const loadPetById = usePetStore((state) => state.loadPetById);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   useEffect(() => {
+    if (petId) {
+      void loadPetById(petId);
+      return;
+    }
+
     void loadPet();
-  }, [loadPet]);
+  }, [loadPet, loadPetById, petId]);
 
   useEffect(() => {
     if (!isLoading && !pet) {
@@ -46,11 +57,15 @@ export default function PetProfileScreen() {
   }, [isLoading, pet, router]);
 
   const handleEditProfile = useCallback(() => {
+    if (!pet) {
+      return;
+    }
+
     if (process.env.EXPO_OS === 'ios') {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    router.push('/edit-pet');
-  }, [router]);
+    router.push(`/edit-pet?id=${pet.id}`);
+  }, [pet, router]);
 
   if (isLoading && !pet) {
     return (

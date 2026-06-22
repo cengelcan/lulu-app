@@ -173,16 +173,19 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 - [ ] A1: Lulu Plus coming-soon → IAP (Faz D / Gelecek) gelene kadar bilinçli kalır
 - [x] `ComingSoonModal` kullanımları gözden geçirildi (kalan tek bilinçli kullanım: Lulu Plus)
 
-## Paket B (mantık) — Pet silme + status modeli (tasarımdan bağımsız) — 🟡 B1 tamam
+## Paket B — Pet silme + status modeli — ✅ B1 + B2 tamam
 
-**Görsel kısım (Aktif/Anma layout) Paket D sonrasına bırakıldı.**
+**Not:** Görsel Aktif/Anma ayrımı şimdilik basit bölüm (`GroupedSection`) olarak yapıldı; Paket D (design.md) sonrası cilalanacak.
 
 - [x] B1: **Edit Pet** ekranına "Delete Pet" (destructive Button + `ConfirmModal`) + i18n → `usePetStore.deletePet`
 - [x] B1: Silme guard'ları (dirty/`!pet`) atlanıyor, sonra `my-pets`'e dönülüyor
 - [ ] B1: *(QA)* Son pet / aktif pet silme akışını cihazda doğrula
-- [ ] B2: `types/pet.ts` + `storage/pet.storage.ts` → `status: 'active' | 'deceased'` (+ `deceasedAt?`)
-- [ ] B2: Supabase migration `0005_pet_status.sql` (`status`/`deceased_at`) + `pets-sync.ts` map
-- [ ] B2: "Mark as deceased" aksiyonu (geri alınabilir) + vefat eden pet davranış kararı (check-in/reminder/records)
+- [x] B2: `types/pet.ts` + `storage/pet.storage.ts` + yerel migration v10 → `status: 'active' | 'deceased'` (+ `deceasedAt`)
+- [x] B2: Supabase migration `0005_pet_status.sql` (`status`/`deceased_at`) + `pets-sync.ts` map
+- [x] B2: "Mark as deceased" / "Restore" aksiyonu (Edit Pet, geri alınabilir, `ConfirmModal` + i18n) → `usePetStore.setPetStatus`
+- [x] B2: Davranış — reminder otomatik iptal, aktif pet olamaz/yeni check-in yok, geçmiş salt-okunur (Home/check-in/records gating); `getActivePet` aktif pet tercih eder
+- [x] B2: My Pets "Aktif" / "Anma" bölüm ayrımı (basit; D sonrası cilalanacak)
+- [ ] B2: *(QA)* Vefat işaretle/geri al akışını cihazda doğrula
 
 ## Paket D — Genel tasarım (design.md bekliyor)
 

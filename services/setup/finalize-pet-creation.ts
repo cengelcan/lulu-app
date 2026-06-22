@@ -45,6 +45,7 @@ function buildPetFromDraft(draft: SetupDraft): Pet {
     breed: draft.breed,
     ageGroup: draft.ageGroup!,
     healthConditions: draft.healthConditions.length > 0 ? draft.healthConditions : ['none'],
+    status: 'active',
     createdAt: new Date().toISOString(),
   };
 }

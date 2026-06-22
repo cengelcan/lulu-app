@@ -120,6 +120,7 @@ export default function RecordFormScreen() {
 
   const isEditMode = Boolean(recordId && existingRecord);
   const notesOverLimit = notes.length > PET_RECORD_NOTES_MAX_LENGTH;
+  const isReadOnly = pet?.status === 'deceased';
 
   const screenTitle = useMemo(() => {
     if (!recordType) {
@@ -198,7 +199,7 @@ export default function RecordFormScreen() {
   }, [recordId, recordType, router]);
 
   const handleSave = useCallback(async () => {
-    if (!recordType || !pet?.id) {
+    if (!recordType || !pet?.id || isReadOnly) {
       return;
     }
 
@@ -259,6 +260,7 @@ export default function RecordFormScreen() {
     date,
     existingRecord,
     isEditMode,
+    isReadOnly,
     metadata,
     notes,
     pet?.id,
@@ -346,11 +348,20 @@ export default function RecordFormScreen() {
               </ThemedText>
             ) : null}
 
-            <Button
-              title={isEditMode ? t('records.saveChanges') : t('records.saveRecord')}
-              disabled={isSaving || notesOverLimit}
-              onPress={() => void handleSave()}
-            />
+            {isReadOnly ? (
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.intro}>
+                {t('records.deceasedReadOnly')}
+              </ThemedText>
+            ) : (
+              <Button
+                title={isEditMode ? t('records.saveChanges') : t('records.saveRecord')}
+                disabled={isSaving || notesOverLimit}
+                onPress={() => void handleSave()}
+              />
+            )}
           </>
         )}
       </ScreenContainer>

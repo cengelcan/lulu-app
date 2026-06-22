@@ -41,7 +41,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 |------|-----|-------|
 | 1 | TypeScript hataları (5 hata, 4 dosya) | ✅ Tamamlandı |
 | 2 | QA — kalan manuel testler | 🔵 Devam ediyor |
-| 3 | Auth — Supabase (email + cloud sync) | 🟡 Devam ediyor (email + pet/check-in/record sync tamam; Delete Account kaldı) |
+| 3 | Auth — Supabase (email + cloud sync) | 🟢 email + pet/check-in/record/profil sync + Delete Account tamam (Apple/Google yayın öncesi) |
 | 3b | Apple + Google native giriş | ⏬ Yayın öncesi son adıma ertelendi (bkz. bölüm 7) |
 | 4 | Aile paylaşımı hazırlık (Lulu Plus) | ⬜ Başlanmadı |
 | 5 | Free vs Plus rapor özellik farkları | ⬜ Başlanmadı (Auth sonrası) |
@@ -87,7 +87,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 
 ### 3. Auth — Supabase (Sprint 5, İş #9) — 🟡 email + pet sync tamam
 
-**Mevcut durum:** Email/şifre auth uçtan uca çalışıyor; bootstrap auth guard aktif; pet'ler Supabase'e sync ediliyor. Apple/Google, check-in/record sync ve Delete Account kaldı.
+**Mevcut durum:** Email/şifre auth uçtan uca çalışıyor; bootstrap auth guard aktif; pet/check-in/record/profil sync ve Delete Account tamam. Apple/Google yayın öncesine ertelendi.
 
 #### Faz A — Supabase kurulum ✅
 - [x] `@supabase/supabase-js` + `expo-secure-store` (+ apple-auth, google-signin, dev-client, aes-js, url-polyfill, get-random-values)
@@ -108,7 +108,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 - [x] Pet → `user_id` (Supabase user ID)
 - [x] Log Out → auth ekranına dön
 - [x] Hesap izolasyonu — farklı hesap girişinde yerel veri wipe
-- [ ] Delete Account → Supabase user silme + local wipe
+- [x] Delete Account → Supabase user silme (`delete_user` RPC, `0003_delete_user.sql`; cascade + avatar storage) + local wipe
 
 #### Faz D — Free / Plus tier temeli ⬜
 - [ ] `isPlusActive` — Supabase metadata veya RevenueCat (sonra)

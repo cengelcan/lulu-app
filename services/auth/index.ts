@@ -94,8 +94,26 @@ export async function signUpWithEmail(
   };
 }
 
-export async function signOutUser(): Promise<void> {
-  const { error } = await supabase.auth.signOut();
+/**
+ * Signs the user out. Use `scope: 'local'` to clear only this device's session
+ * without a server round-trip (e.g. after the account has already been deleted,
+ * where a global revoke would fail because the user no longer exists).
+ */
+export async function signOutUser(scope: 'global' | 'local' = 'global'): Promise<void> {
+  const { error } = await supabase.auth.signOut({ scope });
+
+  if (error) {
+    throw mapSupabaseAuthError(error);
+  }
+}
+
+/**
+ * Permanently deletes the current user's Supabase account via the `delete_user`
+ * RPC (a SECURITY DEFINER function). This cascades to the user's cloud data
+ * (pets, check-ins, records, profile) and removes their avatar files.
+ */
+export async function deleteAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_user');
 
   if (error) {
     throw mapSupabaseAuthError(error);

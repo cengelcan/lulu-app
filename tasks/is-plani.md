@@ -87,7 +87,7 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 - [x] `currentUserId` ↔ Supabase `user.id`
 - [x] Pet → `user_id` (Supabase user ID; cloud `pets` tablosu)
 - [x] Log Out → `(auth)`'a dön (LegalCard bağlandı)
-- [ ] Delete Account → Supabase user sil + local wipe (edge function/RPC gerekir)
+- [x] Delete Account → Supabase user sil + local wipe (`delete_user` SECURITY DEFINER RPC, `0003_delete_user.sql`; cascade + avatar storage temizliği; ardından `signOut('local')` + `deleteAllLocalData`)
 
 ### Faz D — Free / Plus tier temeli ⬜
 - [ ] `isPlusActive` (şimdilik Supabase metadata; RevenueCat sonra)

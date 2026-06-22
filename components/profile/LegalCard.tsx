@@ -25,6 +25,7 @@ export function LegalCard() {
   const { t } = useTranslation();
   const provider = useUserStore((state) => state.provider);
   const signOut = useUserStore((state) => state.signOut);
+  const deleteAccount = useUserStore((state) => state.deleteAccount);
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -51,11 +52,15 @@ export function LegalCard() {
     setIsDeleting(true);
 
     try {
+      // Delete the cloud account first (needs a valid session), then wipe the
+      // device. resetAppStoresAfterDataDeletion clears in-memory store state.
+      await deleteAccount();
       await deleteAllLocalData();
       resetAppStoresAfterDataDeletion();
       setDeleteModalVisible(false);
       router.replace('/');
-    } catch {
+    } catch (error) {
+      console.error('Delete account failed', error);
       setIsDeleting(false);
     }
   };

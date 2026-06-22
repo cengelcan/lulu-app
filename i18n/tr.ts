@@ -422,7 +422,7 @@ export const tr: Translations = {
     logOut: 'Çıkış Yap',
     deleteAccountTitle: 'Hesabımı Sil?',
     deleteAccountMessage:
-      'Bu cihazdaki tüm petler, check-in\'ler ve tercihler kalıcı olarak silinecek.',
+      'Hesabın ve tüm petlerin, check-in\'lerin ve kayıtların hem bu cihazdan hem de buluttan kalıcı olarak silinecek. Bu işlem geri alınamaz.',
     editNameTitle: 'Adın',
     editNameMessage: 'Bu ad isteğe bağlıdır ve yalnızca profilinde görünür.',
     editNamePlaceholder: 'Adın',

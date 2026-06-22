@@ -422,7 +422,7 @@ export const en: Translations = {
     logOut: 'Log Out',
     deleteAccountTitle: 'Delete My Account?',
     deleteAccountMessage:
-      'All pets, check-ins, and preferences on this device will be permanently removed.',
+      'Your account and all pets, check-ins, and records will be permanently deleted from this device and the cloud. This cannot be undone.',
     editNameTitle: 'Your Name',
     editNameMessage: 'This name is optional and only shown on your profile.',
     editNamePlaceholder: 'Your name',

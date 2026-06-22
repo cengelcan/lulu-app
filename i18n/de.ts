@@ -420,9 +420,9 @@ export const de: Translations = {
     terms: 'Nutzungsbedingungen',
     deleteAccount: 'Mein Konto löschen',
     logOut: 'Abmelden',
-    deleteAccountTitle: 'Delete My Account?',
+    deleteAccountTitle: 'Mein Konto löschen?',
     deleteAccountMessage:
-      'All pets, check-ins, and preferences on this device will be permanently removed.',
+      'Dein Konto sowie alle Haustiere, Check-ins und Einträge werden dauerhaft von diesem Gerät und aus der Cloud gelöscht. Dies kann nicht rückgängig gemacht werden.',
     editNameTitle: 'Your Name',
     editNameMessage: 'This name is optional and only shown on your profile.',
     editNamePlaceholder: 'Your name',

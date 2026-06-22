@@ -3,6 +3,7 @@ import { create } from 'zustand';
 
 import {
   type AuthErrorCode,
+  deleteAccount as authDeleteAccount,
   getCurrentSession,
   onAuthStateChange,
   signInWithEmail as authSignInWithEmail,
@@ -12,7 +13,12 @@ import {
 import { wipeUserScopedData } from '@/services/cleanup/wipe-user-scoped-data';
 import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
 import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
-import { pullProfileIntoLocal, pushProfile, uploadAvatar } from '@/services/sync/profile-sync';
+import {
+  deleteAvatarFiles,
+  pullProfileIntoLocal,
+  pushProfile,
+  uploadAvatar,
+} from '@/services/sync/profile-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
 import { getCurrentUserId, setCurrentUserId } from '@/storage/prefs.storage';
 import { getUserProfile, setUserProfile } from '@/storage/user.storage';
@@ -37,6 +43,7 @@ type UserState = {
     password: string
   ) => Promise<{ needsEmailConfirmation: boolean }>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   loadUserProfile: () => Promise<void>;
   updateDisplayName: (displayName: string | null) => Promise<void>;
   updateAvatar: (input: {
@@ -217,6 +224,47 @@ export const useUserStore = create<UserState>((set, get) => ({
         authStatus: 'unauthenticated',
       });
     }
+  },
+
+  deleteAccount: async () => {
+    set({ error: null });
+
+    const userId = get().userId;
+
+    // Storage objects are not covered by the auth cascade and can't be deleted
+    // from SQL, so remove avatar files via the Storage API first (best-effort).
+    if (userId) {
+      try {
+        await deleteAvatarFiles(userId);
+      } catch (error) {
+        console.warn('Failed to delete avatar files during account deletion', error);
+      }
+    }
+
+    try {
+      // Requires a valid session, so run before clearing the local session.
+      await authDeleteAccount();
+    } catch (error) {
+      set({ error: getErrorMessage(error, 'unknown') });
+      throw error;
+    }
+
+    // The account is gone, so a global revoke would fail; clear locally only.
+    try {
+      await signOutUser('local');
+    } catch (error) {
+      console.warn('Failed to clear local session after account deletion', error);
+    }
+
+    set({
+      userId: null,
+      email: null,
+      provider: 'guest',
+      displayName: null,
+      avatarUri: null,
+      isPlusActive: false,
+      authStatus: 'unauthenticated',
+    });
   },
 
   loadUserProfile: async () => {

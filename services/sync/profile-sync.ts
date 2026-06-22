@@ -87,6 +87,30 @@ export async function uploadAvatar(
 }
 
 /**
+ * Removes all of the user's avatar files from Storage. Used during account
+ * deletion (storage objects are not covered by the auth.users FK cascade and
+ * cannot be deleted from SQL). Best-effort: a missing folder is not an error.
+ */
+export async function deleteAvatarFiles(userId: string): Promise<void> {
+  const { data, error: listError } = await supabase.storage.from(AVATAR_BUCKET).list(userId);
+
+  if (listError) {
+    throw new Error(listError.message);
+  }
+
+  if (!data || data.length === 0) {
+    return;
+  }
+
+  const paths = data.map((file) => `${userId}/${file.name}`);
+  const { error: removeError } = await supabase.storage.from(AVATAR_BUCKET).remove(paths);
+
+  if (removeError) {
+    throw new Error(removeError.message);
+  }
+}
+
+/**
  * Reconciles the local profile with Supabase (the source of truth).
  *
  * Transition case: when the cloud has no profile row yet but the device has a

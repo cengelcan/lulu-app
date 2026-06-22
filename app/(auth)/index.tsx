@@ -10,6 +10,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { AuthError, type AuthErrorCode } from '@/services/auth';
 import * as petStorage from '@/storage/pet.storage';
+import { usePetStore } from '@/stores/pet.store';
 import { useUserStore } from '@/stores/user.store';
 
 type AuthMode = 'signIn' | 'signUp';
@@ -28,6 +29,7 @@ export default function AuthScreen() {
 
   const signInWithEmail = useUserStore((state) => state.signInWithEmail);
   const signUpWithEmail = useUserStore((state) => state.signUpWithEmail);
+  const loadPets = usePetStore((state) => state.loadPets);
 
   const [mode, setMode] = useState<AuthMode>('signIn');
   const [email, setEmail] = useState('');
@@ -84,6 +86,7 @@ export default function AuthScreen() {
         await signInWithEmail(trimmedEmail, password);
       }
 
+      await loadPets();
       router.replace(await resolvePostAuthRoute());
     } catch (error) {
       const code: AuthErrorCode = error instanceof AuthError ? error.code : 'unknown';
@@ -91,7 +94,7 @@ export default function AuthScreen() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [email, isSignUp, password, router, signInWithEmail, signUpWithEmail, t]);
+  }, [email, isSignUp, loadPets, password, router, signInWithEmail, signUpWithEmail, t]);
 
   const toggleMode = useCallback(() => {
     setMode((current) => (current === 'signIn' ? 'signUp' : 'signIn'));

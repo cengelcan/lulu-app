@@ -1,10 +1,16 @@
 import { create } from 'zustand';
 
 import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
+import { deleteRemotePet, pushPet } from '@/services/sync/pets-sync';
 import { removeActivePetId } from '@/storage/prefs.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
+import { useUserStore } from '@/stores/user.store';
 import type { Pet } from '@/types/pet';
+
+function getActiveUserId(): string | null {
+  return useUserStore.getState().userId;
+}
 
 type PetState = {
   pets: Pet[];
@@ -79,6 +85,16 @@ export const usePetStore = create<PetState>((set, get) => ({
 
     try {
       await petStorage.createPet(pet);
+
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushPet(userId, pet);
+        } catch (syncError) {
+          console.warn('Failed to sync new pet to cloud', syncError);
+        }
+      }
+
       set((state) => ({
         pets: [...state.pets, pet],
         pet,
@@ -98,6 +114,16 @@ export const usePetStore = create<PetState>((set, get) => ({
 
     try {
       await petStorage.updatePet(pet);
+
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushPet(userId, pet);
+        } catch (syncError) {
+          console.warn('Failed to sync updated pet to cloud', syncError);
+        }
+      }
+
       set((state) => ({
         pet: state.pet?.id === pet.id ? pet : state.pet,
         pets: state.pets.map((entry) => (entry.id === pet.id ? pet : entry)),
@@ -118,6 +144,14 @@ export const usePetStore = create<PetState>((set, get) => ({
     try {
       const wasActive = get().pet?.id === id;
       await petStorage.deletePet(id);
+
+      if (getActiveUserId()) {
+        try {
+          await deleteRemotePet(id);
+        } catch (syncError) {
+          console.warn('Failed to delete pet from cloud', syncError);
+        }
+      }
 
       const remainingPets = get().pets.filter((entry) => entry.id !== id);
 

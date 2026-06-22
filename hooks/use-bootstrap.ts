@@ -60,7 +60,10 @@ export function useBootstrap() {
     clearOnboardingError();
     clearPetError();
 
-    await Promise.all([loadOnboardingStatus(), loadPet(), initializeAuth()]);
+    // Auth must resolve first so cloud pets are pulled into the local cache
+    // before we load them into the pet store.
+    await Promise.all([loadOnboardingStatus(), initializeAuth()]);
+    await loadPet();
 
     const { pet } = usePetStore.getState();
 

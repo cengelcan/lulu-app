@@ -9,6 +9,9 @@ import {
   signOutUser,
   signUpWithEmail as authSignUpWithEmail,
 } from '@/services/auth';
+import { wipeUserScopedData } from '@/services/cleanup/wipe-user-scoped-data';
+import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
+import { getCurrentUserId, setCurrentUserId } from '@/storage/prefs.storage';
 import { getUserProfile, setUserProfile } from '@/storage/user.storage';
 import type { AuthProvider, UserProfile } from '@/types/user';
 
@@ -60,6 +63,33 @@ function resolveProvider(session: Session | null): AuthProvider {
 
 let authSubscriptionStarted = false;
 
+/**
+ * Local data is stored per-device. When a different account signs in, wipe the
+ * previous user's local data so accounts stay isolated until cloud sync exists.
+ * Returns true when a wipe happened.
+ */
+async function enforceUserDataIsolation(userId: string): Promise<boolean> {
+  const previousUserId = await getCurrentUserId();
+  let wiped = false;
+
+  if (previousUserId && previousUserId !== userId) {
+    await wipeUserScopedData();
+    wiped = true;
+  }
+
+  await setCurrentUserId(userId);
+  return wiped;
+}
+
+/** Pulls the user's pets from Supabase into the local cache. Best-effort (offline-safe). */
+async function syncPetsFromCloud(userId: string): Promise<void> {
+  try {
+    await pullPetsIntoLocal(userId);
+  } catch (error) {
+    console.warn('Failed to sync pets from cloud', error);
+  }
+}
+
 export const useUserStore = create<UserState>((set, get) => ({
   userId: null,
   authStatus: 'unknown',
@@ -90,6 +120,16 @@ export const useUserStore = create<UserState>((set, get) => ({
 
     try {
       const session = await getCurrentSession();
+
+      // Reconcile the data-owner marker to the active session on every launch.
+      // This claims the current local data for the logged-in user (no wipe) and
+      // prevents a stale marker from triggering a spurious wipe on next sign-in.
+      // Account isolation is still enforced at the sign-in transition.
+      if (session) {
+        await setCurrentUserId(session.user.id);
+        await syncPetsFromCloud(session.user.id);
+      }
+
       applySession(session);
     } catch {
       set({ authStatus: 'unauthenticated' });
@@ -101,11 +141,14 @@ export const useUserStore = create<UserState>((set, get) => ({
 
     try {
       const session = await authSignInWithEmail(email, password);
+      const wiped = await enforceUserDataIsolation(session.user.id);
+      await syncPetsFromCloud(session.user.id);
       set({
         userId: session.user.id,
         email: session.user.email ?? null,
         provider: resolveProvider(session),
         authStatus: 'authenticated',
+        ...(wiped ? { displayName: null, avatarUri: null } : {}),
       });
     } catch (error) {
       set({ error: getErrorMessage(error, 'unknown') });
@@ -120,11 +163,14 @@ export const useUserStore = create<UserState>((set, get) => ({
       const { session, needsEmailConfirmation } = await authSignUpWithEmail(email, password);
 
       if (session) {
+        const wiped = await enforceUserDataIsolation(session.user.id);
+        await syncPetsFromCloud(session.user.id);
         set({
           userId: session.user.id,
           email: session.user.email ?? null,
           provider: resolveProvider(session),
           authStatus: 'authenticated',
+          ...(wiped ? { displayName: null, avatarUri: null } : {}),
         });
       }
 

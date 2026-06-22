@@ -24,11 +24,28 @@ export function LegalCard() {
   const router = useRouter();
   const { t } = useTranslation();
   const provider = useUserStore((state) => state.provider);
+  const signOut = useUserStore((state) => state.signOut);
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const showLogOut = provider !== 'guest';
+
+  const handleLogOut = async () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+
+    try {
+      await signOut();
+      router.replace('/');
+    } catch {
+      setIsLoggingOut(false);
+    }
+  };
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
@@ -71,9 +88,7 @@ export function LegalCard() {
             destructive
             showChevron={false}
             isLast
-            onPress={() => {
-              // Auth integration will handle sign-out.
-            }}
+            onPress={() => void handleLogOut()}
           />
         ) : null}
       </Card>

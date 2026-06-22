@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { Linking, Share, StyleSheet } from 'react-native';
 import * as StoreReview from 'expo-store-review';
 
 import { ProfileListRow } from '@/components/profile/ProfileListRow';
 import { Card } from '@/components/ui/Card';
-import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
-import { INSTAGRAM_URL, SHARE_MESSAGE, SHARE_URL } from '@/constants/social';
+import { APP_STORE_REVIEW_URL, INSTAGRAM_URL, SHARE_MESSAGE, SHARE_URL } from '@/constants/social';
 import { useTranslation } from '@/hooks/use-translation';
 import {
   getLastStoreReviewPromptAt,
@@ -16,13 +14,19 @@ const REVIEW_COOLDOWN_MS = 90 * 24 * 60 * 60 * 1000;
 
 export function CommunityCard() {
   const { t } = useTranslation();
-  const [isComingSoonVisible, setIsComingSoonVisible] = useState(false);
+
+  const openStoreReviewPage = () => {
+    void Linking.openURL(APP_STORE_REVIEW_URL);
+  };
 
   const handleRate = async () => {
+    // The native in-app prompt is rate-limited by the OS, so we only use it
+    // when available and outside our own cooldown. In every other case we send
+    // the user to the store listing instead of showing a dead-end.
     const isAvailable = await StoreReview.isAvailableAsync();
 
     if (!isAvailable) {
-      setIsComingSoonVisible(true);
+      openStoreReviewPage();
       return;
     }
 
@@ -30,7 +34,7 @@ export function CommunityCard() {
     const now = Date.now();
 
     if (lastPromptAt !== null && now - lastPromptAt < REVIEW_COOLDOWN_MS) {
-      setIsComingSoonVisible(true);
+      openStoreReviewPage();
       return;
     }
 
@@ -50,32 +54,25 @@ export function CommunityCard() {
   };
 
   return (
-    <>
-      <Card style={styles.card}>
-        <ProfileListRow
-          label={t('profile.rateLulu')}
-          icon="star.fill"
-          onPress={() => void handleRate()}
-        />
-        <ProfileListRow
-          label={t('profile.shareLulu')}
-          icon="square.and.arrow.up"
-          onPress={() => void handleShare()}
-        />
-        <ProfileListRow
-          label={t('profile.followInstagram')}
-          icon="camera.fill"
-          showExternalIcon
-          isLast
-          onPress={handleInstagram}
-        />
-      </Card>
-
-      <ComingSoonModal
-        visible={isComingSoonVisible}
-        onDismiss={() => setIsComingSoonVisible(false)}
+    <Card style={styles.card}>
+      <ProfileListRow
+        label={t('profile.rateLulu')}
+        icon="star.fill"
+        onPress={() => void handleRate()}
       />
-    </>
+      <ProfileListRow
+        label={t('profile.shareLulu')}
+        icon="square.and.arrow.up"
+        onPress={() => void handleShare()}
+      />
+      <ProfileListRow
+        label={t('profile.followInstagram')}
+        icon="camera.fill"
+        showExternalIcon
+        isLast
+        onPress={handleInstagram}
+      />
+    </Card>
   );
 }
 

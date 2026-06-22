@@ -9,7 +9,7 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 
 ## Mevcut durum (doğrulama)
 
-**Son güncelleme:** 2026-06-22 — Aşama 1 büyük ölçüde tamamlandı (email auth + pet cloud sync).
+**Son güncelleme:** 2026-06-22 — Aşama 1 tamamlandı (email auth + pet/check-in/record/profil/foto cloud sync + Delete Account). Beş yeni iş paketi (A–E) eklendi ve sıraya yerleştirildi (bkz. "Yeni paketler — yürütme sırası").
 
 | Alan | Durum |
 |------|-------|
@@ -27,13 +27,36 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 
 ```mermaid
 flowchart TD
-  A0[Aşama 0: TS + QA] --> A1[Aşama 1: Auth/Supabase A-E]
-  A1 --> A2[Aşama 2: Aile Paylaşımı]
+  A0[Aşama 0: TS + QA] --> A1[Aşama 1: Auth/Supabase A-E ✅]
+  A1 --> PA[Paket A: Placeholder temizliği]
+  A1 --> PBlogic[Paket B-mantık: pet silme + status modeli]
+  PA --> DESIGN[design.md gelince]
+  PBlogic --> DESIGN
+  DESIGN --> PD[Paket D: Genel tasarım]
+  PD --> PBui[Paket B-görsel: Aktif/Anma]
+  PD --> PC[Paket C: Records tasarım/listeleme]
+  A1 --> A2[Aşama 2: Aile Paylaşımı - Plus]
   A1 --> A3a[Aşama 3: Tier gating]
   A0 -.paralel.-> A3b[Aşama 3: PRD docs]
+  PC --> PE[Paket E: Beslenme/aktivite planı - en son]
 ```
 
-**Yürütme sırası:** Aşama 0 (TS + QA paralel) → Aşama 1 (sıralı A→E) → Aşama 2 + Aşama 3 paralel.
+**Yürütme sırası (klasik):** Aşama 0 (TS + QA paralel) → Aşama 1 (✅) → Aşama 2 + Aşama 3 paralel.
+
+## Yeni paketler — yürütme sırası
+
+Kullanıcı kararları (2026-06-22): **quick wins önce**, **B-görsel + C tasarımı `design.md`'yi bekler**, **E en sona**.
+
+| Sıra | İş | Tasarıma bağlı? | Not |
+|------|-----|------|-----|
+| 1 | **Paket A** — placeholder temizliği & kararlar | Hayır | Mantık/metin; hemen |
+| 2 | **Paket B-mantık** — pet silme UI bağlama + `status` modeli + migration | Hayır | `deletePet` zaten var |
+| 3 | **Paket D** — genel tasarım | `design.md` gerekli | Token + component + ekranlar |
+| 4 | **Paket B-görsel** — Aktif/Anma bölümleri | Evet (D sonrası) | D ile aynı dil |
+| 5 | **Paket C** — Records tasarım & listeleme | Evet (D sonrası) | Kullanıcı detaylandıracak |
+| 6 | **Paket E** — beslenme/aktivite planı | — | En sona; yaklaşım kararı bekliyor |
+
+> Paralel hatlar (bağımsız): Auth **Faz D (tier)**, **Aile Paylaşımı (Aşama 2)**, **PRD docs (Aşama 3)** istenirse araya alınabilir. Tier (Faz D), hem Aile Paylaşımı hem de Paket E'nin Plus gating'i için ön koşul olabilir.
 
 ---
 
@@ -137,6 +160,57 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 - [ ] Free vs Plus rapor özellik farkları — şimdilik tümü açık veya basit gating
 - [ ] PRD Screen 17 güncelle: Profile hub + Settings ayrımı (Screen 17a / 17b)
 - [ ] commit `docs: update PRD for profile hub and settings split`
+
+---
+
+## Paket A — Placeholder temizliği & kararlar (tasarımdan bağımsız, ilk) — 🟢 büyük ölçüde tamam
+
+**Detay:** `yapilacaklar.md` → "Yeni iş paketleri → A".
+
+- [x] A2: Community **Rate Lulu** — yanıltıcı "Çok Yakında" kaldırıldı; in-app prompt uygun değilse mağaza sayfası açılıyor (`APP_STORE_REVIEW_URL`)
+- [x] A3: Records **Attachments** — placeholder + modal + component kaldırıldı; gerçek ek **Paket C**'ye taşındı
+- [x] A4: `deletePet` UI'a bağlandı (Paket B1)
+- [ ] A1: Lulu Plus coming-soon → IAP (Faz D / Gelecek) gelene kadar bilinçli kalır
+- [x] `ComingSoonModal` kullanımları gözden geçirildi (kalan tek bilinçli kullanım: Lulu Plus)
+
+## Paket B (mantık) — Pet silme + status modeli (tasarımdan bağımsız) — 🟡 B1 tamam
+
+**Görsel kısım (Aktif/Anma layout) Paket D sonrasına bırakıldı.**
+
+- [x] B1: **Edit Pet** ekranına "Delete Pet" (destructive Button + `ConfirmModal`) + i18n → `usePetStore.deletePet`
+- [x] B1: Silme guard'ları (dirty/`!pet`) atlanıyor, sonra `my-pets`'e dönülüyor
+- [ ] B1: *(QA)* Son pet / aktif pet silme akışını cihazda doğrula
+- [ ] B2: `types/pet.ts` + `storage/pet.storage.ts` → `status: 'active' | 'deceased'` (+ `deceasedAt?`)
+- [ ] B2: Supabase migration `0005_pet_status.sql` (`status`/`deceased_at`) + `pets-sync.ts` map
+- [ ] B2: "Mark as deceased" aksiyonu (geri alınabilir) + vefat eden pet davranış kararı (check-in/reminder/records)
+
+## Paket D — Genel tasarım (design.md bekliyor)
+
+**Tahmini: design.md kapsamına bağlı.** Detay: `yapilacaklar.md` → "D".
+
+- [ ] `design.md` analizi → tasarım dili, palet, tipografi, spacing, component stilleri
+- [ ] `constants/theme.ts` + Light/Dark token güncelle
+- [ ] Ortak component'ler (Button, Card, ScreenContainer, list row'lar)
+- [ ] Ekran ekran uygulama + Dark mode / Dynamic Type doğrulama
+
+## Paket B (görsel) — Aktif / Anma bölümleri (Paket D sonrası)
+
+- [ ] My Pets: "Aktif" + "Anma / Vefat edenler" bölümleri (yeni tasarım dilinde)
+- [ ] Vefat eden pet için memorial kart/rozet stili
+
+## Paket C — Records tasarım & listeleme (Paket D sonrası, detay bekliyor)
+
+**Durum: kullanıcı detaylandıracak.**
+
+- [ ] Listeleme: gruplama/filtre/arama/"tümünü gör"
+- [ ] Tasarım: kart/satır, ikonografi, boş durum (yeni design system)
+- [ ] A3 (attachments) ilişkisini netleştir
+
+## Paket E — Beslenme / aktivite planı (en son, karar bekliyor)
+
+**Açık kararlar (re-plan):** kural tabanlı vs AI · Free vs Plus · sadece beslenme mi aktivite de mi · içerik kaynağı/sorumluluk.
+
+- [ ] Yaklaşım kararı sonrası detaylı plan (`types/plan.ts`, üretim motoru, UI konumu, tier gating, i18n, disclaimer)
 
 ---
 

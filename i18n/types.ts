@@ -373,6 +373,10 @@ export type Translations = {
     keepEditing: string;
     discard: string;
     photoPermissionError: string;
+    deletePet: string;
+    deletePetA11y: string;
+    deletePetTitle: string;
+    deletePetMessage: string;
     sections: {
       profilePhoto: string;
       petType: string;

@@ -47,6 +47,16 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | 5 | Free vs Plus rapor özellik farkları | ⬜ Başlanmadı (Auth sonrası) |
 | 6 | PRD güncellemeleri (Profile hub, Screen 17) | ⬜ Başlanmadı |
 
+> **Not:** Aşağıdaki **Yeni iş paketleri (A–E)** henüz öncelik sırasına yerleştirilmedi. `is-plani.md` güncellemesinde sıralanacak.
+
+| Sıra | Yeni iş paketi | Durum |
+|------|-----|-------|
+| A | Eksik/placeholder özelliklerin tespiti & kararı | 🟢 A2 + A3 yapıldı; A1 bilinçli ertelendi |
+| B | My Pets: pet silme + aktif/vefat eden ayrımı | 🟡 B1 (silme) yapıldı; B2 (status) kaldı |
+| C | Records tasarım & listeleme güncellemeleri | ⬜ Detay bekleniyor |
+| D | Genel tasarım yenileme (`design.md`) | ⬜ `design.md` bekleniyor |
+| E | Beslenme/aktivite plan sistemi (günlük/haftalık) | ⬜ Başlanmadı (karar gerekli) |
+
 ---
 
 ## 🔵 Devam eden işler
@@ -80,6 +90,115 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 
 #### Multi-Pet Migration — manuel test matrisi
 - [ ] T1–T10: Fresh install, eski kullanıcı upgrade, 2. pet ekleme, pet switch, reminder metni, Delete All Data, dark mode vb.
+
+---
+
+## 🆕 Yeni iş paketleri (2026-06-22)
+
+Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam. Detaylar netleştikçe genişletilecek; `is-plani.md` bunları sıraya ve bağımlılığa göre yerleştirecek.
+
+---
+
+### A. Eksik / placeholder özelliklerin tespiti & kararı
+
+**Amaç:** "Butona basılıyor, çalışıyor gibi görünüyor ama aslında 'Çok Yakında' diyor" veya hiç bağlı olmayan yerleri tespit edip her biri için karar vermek (şimdi yap / bilinçli ertele / kaldır).
+
+**Kod taraması sonucu bulunan placeholder/eksik noktalar:**
+
+| # | Yer | Dosya | Mevcut davranış | Karar / Durum |
+|---|-----|-------|-----------------|----------------|
+| A1 | **Lulu Plus** Upgrade/Manage butonu | `components/profile/LuluPlusCard.tsx` | `ComingSoonModal` açılıyor; gerçek abonelik yok | ⏬ **Bilinçli ertele** — StoreKit/RevenueCat'e bağlı (Faz D + Gelecek). IAP gelene kadar coming-soon kalır |
+| A2 | **Community → Rate Lulu** | `components/profile/CommunityCard.tsx` | ~~StoreReview yoksa/cooldown'da `ComingSoonModal`~~ | ✅ **Yapıldı** — yanıltıcı modal kaldırıldı; in-app prompt uygun değilse mağaza sayfası açılıyor (`APP_STORE_REVIEW_URL`, mağaza canlı olunca gerçek write-review linki ile değiştirilecek) |
+| A3 | **Records → Attachments** (foto/dosya ekleme) | `app/records/[type].tsx` | ~~Karta basınca `ComingSoonModal`~~ | ✅ **Gizlendi** — placeholder kart + modal + `RecordAttachmentPlaceholder.tsx` kaldırıldı. Gerçek ek (foto/PDF → Supabase Storage) **Paket C** (Records yeniden tasarımı) kapsamına alındı |
+| A4 | **Tek pet silme** (`deletePet`) | `stores/pet.store.ts` → çağıran UI yoktu | ~~Ölü kod~~ | ✅ **Bağlandı** — Paket B1 ile Edit Pet ekranına "Delete Pet" eklendi |
+
+**Kalan:**
+- [ ] A1: Lulu Plus IAP gerçeklenince coming-soon kaldırılacak (Faz D / Gelecek)
+- [x] A2 metni düzeltildi · A3 gizlendi · A4 UI'a bağlandı
+- [ ] Paket C'de: gerçek record ek yükleme (foto/PDF) tasarım + Supabase Storage
+
+---
+
+### B. My Pets — pet silme + aktif / vefat eden ayrımı
+
+**Amaç:** My Pets sekmesine tek pet silme eklemek ve pet'leri "aktif" / "vefat eden" (anma) olarak gruplamak.
+
+**B1 — Tek pet silme UI ✅ (Yapıldı)**
+- [x] Konum kararı: **Edit Pet** ekranının altında kırmızı "Delete Pet" butonu (Apple Kişiler/Takvim pattern'i; keşfedilebilir, yanlışlıkla tetiklenmez)
+- [x] Onay: `ConfirmModal` (destructive) + i18n (en/tr/de) — `pet.deletePet*` anahtarları
+- [x] `usePetStore.deletePet`'e bağlandı (cloud + foto + local cascade)
+- [x] Silme sırasında "kaydedilmemiş değişiklik" guard'ı ve `!pet` yönlendirmesi atlanıyor; sonrasında `my-pets`'e dönülüyor
+- [ ] *(QA)* Son pet / aktif pet silme akışını cihazda doğrula
+
+**B2 — Aktif / vefat eden (memorial) ayrımı**
+- [ ] Veri modeli: `Pet`'e `status: 'active' | 'deceased'` (+ ops. `deceasedAt`) — `types/pet.ts`, `storage/pet.storage.ts`
+- [ ] Supabase migration: `pets` tablosuna `status` / `deceased_at` kolonu (`0005_pet_status.sql`) + sync (`pets-sync.ts`)
+- [ ] My Pets ekranında iki bölüm: **Aktif** ve **Anma / Vefat edenler**
+- [ ] Vefat eden pet davranışı (karar gerekli):
+  - Check-in kapalı / gizli mi?
+  - Reminder'lar otomatik iptal
+  - Records read-only mu, yoksa hâlâ görüntülenebilir mi?
+  - Aktif pet seçilemez (sadece geçmiş görüntüleme)
+- [ ] "Mark as deceased" aksiyonu (silmeden farklı, geri alınabilir)
+
+**Açık sorular:**
+- Silme tetikleyici nerede? (satır swipe vs profil ekranı)
+- Vefat eden pet'in verisi tamamen read-only mu olsun?
+
+---
+
+### C. Records — tasarım & listeleme güncellemeleri
+
+**Amaç:** Records ekranının tasarımsal ve listeleme açısından iyileştirilmesi.
+
+> **Durum:** Kullanıcı detaylandıracak. Aşağıdaki maddeler ön kapsam; netleşince güncellenecek.
+
+- [ ] *(detay bekleniyor)* Listeleme iyileştirmeleri: gruplama (tür/tarih), filtre, arama, "tümünü gör"
+- [ ] *(detay bekleniyor)* Tasarım: kart/satır düzeni, ikonografi, boş durum
+- [ ] A3 (attachments) ile ilişki: ekler bu kapsamda mı ele alınacak?
+- [ ] D (genel tasarım) ile uyum: Records yeni design system'e göre
+
+---
+
+### D. Genel tasarım yenileme
+
+**Amaç:** Uygulamanın genel görsel dilini yenilemek. Mevcut tasarım kullanıcıya yeterli gelmiyor.
+
+> **Durum:** Kullanıcı bir `design.md` dosyası verecek. O gelene kadar kapsam belirsiz.
+
+- [ ] `design.md` alındığında: hedef tasarım dili, renk paleti, tipografi, spacing, component stilleri çıkar
+- [ ] `constants/theme.ts` + tema token'larını (Light/Dark) yeni sisteme göre güncelle
+- [ ] Ortak component'leri (Button, Card, ScreenContainer, list row'lar) yeni dile taşı
+- [ ] Ekran ekran uygulama (Home, My Pets, Records, Reports, Profile, Settings, Check-In, Auth)
+- [ ] Dark mode + Dynamic Type ile uyum doğrulama
+- [ ] C (Records tasarımı) bu paketle koordine
+
+**Açık sorular:**
+- `design.md` ne kadar kapsamlı (tam design system mi, yön mü)?
+- Mevcut HIG yapısı korunacak mı, tamamen yeni dil mi?
+
+---
+
+### E. Beslenme / aktivite plan sistemi (günlük & haftalık)
+
+**Amaç:** Seçili pet'e uygun günlük/haftalık beslenme ve/veya aktivite planı üreten bir sistem.
+
+**Girdi (mevcut pet verisinden):** tür (cat/dog), yaş grubu, breed, sağlık koşulları, spay/neuter, (ops.) kilo/`weight` record'ları.
+
+- [ ] Plan üretim yaklaşımı (karar gerekli): **kural tabanlı** (statik tablolar) mı, **AI/LLM** mı, hibrit mi?
+- [ ] Plan kapsamı: yalnız beslenme mi, aktivite de mi? Günlük + haftalık görünüm
+- [ ] Veri modeli: `types/plan.ts` (`FeedingPlan`, `ActivityPlan`, öğün/aktivite kalemleri)
+- [ ] Üretim kaynağı & doğruluk: veteriner onaylı içerik mi, jenerik öneri mi? **Yasal uyarı (disclaimer) gerekli**
+- [ ] UI konumu (karar gerekli): Home'da yeni kart / yeni tab / Pet Profile altında
+- [ ] Tier kararı: **Free mi, Lulu Plus arkasında mı?**
+- [ ] Plan ile Check-In/Records etkileşimi (örn. öğün tamamlandı işaretleme, hatırlatma)
+- [ ] i18n (en/tr/de) + içerik lokalizasyonu
+
+**Açık sorular (re-plan öncesi netleşmeli):**
+- Kural tabanlı mı AI mı?
+- Free mi Plus mı?
+- Sadece beslenme mi, aktivite dahil mi?
+- İçerik kaynağı / sorumluluk (sağlık tavsiyesi hassas konu)
 
 ---
 

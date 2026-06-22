@@ -7,6 +7,8 @@ import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
+import { Button } from '@/components/ui/Button';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
@@ -100,6 +102,7 @@ export default function EditPetScreen() {
   const petError = usePetStore((state) => state.error);
   const loadPet = usePetStore((state) => state.loadPet);
   const updatePet = usePetStore((state) => state.updatePet);
+  const deletePet = usePetStore((state) => state.deletePet);
   const clearError = usePetStore((state) => state.clearError);
 
   const [species, setSpecies] = useState<PetSpecies | null>(() => pet?.species ?? null);
@@ -123,6 +126,8 @@ export default function EditPetScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [isPickingPhoto, setIsPickingPhoto] = useState(false);
   const [canLeave, setCanLeave] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textColor = useThemeColor({}, 'text');
@@ -174,10 +179,10 @@ export default function EditPetScreen() {
   }, [loadPet]);
 
   useEffect(() => {
-    if (!petIsLoading && !pet) {
+    if (!petIsLoading && !pet && !isDeleting) {
       router.dismissTo('/(tabs)/home');
     }
-  }, [pet, petIsLoading, router]);
+  }, [pet, petIsLoading, router, isDeleting]);
 
   useEffect(() => {
     if (!pet) {
@@ -199,7 +204,7 @@ export default function EditPetScreen() {
     setOwnerName(pet.ownerName ?? '');
   }, [pet?.id]);
 
-  usePreventRemove(isDirty && !isSaving && !canLeave, ({ data }) => {
+  usePreventRemove(isDirty && !isSaving && !isDeleting && !canLeave, ({ data }) => {
     Alert.alert(t('pet.discardTitle'), t('pet.discardMessage'), [
       { text: t('pet.keepEditing'), style: 'cancel' },
       {
@@ -354,6 +359,23 @@ export default function EditPetScreen() {
     species,
     updatePet,
   ]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pet) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await deletePet(pet.id);
+      setIsDeleteModalVisible(false);
+      router.dismissTo('/(tabs)/my-pets');
+    } catch {
+      // Store already sets error state; keep the user on the screen to retry.
+      setIsDeleting(false);
+    }
+  }, [deletePet, pet, router]);
 
   const errorMessage = translateValidationError(t, validationError) ?? petError;
   const canSave = isDirty && !isSaving;
@@ -644,6 +666,15 @@ export default function EditPetScreen() {
               />
             </View>
           </GroupedSection>
+
+          <Button
+            accessibilityLabel={t('pet.deletePetA11y')}
+            title={t('pet.deletePet')}
+            variant="destructive"
+            disabled={isSaving || isDeleting}
+            onPress={() => setIsDeleteModalVisible(true)}
+            style={styles.deleteButton}
+          />
         </View>
 
         {errorMessage ? (
@@ -655,6 +686,22 @@ export default function EditPetScreen() {
           </ThemedText>
         ) : null}
       </ScreenContainer>
+
+      <ConfirmModal
+        visible={isDeleteModalVisible}
+        title={t('pet.deletePetTitle', { name: pet.name })}
+        message={t('pet.deletePetMessage', { name: pet.name })}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        isLoading={isDeleting}
+        onConfirm={() => void handleConfirmDelete()}
+        onCancel={() => {
+          if (!isDeleting) {
+            setIsDeleteModalVisible(false);
+          }
+        }}
+      />
     </>
   );
 }
@@ -706,5 +753,8 @@ const styles = StyleSheet.create({
   error: {
     textAlign: 'center',
     marginBottom: Spacing.md,
+  },
+  deleteButton: {
+    marginTop: Spacing.sm,
   },
 });

@@ -447,6 +447,11 @@ export const de: Translations = {
     keepEditing: 'Keep Editing',
     discard: 'Discard',
     photoPermissionError: 'Photo library access is required to choose a pet photo.',
+    deletePet: 'Haustier löschen',
+    deletePetA11y: 'Haustier löschen',
+    deletePetTitle: '{{name}} löschen?',
+    deletePetMessage:
+      'Dadurch werden {{name}} sowie alle Check-ins und Einträge dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.',
     sections: {
       profilePhoto: 'Profile Photo',
       petType: 'Pet Type',

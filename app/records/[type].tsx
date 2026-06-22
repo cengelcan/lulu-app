@@ -4,12 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
-import { RecordAttachmentPlaceholder } from '@/components/records/RecordAttachmentPlaceholder';
 import { RecordNotesField } from '@/components/records/RecordNotesField';
 import { RecordTypeFields } from '@/components/records/RecordTypeFields';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { RECORD_TYPES } from '@/constants/record-types';
@@ -116,7 +114,6 @@ export default function RecordFormScreen() {
   const [isHydrating, setIsHydrating] = useState(Boolean(recordId));
   const [isSaving, setIsSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [attachmentModalVisible, setAttachmentModalVisible] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -343,12 +340,6 @@ export default function RecordFormScreen() {
               </View>
             </GroupedSection>
 
-            <GroupedSection title={t('records.sections.attachments')}>
-              <View style={styles.sectionBody}>
-                <RecordAttachmentPlaceholder onPress={() => setAttachmentModalVisible(true)} />
-              </View>
-            </GroupedSection>
-
             {validationError ? (
               <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.error}>
                 {validationError}
@@ -363,10 +354,6 @@ export default function RecordFormScreen() {
           </>
         )}
       </ScreenContainer>
-      <ComingSoonModal
-        visible={attachmentModalVisible}
-        onDismiss={() => setAttachmentModalVisible(false)}
-      />
     </>
   );
 }

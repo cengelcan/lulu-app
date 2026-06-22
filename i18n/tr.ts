@@ -447,6 +447,11 @@ export const tr: Translations = {
     keepEditing: 'Düzenlemeye Devam',
     discard: 'Sil',
     photoPermissionError: 'Pet fotoğrafı seçmek için fotoğraf kitaplığı erişimi gerekli.',
+    deletePet: 'Pet\'i Sil',
+    deletePetA11y: 'Pet\'i sil',
+    deletePetTitle: '{{name}} silinsin mi?',
+    deletePetMessage:
+      'Bu işlem {{name}} ile birlikte tüm check-in\'leri ve kayıtları kalıcı olarak siler. Geri alınamaz.',
     sections: {
       profilePhoto: 'Profil Fotoğrafı',
       petType: 'Pet Türü',

@@ -1,13 +1,14 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
-import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetListRow } from '@/components/pet/PetListRow';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -15,6 +16,8 @@ import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import type { Pet } from '@/types/pet';
+
+type MyPetsTab = 'active' | 'memorial';
 
 type MyPetsScreenContentProps = {
   edges?: Edge[];
@@ -31,7 +34,6 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
   const isLoading = usePetStore((state) => state.isLoading);
   const error = usePetStore((state) => state.error);
   const loadPets = usePetStore((state) => state.loadPets);
-  const loadPetById = usePetStore((state) => state.loadPetById);
   const setActivePet = usePetStore((state) => state.setActivePet);
   const clearError = usePetStore((state) => state.clearError);
 
@@ -40,9 +42,27 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
 
   const [isSwitching, setIsSwitching] = useState(false);
   const [switchingPetId, setSwitchingPetId] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<MyPetsTab>('active');
 
-  const activePets = pets.filter((pet) => pet.status !== 'deceased');
-  const deceasedPets = pets.filter((pet) => pet.status === 'deceased');
+  const activePets = useMemo(
+    () => pets.filter((pet) => pet.status !== 'deceased'),
+    [pets]
+  );
+  const deceasedPets = useMemo(
+    () => pets.filter((pet) => pet.status === 'deceased'),
+    [pets]
+  );
+  const visiblePets = selectedTab === 'active' ? activePets : deceasedPets;
+  const isMemorialTab = selectedTab === 'memorial';
+  const isInitialLoading = isLoading && pets.length === 0;
+
+  const tabOptions = useMemo(
+    () => [
+      { value: 'active' as const, label: t('myPets.petsSection') },
+      { value: 'memorial' as const, label: t('myPets.memorialSection') },
+    ],
+    [t]
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -100,27 +120,54 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         return;
       }
 
-      void (async () => {
-        setIsSwitching(true);
-        setSwitchingPetId(pet.id);
-
-        try {
-          await loadPetById(pet.id);
-          router.push(`/pet-profile?id=${pet.id}`);
-        } catch {
-          // Error is stored in pet store for retry flows.
-        } finally {
-          setIsSwitching(false);
-          setSwitchingPetId(null);
-        }
-      })();
+      router.push(`/pet-profile?id=${pet.id}`);
     },
-    [isSwitching, loadPetById, router]
+    [isSwitching, router]
+  );
+
+  const renderPetRows = (listPets: Pet[], memorialMode: boolean) =>
+    listPets.map((pet, index) => (
+      <PetListRow
+        key={pet.id}
+        pet={pet}
+        disabled={isSwitching}
+        isActive={!memorialMode && activePet?.id === pet.id}
+        isLast={index === listPets.length - 1}
+        isSwitching={isSwitching && switchingPetId === pet.id}
+        memorialMode={memorialMode}
+        onOpenProfile={() => handleOpenProfile(pet)}
+        onSelect={() => (memorialMode ? handleOpenProfile(pet) : handleSelectPet(pet))}
+      />
+    ));
+
+  const renderEmptyTab = () => (
+    <View style={styles.emptyTab}>
+      {isMemorialTab ? (
+        <>
+          <ThemedText type="subtitle" style={styles.emptyTabTitle}>
+            {t('myPets.emptyMemorialTitle')}
+          </ThemedText>
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.emptyTabMessage}>
+            {t('myPets.emptyMemorialMessage')}
+          </ThemedText>
+        </>
+      ) : (
+        <ThemedText
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.emptyTabMessage}>
+          {t('myPets.noActivePetsMessage')}
+        </ThemedText>
+      )}
+    </View>
   );
 
   return (
     <ScreenContainer scrollable edges={edges} contentStyle={styles.content}>
-      {isLoading ? (
+      {isInitialLoading ? (
         <View style={styles.centered}>
           <ActivityIndicator color={primaryColor} size="large" />
         </View>
@@ -144,56 +191,15 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         </View>
       ) : (
         <View style={styles.body}>
-          {deceasedPets.length === 0 ? (
-            <GroupedSection title={t('myPets.petsSection')}>
-              {activePets.map((pet, index) => (
-                <PetListRow
-                  key={pet.id}
-                  pet={pet}
-                  disabled={isSwitching}
-                  isActive={activePet?.id === pet.id}
-                  isLast={index === activePets.length - 1}
-                  isSwitching={isSwitching && switchingPetId === pet.id}
-                  onOpenProfile={() => handleOpenProfile(pet)}
-                  onSelect={() => handleSelectPet(pet)}
-                />
-              ))}
-            </GroupedSection>
+          <SegmentedControl options={tabOptions} value={selectedTab} onChange={setSelectedTab} />
+          {visiblePets.length === 0 ? (
+            renderEmptyTab()
           ) : (
-            <>
-              {activePets.length > 0 ? (
-                <GroupedSection title={t('myPets.petsSection')}>
-                  {activePets.map((pet, index) => (
-                    <PetListRow
-                      key={pet.id}
-                      pet={pet}
-                      disabled={isSwitching}
-                      isActive={activePet?.id === pet.id}
-                      isLast={index === activePets.length - 1}
-                      isSwitching={isSwitching && switchingPetId === pet.id}
-                      onOpenProfile={() => handleOpenProfile(pet)}
-                      onSelect={() => handleSelectPet(pet)}
-                    />
-                  ))}
-                </GroupedSection>
-              ) : null}
-              <GroupedSection title={t('myPets.memorialSection')}>
-                {deceasedPets.map((pet, index) => (
-                  <PetListRow
-                    key={pet.id}
-                    pet={pet}
-                    disabled={isSwitching}
-                    isActive={false}
-                    isLast={index === deceasedPets.length - 1}
-                    isSwitching={isSwitching && switchingPetId === pet.id}
-                    onOpenProfile={() => handleOpenProfile(pet)}
-                    onSelect={() => handleOpenProfile(pet)}
-                  />
-                ))}
-              </GroupedSection>
-            </>
+            <Card style={styles.petListCard}>{renderPetRows(visiblePets, isMemorialTab)}</Card>
           )}
-          <Button title={t('common.addPet')} variant="secondary" onPress={handleAddPet} />
+          {!isMemorialTab ? (
+            <Button title={t('common.addPet')} variant="secondary" onPress={handleAddPet} />
+          ) : null}
         </View>
       )}
     </ScreenContainer>
@@ -222,7 +228,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     ...Typography.body,
   },
+  emptyTab: {
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+  },
+  emptyTabTitle: {
+    textAlign: 'center',
+  },
+  emptyTabMessage: {
+    textAlign: 'center',
+    ...Typography.body,
+  },
   setupButton: {
     marginTop: Spacing.sm,
+  },
+  petListCard: {
+    padding: 0,
+    gap: 0,
+    overflow: 'hidden',
   },
 });

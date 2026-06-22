@@ -401,6 +401,10 @@ export const de: Translations = {
   myPets: {
     noPetsTitle: 'Noch keine Haustiere',
     noPetsMessage: 'Add your first pet to begin tracking.',
+    noActivePetsMessage: 'Alle deine Tiere werden in liebevoller Erinnerung bewahrt.',
+    emptyMemorialTitle: 'Noch niemand hier',
+    emptyMemorialMessage: 'Wir wünschen all unseren Freunden ein langes, glückliches Leben.',
+    deceasedOn: 'Verstorben am {{date}}',
     petsSection: 'Tiere',
     memorialSection: 'In liebevoller Erinnerung',
   },

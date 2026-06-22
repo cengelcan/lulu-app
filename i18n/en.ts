@@ -400,6 +400,10 @@ export const en: Translations = {
   myPets: {
     noPetsTitle: 'No pets yet',
     noPetsMessage: 'Add your first pet to begin tracking.',
+    noActivePetsMessage: 'All your pets are in loving memory.',
+    emptyMemorialTitle: 'No one here yet',
+    emptyMemorialMessage: 'We wish all our friends long, happy lives.',
+    deceasedOn: 'Passed on {{date}}',
     petsSection: 'Pets',
     memorialSection: 'In Loving Memory',
   },

@@ -400,6 +400,10 @@ export const tr: Translations = {
   myPets: {
     noPetsTitle: 'Henüz pet yok',
     noPetsMessage: 'Takibe başlamak için ilk petini ekle.',
+    noActivePetsMessage: 'Tüm petlerin sevgiyle anılıyor.',
+    emptyMemorialTitle: 'Henüz burada kimse yok',
+    emptyMemorialMessage: 'Tüm dostlarımıza uzun ve mutlu ömürler dileriz.',
+    deceasedOn: '{{date}} tarihinde vefat etti',
     petsSection: 'Petler',
     memorialSection: 'Sevgiyle Anıyoruz',
   },

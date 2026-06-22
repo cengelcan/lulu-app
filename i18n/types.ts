@@ -327,6 +327,10 @@ export type Translations = {
   myPets: {
     noPetsTitle: string;
     noPetsMessage: string;
+    noActivePetsMessage: string;
+    emptyMemorialTitle: string;
+    emptyMemorialMessage: string;
+    deceasedOn: string;
     petsSection: string;
     memorialSection: string;
   };

@@ -6,8 +6,10 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
+import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Pet } from '@/types/pet';
+import { formatDateTimeDdMmYyyyHhMm } from '@/utils/date';
 
 type PetListRowProps = {
   pet: Pet;
@@ -15,6 +17,7 @@ type PetListRowProps = {
   isLast?: boolean;
   disabled?: boolean;
   isSwitching?: boolean;
+  memorialMode?: boolean;
   onSelect: () => void;
   onOpenProfile: () => void;
 };
@@ -25,16 +28,24 @@ export function PetListRow({
   isLast = false,
   disabled = false,
   isSwitching = false,
+  memorialMode = false,
   onSelect,
   onOpenProfile,
 }: PetListRowProps) {
+  const { t } = useTranslation();
   const { displayPetBreed, displayPetSpecies } = usePetDisplay();
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
 
   const breed = displayPetBreed(pet.breed);
-  const subtitle = breed !== displayPetBreed(null) ? breed : displayPetSpecies(pet.species);
+  const speciesLabel = displayPetSpecies(pet.species);
+  const breedLabel = breed !== displayPetBreed(null) ? breed : speciesLabel;
+  const deceasedDateLabel =
+    memorialMode && pet.deceasedAt
+      ? t('myPets.deceasedOn', { date: formatDateTimeDdMmYyyyHhMm(pet.deceasedAt) })
+      : null;
+  const subtitle = deceasedDateLabel ?? breedLabel;
 
   const handleSelect = () => {
     if (disabled) {
@@ -92,7 +103,7 @@ export function PetListRow({
             {subtitle}
           </ThemedText>
         </View>
-        {isSwitching && isActive ? (
+        {isSwitching ? (
           <ActivityIndicator color={primaryColor} size="small" />
         ) : isActive ? (
           <IconSymbol name="checkmark" size={20} color={primaryColor} />

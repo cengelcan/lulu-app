@@ -27,5 +27,5 @@ export function useColorScheme(): 'light' | 'dark' | null {
     return 'dark';
   }
 
-  return systemScheme;
+  return systemScheme ?? null;
 }

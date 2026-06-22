@@ -86,6 +86,10 @@ export async function syncCheckInReminderSchedule(input?: {
     return;
   }
 
+  if (!reminderTime) {
+    return;
+  }
+
   const osPermissionGranted = await hasNotificationPermission();
   if (!osPermissionGranted) {
     return;

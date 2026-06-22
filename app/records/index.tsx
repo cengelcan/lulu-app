@@ -5,11 +5,10 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { RecordHistoryRow } from '@/components/records/RecordHistoryRow';
-import { RecordTypeRow } from '@/components/records/RecordTypeRow';
+import { RecordTypeGrid } from '@/components/records/RecordTypeGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
-import { RECORD_TYPES } from '@/constants/record-types';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -77,6 +76,22 @@ export default function RecordsScreen() {
         }}
       />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
+        {isReadOnly ? (
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.subtitle}>
+            {t('records.deceasedReadOnly')}
+          </ThemedText>
+        ) : (
+          <GroupedSection title={t('records.sectionTitle')}>
+            <RecordTypeGrid
+              getGridLabel={(key) => t(key)}
+              onPressType={handleRecordTypePress}
+            />
+          </GroupedSection>
+        )}
+
         {recentRecords.length > 0 ? (
           <GroupedSection title={t('records.recentTitle')}>
             {isLoading && recentRecords.length === 0 ? (
@@ -97,27 +112,6 @@ export default function RecordsScreen() {
             )}
           </GroupedSection>
         ) : null}
-
-        {isReadOnly ? (
-          <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.subtitle}>
-            {t('records.deceasedReadOnly')}
-          </ThemedText>
-        ) : (
-          <GroupedSection title={t('records.sectionTitle')}>
-            {RECORD_TYPES.map((recordType, index) => (
-              <RecordTypeRow
-                key={recordType.id}
-                label={t(recordType.labelKey)}
-                icon={recordType.icon}
-                isLast={index === RECORD_TYPES.length - 1}
-                onPress={() => handleRecordTypePress(recordType.id)}
-              />
-            ))}
-          </GroupedSection>
-        )}
       </ScreenContainer>
     </>
   );

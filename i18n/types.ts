@@ -319,6 +319,15 @@ export type Translations = {
       weight: string;
       other: string;
     };
+    grid: {
+      vetVisit: string;
+      vaccine: string;
+      parasite: string;
+      medication: string;
+      vomiting: string;
+      weight: string;
+      other: string;
+    };
   };
   notifications: {
     reminderTitle: string;

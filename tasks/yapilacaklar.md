@@ -120,7 +120,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 - [x] **Check-ins**: write-through + pull + yerel→bulut migrasyon
 - [x] **Records**: write-through + pull + yerel→bulut migrasyon
 - [x] **Profil** (isim + avatar): `profiles` tablosu + `avatars` Storage bucket (`0002_profiles.sql`); cihazlar arası
-- [ ] Pet fotoğrafı → Supabase Storage (avatar altyapısı hazır, aynı desen)
+- [x] Pet fotoğrafı → Supabase Storage (`pet-photos` bucket + RLS, `0004_pet_photos.sql`; `uploadPetPhoto`/`deletePetPhotoFiles`; edit-pet seçim anında yükler; pet/hesap silmede temizlik)
 - [ ] *(İleri faz)* Offline-first kuyruk + last-write-wins çakışma çözümü
 
 **Bootstrap akışı (uygulandı):**

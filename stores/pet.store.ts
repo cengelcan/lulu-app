@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 import { syncCheckInReminderSchedule } from '@/services/notifications/schedule';
-import { deleteRemotePet, pushPet } from '@/services/sync/pets-sync';
+import { deletePetPhotoFiles, deleteRemotePet, pushPet } from '@/services/sync/pets-sync';
 import { removeActivePetId } from '@/storage/prefs.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -145,11 +145,18 @@ export const usePetStore = create<PetState>((set, get) => ({
       const wasActive = get().pet?.id === id;
       await petStorage.deletePet(id);
 
-      if (getActiveUserId()) {
+      const userId = getActiveUserId();
+      if (userId) {
         try {
           await deleteRemotePet(id);
         } catch (syncError) {
           console.warn('Failed to delete pet from cloud', syncError);
+        }
+
+        try {
+          await deletePetPhotoFiles(userId, id);
+        } catch (syncError) {
+          console.warn('Failed to delete pet photo from cloud', syncError);
         }
       }
 

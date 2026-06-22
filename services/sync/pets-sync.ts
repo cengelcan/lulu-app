@@ -1,3 +1,5 @@
+import { decode } from 'base64-arraybuffer';
+
 import { supabase } from '@/lib/supabase';
 import * as petStorage from '@/storage/pet.storage';
 import type {
@@ -8,6 +10,22 @@ import type {
   PetSpayNeuterStatus,
   PetSpecies,
 } from '@/types/pet';
+
+const PET_PHOTO_BUCKET = 'pet-photos';
+
+function extensionForMimeType(mimeType: string | null): string {
+  if (!mimeType) {
+    return 'jpg';
+  }
+
+  const subtype = mimeType.split('/')[1]?.toLowerCase();
+
+  if (!subtype) {
+    return 'jpg';
+  }
+
+  return subtype === 'jpeg' ? 'jpg' : subtype;
+}
 
 type RemotePetRow = {
   id: string;
@@ -98,6 +116,64 @@ export async function deleteRemotePet(id: string): Promise<void> {
 
   if (error) {
     throw new Error(error.message);
+  }
+}
+
+/**
+ * Uploads a pet photo (base64 image bytes) to Supabase Storage and returns a
+ * public, cache-busted URL. The file is stored under the owner's folder so the
+ * storage RLS policy permits the write (mirrors the avatar upload pattern).
+ */
+export async function uploadPetPhoto(
+  userId: string,
+  petId: string,
+  base64: string,
+  mimeType: string | null
+): Promise<string> {
+  const extension = extensionForMimeType(mimeType);
+  const path = `${userId}/${petId}.${extension}`;
+  const contentType = mimeType ?? 'image/jpeg';
+
+  const { error } = await supabase.storage
+    .from(PET_PHOTO_BUCKET)
+    .upload(path, decode(base64), { contentType, upsert: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const { data } = supabase.storage.from(PET_PHOTO_BUCKET).getPublicUrl(path);
+  return `${data.publicUrl}?v=${Date.now()}`;
+}
+
+/**
+ * Removes pet photo files from Storage. Storage objects are not covered by the
+ * pets FK cascade, so they must be deleted via the Storage API. Pass a petId to
+ * remove a single pet's photo, or omit it to clear the whole user folder (used
+ * during account deletion). Best-effort: a missing folder is not an error.
+ */
+export async function deletePetPhotoFiles(userId: string, petId?: string): Promise<void> {
+  const { data, error: listError } = await supabase.storage.from(PET_PHOTO_BUCKET).list(userId);
+
+  if (listError) {
+    throw new Error(listError.message);
+  }
+
+  if (!data || data.length === 0) {
+    return;
+  }
+
+  const targets = petId ? data.filter((file) => file.name.startsWith(`${petId}.`)) : data;
+
+  if (targets.length === 0) {
+    return;
+  }
+
+  const paths = targets.map((file) => `${userId}/${file.name}`);
+  const { error: removeError } = await supabase.storage.from(PET_PHOTO_BUCKET).remove(paths);
+
+  if (removeError) {
+    throw new Error(removeError.message);
   }
 }
 

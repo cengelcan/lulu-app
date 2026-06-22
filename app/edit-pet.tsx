@@ -32,7 +32,9 @@ import {
   validateSpecies,
 } from '@/stores/setup.store';
 import { pickPetPhotoFromGallery } from '@/services/pet-photo';
+import { uploadPetPhoto } from '@/services/sync/pets-sync';
 import { usePetStore } from '@/stores/pet.store';
+import { useUserStore } from '@/stores/user.store';
 import type {
   HealthCondition,
   PetAgeGroup,
@@ -224,18 +226,31 @@ export default function EditPetScreen() {
     try {
       const result = await pickPetPhotoFromGallery();
 
-      if (result.ok) {
-        setPhotoUri(result.uri);
+      if (!result.ok) {
+        if (result.reason === 'permission_denied') {
+          setValidationError(t('pet.photoPermissionError'));
+        }
         return;
       }
 
-      if (result.reason === 'permission_denied') {
-        setValidationError(t('pet.photoPermissionError'));
+      // Upload the picked image to cloud storage so the photo syncs across
+      // devices; fall back to the local uri if the upload fails (best-effort).
+      let nextPhotoUri = result.uri;
+      const userId = useUserStore.getState().userId;
+
+      if (userId && pet && result.base64) {
+        try {
+          nextPhotoUri = await uploadPetPhoto(userId, pet.id, result.base64, result.mimeType);
+        } catch (uploadError) {
+          console.warn('Failed to upload pet photo to cloud', uploadError);
+        }
       }
+
+      setPhotoUri(nextPhotoUri);
     } finally {
       setIsPickingPhoto(false);
     }
-  }, [clearError]);
+  }, [clearError, pet, t]);
 
   const handleSave = useCallback(async () => {
     if (!pet) {

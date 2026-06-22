@@ -12,7 +12,7 @@ import {
 } from '@/services/auth';
 import { wipeUserScopedData } from '@/services/cleanup/wipe-user-scoped-data';
 import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
-import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
+import { deletePetPhotoFiles, pullPetsIntoLocal } from '@/services/sync/pets-sync';
 import {
   deleteAvatarFiles,
   pullProfileIntoLocal,
@@ -238,6 +238,12 @@ export const useUserStore = create<UserState>((set, get) => ({
         await deleteAvatarFiles(userId);
       } catch (error) {
         console.warn('Failed to delete avatar files during account deletion', error);
+      }
+
+      try {
+        await deletePetPhotoFiles(userId);
+      } catch (error) {
+        console.warn('Failed to delete pet photo files during account deletion', error);
       }
     }
 

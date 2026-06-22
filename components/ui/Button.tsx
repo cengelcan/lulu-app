@@ -17,6 +17,8 @@ const variantStyles: Record<
   {
     background: ThemeColor;
     text: ThemeColor;
+    bordered?: boolean;
+    transparent?: boolean;
   }
 > = {
   primary: {
@@ -24,12 +26,14 @@ const variantStyles: Record<
     text: 'primaryText',
   },
   secondary: {
-    background: 'secondary',
-    text: 'secondaryText',
+    background: 'surfaceElevated',
+    text: 'text',
+    bordered: true,
   },
   ghost: {
     background: 'background',
-    text: 'primary',
+    text: 'text',
+    transparent: true,
   },
   destructive: {
     background: 'alert',
@@ -57,11 +61,11 @@ export function Button({ title, variant = 'primary', disabled, style, onPress, .
       onPress={handlePress}
       style={({ pressed }) => [
         styles.base,
-        variant === 'ghost' && styles.ghost,
+        tokens.bordered && styles.bordered,
         {
-          backgroundColor: variant === 'ghost' ? 'transparent' : backgroundColor,
-          borderColor: variant === 'ghost' ? borderColor : undefined,
-          opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+          backgroundColor: tokens.transparent ? 'transparent' : backgroundColor,
+          borderColor: tokens.bordered ? borderColor : undefined,
+          opacity: disabled ? 0.45 : pressed ? 0.85 : 1,
         },
         style,
       ]}
@@ -85,7 +89,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ghost: {
+  bordered: {
     borderWidth: 1,
   },
   label: {

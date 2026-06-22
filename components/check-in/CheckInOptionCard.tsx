@@ -10,7 +10,7 @@ import Animated, {
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { IconSymbolName } from '@/components/ui/icon-symbol';
-import { Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 type CheckInOptionCardProps = {
@@ -110,7 +110,7 @@ export function CheckInOptionCard({
 const styles = StyleSheet.create({
   card: {
     minHeight: 112,
-    borderRadius: 18,
+    borderRadius: Radius.xl,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.lg,
     alignItems: 'center',

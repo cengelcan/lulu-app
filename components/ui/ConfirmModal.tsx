@@ -28,7 +28,7 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
-  const surfaceColor = useThemeColor({}, 'surface');
+  const surfaceColor = useThemeColor({}, 'surfaceElevated');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   return (

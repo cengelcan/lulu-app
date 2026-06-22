@@ -1,4 +1,4 @@
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -13,7 +13,7 @@ type ComingSoonModalProps = {
 
 export function ComingSoonModal({ visible, onDismiss }: ComingSoonModalProps) {
   const { t } = useTranslation();
-  const surfaceColor = useThemeColor({}, 'surface');
+  const surfaceColor = useThemeColor({}, 'surfaceElevated');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   return (

@@ -231,111 +231,104 @@ Overall wellbeing indicator based on collected data.
 
 # Design System
 
+The design system follows `design.md` — a clean, Cal.com-inspired monochrome
+system. Tokens live in `constants/theme.ts` and flow through `useThemeColor`,
+`ThemedText`, and the shared UI components, so the whole app is driven from a
+single source of truth.
+
 ## Design Direction
 
-Apple Health for Cats & Dogs
+Modern, confident, monochrome SaaS — applied to a pet health journal.
 
 The app should feel:
 
 - Professional
 - Trustworthy
 - Calm
-- Premium
+- Precise
+
+Brand voltage comes from typography (weight 600 display with negative
+letter-spacing) and generous whitespace — not from accent colors. The action
+layer is monochrome: primary CTAs are near-black on light, near-white on dark.
 
 Avoid:
 
 - Cartoon aesthetics
 - Bright playful colors
+- Accent colors on primary CTAs
 - Gamification-heavy interfaces
 
 ---
 
 # Visual Style
 
-## Design Category
-
-Warm Medical
-
-A balance between:
-
-- Healthcare
-- Pet Care
-- Emotional Connection
+White canvas with black primary CTAs, light-gray cards, and a strictly
+hierarchical type scale. The Dark Mode theme is derived from `design.md`'s dark
+surfaces (`#101010` / `#1a1a1a`).
 
 ---
 
 # Color Palette
 
-## Primary
+Monochrome at the action layer; semantic colors only for status. Defined in
+`constants/theme.ts` (`Palette`, `Colors.light`, `Colors.dark`).
 
-Sage Green
+## Light
 
-HEX: #6B8F71
+| Role | HEX |
+|---|---|
+| Ink / primary text & CTA | `#111111` |
+| Body / secondary text | `#6b7280` |
+| Canvas / background | `#ffffff` |
+| Card surface | `#f5f5f5` |
+| Elevated surface (inputs, modals) | `#ffffff` |
+| Hairline / border | `#e5e7eb` |
+| On-primary text | `#ffffff` |
 
-Used for:
+## Dark
 
-- Buttons
-- Highlights
-- Positive indicators
+| Role | HEX |
+|---|---|
+| Background | `#101010` |
+| Card surface | `#1a1a1a` |
+| Primary / CTA (inverted) | `#ffffff` |
+| On-primary text | `#111111` |
+| Secondary text | `#a1a1aa` |
+| Border | `#2a2a2a` |
 
----
+## Semantic (both themes)
 
-## Secondary
-
-Soft Sage
-
-HEX: #8FAE96
-
-Used for:
-
-- Supporting UI elements
-- Charts
-- Secondary actions
-
----
-
-## Background
-
-Warm Cream
-
-HEX: #FAF8F4
-
-Used for:
-
-- Main backgrounds
-- Empty states
-
----
-
-## Success
-
-HEX: #34C759
-
----
-
-## Warning
-
-HEX: #FFCC00
-
----
-
-## Alert
-
-HEX: #FF3B30
+| Role | HEX |
+|---|---|
+| Success | `#10b981` |
+| Warning | `#f59e0b` |
+| Alert / error | `#ef4444` |
+| Accent (links, rare) | `#3b82f6` |
 
 ---
 
 # Typography
 
-## iOS
+Native system font (SF Pro on iOS). The Cal Sans display voice from `design.md`
+is approximated with **weight 600 + negative letter-spacing**; body/UI text
+stays neutral. No custom fonts are bundled for V1.
 
-Font Family:
+| Token | Size / Line | Weight | Tracking |
+|---|---|---|---|
+| `displayLg` | 40 / 44 | 600 | -1.2 |
+| `displayMd` | 32 / 38 | 600 | -0.8 |
+| `title` | 28 / 34 | 600 | -0.5 |
+| `subtitle` | 22 / 28 | 600 | -0.3 |
+| `titleSmall` | 16 / 22 | 600 | 0 |
+| `body` | 16 / 24 | 400 | 0 |
+| `bodySemiBold` | 16 / 24 | 600 | 0 |
+| `caption` | 13 / 18 | 500 | 0 |
+| `button` | 16 / 20 | 600 | 0 |
 
-San Francisco (SF Pro)
+## Spacing & Radius
 
-Use Apple's native typography system.
-
-No custom fonts required for V1.
+- Spacing (4px base): `xxs 4 · xs 8 · sm 12 · md 16 · lg 24 · xl 32 · xxl 48 · section 96`.
+- Radius: `xs 4 · sm 6 · md 8` (buttons, inputs) · `lg 12` (cards) · `xl 16` (large cards) · `pill / full 9999`.
 
 ---
 
@@ -416,17 +409,15 @@ Next scheduled check-in.
 
 # Inspiration References
 
-Apple Health
+Cal.com (primary design language — see `design.md`)
 
-Apple Journal
-
-Apple Fitness
-
-Apple Reminders
+Linear
 
 Apple Human Interface Guidelines
 
-The application should follow Apple's Human Interface Guidelines as closely as possible during the initial iOS-first release.
+The visual language follows the Cal.com-inspired monochrome system in
+`design.md`, while interaction patterns and platform conventions follow Apple's
+Human Interface Guidelines for the iOS-first release.
 
 ---
 

@@ -153,6 +153,6 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: Radius.lg,
     overflow: 'hidden',
-    backgroundColor: '#e7eae8',
+    backgroundColor: '#e5e7eb',
   },
 });

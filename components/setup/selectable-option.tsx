@@ -14,6 +14,7 @@ type SelectableOptionProps = {
 
 export function SelectableOption({ label, selected, onPress, disabled = false }: SelectableOptionProps) {
   const primaryColor = useThemeColor({}, 'primary');
+  const primaryTextColor = useThemeColor({}, 'primaryText');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -45,13 +46,13 @@ export function SelectableOption({ label, selected, onPress, disabled = false }:
       ]}>
       <ThemedText
         type="defaultSemiBold"
-        lightColor={selected ? '#FFFFFF' : undefined}
-        darkColor={selected ? '#FFFFFF' : undefined}
+        lightColor={selected ? primaryTextColor : undefined}
+        darkColor={selected ? primaryTextColor : undefined}
         style={styles.label}>
         {label}
       </ThemedText>
       {selected ? (
-        <ThemedText lightColor="#FFFFFF" darkColor="#FFFFFF" style={styles.checkmark}>
+        <ThemedText lightColor={primaryTextColor} darkColor={primaryTextColor} style={styles.checkmark}>
           ✓
         </ThemedText>
       ) : (

@@ -21,6 +21,7 @@ export function SettingsToggleRow({
 }: SettingsToggleRowProps) {
   const borderColor = useThemeColor({}, 'border');
   const primaryColor = useThemeColor({}, 'primary');
+  const primaryTextColor = useThemeColor({}, 'primaryText');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   return (
@@ -37,7 +38,7 @@ export function SettingsToggleRow({
         disabled={disabled}
         ios_backgroundColor={textSecondaryColor}
         onValueChange={onValueChange}
-        thumbColor="#FFFFFF"
+        thumbColor={primaryTextColor}
         trackColor={{ false: textSecondaryColor, true: primaryColor }}
         value={value}
       />

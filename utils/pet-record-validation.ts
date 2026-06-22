@@ -1,7 +1,7 @@
 import type {
   PetRecordMetadataByType,
   RecordTypeId,
-  VomitingSeverity,
+  SymptomSeverity,
   WeightUnit,
 } from '@/types/pet-record';
 import { isValidLocalDateString } from '@/utils/date';
@@ -11,9 +11,11 @@ export type RecordValidationErrorKey =
   | 'records.validation.dateInvalid'
   | 'records.validation.vaccineNameRequired'
   | 'records.validation.medicationNameRequired'
+  | 'records.validation.symptomNameRequired'
+  | 'records.validation.procedureNameRequired'
+  | 'records.validation.testNameRequired'
   | 'records.validation.weightValueRequired'
   | 'records.validation.weightValueInvalid'
-  | 'records.validation.titleRequired'
   | 'records.validation.notesTooLong';
 
 export function validatePetRecordForm(
@@ -48,8 +50,10 @@ export function validatePetRecordForm(
       const data = metadata as PetRecordMetadataByType['medication'];
       return data.medicationName.trim() ? null : 'records.validation.medicationNameRequired';
     }
-    case 'vomiting':
-      return null;
+    case 'symptom': {
+      const data = metadata as PetRecordMetadataByType['symptom'];
+      return data.symptomName.trim() ? null : 'records.validation.symptomNameRequired';
+    }
     case 'weight': {
       const data = metadata as PetRecordMetadataByType['weight'];
       if (!Number.isFinite(data.value) || data.value <= 0) {
@@ -60,9 +64,13 @@ export function validatePetRecordForm(
       }
       return null;
     }
-    case 'other': {
-      const data = metadata as PetRecordMetadataByType['other'];
-      return data.title?.trim() ? null : 'records.validation.titleRequired';
+    case 'operation': {
+      const data = metadata as PetRecordMetadataByType['operation'];
+      return data.procedureName.trim() ? null : 'records.validation.procedureNameRequired';
+    }
+    case 'test_result': {
+      const data = metadata as PetRecordMetadataByType['test_result'];
+      return data.testName.trim() ? null : 'records.validation.testNameRequired';
     }
   }
 }
@@ -71,7 +79,7 @@ function isWeightUnit(value: string): value is WeightUnit {
   return value === 'kg' || value === 'lb';
 }
 
-export function isVomitingSeverity(value: string): value is VomitingSeverity {
+export function isSymptomSeverity(value: string): value is SymptomSeverity {
   return value === 'mild' || value === 'moderate' || value === 'severe';
 }
 

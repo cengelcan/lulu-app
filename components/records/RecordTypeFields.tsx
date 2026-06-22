@@ -1,16 +1,22 @@
-import { StyleSheet, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { RecordTextField } from '@/components/records/RecordTextField';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { DatePickerField } from '@/components/ui/DatePickerField';
-import { VOMITING_SEVERITY_OPTIONS, WEIGHT_UNIT_OPTIONS } from '@/constants/pet-record-form';
-import { Spacing } from '@/constants/theme';
+import {
+  SYMPTOM_SEVERITY_OPTIONS,
+  SYMPTOM_SUGGESTION_KEYS,
+  WEIGHT_UNIT_OPTIONS,
+} from '@/constants/pet-record-form';
+import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import type {
   PetRecordMetadataByType,
   RecordTypeId,
-  VomitingSeverity,
+  SymptomSeverity,
   WeightUnit,
 } from '@/types/pet-record';
 import { parseWeightInput } from '@/utils/pet-record-validation';
@@ -23,6 +29,10 @@ type RecordTypeFieldsProps = {
 
 export function RecordTypeFields({ type, metadata, onChangeMetadata }: RecordTypeFieldsProps) {
   const { t } = useTranslation();
+  const primaryColor = useThemeColor({}, 'primary');
+  const primaryTextColor = useThemeColor({}, 'primaryText');
+  const borderColor = useThemeColor({}, 'border');
+  const surfaceColor = useThemeColor({}, 'surface');
 
   switch (type) {
     case 'vet_visit': {
@@ -151,28 +161,77 @@ export function RecordTypeFields({ type, metadata, onChangeMetadata }: RecordTyp
         </View>
       );
     }
-    case 'vomiting': {
-      const data = metadata as PetRecordMetadataByType['vomiting'];
+    case 'symptom': {
+      const data = metadata as PetRecordMetadataByType['symptom'];
+
+      const handleSuggestionPress = (suggestion: string) => {
+        if (process.env.EXPO_OS === 'ios') {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        onChangeMetadata({ ...data, symptomName: suggestion });
+      };
+
       return (
         <View style={styles.section}>
-          <View style={styles.labelRow}>
-            <ThemedText type="defaultSemiBold">{t('records.fields.severity')}</ThemedText>
-            <ThemedText style={styles.optional}>{t('common.optional')}</ThemedText>
+          <RecordTextField
+            label={t('records.fields.symptomName')}
+            placeholder={t('records.fields.symptomNamePlaceholder')}
+            value={data.symptomName}
+            onChangeText={(symptomName) => onChangeMetadata({ ...data, symptomName })}
+          />
+          <View style={styles.field}>
+            <ThemedText type="defaultSemiBold">{t('records.fields.symptomSuggestions')}</ThemedText>
+            <View style={styles.suggestionGroup}>
+              {SYMPTOM_SUGGESTION_KEYS.map((key) => {
+                const label = t(key);
+                const selected = data.symptomName.trim() === label;
+
+                return (
+                  <Pressable
+                    key={key}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    onPress={() => handleSuggestionPress(label)}
+                    style={({ pressed }) => [
+                      styles.suggestionChip,
+                      {
+                        backgroundColor: selected ? primaryColor : surfaceColor,
+                        borderColor: selected ? primaryColor : borderColor,
+                        opacity: pressed ? 0.85 : 1,
+                      },
+                    ]}>
+                    <ThemedText
+                      type="defaultSemiBold"
+                      lightColor={selected ? primaryTextColor : undefined}
+                      darkColor={selected ? primaryTextColor : undefined}
+                      style={styles.suggestionLabel}>
+                      {label}
+                    </ThemedText>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
-          <View style={styles.optionGroup}>
-            {VOMITING_SEVERITY_OPTIONS.map((severity) => (
-              <SelectableOption
-                key={severity}
-                label={t(`records.severity.${severity}`)}
-                selected={data.severity === severity}
-                onPress={() =>
-                  onChangeMetadata({
-                    ...data,
-                    severity: data.severity === severity ? null : (severity as VomitingSeverity),
-                  })
-                }
-              />
-            ))}
+          <View style={styles.field}>
+            <View style={styles.labelRow}>
+              <ThemedText type="defaultSemiBold">{t('records.fields.severity')}</ThemedText>
+              <ThemedText style={styles.optional}>{t('common.optional')}</ThemedText>
+            </View>
+            <View style={styles.optionGroup}>
+              {SYMPTOM_SEVERITY_OPTIONS.map((severity) => (
+                <SelectableOption
+                  key={severity}
+                  label={t(`records.severity.${severity}`)}
+                  selected={data.severity === severity}
+                  onPress={() =>
+                    onChangeMetadata({
+                      ...data,
+                      severity: data.severity === severity ? null : (severity as SymptomSeverity),
+                    })
+                  }
+                />
+              ))}
+            </View>
           </View>
         </View>
       );
@@ -206,16 +265,36 @@ export function RecordTypeFields({ type, metadata, onChangeMetadata }: RecordTyp
         </View>
       );
     }
-    case 'other': {
-      const data = metadata as PetRecordMetadataByType['other'];
+    case 'operation': {
+      const data = metadata as PetRecordMetadataByType['operation'];
+      return (
+        <View style={styles.section}>
+          <RecordTextField
+            label={t('records.fields.procedureName')}
+            placeholder={t('records.fields.procedureNamePlaceholder')}
+            value={data.procedureName}
+            onChangeText={(procedureName) => onChangeMetadata({ ...data, procedureName })}
+          />
+          <RecordTextField
+            label={t('records.fields.clinicName')}
+            optional
+            placeholder={t('records.fields.clinicNamePlaceholder')}
+            value={data.clinicName ?? ''}
+            onChangeText={(clinicName) =>
+              onChangeMetadata({ ...data, clinicName: clinicName.trim() ? clinicName : null })
+            }
+          />
+        </View>
+      );
+    }
+    case 'test_result': {
+      const data = metadata as PetRecordMetadataByType['test_result'];
       return (
         <RecordTextField
-          label={t('records.fields.title')}
-          placeholder={t('records.fields.titlePlaceholder')}
-          value={data.title ?? ''}
-          onChangeText={(title) =>
-            onChangeMetadata({ ...data, title: title.trim() ? title : null })
-          }
+          label={t('records.fields.testName')}
+          placeholder={t('records.fields.testNamePlaceholder')}
+          value={data.testName}
+          onChangeText={(testName) => onChangeMetadata({ ...data, testName })}
         />
       );
     }
@@ -240,5 +319,19 @@ const styles = StyleSheet.create({
   },
   optionGroup: {
     gap: Spacing.sm,
+  },
+  suggestionGroup: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  suggestionChip: {
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  suggestionLabel: {
+    ...Typography.caption,
   },
 });

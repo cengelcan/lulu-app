@@ -272,11 +272,16 @@ export type Translations = {
       frequencyPlaceholder: string;
       endDate: string;
       severity: string;
+      symptomName: string;
+      symptomNamePlaceholder: string;
+      symptomSuggestions: string;
+      procedureName: string;
+      procedureNamePlaceholder: string;
+      testName: string;
+      testNamePlaceholder: string;
       weightValue: string;
       weightValuePlaceholder: string;
       weightUnit: string;
-      title: string;
-      titlePlaceholder: string;
     };
     severity: {
       mild: string;
@@ -293,8 +298,9 @@ export type Translations = {
       parasite: string;
       medication: string;
       vomiting: string;
+      operation: string;
+      testResult: string;
       weightValue: string;
-      other: string;
     };
     attachment: {
       title: string;
@@ -305,28 +311,41 @@ export type Translations = {
       dateInvalid: string;
       vaccineNameRequired: string;
       medicationNameRequired: string;
+      symptomNameRequired: string;
+      procedureNameRequired: string;
+      testNameRequired: string;
       weightValueRequired: string;
       weightValueInvalid: string;
-      titleRequired: string;
       notesTooLong: string;
+    };
+    symptomSuggestions: {
+      vomiting: string;
+      lethargy: string;
+      lossOfAppetite: string;
+      diarrhea: string;
+      itching: string;
+      coughing: string;
+      limping: string;
     };
     types: {
       vetVisit: string;
       vaccine: string;
       parasite: string;
       medication: string;
-      vomiting: string;
+      symptom: string;
       weight: string;
-      other: string;
+      operation: string;
+      testResult: string;
     };
     grid: {
       vetVisit: string;
       vaccine: string;
       parasite: string;
       medication: string;
-      vomiting: string;
+      symptom: string;
       weight: string;
-      other: string;
+      operation: string;
+      testResult: string;
     };
   };
   notifications: {

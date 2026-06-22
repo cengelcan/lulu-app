@@ -1,10 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import * as petRecordStorage from '@/storage/pet-record.storage';
-import {
-  createDefaultMetadata,
-  isRecordTypeId,
-  type PetRecord,
-} from '@/types/pet-record';
+import type { PetRecord } from '@/types/pet-record';
+import { normalizeLegacyRecordMetadata, normalizePetRecord } from '@/utils/pet-record-normalize';
 
 type RemotePetRecordRow = {
   id: string;
@@ -19,39 +16,38 @@ type RemotePetRecordRow = {
 };
 
 function toRemoteRow(record: PetRecord, userId: string): Record<string, unknown> {
+  const normalized = normalizePetRecord(record);
+
   return {
-    id: record.id,
+    id: normalized.id,
     user_id: userId,
-    pet_id: record.petId,
-    type: record.type,
-    date: record.date,
-    notes: record.notes ?? null,
-    metadata: record.metadata,
-    created_at: record.createdAt,
-    updated_at: record.updatedAt,
+    pet_id: normalized.petId,
+    type: normalized.type,
+    date: normalized.date,
+    notes: normalized.notes ?? null,
+    metadata: normalized.metadata,
+    created_at: normalized.createdAt,
+    updated_at: normalized.updatedAt,
   };
 }
 
 function fromRemoteRow(row: RemotePetRecordRow): PetRecord {
-  if (!isRecordTypeId(row.type)) {
+  const normalized = normalizeLegacyRecordMetadata(row.type, row.metadata);
+
+  if (!normalized) {
     throw new Error(`Unknown pet record type: ${row.type}`);
   }
 
-  const metadata = {
-    ...createDefaultMetadata(row.type),
-    ...(row.metadata ?? {}),
-  };
-
-  return {
+  return normalizePetRecord({
     id: row.id,
     petId: row.pet_id,
     date: row.date,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    type: row.type,
-    metadata,
-  } as PetRecord;
+    type: normalized.type,
+    metadata: normalized.metadata,
+  } as PetRecord);
 }
 
 export async function fetchRemotePetRecords(userId: string): Promise<PetRecord[]> {

@@ -3,11 +3,12 @@ export type RecordTypeId =
   | 'vaccine'
   | 'parasite'
   | 'medication'
-  | 'vomiting'
+  | 'symptom'
   | 'weight'
-  | 'other';
+  | 'operation'
+  | 'test_result';
 
-export type VomitingSeverity = 'mild' | 'moderate' | 'severe';
+export type SymptomSeverity = 'mild' | 'moderate' | 'severe';
 
 export type WeightUnit = 'kg' | 'lb';
 
@@ -33,8 +34,9 @@ export type MedicationMetadata = {
   endDate?: string | null;
 };
 
-export type VomitingMetadata = {
-  severity?: VomitingSeverity | null;
+export type SymptomMetadata = {
+  symptomName: string;
+  severity?: SymptomSeverity | null;
 };
 
 export type WeightMetadata = {
@@ -42,6 +44,21 @@ export type WeightMetadata = {
   unit: WeightUnit;
 };
 
+export type OperationMetadata = {
+  procedureName: string;
+  clinicName?: string | null;
+};
+
+export type TestResultMetadata = {
+  testName: string;
+};
+
+/** @deprecated Legacy metadata — only used during migration from pre-symptom records. */
+export type VomitingMetadata = {
+  severity?: SymptomSeverity | null;
+};
+
+/** @deprecated Legacy metadata — only used during migration from pre-symptom records. */
 export type OtherMetadata = {
   title?: string | null;
 };
@@ -51,9 +68,10 @@ export type PetRecordMetadataByType = {
   vaccine: VaccineMetadata;
   parasite: ParasiteMetadata;
   medication: MedicationMetadata;
-  vomiting: VomitingMetadata;
+  symptom: SymptomMetadata;
   weight: WeightMetadata;
-  other: OtherMetadata;
+  operation: OperationMetadata;
+  test_result: TestResultMetadata;
 };
 
 type BasePetRecord = {
@@ -85,9 +103,10 @@ export const RECORD_TYPE_IDS: readonly RecordTypeId[] = [
   'vaccine',
   'parasite',
   'medication',
-  'vomiting',
+  'symptom',
   'weight',
-  'other',
+  'operation',
+  'test_result',
 ] as const;
 
 export function isRecordTypeId(value: string): value is RecordTypeId {
@@ -104,11 +123,13 @@ export function createDefaultMetadata<T extends RecordTypeId>(type: T): PetRecor
       return { productName: null } as PetRecordMetadataByType[T];
     case 'medication':
       return { medicationName: '' } as PetRecordMetadataByType[T];
-    case 'vomiting':
-      return { severity: null } as PetRecordMetadataByType[T];
+    case 'symptom':
+      return { symptomName: '', severity: null } as PetRecordMetadataByType[T];
     case 'weight':
       return { value: 0, unit: 'kg' } as PetRecordMetadataByType[T];
-    case 'other':
-      return { title: null } as PetRecordMetadataByType[T];
+    case 'operation':
+      return { procedureName: '', clinicName: null } as PetRecordMetadataByType[T];
+    case 'test_result':
+      return { testName: '' } as PetRecordMetadataByType[T];
   }
 }

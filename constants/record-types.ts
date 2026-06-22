@@ -8,18 +8,20 @@ export type RecordTypeLabelKey =
   | 'records.types.vaccine'
   | 'records.types.parasite'
   | 'records.types.medication'
-  | 'records.types.vomiting'
+  | 'records.types.symptom'
   | 'records.types.weight'
-  | 'records.types.other';
+  | 'records.types.operation'
+  | 'records.types.testResult';
 
 export type RecordTypeGridLabelKey =
   | 'records.grid.vetVisit'
   | 'records.grid.vaccine'
   | 'records.grid.parasite'
   | 'records.grid.medication'
-  | 'records.grid.vomiting'
+  | 'records.grid.symptom'
   | 'records.grid.weight'
-  | 'records.grid.other';
+  | 'records.grid.operation'
+  | 'records.grid.testResult';
 
 export type RecordTypeDefinition = {
   id: RecordTypeId;
@@ -59,10 +61,10 @@ export const RECORD_TYPES: readonly RecordTypeDefinition[] = [
     backgroundColor: '#FFD6E8',
   },
   {
-    id: 'vomiting',
+    id: 'symptom',
     icon: 'exclamationmark.triangle',
-    labelKey: 'records.types.vomiting',
-    gridLabelKey: 'records.grid.vomiting',
+    labelKey: 'records.types.symptom',
+    gridLabelKey: 'records.grid.symptom',
     backgroundColor: '#FFE4C4',
   },
   {
@@ -73,10 +75,17 @@ export const RECORD_TYPES: readonly RecordTypeDefinition[] = [
     backgroundColor: '#FFF3B0',
   },
   {
-    id: 'other',
-    icon: 'ellipsis.circle.fill',
-    labelKey: 'records.types.other',
-    gridLabelKey: 'records.grid.other',
+    id: 'operation',
+    icon: 'staroflife.fill',
+    labelKey: 'records.types.operation',
+    gridLabelKey: 'records.grid.operation',
     backgroundColor: '#E8E0F0',
+  },
+  {
+    id: 'test_result',
+    icon: 'doc.text.fill',
+    labelKey: 'records.types.testResult',
+    gridLabelKey: 'records.grid.testResult',
+    backgroundColor: '#C4E8FF',
   },
 ] as const;

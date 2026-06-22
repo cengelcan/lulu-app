@@ -5,11 +5,12 @@ export const RECORD_TYPE_EMOJIS: Record<RecordTypeId, string> = {
   vaccine: '💉',
   parasite: '🐛',
   medication: '💊',
-  vomiting: '⚠️',
+  symptom: '⚠️',
   weight: '⚖️',
-  other: '📋',
+  operation: '🩺',
+  test_result: '📋',
 };
 
 export function getRecordTypeEmoji(typeId: RecordTypeId): string {
-  return RECORD_TYPE_EMOJIS[typeId] ?? RECORD_TYPE_EMOJIS.other;
+  return RECORD_TYPE_EMOJIS[typeId] ?? RECORD_TYPE_EMOJIS.symptom;
 }

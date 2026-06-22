@@ -1,5 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
+import { normalizeLegacyRecordMetadata } from '@/utils/pet-record-normalize';
+
 const DATABASE_NAME = 'pet_health_journal.db';
 
 let database: SQLite.SQLiteDatabase | null = null;
@@ -12,7 +14,7 @@ let database: SQLite.SQLiteDatabase | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 10;
+const CURRENT_SCHEMA_VERSION = 11;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -216,6 +218,43 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     await ensurePetStatusColumns(db);
     version = 10;
     await setSchemaVersion(db, version);
+  }
+
+  if (version < 11) {
+    await migrateRecordTypes(db);
+    version = 11;
+    await setSchemaVersion(db, version);
+  }
+}
+
+async function migrateRecordTypes(db: SQLite.SQLiteDatabase): Promise<void> {
+  const rows = await db.getAllAsync<{
+    id: string;
+    type: string;
+    metadata: string;
+  }>("SELECT id, type, metadata FROM pet_records WHERE type IN ('vomiting', 'other')");
+
+  for (const row of rows) {
+    let metadata: unknown;
+
+    try {
+      metadata = JSON.parse(row.metadata);
+    } catch {
+      metadata = {};
+    }
+
+    const normalized = normalizeLegacyRecordMetadata(row.type, metadata);
+
+    if (!normalized) {
+      continue;
+    }
+
+    await db.runAsync(
+      'UPDATE pet_records SET type = ?, metadata = ? WHERE id = ?',
+      normalized.type,
+      JSON.stringify(normalized.metadata),
+      row.id
+    );
   }
 }
 

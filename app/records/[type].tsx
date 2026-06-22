@@ -20,7 +20,6 @@ import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 import {
   createDefaultMetadata,
-  isRecordTypeId,
   PET_RECORD_NOTES_MAX_LENGTH,
   type PetRecord,
   type PetRecordMetadataByType,
@@ -28,6 +27,7 @@ import {
 } from '@/types/pet-record';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { getRecordTypeLabelKey } from '@/utils/pet-record-display';
+import { resolveRecordTypeId } from '@/utils/pet-record-normalize';
 import { validatePetRecordForm } from '@/utils/pet-record-validation';
 
 function createRecordId(): string {
@@ -78,14 +78,26 @@ function normalizeMetadataForSave<T extends RecordTypeId>(
         endDate: data.endDate?.trim() ? data.endDate.trim() : null,
       } as PetRecordMetadataByType[T];
     }
-    case 'vomiting':
-      return metadata;
+    case 'symptom': {
+      const data = metadata as PetRecordMetadataByType['symptom'];
+      return {
+        symptomName: data.symptomName.trim(),
+        severity: data.severity ?? null,
+      } as PetRecordMetadataByType[T];
+    }
     case 'weight':
       return metadata;
-    case 'other': {
-      const data = metadata as PetRecordMetadataByType['other'];
+    case 'operation': {
+      const data = metadata as PetRecordMetadataByType['operation'];
       return {
-        title: normalizeOptionalText(data.title ?? ''),
+        procedureName: data.procedureName.trim(),
+        clinicName: normalizeOptionalText(data.clinicName ?? ''),
+      } as PetRecordMetadataByType[T];
+    }
+    case 'test_result': {
+      const data = metadata as PetRecordMetadataByType['test_result'];
+      return {
+        testName: data.testName.trim(),
       } as PetRecordMetadataByType[T];
     }
   }
@@ -97,7 +109,7 @@ export default function RecordFormScreen() {
   const { type: typeParam, id: idParam } = useLocalSearchParams<{ type?: string; id?: string | string[] }>();
 
   const rawType = Array.isArray(typeParam) ? typeParam[0] : typeParam;
-  const recordType = rawType && isRecordTypeId(rawType) ? rawType : null;
+  const recordType = rawType ? resolveRecordTypeId(rawType) : null;
   const recordId = Array.isArray(idParam) ? idParam[0] : idParam;
 
   const pet = usePetStore((state) => state.pet);
@@ -108,7 +120,7 @@ export default function RecordFormScreen() {
   const [date, setDate] = useState(() => formatLocalDate(getTodayStart()));
   const [notes, setNotes] = useState('');
   const [metadata, setMetadata] = useState<PetRecordMetadataByType[RecordTypeId]>(() =>
-    recordType ? createDefaultMetadata(recordType) : createDefaultMetadata('other')
+    recordType ? createDefaultMetadata(recordType) : createDefaultMetadata('symptom')
   );
   const [existingRecord, setExistingRecord] = useState<PetRecord | null>(null);
   const [isHydrating, setIsHydrating] = useState(Boolean(recordId));
@@ -175,7 +187,7 @@ export default function RecordFormScreen() {
           return;
         }
 
-        if (!record || record.type !== recordType) {
+        if (!record || resolveRecordTypeId(record.type) !== recordType) {
           router.replace('/records' as Href);
           return;
         }

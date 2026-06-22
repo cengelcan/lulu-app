@@ -8,7 +8,7 @@ type TranslateFn = (key: string, params?: Record<string, string | number>) => st
 export function getRecordTypeLabelKey(type: RecordTypeId): RecordTypeLabelKey {
   const definition = RECORD_TYPES.find((item) => item.id === type);
   if (!definition) {
-    return 'records.types.other';
+    return 'records.types.symptom';
   }
 
   return definition.labelKey;
@@ -28,17 +28,33 @@ export function getRecordSummary(record: PetRecord, t: TranslateFn): string {
       return record.metadata.productName?.trim() || t('records.summary.parasite');
     case 'medication':
       return record.metadata.medicationName.trim() || t('records.summary.medication');
-    case 'vomiting':
+    case 'symptom': {
+      const name = record.metadata.symptomName.trim();
+      if (!name) {
+        return record.metadata.severity
+          ? `${t('records.summary.vomiting')} · ${t(`records.severity.${record.metadata.severity}`)}`
+          : t('records.summary.vomiting');
+      }
+
       return record.metadata.severity
-        ? t(`records.severity.${record.metadata.severity}`)
-        : t('records.summary.vomiting');
+        ? `${name} · ${t(`records.severity.${record.metadata.severity}`)}`
+        : name;
+    }
     case 'weight':
       return t('records.summary.weightValue', {
         value: record.metadata.value,
         unit: t(`records.units.${record.metadata.unit}`),
       });
-    case 'other':
-      return record.metadata.title?.trim() || t('records.summary.other');
+    case 'operation': {
+      const procedure = record.metadata.procedureName.trim();
+      const clinic = record.metadata.clinicName?.trim();
+      if (procedure && clinic) {
+        return `${procedure} · ${clinic}`;
+      }
+      return procedure || clinic || t('records.summary.operation');
+    }
+    case 'test_result':
+      return record.metadata.testName.trim() || t('records.summary.testResult');
   }
 }
 

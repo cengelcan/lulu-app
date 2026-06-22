@@ -1,0 +1,2 @@
+-- Migrate legacy pet record types (vomiting, other) to symptom.
+-- Applied via database.ts schema version 11.

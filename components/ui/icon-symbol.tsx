@@ -63,6 +63,7 @@ const MAPPING = {
   'ant.fill': 'pest-control',
   'scalemass.fill': 'monitor-weight',
   'ellipsis.circle.fill': 'more-horiz',
+  'staroflife.fill': 'medical-services',
 } as IconMapping;
 
 /**

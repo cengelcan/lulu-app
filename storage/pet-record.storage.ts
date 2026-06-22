@@ -1,10 +1,5 @@
-import {
-  createDefaultMetadata,
-  isRecordTypeId,
-  type PetRecord,
-  type PetRecordMetadataByType,
-  type RecordTypeId,
-} from '@/types/pet-record';
+import type { PetRecord, RecordTypeId } from '@/types/pet-record';
+import { normalizeLegacyRecordMetadata, normalizePetRecord } from '@/utils/pet-record-normalize';
 
 import { getDatabase } from './database';
 
@@ -19,20 +14,18 @@ type PetRecordRow = {
   updated_at: string;
 };
 
-function parseMetadata<T extends RecordTypeId>(
-  type: T,
-  raw: string
-): PetRecordMetadataByType[T] {
-  try {
-    const parsed = JSON.parse(raw) as Partial<PetRecordMetadataByType[T]>;
-    return { ...createDefaultMetadata(type), ...parsed };
-  } catch {
-    return createDefaultMetadata(type);
-  }
-}
-
 function mapPetRecordRow(row: PetRecordRow): PetRecord {
-  if (!isRecordTypeId(row.type)) {
+  let metadata: unknown;
+
+  try {
+    metadata = JSON.parse(row.metadata);
+  } catch {
+    metadata = {};
+  }
+
+  const normalized = normalizeLegacyRecordMetadata(row.type, metadata);
+
+  if (!normalized) {
     throw new Error(`Unknown pet record type: ${row.type}`);
   }
 
@@ -45,30 +38,29 @@ function mapPetRecordRow(row: PetRecordRow): PetRecord {
     updatedAt: row.updated_at,
   };
 
-  const metadata = parseMetadata(row.type, row.metadata);
-
-  return {
+  return normalizePetRecord({
     ...base,
-    type: row.type,
-    metadata,
-  } as PetRecord;
+    type: normalized.type,
+    metadata: normalized.metadata,
+  } as PetRecord);
 }
 
 export async function createPetRecord(record: PetRecord): Promise<void> {
   const db = await getDatabase();
+  const normalized = normalizePetRecord(record);
 
   await db.runAsync(
     `INSERT INTO pet_records (
       id, pet_id, type, date, notes, metadata, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    record.id,
-    record.petId,
-    record.type,
-    record.date,
-    record.notes ?? null,
-    JSON.stringify(record.metadata),
-    record.createdAt,
-    record.updatedAt
+    normalized.id,
+    normalized.petId,
+    normalized.type,
+    normalized.date,
+    normalized.notes ?? null,
+    JSON.stringify(normalized.metadata),
+    normalized.createdAt,
+    normalized.updatedAt
   );
 }
 
@@ -136,17 +128,18 @@ export async function getPetRecordsByPetIdAndDateRange(
 
 export async function updatePetRecord(record: PetRecord): Promise<void> {
   const db = await getDatabase();
+  const normalized = normalizePetRecord(record);
 
   await db.runAsync(
     `UPDATE pet_records
      SET type = ?, date = ?, notes = ?, metadata = ?, updated_at = ?
      WHERE id = ?`,
-    record.type,
-    record.date,
-    record.notes ?? null,
-    JSON.stringify(record.metadata),
-    record.updatedAt,
-    record.id
+    normalized.type,
+    normalized.date,
+    normalized.notes ?? null,
+    JSON.stringify(normalized.metadata),
+    normalized.updatedAt,
+    normalized.id
   );
 }
 

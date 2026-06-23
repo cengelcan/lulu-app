@@ -66,7 +66,6 @@ export function QuickActionItem({
           {subtitle}
         </ThemedText>
       </View>
-      <IconSymbol name="chevron.right" size={14} color={textSecondaryColor} />
     </Pressable>
   );
 }
@@ -79,7 +78,6 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     padding: Spacing.sm,
     alignItems: 'flex-start',
-    justifyContent: 'space-between',
     gap: Spacing.sm,
   },
   iconContainer: {

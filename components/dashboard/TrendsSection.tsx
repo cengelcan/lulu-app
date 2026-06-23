@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionHeader';
 import { TrendMetricCard } from '@/components/dashboard/TrendMetricCard';
+import { WeightTrendMetricCard } from '@/components/dashboard/WeightTrendMetricCard';
 import { Spacing } from '@/constants/theme';
 import type { DashboardTrends } from '@/utils/trends';
 import { useTranslation } from '@/hooks/use-translation';
@@ -21,7 +22,7 @@ export function TrendsSection({ trends }: TrendsSectionProps) {
     <View style={styles.section}>
       <DashboardSectionHeader title={t('dashboard.trendsTitle')} icon="chart.line.uptrend.xyaxis" />
       <View style={styles.row}>
-        <TrendMetricCard metric={trends.weight} />
+        <WeightTrendMetricCard metric={trends.weight} />
         <TrendMetricCard metric={trends.appetite} />
         <TrendMetricCard metric={trends.energy} />
       </View>

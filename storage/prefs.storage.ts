@@ -166,6 +166,22 @@ export async function removeNotificationPermission(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.notificationPermission);
 }
 
+export async function getPetReminderNotificationsEnabled(): Promise<boolean> {
+  const value = await AsyncStorage.getItem(StorageKeys.petReminderNotificationsEnabled);
+  return value !== 'false';
+}
+
+export async function setPetReminderNotificationsEnabled(enabled: boolean): Promise<void> {
+  await AsyncStorage.setItem(
+    StorageKeys.petReminderNotificationsEnabled,
+    enabled ? 'true' : 'false'
+  );
+}
+
+export async function removePetReminderNotificationsEnabled(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.petReminderNotificationsEnabled);
+}
+
 export async function getActivePetId(): Promise<string | null> {
   return AsyncStorage.getItem(StorageKeys.activePetId);
 }

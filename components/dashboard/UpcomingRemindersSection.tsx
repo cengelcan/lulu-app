@@ -8,31 +8,34 @@ import { Card } from '@/components/ui/Card';
 import { Spacing } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
 import { getLocaleTag } from '@/utils/locale';
-import { getRecordFormRoute } from '@/utils/pet-record-display';
+import { getReminderFormRoute } from '@/utils/pet-reminder-display';
 import { buildUpcomingReminders } from '@/utils/upcoming-reminders';
-import type { PetRecord } from '@/types/pet-record';
+import type { PetReminder } from '@/types/pet-reminder';
 
 type UpcomingRemindersSectionProps = {
-  records: PetRecord[];
+  reminders: PetReminder[];
 };
 
-export function UpcomingRemindersSection({ records }: UpcomingRemindersSectionProps) {
+export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSectionProps) {
   const router = useRouter();
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
 
-  const reminders = buildUpcomingReminders(records, locale, t);
+  const upcoming = buildUpcomingReminders(reminders, locale, t, {
+    limit: 3,
+    withinDays: 7,
+  });
 
-  if (reminders.length === 0) {
+  if (upcoming.length === 0) {
     return null;
   }
 
   const handleSeeAll = () => {
-    router.push('/records' as Href);
+    router.push('/reminders' as Href);
   };
 
-  const handleReminderPress = (recordType: PetRecord['type'], recordId: string) => {
-    router.push(getRecordFormRoute(recordType, recordId) as Href);
+  const handleReminderPress = (reminderType: PetReminder['type'], reminderId: string) => {
+    router.push(getReminderFormRoute(reminderType, reminderId) as Href);
   };
 
   return (
@@ -44,16 +47,16 @@ export function UpcomingRemindersSection({ records }: UpcomingRemindersSectionPr
         onActionPress={handleSeeAll}
       />
       <Card style={styles.card}>
-        {reminders.map((reminder, index) => (
+        {upcoming.map((reminder, index) => (
           <RecordHistoryRow
             key={reminder.key}
             title={reminder.title}
-            subtitle={reminder.subtitle}
+            subtitle={reminder.typeLabel}
             dateLabel={reminder.dateLabel}
             icon={reminder.icon}
             backgroundColor={reminder.backgroundColor}
-            isLast={index === reminders.length - 1}
-            onPress={() => handleReminderPress(reminder.recordType, reminder.recordId)}
+            isLast={index === upcoming.length - 1}
+            onPress={() => handleReminderPress(reminder.reminderType, reminder.reminderId)}
           />
         ))}
       </Card>

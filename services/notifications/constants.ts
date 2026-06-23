@@ -26,3 +26,17 @@ export const ALL_CHECK_IN_REMINDER_NOTIFICATION_IDS = [
   CHECK_IN_REMINDER_NOTIFICATION_ID,
   ...LEGACY_CHECK_IN_REMINDER_SLOT_IDS,
 ] as const;
+
+export const PET_REMINDER_NOTIFICATION_ID_PREFIX = 'pet-health-reminder-';
+
+export const ANDROID_PET_REMINDER_CHANNEL_ID = 'pet-reminders-v1';
+
+export const PET_REMINDER_REMINDER_SOUND = 'bell-ring.wav';
+
+export function getPetReminderNotificationId(reminderId: string): string {
+  return `${PET_REMINDER_NOTIFICATION_ID_PREFIX}${reminderId}`;
+}
+
+export function isPetReminderNotificationId(identifier: string): boolean {
+  return identifier.startsWith(PET_REMINDER_NOTIFICATION_ID_PREFIX);
+}

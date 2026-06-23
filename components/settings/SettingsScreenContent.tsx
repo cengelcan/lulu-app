@@ -27,7 +27,13 @@ export function SettingsScreenContent({
   const storeError = useNotificationStore((state) => state.error);
   const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
   const saveReminderTime = useNotificationStore((state) => state.saveReminderTime);
+  const savePetReminderNotificationsEnabled = useNotificationStore(
+    (state) => state.savePetReminderNotificationsEnabled
+  );
   const savePermission = useNotificationStore((state) => state.savePermission);
+  const petReminderNotificationsEnabled = useNotificationStore(
+    (state) => state.petReminderNotificationsEnabled
+  );
   const clearError = useNotificationStore((state) => state.clearError);
 
   const appearance = useAppearanceStore((state) => state.appearance);
@@ -44,11 +50,21 @@ export function SettingsScreenContent({
     }, [loadNotificationSettings])
   );
 
-  const handleToggleReminders = async (enabled: boolean) => {
+  const handleToggleCheckIn = async (enabled: boolean) => {
     clearError();
 
     try {
       await savePermission(enabled ? 'allowed' : 'later');
+    } catch {
+      // Store sets error state.
+    }
+  };
+
+  const handleTogglePetReminders = async (enabled: boolean) => {
+    clearError();
+
+    try {
+      await savePetReminderNotificationsEnabled(enabled);
     } catch {
       // Store sets error state.
     }
@@ -84,9 +100,11 @@ export function SettingsScreenContent({
             <NotificationSection
               permission={permission}
               reminderTime={reminderTime}
+              petReminderNotificationsEnabled={petReminderNotificationsEnabled}
               isLoading={isLoading}
               error={storeError}
-              onToggle={(enabled) => void handleToggleReminders(enabled)}
+              onToggleCheckIn={(enabled) => void handleToggleCheckIn(enabled)}
+              onTogglePetReminders={(enabled) => void handleTogglePetReminders(enabled)}
               onTimeChange={(time) => void handleTimeChange(time)}
             />
             <AppearanceSection

@@ -38,6 +38,7 @@ export default function RootLayout() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="reports" />
         <Stack.Screen name="records" />
+        <Stack.Screen name="reminders" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

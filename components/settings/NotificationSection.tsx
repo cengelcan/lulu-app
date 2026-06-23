@@ -14,23 +14,27 @@ import type { ReminderTime } from '@/types/reminder';
 type NotificationSectionProps = {
   permission: NotificationPermissionStatus | null;
   reminderTime: ReminderTime | null;
+  petReminderNotificationsEnabled: boolean;
   isLoading: boolean;
   error: string | null;
-  onToggle: (enabled: boolean) => void;
+  onToggleCheckIn: (enabled: boolean) => void;
+  onTogglePetReminders: (enabled: boolean) => void;
   onTimeChange: (time: ReminderTime) => void;
 };
 
 export function NotificationSection({
   permission,
   reminderTime,
+  petReminderNotificationsEnabled,
   isLoading,
   error,
-  onToggle,
+  onToggleCheckIn,
+  onTogglePetReminders,
   onTimeChange,
 }: NotificationSectionProps) {
   const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const remindersEnabled = permission === 'allowed';
+  const checkInEnabled = permission === 'allowed';
   const isDenied = permission === 'denied';
   const toggleDisabled = isLoading || isDenied;
   const time = reminderTime ?? { hour: 9, minute: 0 };
@@ -44,22 +48,28 @@ export function NotificationSection({
       <GroupedSection title={t('settings.notifications')}>
         <SettingsToggleRow
           label={t('settings.dailyCheckInReminder')}
-          value={remindersEnabled}
+          value={checkInEnabled}
           disabled={toggleDisabled}
-          onValueChange={onToggle}
-          isLast={!remindersEnabled}
+          onValueChange={onToggleCheckIn}
+          isLast={!checkInEnabled}
         />
-        {remindersEnabled ? (
+        {checkInEnabled ? (
           <TimePickerField
             accessibilityLabel={t('settings.reminderTime')}
             label={t('settings.reminderTime')}
             value={time}
             disabled={isLoading}
             variant="row"
-            isLast
             onChange={onTimeChange}
           />
         ) : null}
+        <SettingsToggleRow
+          label={t('settings.petReminderNotifications')}
+          value={petReminderNotificationsEnabled}
+          disabled={toggleDisabled}
+          onValueChange={onTogglePetReminders}
+          isLast
+        />
       </GroupedSection>
 
       {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}

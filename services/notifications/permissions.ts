@@ -3,12 +3,14 @@ import { Platform } from 'react-native';
 
 import {
   ANDROID_CHECK_IN_CHANNEL_ID,
+  ANDROID_PET_REMINDER_CHANNEL_ID,
   CHECK_IN_REMINDER_SOUND,
+  PET_REMINDER_REMINDER_SOUND,
 } from '@/services/notifications/constants';
 
 export { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
 
-export async function ensureAndroidNotificationChannel(): Promise<void> {
+export async function ensureAndroidNotificationChannels(): Promise<void> {
   if (Platform.OS !== 'android') {
     return;
   }
@@ -18,6 +20,17 @@ export async function ensureAndroidNotificationChannel(): Promise<void> {
     importance: Notifications.AndroidImportance.DEFAULT,
     sound: CHECK_IN_REMINDER_SOUND,
   });
+
+  await Notifications.setNotificationChannelAsync(ANDROID_PET_REMINDER_CHANNEL_ID, {
+    name: 'Pet reminders',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    sound: PET_REMINDER_REMINDER_SOUND,
+  });
+}
+
+/** @deprecated Use ensureAndroidNotificationChannels */
+export async function ensureAndroidNotificationChannel(): Promise<void> {
+  await ensureAndroidNotificationChannels();
 }
 
 export async function hasNotificationPermission(): Promise<boolean> {
@@ -34,7 +47,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     return false;
   }
 
-  await ensureAndroidNotificationChannel();
+  await ensureAndroidNotificationChannels();
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   if (existingStatus === 'granted') {

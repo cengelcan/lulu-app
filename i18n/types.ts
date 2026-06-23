@@ -31,6 +31,7 @@ export type Translations = {
     title: string;
     notifications: string;
     dailyCheckInReminder: string;
+    petReminderNotifications: string;
     reminderTime: string;
     notificationsDisabledFooter: string;
     openSettings: string;
@@ -380,9 +381,97 @@ export type Translations = {
       testResult: string;
     };
   };
+  reminders: {
+    title: string;
+    empty: string;
+    emptyUpcoming: string;
+    addReminder: string;
+    addReminderType: string;
+    editReminder: string;
+    saveReminder: string;
+    saveChanges: string;
+    saveFailed: string;
+    completeFailed: string;
+    deleteFailed: string;
+    deleteTitle: string;
+    deleteMessage: string;
+    deleteReminder: string;
+    markComplete: string;
+    completedReadOnly: string;
+    completedTitle: string;
+    deceasedReadOnly: string;
+    sectionCreate: string;
+    sectionUpcoming: string;
+    sectionCompleted: string;
+    seeAllCompleted: string;
+    notificationHint: string;
+    manageNotificationSettings: string;
+    sections: {
+      details: string;
+      notes: string;
+    };
+    fields: {
+      dueDate: string;
+      dueDatePlaceholder: string;
+      dueTime: string;
+      title: string;
+      titlePlaceholder: string;
+      customTitlePlaceholder: string;
+      clinicName: string;
+      clinicNamePlaceholder: string;
+      vaccineName: string;
+      vaccineNamePlaceholder: string;
+      productName: string;
+      productNamePlaceholder: string;
+      medicationName: string;
+      medicationNamePlaceholder: string;
+      recurrence: string;
+    };
+    recurrence: {
+      none: string;
+      daily: string;
+      weekly: string;
+      monthly: string;
+      yearly: string;
+    };
+    status: {
+      upcoming: string;
+    };
+    validation: {
+      dueDateRequired: string;
+      dueDateInvalid: string;
+      titleRequired: string;
+      vaccineNameRequired: string;
+      medicationNameRequired: string;
+      notesTooLong: string;
+    };
+    types: {
+      vetVisit: string;
+      vaccine: string;
+      parasite: string;
+      medication: string;
+      custom: string;
+    };
+    grid: {
+      vetVisit: string;
+      vaccine: string;
+      parasite: string;
+      medication: string;
+      custom: string;
+      customSubtitle: string;
+    };
+    summary: {
+      vetVisit: string;
+      vaccine: string;
+      parasite: string;
+      medication: string;
+      custom: string;
+    };
+  };
   notifications: {
     reminderTitle: string;
     reminderBody: string;
+    petReminderBody: string;
   };
   myPets: {
     noPetsTitle: string;

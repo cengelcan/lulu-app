@@ -6,6 +6,7 @@ export const StorageKeys = {
   appAppearance: '@pet_health_journal/app_appearance',
   appLanguage: '@pet_health_journal/app_language',
   notificationPermission: '@pet_health_journal/notification_permission',
+  petReminderNotificationsEnabled: '@pet_health_journal/pet_reminder_notifications_enabled',
   activePetId: '@pet_health_journal/active_pet_id',
   userProfile: '@pet_health_journal/user_profile',
   lastStoreReviewPromptAt: '@pet_health_journal/last_store_review_prompt_at',

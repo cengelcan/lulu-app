@@ -9,6 +9,11 @@ export {
   requestNotificationPermission,
 } from '@/services/notifications/permissions';
 export {
+  cancelAllPetReminderNotifications,
+  cancelPetReminderNotification,
+  syncPetReminderNotificationSchedule,
+} from '@/services/notifications/pet-reminder-schedule';
+export {
   cancelCheckInReminder,
   syncCheckInReminderSchedule,
 } from '@/services/notifications/schedule';

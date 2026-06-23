@@ -1,11 +1,13 @@
-import { cancelCheckInReminder } from '@/services/notifications';
+import { cancelCheckInReminder, cancelAllPetReminderNotifications } from '@/services/notifications';
 import * as checkInStorage from '@/storage/check-in.storage';
+import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { removeActivePetId, removeCheckInReminderTime } from '@/storage/prefs.storage';
 import { clearUserProfile } from '@/storage/user.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useNotificationStore } from '@/stores/notification.store';
+import { usePetReminderStore } from '@/stores/pet-reminder.store';
 import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 
@@ -17,6 +19,8 @@ import { usePetStore } from '@/stores/pet.store';
  */
 export async function wipeUserScopedData(): Promise<void> {
   await cancelCheckInReminder();
+  await cancelAllPetReminderNotifications();
+  await petReminderStorage.deleteAllPetReminders();
   await petRecordStorage.deleteAllPetRecords();
   await checkInStorage.deleteAllCheckIns();
   await petStorage.deleteAllPets();
@@ -42,6 +46,11 @@ export async function wipeUserScopedData(): Promise<void> {
   });
   usePetRecordStore.setState({
     records: [],
+    isLoading: false,
+    error: null,
+  });
+  usePetReminderStore.setState({
+    reminders: [],
     isLoading: false,
     error: null,
   });

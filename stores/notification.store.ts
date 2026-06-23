@@ -1,16 +1,20 @@
 import { create } from 'zustand';
 
 import {
+  cancelAllPetReminderNotifications,
   cancelCheckInReminder,
   requestNotificationPermission,
   syncCheckInReminderSchedule,
+  syncPetReminderNotificationSchedule,
 } from '@/services/notifications';
 import { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
 import {
   getCheckInReminderTime,
   getNotificationPermission,
+  getPetReminderNotificationsEnabled,
   setCheckInReminderTime,
   setNotificationPermission,
+  setPetReminderNotificationsEnabled,
   type NotificationPermissionStatus,
 } from '@/storage/prefs.storage';
 import type { ReminderTime } from '@/types/reminder';
@@ -18,11 +22,13 @@ import type { ReminderTime } from '@/types/reminder';
 type NotificationState = {
   reminderTime: ReminderTime | null;
   permission: NotificationPermissionStatus | null;
+  petReminderNotificationsEnabled: boolean;
   isLoading: boolean;
   error: string | null;
   loadNotificationSettings: () => Promise<void>;
   saveReminderTime: (reminderTime: ReminderTime) => Promise<void>;
   savePermission: (permission: NotificationPermissionStatus) => Promise<NotificationPermissionStatus>;
+  savePetReminderNotificationsEnabled: (enabled: boolean) => Promise<boolean>;
   clearError: () => void;
 };
 
@@ -33,6 +39,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
 export const useNotificationStore = create<NotificationState>((set) => ({
   reminderTime: null,
   permission: null,
+  petReminderNotificationsEnabled: true,
   isLoading: false,
   error: null,
 
@@ -40,12 +47,13 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const [reminderTime, permission] = await Promise.all([
+      const [reminderTime, permission, petReminderNotificationsEnabled] = await Promise.all([
         getCheckInReminderTime(),
         getNotificationPermission(),
+        getPetReminderNotificationsEnabled(),
       ]);
 
-      set({ reminderTime, permission, isLoading: false });
+      set({ reminderTime, permission, petReminderNotificationsEnabled, isLoading: false });
     } catch (error) {
       set({
         isLoading: false,
@@ -91,6 +99,34 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       set({
         isLoading: false,
         error: getErrorMessage(error, 'Failed to save notification permission'),
+      });
+      throw error;
+    }
+  },
+
+  savePetReminderNotificationsEnabled: async (enabled) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      let resolvedEnabled = enabled;
+
+      if (enabled) {
+        const osGranted = await requestNotificationPermission();
+        if (!osGranted) {
+          resolvedEnabled = false;
+        }
+      } else {
+        await cancelAllPetReminderNotifications();
+      }
+
+      await setPetReminderNotificationsEnabled(resolvedEnabled);
+      set({ petReminderNotificationsEnabled: resolvedEnabled, isLoading: false });
+      await syncPetReminderNotificationSchedule({ enabled: resolvedEnabled });
+      return resolvedEnabled;
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: getErrorMessage(error, 'Failed to save pet reminder notifications'),
       });
       throw error;
     }

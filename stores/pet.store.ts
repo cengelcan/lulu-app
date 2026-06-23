@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 
-import { cancelCheckInReminder, syncCheckInReminderSchedule } from '@/services/notifications/schedule';
+import {
+  cancelCheckInReminder,
+  syncCheckInReminderSchedule,
+  syncPetReminderNotificationSchedule,
+} from '@/services/notifications';
 import { deletePetPhotoFiles, deleteRemotePet, pushPet } from '@/services/sync/pets-sync';
 import { removeActivePetId } from '@/storage/prefs.storage';
 import * as petStorage from '@/storage/pet.storage';
@@ -90,6 +94,7 @@ export const usePetStore = create<PetState>((set, get) => ({
       await petStorage.setActivePet(id);
       set({ pets, pet, activePetId: pet.id, isLoading: false });
       await syncCheckInReminderSchedule({ petName: pet.name });
+      await syncPetReminderNotificationSchedule();
     } catch (error) {
       set({
         isLoading: false,
@@ -114,6 +119,7 @@ export const usePetStore = create<PetState>((set, get) => ({
       } else {
         await syncCheckInReminderSchedule({ petName: pet.name });
       }
+      await syncPetReminderNotificationSchedule();
     } catch (error) {
       set({ error: getErrorMessage(error, 'Failed to switch pet') });
       throw error;
@@ -228,6 +234,7 @@ export const usePetStore = create<PetState>((set, get) => ({
         }
       } else if (status === 'active' && wasActive) {
         await syncCheckInReminderSchedule({ petName: updated.name });
+        await syncPetReminderNotificationSchedule();
       }
     } catch (error) {
       set({

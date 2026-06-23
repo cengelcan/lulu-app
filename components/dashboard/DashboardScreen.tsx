@@ -20,6 +20,7 @@ import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
+import { usePetReminderStore } from '@/stores/pet-reminder.store';
 import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useUserStore } from '@/stores/user.store';
@@ -44,6 +45,9 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
   const records = usePetRecordStore((state) => state.records);
   const loadRecords = usePetRecordStore((state) => state.loadRecords);
+
+  const reminders = usePetReminderStore((state) => state.reminders);
+  const loadReminders = usePetReminderStore((state) => state.loadReminders);
 
   const displayName = useUserStore((state) => state.displayName);
 
@@ -80,6 +84,14 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
     void loadCheckIns(pet.id);
   }, [loadCheckIns, pet?.id]);
+
+  useEffect(() => {
+    if (!pet?.id) {
+      return;
+    }
+
+    void loadReminders(pet.id);
+  }, [loadReminders, pet?.id]);
 
   useEffect(() => {
     if (!pet?.id) {
@@ -182,7 +194,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
           {!isDeceased ? <TrendsSection trends={trends} /> : null}
 
-          {!isDeceased ? <UpcomingRemindersSection records={records} /> : null}
+          {!isDeceased ? <UpcomingRemindersSection reminders={reminders} /> : null}
         </View>
       )}
     </ScreenContainer>

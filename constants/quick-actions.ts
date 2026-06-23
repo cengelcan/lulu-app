@@ -36,7 +36,7 @@ export const QUICK_ACTIONS: readonly QuickActionDefinition[] = [
     icon: 'bell.fill',
     labelKey: 'dashboard.reminder',
     subtitleKey: 'dashboard.reminderSubtitle',
-    route: '/records' as Href,
+    route: '/reminders' as Href,
     iconTint: 'warning',
   },
 ] as const;

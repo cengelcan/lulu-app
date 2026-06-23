@@ -24,6 +24,7 @@ const MAPPING = {
   'lock.fill': 'lock',
   'pawprint.fill': 'pets',
   'checkmark': 'check',
+  'checkmark.circle': 'check-circle',
   'pencil': 'edit',
   'gearshape.fill': 'settings',
   'person.fill': 'person',
@@ -70,6 +71,7 @@ const MAPPING = {
   'calendar': 'event',
   'calendar.badge.checkmark': 'event-available',
   'clock.fill': 'schedule',
+  'plus': 'add',
 } as IconMapping;
 
 /**

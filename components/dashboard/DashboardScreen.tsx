@@ -10,6 +10,7 @@ import { GreetingHeader } from '@/components/dashboard/GreetingHeader';
 import { PetProfileCard } from '@/components/dashboard/PetProfileCard';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
 import { TrendsSection } from '@/components/dashboard/TrendsSection';
+import { UpcomingRemindersSection } from '@/components/dashboard/UpcomingRemindersSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -166,8 +167,6 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
             <DailyCheckInProgress />
           )}
 
-          {!isDeceased ? <TrendsSection trends={trends} /> : null}
-
           <View style={styles.quickActionsSection}>
             <DashboardSectionHeader title={t('dashboard.quickActions')} icon="bolt.fill" />
             <View style={styles.quickActionsGrid}>
@@ -183,6 +182,10 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
               ))}
             </View>
           </View>
+
+          {!isDeceased ? <TrendsSection trends={trends} /> : null}
+
+          {!isDeceased ? <UpcomingRemindersSection records={records} /> : null}
         </View>
       )}
     </ScreenContainer>

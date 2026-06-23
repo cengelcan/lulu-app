@@ -235,6 +235,8 @@ export const en: Translations = {
     noPetMessage: 'Add your pet to start tracking their health.',
     petProfileA11y: '{{name}} profile',
     upcomingReminder: 'Upcoming Reminder',
+    upcomingReminders: 'Upcoming Reminders',
+    seeAllReminders: 'See All',
     remindersOff: 'Reminders are off',
     notificationsDisabled: 'Notifications are disabled.',
     enableInSettings: 'Enable them in Settings.',

@@ -162,6 +162,8 @@ export type Translations = {
     noPetMessage: string;
     petProfileA11y: string;
     upcomingReminder: string;
+    upcomingReminders: string;
+    seeAllReminders: string;
     remindersOff: string;
     notificationsDisabled: string;
     enableInSettings: string;

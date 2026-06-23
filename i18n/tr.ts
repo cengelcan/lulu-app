@@ -235,6 +235,8 @@ export const tr: Translations = {
     noPetMessage: 'Sağlık takibine başlamak için petini ekle.',
     petProfileA11y: '{{name}} profili',
     upcomingReminder: 'Yaklaşan Hatırlatıcı',
+    upcomingReminders: 'Yaklaşan Hatırlatıcılar',
+    seeAllReminders: 'Tümünü Gör',
     remindersOff: 'Hatırlatıcılar kapalı',
     notificationsDisabled: 'Bildirimler kapalı.',
     enableInSettings: 'Ayarlardan etkinleştir.',

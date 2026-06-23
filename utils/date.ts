@@ -92,6 +92,19 @@ export function formatCheckInTitleDate(dateString: string, locale?: string): str
   });
 }
 
+export function formatMemorialDate(dateString: string, locale = 'en-US'): string {
+  const parsed = new Date(dateString);
+  if (Number.isNaN(parsed.getTime())) {
+    return dateString;
+  }
+
+  return parsed.toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
 export function formatDateTimeDdMmYyyyHhMm(dateString: string): string {
   const parsed = new Date(dateString);
   if (Number.isNaN(parsed.getTime())) {

@@ -9,7 +9,8 @@ import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { Pet } from '@/types/pet';
-import { formatDateTimeDdMmYyyyHhMm } from '@/utils/date';
+import { formatMemorialDate } from '@/utils/date';
+import { getLocaleTag } from '@/utils/locale';
 
 type PetListRowProps = {
   pet: Pet;
@@ -34,13 +35,7 @@ export function PetListRow({
 }: PetListRowProps) {
   if (memorialMode) {
     return (
-      <MemorialPetListRow
-        pet={pet}
-        isLast={isLast}
-        disabled={disabled}
-        onSelect={onSelect}
-        onOpenProfile={onOpenProfile}
-      />
+      <MemorialPetListRow pet={pet} disabled={disabled} onSelect={onSelect} />
     );
   }
 
@@ -58,29 +53,33 @@ export function PetListRow({
 
 type MemorialPetListRowProps = {
   pet: Pet;
-  isLast?: boolean;
   disabled?: boolean;
   onSelect: () => void;
-  onOpenProfile: () => void;
 };
 
 function MemorialPetListRow({
   pet,
-  isLast = false,
   disabled = false,
   onSelect,
-  onOpenProfile,
 }: MemorialPetListRowProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { displayPetBreed, displayPetSpecies } = usePetDisplay();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const borderColor = useThemeColor({}, 'border');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const rowBackground = useThemeColor({}, 'brandAccentSoft');
+  const rowBorder = useThemeColor({}, 'brandAccentBorder');
+  const heartCircleBackground = useThemeColor(
+    { light: 'rgba(255, 255, 255, 0.55)', dark: 'rgba(255, 255, 255, 0.08)' },
+    'surfaceElevated'
+  );
 
   const breed = displayPetBreed(pet.breed);
   const speciesLabel = displayPetSpecies(pet.species);
   const breedLabel = breed !== displayPetBreed(null) ? breed : speciesLabel;
   const deceasedDateLabel = pet.deceasedAt
-    ? t('myPets.deceasedOn', { date: formatDateTimeDdMmYyyyHhMm(pet.deceasedAt) })
+    ? t('myPets.deceasedOn', {
+        date: formatMemorialDate(pet.deceasedAt, getLocaleTag(language)),
+      })
     : null;
   const subtitle = deceasedDateLabel ?? breedLabel;
 
@@ -96,23 +95,11 @@ function MemorialPetListRow({
     onSelect();
   };
 
-  const handleOpenProfile = () => {
-    if (disabled) {
-      return;
-    }
-
-    if (process.env.EXPO_OS === 'ios') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-
-    onOpenProfile();
-  };
-
   return (
     <View
       style={[
         styles.memorialRow,
-        !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: borderColor },
+        { backgroundColor: rowBackground, borderColor: rowBorder },
       ]}>
       <Pressable
         accessibilityRole="button"
@@ -131,23 +118,17 @@ function MemorialPetListRow({
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
-            numberOfLines={1}
+            numberOfLines={2}
             style={styles.subtitle}>
             {subtitle}
           </ThemedText>
         </View>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`View ${pet.name} profile`}
-        disabled={disabled}
-        hitSlop={8}
-        onPress={handleOpenProfile}
-        style={({ pressed }) => [
-          styles.profileButton,
-          { opacity: disabled ? 0.6 : pressed ? 0.7 : 1 },
-        ]}>
-        <IconSymbol name="chevron.right" size={18} color={textSecondaryColor} />
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={[styles.memorialHeart, { borderColor: rowBorder, backgroundColor: heartCircleBackground }]}>
+          <IconSymbol name="heart.fill" size={16} color={brandAccentColor} />
+        </View>
       </Pressable>
     </View>
   );
@@ -292,17 +273,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   memorialRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 64,
+    borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    minHeight: 72,
   },
   memorialMainPressable: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    paddingLeft: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+  },
+  memorialHeart: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.full,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   info: {
     flex: 1,

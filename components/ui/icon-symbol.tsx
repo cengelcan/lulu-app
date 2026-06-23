@@ -49,6 +49,7 @@ const MAPPING = {
   'cloud.bolt': 'thunderstorm',
   'face.smiling': 'sentiment-satisfied',
   'heart.fill': 'favorite',
+  heart: 'favorite-border',
   'sparkles': 'auto-awesome',
   'exclamationmark.triangle': 'warning',
   'arrow.down': 'south',

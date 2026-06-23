@@ -3,10 +3,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
+import { MemorialTabContent } from '@/components/pets/MemorialTabContent';
 import { PetListRow } from '@/components/pet/PetListRow';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Spacing, Typography } from '@/constants/theme';
@@ -140,28 +140,14 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
       />
     ));
 
-  const renderEmptyTab = () => (
+  const renderEmptyActiveTab = () => (
     <View style={styles.emptyTab}>
-      {isMemorialTab ? (
-        <>
-          <ThemedText type="subtitle" style={styles.emptyTabTitle}>
-            {t('myPets.emptyMemorialTitle')}
-          </ThemedText>
-          <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.emptyTabMessage}>
-            {t('myPets.emptyMemorialMessage')}
-          </ThemedText>
-        </>
-      ) : (
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.emptyTabMessage}>
-          {t('myPets.noActivePetsMessage')}
-        </ThemedText>
-      )}
+      <ThemedText
+        lightColor={textSecondaryColor}
+        darkColor={textSecondaryColor}
+        style={styles.emptyTabMessage}>
+        {t('myPets.noActivePetsMessage')}
+      </ThemedText>
     </View>
   );
 
@@ -192,12 +178,16 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
       ) : (
         <View style={styles.body}>
           <SegmentedControl options={tabOptions} value={selectedTab} onChange={setSelectedTab} />
-          {visiblePets.length === 0 ? (
-            renderEmptyTab()
-          ) : isMemorialTab ? (
-            <Card style={styles.petListCard}>{renderPetRows(visiblePets, isMemorialTab)}</Card>
+          {isMemorialTab ? (
+            <MemorialTabContent
+              pets={deceasedPets}
+              disabled={isSwitching}
+              onOpenPet={handleOpenProfile}
+            />
+          ) : visiblePets.length === 0 ? (
+            renderEmptyActiveTab()
           ) : (
-            <View style={styles.petList}>{renderPetRows(visiblePets, isMemorialTab)}</View>
+            <View style={styles.petList}>{renderPetRows(visiblePets, false)}</View>
           )}
           {!isMemorialTab ? (
             <Button title={t('common.addPetWithPlus')} onPress={handleAddPet} />
@@ -236,20 +226,12 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xl,
     paddingHorizontal: Spacing.md,
   },
-  emptyTabTitle: {
-    textAlign: 'center',
-  },
   emptyTabMessage: {
     textAlign: 'center',
     ...Typography.body,
   },
   setupButton: {
     marginTop: Spacing.sm,
-  },
-  petListCard: {
-    padding: 0,
-    gap: 0,
-    overflow: 'hidden',
   },
   petList: {
     gap: Spacing.sm,

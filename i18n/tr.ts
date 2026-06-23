@@ -13,6 +13,7 @@ export const tr: Translations = {
     optional: 'İsteğe bağlı',
     next: 'İleri',
     addPet: 'Pet Ekle',
+    addPetWithPlus: '+ Pet Ekle',
     setUpPet: 'Pet Kur',
     date: 'Tarih',
     time: 'Saat',

@@ -194,11 +194,13 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
           <SegmentedControl options={tabOptions} value={selectedTab} onChange={setSelectedTab} />
           {visiblePets.length === 0 ? (
             renderEmptyTab()
-          ) : (
+          ) : isMemorialTab ? (
             <Card style={styles.petListCard}>{renderPetRows(visiblePets, isMemorialTab)}</Card>
+          ) : (
+            <View style={styles.petList}>{renderPetRows(visiblePets, isMemorialTab)}</View>
           )}
           {!isMemorialTab ? (
-            <Button title={t('common.addPet')} variant="secondary" onPress={handleAddPet} />
+            <Button title={t('common.addPetWithPlus')} onPress={handleAddPet} />
           ) : null}
         </View>
       )}
@@ -248,5 +250,8 @@ const styles = StyleSheet.create({
     padding: 0,
     gap: 0,
     overflow: 'hidden',
+  },
+  petList: {
+    gap: Spacing.sm,
   },
 });

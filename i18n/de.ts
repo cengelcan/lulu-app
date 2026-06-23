@@ -13,6 +13,7 @@ export const de: Translations = {
     optional: 'Optional',
     next: 'Weiter',
     addPet: 'Haustier hinzufügen',
+    addPetWithPlus: '+ Haustier hinzufügen',
     setUpPet: 'Haustier einrichten',
     date: 'Datum',
     time: 'Uhrzeit',

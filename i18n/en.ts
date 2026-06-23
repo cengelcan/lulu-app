@@ -13,6 +13,7 @@ export const en: Translations = {
     optional: 'Optional',
     next: 'Next',
     addPet: 'Add Pet',
+    addPetWithPlus: '+ Add Pet',
     setUpPet: 'Set Up Pet',
     date: 'Date',
     time: 'Time',

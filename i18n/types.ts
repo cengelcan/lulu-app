@@ -15,6 +15,7 @@ export type Translations = {
     optional: string;
     next: string;
     addPet: string;
+    addPetWithPlus: string;
     setUpPet: string;
     date: string;
     time: string;

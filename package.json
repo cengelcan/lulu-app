@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "tsx --test services/notifications/permissions.test.ts services/reports/paginate-report-pages.test.ts"
+    "test": "tsx --test services/notifications/permissions.test.ts services/reports/paginate-report-pages.test.ts utils/trends.test.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

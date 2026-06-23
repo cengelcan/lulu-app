@@ -9,6 +9,7 @@ import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionH
 import { GreetingHeader } from '@/components/dashboard/GreetingHeader';
 import { PetProfileCard } from '@/components/dashboard/PetProfileCard';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
+import { TrendsSection } from '@/components/dashboard/TrendsSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -18,10 +19,12 @@ import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
+import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useUserStore } from '@/stores/user.store';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { getLatestCheckIn } from '@/utils/last-check-in';
+import { buildDashboardTrends } from '@/utils/trends';
 
 type DashboardScreenProps = {
   edges?: Edge[];
@@ -39,6 +42,9 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   const checkIns = useCheckInStore((state) => state.checkIns);
   const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
 
+  const records = usePetRecordStore((state) => state.records);
+  const loadRecords = usePetRecordStore((state) => state.loadRecords);
+
   const displayName = useUserStore((state) => state.displayName);
 
   const primaryColor = useThemeColor({}, 'primary');
@@ -52,6 +58,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     [checkIns, todayDateString]
   );
   const latestCheckIn = useMemo(() => getLatestCheckIn(checkIns), [checkIns]);
+  const trends = useMemo(() => buildDashboardTrends(checkIns, records), [checkIns, records]);
 
   const ownerName = useMemo(() => {
     const userName = displayName?.trim();
@@ -74,6 +81,14 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
     void loadCheckIns(pet.id);
   }, [loadCheckIns, pet?.id]);
+
+  useEffect(() => {
+    if (!pet?.id) {
+      return;
+    }
+
+    void loadRecords(pet.id);
+  }, [loadRecords, pet?.id]);
 
   const handleRetry = () => {
     clearError();
@@ -150,6 +165,8 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
           ) : (
             <DailyCheckInProgress />
           )}
+
+          {!isDeceased ? <TrendsSection trends={trends} /> : null}
 
           <View style={styles.quickActionsSection}>
             <DashboardSectionHeader title={t('dashboard.quickActions')} icon="bolt.fill" />

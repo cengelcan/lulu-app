@@ -182,6 +182,14 @@ export type Translations = {
     missedCheckInToday: string;
     missedCheckInYesterday: string;
     missedCheckInCta: string;
+    trendsTitle: string;
+    trendsWeight: string;
+    trendsAppetite: string;
+    trendsEnergy: string;
+    trendsNormal: string;
+    trendsNoData: string;
+    trendsComparedToLast30Days: string;
+    trendsLatestRecord: string;
   };
   reports: {
     title: string;

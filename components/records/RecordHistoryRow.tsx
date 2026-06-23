@@ -1,15 +1,20 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, useColorScheme, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Spacing, Typography } from '@/constants/theme';
+import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
+import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+
+const ICON_BOX_SIZE = 40;
+const ICON_SIZE = 20;
 
 type RecordHistoryRowProps = {
   title: string;
   subtitle: string;
   dateLabel: string;
+  icon: IconSymbolName;
+  backgroundColor: string;
   onPress: () => void;
   isLast?: boolean;
 };
@@ -18,11 +23,18 @@ export function RecordHistoryRow({
   title,
   subtitle,
   dateLabel,
+  icon,
+  backgroundColor,
   onPress,
   isLast = false,
 }: RecordHistoryRowProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
+
+  const iconBoxBackground = isDark ? backgroundColor : `${backgroundColor}22`;
+  const iconColor = isDark ? Palette.onDark : backgroundColor;
 
   const handlePress = () => {
     if (process.env.EXPO_OS === 'ios') {
@@ -41,6 +53,9 @@ export function RecordHistoryRow({
         !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: borderColor },
         { opacity: pressed ? 0.7 : 1 },
       ]}>
+      <View style={[styles.iconBox, { backgroundColor: iconBoxBackground }]}>
+        <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
+      </View>
       <View style={styles.textWrap}>
         <ThemedText type="defaultSemiBold" numberOfLines={1}>
           {title}
@@ -71,7 +86,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    gap: Spacing.sm,
+    gap: Spacing.md,
+  },
+  iconBox: {
+    width: ICON_BOX_SIZE,
+    height: ICON_BOX_SIZE,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   textWrap: {
     flex: 1,

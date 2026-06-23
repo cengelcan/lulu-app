@@ -9,6 +9,7 @@ import { RecordTypeGrid } from '@/components/records/RecordTypeGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
+import { RECORD_TYPES } from '@/constants/record-types';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -99,16 +100,22 @@ export default function RecordsScreen() {
                 <ActivityIndicator color={primaryColor} />
               </View>
             ) : (
-              recentRecords.map((record, index) => (
-                <RecordHistoryRow
-                  key={record.id}
-                  dateLabel={formatRecordDate(record.date, locale)}
-                  isLast={index === recentRecords.length - 1}
-                  subtitle={getRecordSummary(record, t)}
-                  title={t(getRecordTypeLabelKey(record.type))}
-                  onPress={() => handleHistoryPress(record.type, record.id)}
-                />
-              ))
+              recentRecords.map((record, index) => {
+                const typeDefinition = RECORD_TYPES.find((item) => item.id === record.type);
+
+                return (
+                  <RecordHistoryRow
+                    key={record.id}
+                    backgroundColor={typeDefinition?.backgroundColor ?? '#6b7280'}
+                    dateLabel={formatRecordDate(record.date, locale)}
+                    icon={typeDefinition?.icon ?? 'doc.text.fill'}
+                    isLast={index === recentRecords.length - 1}
+                    subtitle={getRecordSummary(record, t)}
+                    title={t(getRecordTypeLabelKey(record.type))}
+                    onPress={() => handleHistoryPress(record.type, record.id)}
+                  />
+                );
+              })
             )}
           </GroupedSection>
         ) : null}

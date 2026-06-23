@@ -319,7 +319,13 @@ export default function CheckInScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: t('checkIn.title') }} />
+      <Stack.Screen
+        options={{
+          ...STACK_BACK_ONLY_OPTIONS,
+          headerShown: true,
+          title: t('checkIn.title'),
+        }}
+      />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         <View style={styles.body}>
           <View style={styles.header}>

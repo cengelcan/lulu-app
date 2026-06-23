@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import type { PetReminder } from '@/types/pet-reminder';
-import { buildUpcomingReminders, hasUpcomingReminders } from '@/utils/upcoming-reminders';
+import { buildUpcomingReminders, hasUpcomingReminders, listOverduePendingReminders, listUpcomingPendingReminders } from '@/utils/upcoming-reminders';
 
 const REFERENCE_DATE = new Date('2026-06-23T12:00:00');
 
@@ -18,7 +18,7 @@ function createReminder(
     dueTime: { hour: 9, minute: 0 },
     notes: null,
     recurrence: { frequency: 'none' as const },
-    status: 'pending' as const,
+    status: (overrides.status ?? 'pending') as PetReminder['status'],
     completedAt: null,
     recordId: null,
     createdAt: `${overrides.dueDate}T10:00:00.000Z`,
@@ -109,5 +109,69 @@ describe('buildUpcomingReminders', () => {
       ),
       true
     );
+  });
+});
+
+describe('listUpcomingPendingReminders', () => {
+  it('returns pending reminders from today forward sorted by due date and time', () => {
+    const reminders = [
+      createReminder({ id: 'past', type: 'medication', dueDate: '2026-06-01' }),
+      createReminder({
+        id: 'later',
+        type: 'vaccine',
+        dueDate: '2026-07-15',
+        dueTime: { hour: 21, minute: 0 },
+      }),
+      createReminder({
+        id: 'soon',
+        type: 'vet_visit',
+        dueDate: '2026-06-24',
+        dueTime: { hour: 9, minute: 0 },
+      }),
+      createReminder({
+        id: 'done',
+        type: 'custom',
+        dueDate: '2026-06-25',
+        status: 'completed',
+        completedAt: '2026-06-20T10:00:00.000Z',
+      }),
+    ];
+
+    const items = listUpcomingPendingReminders(reminders, REFERENCE_DATE);
+
+    assert.equal(items.length, 2);
+    assert.equal(items[0]?.id, 'soon');
+    assert.equal(items[1]?.id, 'later');
+  });
+});
+
+describe('listOverduePendingReminders', () => {
+  it('returns overdue pending reminders sorted oldest first', () => {
+    const reminders = [
+      createReminder({
+        id: 'overdue-2',
+        type: 'vaccine',
+        dueDate: '2026-06-20',
+        dueTime: { hour: 9, minute: 0 },
+      }),
+      createReminder({
+        id: 'overdue-1',
+        type: 'medication',
+        dueDate: '2026-06-18',
+        dueTime: { hour: 9, minute: 0 },
+      }),
+      createReminder({
+        id: 'upcoming',
+        type: 'vet_visit',
+        dueDate: '2026-06-30',
+        dueTime: { hour: 9, minute: 0 },
+      }),
+    ];
+
+    const items = listOverduePendingReminders(reminders, REFERENCE_DATE);
+
+    assert.equal(items.length, 2);
+    assert.equal(items[0]?.id, 'overdue-1');
+    assert.equal(items[1]?.id, 'overdue-2');
   });
 });

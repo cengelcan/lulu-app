@@ -1,20 +1,19 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, useColorScheme, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
-import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 const ICON_BOX_SIZE = 40;
 const ICON_SIZE = 20;
+const SUCCESS_COLOR = '#3EAD6B';
 
 type CompletedReminderRowProps = {
   title: string;
   typeLabel: string;
   dateLabel: string;
-  icon: IconSymbolName;
-  backgroundColor: string;
   onPress?: () => void;
   isLast?: boolean;
 };
@@ -23,19 +22,11 @@ export function CompletedReminderRow({
   title,
   typeLabel,
   dateLabel,
-  icon,
-  backgroundColor,
   onPress,
   isLast = false,
 }: CompletedReminderRowProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
-  const successColor = '#3EAD6B';
-
-  const iconBoxBackground = isDark ? backgroundColor : `${backgroundColor}22`;
-  const iconColor = isDark ? Palette.onDark : backgroundColor;
 
   const handlePress = () => {
     if (!onPress) {
@@ -50,11 +41,8 @@ export function CompletedReminderRow({
 
   const content = (
     <>
-      <View style={[styles.checkCircle, { backgroundColor: `${successColor}22` }]}>
-        <IconSymbol name="checkmark.circle" size={ICON_SIZE} color={successColor} />
-      </View>
-      <View style={[styles.iconBox, { backgroundColor: iconBoxBackground }]}>
-        <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
+      <View style={[styles.checkCircle, { backgroundColor: `${SUCCESS_COLOR}22` }]}>
+        <IconSymbol name="checkmark.circle" size={ICON_SIZE} color={SUCCESS_COLOR} />
       </View>
       <View style={styles.textWrap}>
         <ThemedText type="defaultSemiBold" numberOfLines={1} style={styles.completedTitle}>
@@ -74,6 +62,7 @@ export function CompletedReminderRow({
         style={styles.date}>
         {dateLabel}
       </ThemedText>
+      {onPress ? <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} /> : null}
     </>
   );
 
@@ -117,14 +106,6 @@ const styles = StyleSheet.create({
     width: ICON_BOX_SIZE,
     height: ICON_BOX_SIZE,
     borderRadius: Radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  iconBox: {
-    width: ICON_BOX_SIZE,
-    height: ICON_BOX_SIZE,
-    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,

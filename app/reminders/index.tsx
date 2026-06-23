@@ -1,36 +1,40 @@
 import type { Href } from 'expo-router';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import * as Haptics from 'expo-haptics';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { CompletedReminderRow } from '@/components/reminders/CompletedReminderRow';
 import { ReminderListRow } from '@/components/reminders/ReminderListRow';
 import { ReminderTypeGrid } from '@/components/reminders/ReminderTypeGrid';
 import { RemindersFooter } from '@/components/reminders/RemindersFooter';
 import { GroupedSection } from '@/components/pet/GroupedSection';
-import { Card } from '@/components/ui/Card';
 import { ThemedText } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { REMINDER_TYPES } from '@/constants/reminder-types';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
 import { usePetStore } from '@/stores/pet.store';
-import type { ReminderTypeId } from '@/types/pet-reminder';
+import type { PetReminder, ReminderTypeId } from '@/types/pet-reminder';
+import {
+  formatCompletedReminderDate,
+  formatReminderDateTimeParts,
+  listCompletedReminders,
+  listOverduePendingReminders,
+  listUpcomingPendingReminders,
+} from '@/utils/upcoming-reminders';
 import { getLocaleTag } from '@/utils/locale';
 import {
-  formatReminderDateTime,
   getReminderFormRoute,
   getReminderTitle,
   getReminderTypeLabelKey,
 } from '@/utils/pet-reminder-display';
-import { formatCompletedReminderDate } from '@/utils/upcoming-reminders';
+import { getRecordFormRoute } from '@/utils/pet-record-display';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { addDays } from '@/services/notifications/date';
+import { reminderTypeToRecordType } from '@/utils/reminder-to-record';
 
 const COMPLETED_PREVIEW_LIMIT = 3;
 
@@ -46,7 +50,6 @@ export default function RemindersScreen() {
   const loadReminders = usePetReminderStore((state) => state.loadReminders);
 
   const primaryColor = useThemeColor({}, 'primary');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const todayKey = useMemo(() => formatLocalDate(getTodayStart()), []);
@@ -68,40 +71,14 @@ export default function RemindersScreen() {
     }, [loadReminders, pet?.id])
   );
 
-  const pendingReminders = useMemo(
-    () =>
-      reminders
-        .filter((reminder) => reminder.status === 'pending')
-        .sort((left, right) => {
-          const dateCompare = left.dueDate.localeCompare(right.dueDate);
-          if (dateCompare !== 0) {
-            return dateCompare;
-          }
+  const overdueReminders = useMemo(() => listOverduePendingReminders(reminders), [reminders]);
 
-          const leftMinutes = left.dueTime.hour * 60 + left.dueTime.minute;
-          const rightMinutes = right.dueTime.hour * 60 + right.dueTime.minute;
-          return leftMinutes - rightMinutes;
-        }),
-    [reminders]
-  );
+  const pendingReminders = useMemo(() => listUpcomingPendingReminders(reminders), [reminders]);
 
-  const completedReminders = useMemo(
-    () =>
-      reminders
-        .filter((reminder) => reminder.status === 'completed')
-        .sort((left, right) => (right.completedAt ?? '').localeCompare(left.completedAt ?? '')),
-    [reminders]
-  );
+  const completedReminders = useMemo(() => listCompletedReminders(reminders), [reminders]);
 
   const completedPreview = completedReminders.slice(0, COMPLETED_PREVIEW_LIMIT);
   const isReadOnly = pet?.status === 'deceased';
-
-  const handleAddReminder = () => {
-    if (process.env.EXPO_OS === 'ios') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    router.push(getReminderFormRoute('custom') as Href);
-  };
 
   const handleTypePress = (type: ReminderTypeId) => {
     router.push(getReminderFormRoute(type) as Href);
@@ -115,6 +92,15 @@ export default function RemindersScreen() {
     router.push('/reminders/completed' as Href);
   };
 
+  const handleCompletedReminderPress = (reminder: PetReminder) => {
+    if (!reminder.recordId) {
+      return;
+    }
+
+    const recordType = reminderTypeToRecordType(reminder.type);
+    router.push(getRecordFormRoute(recordType, reminder.recordId) as Href);
+  };
+
   return (
     <>
       <Stack.Screen
@@ -122,20 +108,6 @@ export default function RemindersScreen() {
           ...STACK_BACK_ONLY_OPTIONS,
           headerShown: true,
           title: t('reminders.title'),
-          headerRight: () =>
-            isReadOnly ? null : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('reminders.addReminder')}
-                hitSlop={8}
-                onPress={handleAddReminder}
-                style={({ pressed }) => [
-                  styles.addButton,
-                  { backgroundColor: brandAccentColor, opacity: pressed ? 0.8 : 1 },
-                ]}>
-                <IconSymbol name="plus" size={18} color="#ffffff" />
-              </Pressable>
-            ),
         }}
       />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
@@ -156,24 +128,58 @@ export default function RemindersScreen() {
           </GroupedSection>
         )}
 
+        {overdueReminders.length > 0 ? (
+          <GroupedSection title={t('reminders.sectionOverdue')}>
+            {overdueReminders.map((reminder, index) => {
+              const typeDefinition = REMINDER_TYPES.find((item) => item.id === reminder.type);
+              const { dateLabel, timeLabel } = formatReminderDateTimeParts(
+                reminder.dueDate,
+                reminder.dueTime,
+                locale,
+                todayKey,
+                tomorrowKey,
+                t
+              );
+
+              return (
+                <ReminderListRow
+                  key={reminder.id}
+                  badgeLabel={t('reminders.status.overdue')}
+                  badgeVariant="overdue"
+                  backgroundColor={typeDefinition?.backgroundColor ?? '#6b7280'}
+                  dateLabel={dateLabel}
+                  timeLabel={timeLabel}
+                  icon={typeDefinition?.icon ?? 'bell.fill'}
+                  isLast={index === overdueReminders.length - 1}
+                  title={getReminderTitle(reminder, t)}
+                  typeLabel={t(getReminderTypeLabelKey(reminder.type))}
+                  onPress={() => handleReminderPress(reminder.type, reminder.id)}
+                />
+              );
+            })}
+          </GroupedSection>
+        ) : null}
+
         {pendingReminders.length > 0 ? (
           <GroupedSection title={t('reminders.sectionUpcoming')}>
             {pendingReminders.map((reminder, index) => {
               const typeDefinition = REMINDER_TYPES.find((item) => item.id === reminder.type);
+              const { dateLabel, timeLabel } = formatReminderDateTimeParts(
+                reminder.dueDate,
+                reminder.dueTime,
+                locale,
+                todayKey,
+                tomorrowKey,
+                t
+              );
 
               return (
                 <ReminderListRow
                   key={reminder.id}
                   badgeLabel={t('reminders.status.upcoming')}
                   backgroundColor={typeDefinition?.backgroundColor ?? '#6b7280'}
-                  dateLabel={formatReminderDateTime(
-                    reminder.dueDate,
-                    reminder.dueTime,
-                    locale,
-                    todayKey,
-                    tomorrowKey,
-                    t
-                  )}
+                  dateLabel={dateLabel}
+                  timeLabel={timeLabel}
                   icon={typeDefinition?.icon ?? 'bell.fill'}
                   isLast={index === pendingReminders.length - 1}
                   title={getReminderTitle(reminder, t)}
@@ -183,60 +189,43 @@ export default function RemindersScreen() {
               );
             })}
           </GroupedSection>
-        ) : isLoading ? (
+        ) : overdueReminders.length === 0 && isLoading ? (
           <View style={styles.loadingRow}>
             <ActivityIndicator color={primaryColor} />
           </View>
-        ) : (
+        ) : overdueReminders.length === 0 ? (
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.subtitle}>
             {t('reminders.emptyUpcoming')}
           </ThemedText>
-        )}
+        ) : null}
 
         {completedPreview.length > 0 ? (
-          <View style={styles.completedSection}>
-            <View style={styles.completedHeader}>
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.completedTitle}>
-                {t('reminders.sectionCompleted')}
-              </ThemedText>
-              {completedReminders.length > COMPLETED_PREVIEW_LIMIT ? (
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={handleSeeAllCompleted}
-                  style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
-                  <ThemedText
-                    lightColor={brandAccentColor}
-                    darkColor={brandAccentColor}
-                    style={styles.seeAll}>
-                    {t('reminders.seeAllCompleted')}
-                  </ThemedText>
-                </Pressable>
-              ) : null}
-            </View>
-            <Card style={styles.completedCard}>
-              {completedPreview.map((reminder, index) => {
-                const typeDefinition = REMINDER_TYPES.find((item) => item.id === reminder.type);
-
-                return (
-                  <CompletedReminderRow
-                    key={reminder.id}
-                    backgroundColor={typeDefinition?.backgroundColor ?? '#6b7280'}
-                    dateLabel={formatCompletedReminderDate(reminder.dueDate, locale)}
-                    icon={typeDefinition?.icon ?? 'bell.fill'}
-                    isLast={index === completedPreview.length - 1}
-                    title={getReminderTitle(reminder, t)}
-                    typeLabel={t(getReminderTypeLabelKey(reminder.type))}
-                  />
-                );
-              })}
-            </Card>
-          </View>
+          <GroupedSection
+            actionLabel={
+              completedReminders.length > COMPLETED_PREVIEW_LIMIT
+                ? t('reminders.seeAllCompleted')
+                : undefined
+            }
+            title={t('reminders.sectionCompleted')}
+            onActionPress={
+              completedReminders.length > COMPLETED_PREVIEW_LIMIT ? handleSeeAllCompleted : undefined
+            }>
+            {completedPreview.map((reminder, index) => (
+              <CompletedReminderRow
+                key={reminder.id}
+                dateLabel={formatCompletedReminderDate(reminder.dueDate, locale)}
+                isLast={index === completedPreview.length - 1}
+                title={getReminderTitle(reminder, t)}
+                typeLabel={t(getReminderTypeLabelKey(reminder.type))}
+                onPress={
+                  reminder.recordId ? () => handleCompletedReminderPress(reminder) : undefined
+                }
+              />
+            ))}
+          </GroupedSection>
         ) : null}
 
         <RemindersFooter />
@@ -257,36 +246,5 @@ const styles = StyleSheet.create({
   loadingRow: {
     padding: Spacing.lg,
     alignItems: 'center',
-  },
-  addButton: {
-    width: 32,
-    height: 32,
-    borderRadius: Radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.sm,
-  },
-  completedSection: {
-    gap: Spacing.xs,
-  },
-  completedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xs,
-  },
-  completedTitle: {
-    ...Typography.caption,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  seeAll: {
-    ...Typography.caption,
-    fontWeight: '600',
-  },
-  completedCard: {
-    padding: 0,
-    gap: 0,
-    overflow: 'hidden',
   },
 });

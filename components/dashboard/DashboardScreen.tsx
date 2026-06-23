@@ -10,6 +10,7 @@ import { GreetingHeader } from '@/components/dashboard/GreetingHeader';
 import { PetProfileCard } from '@/components/dashboard/PetProfileCard';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
 import { TrendsSection } from '@/components/dashboard/TrendsSection';
+import { OverdueRemindersSection } from '@/components/dashboard/OverdueRemindersSection';
 import { UpcomingRemindersSection } from '@/components/dashboard/UpcomingRemindersSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -194,6 +195,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
           {!isDeceased ? <TrendsSection trends={trends} /> : null}
 
+          {!isDeceased ? <OverdueRemindersSection reminders={reminders} /> : null}
           {!isDeceased ? <UpcomingRemindersSection reminders={reminders} /> : null}
         </View>
       )}

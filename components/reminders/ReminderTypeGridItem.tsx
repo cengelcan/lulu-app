@@ -14,7 +14,7 @@ type ReminderTypeGridItemProps = {
   icon: IconSymbolName;
   backgroundColor: string;
   onPress: () => void;
-  widthPercent?: number;
+  variant?: 'grid' | 'banner';
 };
 
 export function ReminderTypeGridItem({
@@ -23,7 +23,7 @@ export function ReminderTypeGridItem({
   icon,
   backgroundColor,
   onPress,
-  widthPercent = 20,
+  variant = 'grid',
 }: ReminderTypeGridItemProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -38,16 +38,44 @@ export function ReminderTypeGridItem({
     onPress();
   };
 
+  if (variant === 'banner') {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        onPress={handlePress}
+        style={({ pressed }) => [styles.bannerCell, { opacity: pressed ? 0.75 : 1 }]}>
+        <View
+          style={[
+            styles.iconBox,
+            { backgroundColor: iconBoxBackground },
+            isDark && {
+              shadowColor: backgroundColor,
+              shadowOpacity: 0.45,
+            },
+          ]}>
+          <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
+        </View>
+        <View style={styles.bannerText}>
+          <ThemedText style={styles.bannerLabel} numberOfLines={1}>
+            {label}
+          </ThemedText>
+          {subtitle ? (
+            <ThemedText style={styles.subtitle} numberOfLines={2}>
+              {subtitle}
+            </ThemedText>
+          ) : null}
+        </View>
+      </Pressable>
+    );
+  }
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={handlePress}
-      style={({ pressed }) => [
-        styles.cell,
-        { width: `${widthPercent}%` },
-        { opacity: pressed ? 0.75 : 1 },
-      ]}>
+      style={({ pressed }) => [styles.gridCell, { opacity: pressed ? 0.75 : 1 }]}>
       <View
         style={[
           styles.iconBox,
@@ -59,24 +87,27 @@ export function ReminderTypeGridItem({
         ]}>
         <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
       </View>
-      <ThemedText style={styles.label} numberOfLines={subtitle ? 1 : 2}>
+      <ThemedText style={styles.label} numberOfLines={2}>
         {label}
       </ThemedText>
-      {subtitle ? (
-        <ThemedText style={styles.subtitle} numberOfLines={2}>
-          {subtitle}
-        </ThemedText>
-      ) : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  cell: {
+  gridCell: {
+    width: '25%',
     alignItems: 'center',
     paddingHorizontal: Spacing.xs,
     paddingVertical: Spacing.sm,
     gap: Spacing.xs,
+  },
+  bannerCell: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
   },
   iconBox: {
     width: ICON_BOX_SIZE,
@@ -87,17 +118,27 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 10,
     elevation: 4,
+    flexShrink: 0,
+  },
+  bannerText: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
   },
   label: {
     ...Typography.caption,
     textAlign: 'center',
     fontWeight: '600',
   },
+  bannerLabel: {
+    ...Typography.caption,
+    textAlign: 'left',
+    fontWeight: '600',
+  },
   subtitle: {
     ...Typography.caption,
-    textAlign: 'center',
-    fontSize: 10,
-    lineHeight: 13,
+    fontSize: 11,
+    lineHeight: 14,
     opacity: 0.75,
   },
 });

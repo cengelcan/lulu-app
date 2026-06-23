@@ -36,6 +36,13 @@ type PetReminderState = {
   createReminder: (reminder: PetReminder) => Promise<void>;
   updateReminder: (reminder: PetReminder) => Promise<void>;
   completeReminder: (id: string, petId: string) => Promise<void>;
+  skipReminder: (id: string, petId: string) => Promise<void>;
+  snoozeReminder: (
+    id: string,
+    petId: string,
+    dueDate: string,
+    dueTime: PetReminder['dueTime']
+  ) => Promise<void>;
   deleteReminder: (id: string, petId: string) => Promise<void>;
   clearError: () => void;
 };
@@ -150,7 +157,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     try {
       const reminder = await petReminderStorage.getPetReminderById(id);
 
-      if (!reminder || reminder.status === 'completed') {
+      if (!reminder || reminder.status !== 'pending') {
         throw new Error('Reminder is not available to complete');
       }
 
@@ -212,6 +219,88 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
       set({
         isLoading: false,
         error: getErrorMessage(error, 'Failed to complete reminder'),
+      });
+      throw error;
+    }
+  },
+
+  skipReminder: async (id, petId) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const reminder = await petReminderStorage.getPetReminderById(id);
+
+      if (!reminder || reminder.status !== 'pending') {
+        throw new Error('Reminder is not available to skip');
+      }
+
+      const skippedAt = new Date().toISOString();
+      const skippedReminder: PetReminder = {
+        ...reminder,
+        status: 'skipped',
+        skippedAt,
+        updatedAt: skippedAt,
+      };
+
+      await petReminderStorage.updatePetReminder(skippedReminder);
+
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushPetReminder(userId, skippedReminder);
+        } catch (syncError) {
+          console.warn('Failed to sync skipped reminder to cloud', syncError);
+        }
+      }
+
+      const reminders = await petReminderStorage.getPetRemindersByPetId(petId);
+      set({ reminders, isLoading: false });
+      await syncReminderNotifications();
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: getErrorMessage(error, 'Failed to skip reminder'),
+      });
+      throw error;
+    }
+  },
+
+  snoozeReminder: async (id, petId, dueDate, dueTime) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const reminder = await petReminderStorage.getPetReminderById(id);
+
+      if (!reminder || reminder.status !== 'pending') {
+        throw new Error('Reminder is not available to snooze');
+      }
+
+      const updatedAt = new Date().toISOString();
+      const snoozedReminder: PetReminder = {
+        ...reminder,
+        dueDate,
+        dueTime,
+        updatedAt,
+      };
+
+      await petReminderStorage.updatePetReminder(snoozedReminder);
+
+      const userId = getActiveUserId();
+      if (userId) {
+        try {
+          await pushPetReminder(userId, snoozedReminder);
+        } catch (syncError) {
+          console.warn('Failed to sync snoozed reminder to cloud', syncError);
+        }
+      }
+
+      const reminders = await petReminderStorage.getPetRemindersByPetId(petId);
+      set({ reminders, isLoading: false });
+      await syncReminderNotifications();
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: getErrorMessage(error, 'Failed to snooze reminder'),
       });
       throw error;
     }

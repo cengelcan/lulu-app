@@ -164,6 +164,7 @@ export type Translations = {
     petProfileA11y: string;
     upcomingReminder: string;
     upcomingReminders: string;
+    overdueReminders: string;
     seeAllReminders: string;
     remindersOff: string;
     notificationsDisabled: string;
@@ -397,11 +398,20 @@ export type Translations = {
     deleteMessage: string;
     deleteReminder: string;
     markComplete: string;
+    skipReminder: string;
+    skipTitle: string;
+    skipMessage: string;
+    skipFailed: string;
+    snoozeReminder: string;
+    snoozeFailed: string;
+    overdueReminder: string;
+    skippedReadOnly: string;
     completedReadOnly: string;
     completedTitle: string;
     deceasedReadOnly: string;
     sectionCreate: string;
     sectionUpcoming: string;
+    sectionOverdue: string;
     sectionCompleted: string;
     seeAllCompleted: string;
     notificationHint: string;
@@ -436,6 +446,7 @@ export type Translations = {
     };
     status: {
       upcoming: string;
+      overdue: string;
     };
     validation: {
       dueDateRequired: string;

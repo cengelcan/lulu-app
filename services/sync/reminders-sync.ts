@@ -15,6 +15,7 @@ type RemotePetReminderRow = {
   notes: string | null;
   status: string;
   completed_at: string | null;
+  skipped_at: string | null;
   record_id: string | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
@@ -34,6 +35,7 @@ function toRemoteRow(reminder: PetReminder, userId: string): Record<string, unkn
     notes: normalized.notes ?? null,
     status: normalized.status,
     completed_at: normalized.completedAt ?? null,
+    skipped_at: normalized.skippedAt ?? null,
     record_id: normalized.recordId ?? null,
     metadata: mergeStoredReminderMetadata(normalized),
     created_at: normalized.createdAt,
@@ -55,8 +57,9 @@ function fromRemoteRow(row: RemotePetReminderRow): PetReminder {
     dueTime: row.due_time ?? { ...DEFAULT_REMINDER_TIME },
     notes: row.notes,
     recurrence,
-    status: row.status === 'completed' ? 'completed' : 'pending',
+    status: row.status,
     completedAt: row.completed_at,
+    skippedAt: row.skipped_at ?? (row.status === 'skipped' ? row.updated_at : null),
     recordId: row.record_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

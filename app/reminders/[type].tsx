@@ -30,7 +30,9 @@ import {
 } from '@/types/pet-reminder';
 import { DEFAULT_REMINDER_TIME } from '@/types/reminder';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
+import { addDays } from '@/services/notifications/date';
 import { getReminderTypeLabelKey } from '@/utils/pet-reminder-display';
+import { isReminderOverdue } from '@/utils/reminder-overdue';
 import { resolveReminderTypeId } from '@/utils/pet-reminder-normalize';
 import { validatePetReminderForm } from '@/utils/pet-reminder-validation';
 
@@ -60,6 +62,8 @@ export default function ReminderFormScreen() {
   const createReminder = usePetReminderStore((state) => state.createReminder);
   const updateReminder = usePetReminderStore((state) => state.updateReminder);
   const completeReminder = usePetReminderStore((state) => state.completeReminder);
+  const skipReminder = usePetReminderStore((state) => state.skipReminder);
+  const snoozeReminder = usePetReminderStore((state) => state.snoozeReminder);
   const deleteReminder = usePetReminderStore((state) => state.deleteReminder);
 
   const [dueDate, setDueDate] = useState(() => formatLocalDate(getTodayStart()));
@@ -74,6 +78,8 @@ export default function ReminderFormScreen() {
   const [isHydrating, setIsHydrating] = useState(Boolean(reminderId));
   const [isSaving, setIsSaving] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
+  const [isSnoozing, setIsSnoozing] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -81,6 +87,14 @@ export default function ReminderFormScreen() {
   const isEditMode = Boolean(reminderId);
   const isReadOnly = pet?.status === 'deceased';
   const isCompleted = existingReminder?.status === 'completed';
+  const isSkipped = existingReminder?.status === 'skipped';
+  const isOverdue = useMemo(() => {
+    if (!existingReminder || existingReminder.status !== 'pending') {
+      return false;
+    }
+
+    return isReminderOverdue(existingReminder);
+  }, [existingReminder]);
   const notesOverLimit = notes.length > PET_REMINDER_NOTES_MAX_LENGTH;
 
   const screenTitle = useMemo(() => {
@@ -251,6 +265,63 @@ export default function ReminderFormScreen() {
     }
   }, [completeReminder, isCompleted, isReadOnly, pet?.id, reminderId, router, t]);
 
+  const handleSkip = useCallback(() => {
+    if (!reminderId || !pet?.id || isReadOnly || isCompleted || isSkipped) {
+      return;
+    }
+
+    Alert.alert(t('reminders.skipTitle'), t('reminders.skipMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('reminders.skipReminder'),
+        style: 'destructive',
+        onPress: () => {
+          void (async () => {
+            setIsSkipping(true);
+
+            try {
+              await skipReminder(reminderId, pet.id);
+              router.back();
+            } catch {
+              setValidationError(t('reminders.skipFailed'));
+            } finally {
+              setIsSkipping(false);
+            }
+          })();
+        },
+      },
+    ]);
+  }, [isCompleted, isReadOnly, isSkipped, pet?.id, reminderId, router, skipReminder, t]);
+
+  const handleSnooze = useCallback(async () => {
+    if (!reminderId || !pet?.id || isReadOnly || isCompleted || isSkipped) {
+      return;
+    }
+
+    const nextDueDate = formatLocalDate(addDays(getTodayStart(), 1));
+
+    setIsSnoozing(true);
+
+    try {
+      await snoozeReminder(reminderId, pet.id, nextDueDate, dueTime);
+      router.back();
+    } catch {
+      setValidationError(t('reminders.snoozeFailed'));
+    } finally {
+      setIsSnoozing(false);
+    }
+  }, [
+    dueTime,
+    isCompleted,
+    isReadOnly,
+    isSkipped,
+    pet?.id,
+    reminderId,
+    router,
+    snoozeReminder,
+    t,
+  ]);
+
   const handleDelete = useCallback(() => {
     if (!reminderId || !pet?.id || isReadOnly) {
       return;
@@ -304,9 +375,13 @@ export default function ReminderFormScreen() {
                 style={styles.intro}>
                 {isCompleted
                   ? t('reminders.completedReadOnly')
-                  : isEditMode
-                    ? t('reminders.editReminder')
-                    : t('reminders.addReminderType', { type: t(typeDefinition.labelKey) })}
+                  : isSkipped
+                    ? t('reminders.skippedReadOnly')
+                    : isEditMode
+                      ? isOverdue
+                        ? t('reminders.overdueReminder')
+                        : t('reminders.editReminder')
+                      : t('reminders.addReminderType', { type: t(typeDefinition.labelKey) })}
               </ThemedText>
             ) : null}
 
@@ -316,7 +391,9 @@ export default function ReminderFormScreen() {
                   <ThemedText type="defaultSemiBold">{t('reminders.fields.dueDate')}</ThemedText>
                   <DatePickerField
                     accessibilityLabel={t('reminders.fields.dueDate')}
-                    disabled={isCompleted}
+                    disabled={isCompleted || isSkipped}
+                    maximumDate={null}
+                    minimumDate={getTodayStart()}
                     placeholder={t('reminders.fields.dueDatePlaceholder')}
                     value={dueDate}
                     onChange={(value) => {
@@ -328,7 +405,7 @@ export default function ReminderFormScreen() {
 
                 <TimePickerField
                   accessibilityLabel={t('reminders.fields.dueTime')}
-                  disabled={isCompleted}
+                  disabled={isCompleted || isSkipped}
                   label={t('reminders.fields.dueTime')}
                   value={dueTime}
                   variant="row"
@@ -385,7 +462,7 @@ export default function ReminderFormScreen() {
                 style={styles.intro}>
                 {t('reminders.deceasedReadOnly')}
               </ThemedText>
-            ) : isCompleted ? null : (
+            ) : isCompleted || isSkipped ? null : (
               <View style={styles.actions}>
                 <Button
                   title={isEditMode ? t('reminders.saveChanges') : t('reminders.saveReminder')}
@@ -400,6 +477,22 @@ export default function ReminderFormScreen() {
                       variant="secondary"
                       onPress={() => void handleComplete()}
                     />
+                    {isOverdue ? (
+                      <>
+                        <Button
+                          title={t('reminders.snoozeReminder')}
+                          disabled={isSnoozing}
+                          variant="secondary"
+                          onPress={() => void handleSnooze()}
+                        />
+                        <Button
+                          title={t('reminders.skipReminder')}
+                          disabled={isSkipping}
+                          variant="secondary"
+                          onPress={handleSkip}
+                        />
+                      </>
+                    ) : null}
                     <Button
                       title={t('reminders.deleteReminder')}
                       variant="destructive"

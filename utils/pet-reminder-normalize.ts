@@ -3,6 +3,7 @@ import type {
   ReminderMetadataByType,
   ReminderRecurrence,
   ReminderRecurrenceFrequency,
+  ReminderStatus,
   ReminderTimeOfDay,
   ReminderTypeId,
 } from '@/types/pet-reminder';
@@ -12,6 +13,16 @@ import {
   isReminderTypeId,
 } from '@/types/pet-reminder';
 import { DEFAULT_REMINDER_TIME } from '@/types/reminder';
+
+const REMINDER_STATUSES = ['pending', 'completed', 'skipped'] as const;
+
+function normalizeReminderStatus(value: unknown): ReminderStatus {
+  if (typeof value === 'string' && (REMINDER_STATUSES as readonly string[]).includes(value)) {
+    return value as ReminderStatus;
+  }
+
+  return 'pending';
+}
 
 export function resolveReminderTypeId(value: string): ReminderTypeId | null {
   return isReminderTypeId(value) ? value : null;
@@ -103,7 +114,8 @@ export function normalizePetReminder(reminder: PetReminder): PetReminder {
     recurrence: normalizeRecurrence(reminder.recurrence),
     recordId: reminder.recordId?.trim() || null,
     completedAt: reminder.completedAt ?? null,
-    status: reminder.status === 'completed' ? 'completed' : 'pending',
+    skippedAt: reminder.skippedAt ?? null,
+    status: normalizeReminderStatus(reminder.status),
     metadata,
   } as PetReminder;
 }

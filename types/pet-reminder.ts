@@ -1,6 +1,6 @@
 export type ReminderTypeId = 'vet_visit' | 'vaccine' | 'parasite' | 'medication' | 'custom';
 
-export type ReminderStatus = 'pending' | 'completed';
+export type ReminderStatus = 'pending' | 'completed' | 'skipped';
 
 export type ReminderTimeOfDay = {
   hour: number;
@@ -54,6 +54,7 @@ type BasePetReminder = {
   recurrence: ReminderRecurrence;
   status: ReminderStatus;
   completedAt?: string | null;
+  skippedAt?: string | null;
   /** Set when completed — links to the auto-created health record. */
   recordId?: string | null;
   createdAt: string;
@@ -69,7 +70,7 @@ export type PetReminder = {
 
 export type PetReminderInput<T extends ReminderTypeId = ReminderTypeId> = Omit<
   Extract<PetReminder, { type: T }>,
-  'id' | 'createdAt' | 'updatedAt' | 'status' | 'completedAt' | 'recordId'
+  'id' | 'createdAt' | 'updatedAt' | 'status' | 'completedAt' | 'recordId' | 'skippedAt'
 >;
 
 export const PET_REMINDER_NOTES_MAX_LENGTH = 500;

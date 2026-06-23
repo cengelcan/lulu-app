@@ -13,7 +13,9 @@ type ReminderListRowProps = {
   title: string;
   typeLabel: string;
   badgeLabel: string;
+  badgeVariant?: 'upcoming' | 'overdue';
   dateLabel: string;
+  timeLabel: string;
   icon: IconSymbolName;
   backgroundColor: string;
   onPress: () => void;
@@ -24,7 +26,9 @@ export function ReminderListRow({
   title,
   typeLabel,
   badgeLabel,
+  badgeVariant = 'upcoming',
   dateLabel,
+  timeLabel,
   icon,
   backgroundColor,
   onPress,
@@ -36,6 +40,11 @@ export function ReminderListRow({
   const borderColor = useThemeColor({}, 'border');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
+  const warningColor = useThemeColor({}, 'warning');
+
+  const isOverdue = badgeVariant === 'overdue';
+  const accentColor = isOverdue ? warningColor : brandAccentColor;
+  const badgeBackground = isOverdue ? `${warningColor}22` : brandAccentSoft;
 
   const iconBoxBackground = isDark ? backgroundColor : `${backgroundColor}22`;
   const iconColor = isDark ? Palette.onDark : backgroundColor;
@@ -50,22 +59,22 @@ export function ReminderListRow({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${title}, ${dateLabel}`}
+      accessibilityLabel={`${title}, ${dateLabel} ${timeLabel}`}
       onPress={handlePress}
       style={({ pressed }) => [
         styles.row,
         !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: borderColor },
         { opacity: pressed ? 0.7 : 1 },
       ]}>
-      <View style={[styles.statusDot, { backgroundColor: brandAccentColor }]} />
+      <View style={[styles.statusDot, { backgroundColor: accentColor }]} />
       <View style={[styles.iconBox, { backgroundColor: iconBoxBackground }]}>
         <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
       </View>
       <View style={styles.textWrap}>
-        <View style={[styles.badge, { backgroundColor: brandAccentSoft }]}>
+        <View style={[styles.badge, { backgroundColor: badgeBackground }]}>
           <ThemedText
-            lightColor={brandAccentColor}
-            darkColor={brandAccentColor}
+            lightColor={accentColor}
+            darkColor={accentColor}
             style={styles.badgeText}>
             {badgeLabel}
           </ThemedText>
@@ -81,13 +90,22 @@ export function ReminderListRow({
           {typeLabel}
         </ThemedText>
       </View>
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.date}
-        numberOfLines={2}>
-        {dateLabel}
-      </ThemedText>
+      <View style={styles.dateColumn}>
+        <ThemedText
+          lightColor={accentColor}
+          darkColor={accentColor}
+          style={styles.dateLine}
+          numberOfLines={1}>
+          {dateLabel}
+        </ThemedText>
+        <ThemedText
+          lightColor={accentColor}
+          darkColor={accentColor}
+          style={styles.timeLine}
+          numberOfLines={1}>
+          {timeLabel}
+        </ThemedText>
+      </View>
       <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
     </Pressable>
   );
@@ -136,10 +154,19 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.caption,
   },
-  date: {
-    ...Typography.caption,
+  dateColumn: {
     flexShrink: 0,
+    alignItems: 'flex-end',
+    gap: 2,
+    minWidth: 72,
+  },
+  dateLine: {
+    ...Typography.caption,
+    fontWeight: '600',
     textAlign: 'right',
-    maxWidth: 96,
+  },
+  timeLine: {
+    ...Typography.caption,
+    textAlign: 'right',
   },
 });

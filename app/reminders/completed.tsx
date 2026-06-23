@@ -6,7 +6,6 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { CompletedReminderRow } from '@/components/reminders/CompletedReminderRow';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { REMINDER_TYPES } from '@/constants/reminder-types';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Spacing } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -17,7 +16,7 @@ import { getLocaleTag } from '@/utils/locale';
 import { getRecordFormRoute } from '@/utils/pet-record-display';
 import { getReminderTitle, getReminderTypeLabelKey } from '@/utils/pet-reminder-display';
 import { reminderTypeToRecordType } from '@/utils/reminder-to-record';
-import { formatCompletedReminderDate } from '@/utils/upcoming-reminders';
+import { formatCompletedReminderDate, listCompletedReminders } from '@/utils/upcoming-reminders';
 
 export default function CompletedRemindersScreen() {
   const router = useRouter();
@@ -48,13 +47,7 @@ export default function CompletedRemindersScreen() {
     }, [loadReminders, pet?.id])
   );
 
-  const completedReminders = useMemo(
-    () =>
-      reminders
-        .filter((reminder) => reminder.status === 'completed')
-        .sort((left, right) => (right.completedAt ?? '').localeCompare(left.completedAt ?? '')),
-    [reminders]
-  );
+  const completedReminders = useMemo(() => listCompletedReminders(reminders), [reminders]);
 
   const handleReminderPress = (reminder: (typeof completedReminders)[number]) => {
     if (!reminder.recordId) {
@@ -81,24 +74,18 @@ export default function CompletedRemindersScreen() {
           </View>
         ) : completedReminders.length > 0 ? (
           <GroupedSection title={t('reminders.sectionCompleted')}>
-            {completedReminders.map((reminder, index) => {
-              const typeDefinition = REMINDER_TYPES.find((item) => item.id === reminder.type);
-
-              return (
-                <CompletedReminderRow
-                  key={reminder.id}
-                  backgroundColor={typeDefinition?.backgroundColor ?? '#6b7280'}
-                  dateLabel={formatCompletedReminderDate(reminder.dueDate, locale)}
-                  icon={typeDefinition?.icon ?? 'bell.fill'}
-                  isLast={index === completedReminders.length - 1}
-                  title={getReminderTitle(reminder, t)}
-                  typeLabel={t(getReminderTypeLabelKey(reminder.type))}
-                  onPress={
-                    reminder.recordId ? () => handleReminderPress(reminder) : undefined
-                  }
-                />
-              );
-            })}
+            {completedReminders.map((reminder, index) => (
+              <CompletedReminderRow
+                key={reminder.id}
+                dateLabel={formatCompletedReminderDate(reminder.dueDate, locale)}
+                isLast={index === completedReminders.length - 1}
+                title={getReminderTitle(reminder, t)}
+                typeLabel={t(getReminderTypeLabelKey(reminder.type))}
+                onPress={
+                  reminder.recordId ? () => handleReminderPress(reminder) : undefined
+                }
+              />
+            ))}
           </GroupedSection>
         ) : null}
       </ScreenContainer>

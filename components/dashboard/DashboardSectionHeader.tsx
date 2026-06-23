@@ -10,6 +10,7 @@ type DashboardSectionHeaderProps = {
   title: string;
   icon?: IconSymbolName;
   iconColor?: string;
+  detailLabel?: string;
   actionLabel?: string;
   onActionPress?: () => void;
 };
@@ -18,10 +19,12 @@ export function DashboardSectionHeader({
   title,
   icon,
   iconColor,
+  detailLabel,
   actionLabel,
   onActionPress,
 }: DashboardSectionHeaderProps) {
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const accentColor = iconColor ?? brandAccentColor;
 
   const handleActionPress = () => {
@@ -44,6 +47,15 @@ export function DashboardSectionHeader({
           {title}
         </ThemedText>
       </View>
+      {detailLabel ? (
+        <ThemedText
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.detail}
+          numberOfLines={1}>
+          {detailLabel}
+        </ThemedText>
+      ) : null}
       {actionLabel && onActionPress ? (
         <Pressable
           accessibilityRole="button"
@@ -82,5 +94,10 @@ const styles = StyleSheet.create({
   action: {
     ...Typography.caption,
     fontWeight: '600',
+  },
+  detail: {
+    ...Typography.caption,
+    flexShrink: 1,
+    textAlign: 'right',
   },
 });

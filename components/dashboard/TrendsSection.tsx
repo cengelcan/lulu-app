@@ -20,7 +20,11 @@ export function TrendsSection({ trends }: TrendsSectionProps) {
 
   return (
     <View style={styles.section}>
-      <DashboardSectionHeader title={t('dashboard.trendsTitle')} icon="chart.line.uptrend.xyaxis" />
+      <DashboardSectionHeader
+        title={t('dashboard.trendsTitle')}
+        icon="chart.line.uptrend.xyaxis"
+        detailLabel={t('dashboard.trendsComparedToLast30Days')}
+      />
       <View style={styles.row}>
         <WeightTrendMetricCard metric={trends.weight} />
         <TrendMetricCard metric={trends.appetite} />

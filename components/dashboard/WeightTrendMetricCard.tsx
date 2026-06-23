@@ -22,11 +22,11 @@ export function WeightTrendMetricCard({ metric }: WeightTrendMetricCardProps) {
   const titleColor = useThemeColor({}, 'text');
 
   const subtitle =
-    metric.subtitleMode === 'delta'
-      ? t('dashboard.trendsComparedToLast30Days')
-      : metric.subtitleMode === 'latest'
-        ? t('dashboard.trendsLatestRecord')
-        : t('dashboard.trendsNoData');
+    metric.subtitleMode === 'latest'
+      ? t('dashboard.trendsLatestRecord')
+      : metric.subtitleMode === 'no_data' || !metric.hasData
+        ? t('dashboard.trendsNoData')
+        : null;
 
   return (
     <View style={[styles.card, { backgroundColor: surfaceColor, borderColor }]}>
@@ -47,13 +47,15 @@ export function WeightTrendMetricCard({ metric }: WeightTrendMetricCardProps) {
         numberOfLines={1}>
         {metric.valueLabel ?? '—'}
       </ThemedText>
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.subtitle}
-        numberOfLines={1}>
-        {subtitle}
-      </ThemedText>
+      {subtitle ? (
+        <ThemedText
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.subtitle}
+          numberOfLines={1}>
+          {subtitle}
+        </ThemedText>
+      ) : null}
       <WeightTrendSparkline
         points={metric.sparklinePoints}
         color={WEIGHT_ACCENT}

@@ -8,7 +8,7 @@ const DOT_SIZE = 5;
 const LINE_WIDTH = 2;
 const CHART_PADDING = 4;
 
-type WeightTrendSparklineProps = {
+type TrendLineSparklineProps = {
   points: number[];
   color: string;
   height?: number;
@@ -70,11 +70,11 @@ function getChartSegments(chartPoints: ChartPoint[]): ChartSegment[] {
   return segments;
 }
 
-export function WeightTrendSparkline({
+export function TrendLineSparkline({
   points,
   color,
   height = 40,
-}: WeightTrendSparklineProps) {
+}: TrendLineSparklineProps) {
   const [width, setWidth] = useState(0);
 
   const chartPoints = useMemo(

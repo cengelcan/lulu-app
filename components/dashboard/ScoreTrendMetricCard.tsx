@@ -1,65 +1,71 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { TrendLineSparkline } from '@/components/dashboard/TrendLineSparkline';
+import type { IconSymbolName } from '@/components/ui/icon-symbol';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import type { TrendMetric } from '@/utils/trends';
 
-const WEIGHT_ACCENT = Palette.badgeViolet;
-
-type WeightTrendMetricCardProps = {
+type ScoreTrendMetricCardProps = {
   metric: TrendMetric;
+  titleKey: 'dashboard.trendsAppetite' | 'dashboard.trendsEnergy';
+  icon: IconSymbolName;
+  accentColor: string;
+  chart: ReactNode;
 };
 
-export function WeightTrendMetricCard({ metric }: WeightTrendMetricCardProps) {
+export function ScoreTrendMetricCard({
+  metric,
+  titleKey,
+  icon,
+  accentColor,
+  chart,
+}: ScoreTrendMetricCardProps) {
   const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
   const titleColor = useThemeColor({}, 'text');
 
-  const subtitle =
-    metric.subtitleMode === 'latest'
-      ? t('dashboard.trendsLatestRecord')
-      : metric.subtitleMode === 'no_data' || !metric.hasData
-        ? t('dashboard.trendsNoData')
-        : null;
+  const statusLabel =
+    metric.status === 'no_data'
+      ? t('dashboard.trendsNoData')
+      : metric.status === 'normal'
+        ? t('dashboard.trendsNormal')
+        : t('dashboard.attention');
 
   return (
     <View style={[styles.card, { backgroundColor: surfaceColor, borderColor }]}>
       <View style={styles.titleRow}>
-        <IconSymbol name="scalemass.fill" size={14} color={WEIGHT_ACCENT} />
+        <IconSymbol name={icon} size={14} color={accentColor} />
         <ThemedText
           lightColor={titleColor}
           darkColor={titleColor}
           style={styles.title}
           numberOfLines={1}>
-          {t('dashboard.trendsWeight')}
+          {t(titleKey)}
         </ThemedText>
       </View>
       <ThemedText
-        lightColor={WEIGHT_ACCENT}
-        darkColor={WEIGHT_ACCENT}
+        lightColor={accentColor}
+        darkColor={accentColor}
         style={styles.value}
         numberOfLines={1}>
         {metric.valueLabel ?? '—'}
       </ThemedText>
-      {subtitle ? (
+      {metric.hasData ? (
         <ThemedText
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
           style={styles.subtitle}
           numberOfLines={1}>
-          {subtitle}
+          {statusLabel}
         </ThemedText>
       ) : null}
-      <TrendLineSparkline
-        points={metric.sparklinePoints}
-        color={WEIGHT_ACCENT}
-      />
+      {chart}
     </View>
   );
 }

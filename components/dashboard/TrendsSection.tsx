@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
 import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionHeader';
-import { TrendMetricCard } from '@/components/dashboard/TrendMetricCard';
+import { AppetiteTrendMetricCard } from '@/components/dashboard/AppetiteTrendMetricCard';
+import { EnergyTrendMetricCard } from '@/components/dashboard/EnergyTrendMetricCard';
 import { WeightTrendMetricCard } from '@/components/dashboard/WeightTrendMetricCard';
 import { Spacing } from '@/constants/theme';
 import type { DashboardTrends } from '@/utils/trends';
@@ -27,8 +28,8 @@ export function TrendsSection({ trends }: TrendsSectionProps) {
       />
       <View style={styles.row}>
         <WeightTrendMetricCard metric={trends.weight} />
-        <TrendMetricCard metric={trends.appetite} />
-        <TrendMetricCard metric={trends.energy} />
+        <AppetiteTrendMetricCard metric={trends.appetite} />
+        <EnergyTrendMetricCard metric={trends.energy} />
       </View>
     </View>
   );

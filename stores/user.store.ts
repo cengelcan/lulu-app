@@ -34,6 +34,7 @@ type UserState = {
   provider: AuthProvider;
   email: string | null;
   isPlusActive: boolean;
+  plusExpiresAt: string | null;
   isLoading: boolean;
   error: string | null;
   initializeAuth: () => Promise<void>;
@@ -125,6 +126,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   provider: 'guest',
   email: null,
   isPlusActive: false,
+  plusExpiresAt: null,
   isLoading: false,
   error: null,
 
@@ -221,6 +223,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         displayName: null,
         avatarUri: null,
         isPlusActive: false,
+        plusExpiresAt: null,
         authStatus: 'unauthenticated',
       });
     }
@@ -269,6 +272,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       displayName: null,
       avatarUri: null,
       isPlusActive: false,
+      plusExpiresAt: null,
       authStatus: 'unauthenticated',
     });
   },

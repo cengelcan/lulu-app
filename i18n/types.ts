@@ -373,8 +373,13 @@ export type Translations = {
     couldNotSavePhoto: string;
     couldNotSaveName: string;
     luluPlus: string;
-    luluPlusActive: string;
-    luluPlusInactive: string;
+    luluPlusDescription: string;
+    luluPlusActiveStatus: string;
+    luluPlusRenewsOn: string;
+    luluPlusFeaturePdf: string;
+    luluPlusFeatureSharing: string;
+    luluPlusFeatureBackup: string;
+    luluPlusFeaturePhotos: string;
     manage: string;
     upgrade: string;
     manageA11y: string;

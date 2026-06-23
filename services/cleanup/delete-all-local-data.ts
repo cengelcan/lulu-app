@@ -91,6 +91,7 @@ export function resetAppStoresAfterDataDeletion(): void {
     provider: 'guest',
     email: null,
     isPlusActive: false,
+    plusExpiresAt: null,
     isLoading: false,
     error: null,
   });

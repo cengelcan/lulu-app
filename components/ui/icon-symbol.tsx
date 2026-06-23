@@ -64,6 +64,7 @@ const MAPPING = {
   'scalemass.fill': 'monitor-weight',
   'ellipsis.circle.fill': 'more-horiz',
   'staroflife.fill': 'medical-services',
+  'crown.fill': 'workspace-premium',
 } as IconMapping;
 
 /**

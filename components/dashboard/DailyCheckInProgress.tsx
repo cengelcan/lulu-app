@@ -2,8 +2,10 @@ import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
+import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionHeader';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -22,18 +24,24 @@ type DayPillProps = {
   weekdayLabel: string;
   isCompleted: boolean;
   isFuture: boolean;
+  isToday: boolean;
   onPress: () => void;
 };
 
-function DayPill({ weekdayLabel, isCompleted, isFuture, onPress }: DayPillProps) {
-  const surfaceColor = useThemeColor({}, 'surface');
+function DayPill({ weekdayLabel, isCompleted, isFuture, isToday, onPress }: DayPillProps) {
   const borderColor = useThemeColor({}, 'border');
-  const successColor = useThemeColor({}, 'success');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
   const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const primaryTextColor = useThemeColor({}, 'primaryText');
 
-  const backgroundColor = isCompleted ? successColor : surfaceColor;
+  const backgroundColor = isCompleted ? brandAccentColor : isToday ? brandAccentSoft : 'transparent';
+  const pillBorderColor = isCompleted
+    ? brandAccentColor
+    : isToday
+      ? brandAccentColor
+      : borderColor;
   const labelColor = isCompleted ? primaryTextColor : isFuture ? textSecondaryColor : textColor;
 
   return (
@@ -47,20 +55,24 @@ function DayPill({ weekdayLabel, isCompleted, isFuture, onPress }: DayPillProps)
         styles.dayPill,
         {
           backgroundColor,
-          borderColor: isCompleted ? successColor : borderColor,
+          borderColor: pillBorderColor,
           borderWidth: isCompleted ? 0 : StyleSheet.hairlineWidth,
           opacity: isFuture ? 0.45 : pressed ? 0.85 : 1,
         },
       ]}>
-      <ThemedText
-        lightColor={labelColor}
-        darkColor={labelColor}
-        style={styles.dayLabel}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.8}>
-        {weekdayLabel}
-      </ThemedText>
+      {isCompleted ? (
+        <IconSymbol name="checkmark" size={14} color={primaryTextColor} />
+      ) : (
+        <ThemedText
+          lightColor={labelColor}
+          darkColor={labelColor}
+          style={styles.dayLabel}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}>
+          {weekdayLabel}
+        </ThemedText>
+      )}
     </Pressable>
   );
 }
@@ -105,7 +117,7 @@ export function DailyCheckInProgress() {
 
   return (
     <Card>
-      <ThemedText type="subtitle">{t('dashboard.dailyCheckIn')}</ThemedText>
+      <DashboardSectionHeader title={t('dashboard.dailyCheckIn')} icon="calendar" />
       <ThemedText
         lightColor={textSecondaryColor}
         darkColor={textSecondaryColor}
@@ -127,6 +139,7 @@ export function DailyCheckInProgress() {
                 weekdayLabel={formatWeekdayShort(day, locale)}
                 isCompleted={completedDayKeys.has(dayKey)}
                 isFuture={isFuture}
+                isToday={isSameLocalDate(day, today)}
                 onPress={() => handleDayPress(day)}
               />
             );

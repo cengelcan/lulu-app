@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { NotificationBellButton } from '@/components/dashboard/NotificationBellButton';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -38,21 +39,31 @@ export function GreetingHeader({ petName, ownerName, todayCheckIn }: GreetingHea
 
   return (
     <View style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
-        {greetingTitle}
-      </ThemedText>
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.subtitle}>
-        {subtitle}
-      </ThemedText>
+      <View style={styles.textColumn}>
+        <ThemedText type="title" style={styles.title}>
+          {greetingTitle}
+        </ThemedText>
+        <ThemedText
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.subtitle}>
+          {subtitle}
+        </ThemedText>
+      </View>
+      <NotificationBellButton />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  },
+  textColumn: {
+    flex: 1,
     gap: Spacing.xs,
   },
   title: {

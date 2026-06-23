@@ -170,7 +170,14 @@ export type Translations = {
     memorialMessage: string;
     quickActions: string;
     reports: string;
+    reportsSubtitle: string;
     records: string;
+    recordsSubtitle: string;
+    reminder: string;
+    reminderSubtitle: string;
+    notificationsTitle: string;
+    notificationsEmpty: string;
+    notificationsA11y: string;
     medication: string;
     missedCheckInToday: string;
     missedCheckInYesterday: string;

@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePetDisplay } from '@/hooks/use-pet-display';
@@ -93,26 +94,31 @@ export function PetProfileCard({
         <View style={styles.topRow}>
           <PetAvatar photoUri={pet.photoUri} size={56} />
           <View style={styles.info}>
-            <ThemedText type="defaultSemiBold" style={styles.petName}>
-              {pet.name}
-            </ThemedText>
+            <View style={styles.nameRow}>
+              <ThemedText type="defaultSemiBold" style={styles.petName} numberOfLines={1}>
+                {pet.name}
+              </ThemedText>
+              {healthBadge ? <HealthBadge variant={healthBadge} /> : null}
+            </View>
             <ThemedText
               lightColor={textSecondaryColor}
               darkColor={textSecondaryColor}
-              style={styles.breed}>
+              style={styles.breed}
+              numberOfLines={1}>
               {breedLabel}
             </ThemedText>
+            {lastCheckInLabel ? (
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.lastCheckIn}
+                numberOfLines={1}>
+                {lastCheckInLabel}
+              </ThemedText>
+            ) : null}
           </View>
-          {healthBadge ? <HealthBadge variant={healthBadge} /> : null}
+          <IconSymbol name="chevron.right" size={18} color={textSecondaryColor} />
         </View>
-        {lastCheckInLabel ? (
-          <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.lastCheckIn}>
-            {lastCheckInLabel}
-          </ThemedText>
-        ) : null}
       </Card>
     </Pressable>
   );
@@ -121,23 +127,31 @@ export function PetProfileCard({
 const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: Spacing.md,
   },
   info: {
     flex: 1,
     gap: 2,
-    paddingTop: 2,
+    minWidth: 0,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    flexWrap: 'wrap',
   },
   petName: {
     ...Typography.bodySemiBold,
     fontSize: 17,
+    flexShrink: 1,
   },
   breed: {
     ...Typography.caption,
   },
   lastCheckIn: {
     ...Typography.caption,
+    marginTop: 2,
   },
   badge: {
     flexDirection: 'row',

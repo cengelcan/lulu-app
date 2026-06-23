@@ -66,6 +66,8 @@ const MAPPING = {
   'ellipsis.circle.fill': 'more-horiz',
   'staroflife.fill': 'medical-services',
   'crown.fill': 'workspace-premium',
+  'bell.fill': 'notifications',
+  'calendar': 'event',
 } as IconMapping;
 
 /**

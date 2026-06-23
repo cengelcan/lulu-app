@@ -1,15 +1,14 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { Fonts, Palette, Spacing, Typography } from '@/constants/theme';
 import { useBootstrap } from '@/hooks/use-bootstrap';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 const SPLASH_BG = require('@/assets/images/splash-screen-bg.png');
+const LULU_LOGO = require('@/assets/images/lulu-logo.png');
 
 export default function SplashScreen() {
   const { phase, error, retry } = useBootstrap();
@@ -29,28 +28,32 @@ export default function SplashScreen() {
       />
 
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.center}>
-          <View
-            accessible={false}
-            importantForAccessibility="no-hide-descendants"
-            style={[styles.logoContainer, { backgroundColor: brandAccentColor }]}>
-            <MaterialIcons name="pets" size={40} color={Palette.onDark} />
-          </View>
+        <View style={styles.branding}>
+          <Image
+            accessibilityLabel="Lulu"
+            source={LULU_LOGO}
+            style={styles.logo}
+            contentFit="contain"
+          />
 
-          <ThemedText
-            lightColor={Palette.onDark}
-            darkColor={Palette.onDark}
-            type="title"
-            style={styles.appName}>
-            Lulu - Pet Health Journal
-          </ThemedText>
+          <Text allowFontScaling style={styles.appName}>
+            Lulu
+          </Text>
 
-          <ThemedText
-            lightColor={Palette.onDarkSoft}
-            darkColor={Palette.onDarkSoft}
-            style={styles.tagline}>
-            Remember every symptom. Explain every vet visit.
-          </ThemedText>
+          <Text allowFontScaling style={styles.subtitle}>
+            <Text style={{ color: brandAccentColor }}>• </Text>
+            Pet Health Journal
+            <Text style={{ color: brandAccentColor }}> •</Text>
+          </Text>
+        </View>
+
+        <View style={styles.footer}>
+          <Text allowFontScaling style={styles.footerLine}>
+            Remember every symptom.
+          </Text>
+          <Text allowFontScaling style={styles.footerLine}>
+            Explain <Text style={{ color: brandAccentColor }}>every</Text> vet visit.
+          </Text>
 
           {isLoading ? (
             <ActivityIndicator color={brandAccentColor} size="small" style={styles.spinner} />
@@ -58,12 +61,9 @@ export default function SplashScreen() {
 
           {phase === 'error' && error ? (
             <View style={[styles.errorContainer, { backgroundColor: surfaceColor }]}>
-              <ThemedText
-                lightColor={Palette.onDarkSoft}
-                darkColor={Palette.onDarkSoft}
-                style={styles.errorText}>
+              <Text allowFontScaling style={styles.errorText}>
                 {error}
-              </ThemedText>
+              </Text>
               <Button title="Try Again" onPress={() => void retry()} />
             </View>
           ) : null}
@@ -81,30 +81,50 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
+    justifyContent: 'space-between',
   },
-  center: {
-    flex: 1,
+  branding: {
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: '22%',
-    gap: Spacing.md,
+    paddingTop: '14%',
+    gap: Spacing.sm,
   },
-  logoContainer: {
-    width: 88,
-    height: 88,
-    borderRadius: Radius.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.sm,
+  logo: {
+    width: 148,
+    height: 148,
+    marginBottom: Spacing.xs,
   },
   appName: {
+    color: Palette.brandAccentLight,
     textAlign: 'center',
-    ...Typography.title,
+    fontSize: Typography.displayLg.fontSize,
+    lineHeight: Typography.displayLg.lineHeight,
+    fontWeight: Typography.displayLg.fontWeight,
+    letterSpacing: Typography.displayLg.letterSpacing,
+    fontFamily: Platform.select({
+      ios: Fonts?.rounded,
+      web: Fonts?.rounded,
+      default: undefined,
+    }),
   },
-  tagline: {
+  subtitle: {
+    color: Palette.onDark,
     textAlign: 'center',
-    ...Typography.body,
-    paddingHorizontal: Spacing.md,
+    fontSize: Typography.body.fontSize,
+    lineHeight: Typography.body.lineHeight,
+    fontWeight: '500',
+    letterSpacing: 0.4,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingBottom: Spacing.xl,
+    gap: Spacing.xxs,
+  },
+  footerLine: {
+    color: Palette.onDark,
+    textAlign: 'center',
+    fontSize: Typography.body.fontSize,
+    lineHeight: Typography.body.lineHeight,
+    fontWeight: '400',
   },
   spinner: {
     marginTop: Spacing.lg,
@@ -115,9 +135,10 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     alignItems: 'center',
     padding: Spacing.lg,
-    borderRadius: Radius.lg,
+    borderRadius: 16,
   },
   errorText: {
+    color: Palette.onDarkSoft,
     textAlign: 'center',
     ...Typography.body,
   },

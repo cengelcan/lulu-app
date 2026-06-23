@@ -12,7 +12,7 @@ type CheckInProgressProps = {
 
 export function CheckInProgress({ completedCount, totalCount }: CheckInProgressProps) {
   const { t } = useTranslation();
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const borderColor = useThemeColor({}, 'border');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -25,7 +25,7 @@ export function CheckInProgress({ completedCount, totalCount }: CheckInProgressP
             style={[
               styles.dot,
               {
-                backgroundColor: index < completedCount ? primaryColor : borderColor,
+                backgroundColor: index < completedCount ? brandAccentColor : borderColor,
               },
             ]}
           />

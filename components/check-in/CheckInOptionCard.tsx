@@ -35,7 +35,8 @@ export function CheckInOptionCard({
 }: CheckInOptionCardProps) {
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const brandAccentGlowColor = useThemeColor({}, 'brandAccentGlow');
   const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const iconColor = useThemeColor({}, 'icon');
@@ -81,17 +82,18 @@ export function CheckInOptionCard({
           styles.card,
           {
             backgroundColor: surfaceColor,
-            borderColor: selected ? primaryColor : borderColor,
+            borderColor: selected ? brandAccentColor : borderColor,
             borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
             opacity: pressed ? 0.9 : selected ? 1 : 0.82,
-            shadowOpacity: selected ? 0.12 : 0,
+            shadowColor: selected ? brandAccentGlowColor : '#000000',
+            shadowOpacity: selected ? 1 : 0,
             elevation: selected ? 4 : 0,
           },
         ]}>
         <IconSymbol
           name={icon}
           size={28}
-          color={selected ? primaryColor : iconColor}
+          color={selected ? brandAccentColor : iconColor}
           style={styles.icon}
         />
         <ThemedText

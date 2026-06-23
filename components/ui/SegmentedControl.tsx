@@ -22,7 +22,7 @@ export function SegmentedControl<T extends string>({
 }: SegmentedControlProps<T>) {
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const primaryTextColor = useThemeColor({}, 'primaryText');
   const textColor = useThemeColor({}, 'text');
 
@@ -53,7 +53,7 @@ export function SegmentedControl<T extends string>({
             onPress={() => handleSelect(option.value)}
             style={({ pressed }) => [
               styles.segment,
-              isSelected && { backgroundColor: primaryColor },
+              isSelected && { backgroundColor: brandAccentColor },
               pressed && !isSelected && styles.segmentPressed,
             ]}>
             <Text

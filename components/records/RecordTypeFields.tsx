@@ -29,7 +29,7 @@ type RecordTypeFieldsProps = {
 
 export function RecordTypeFields({ type, metadata, onChangeMetadata }: RecordTypeFieldsProps) {
   const { t } = useTranslation();
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const primaryTextColor = useThemeColor({}, 'primaryText');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -195,8 +195,8 @@ export function RecordTypeFields({ type, metadata, onChangeMetadata }: RecordTyp
                     style={({ pressed }) => [
                       styles.suggestionChip,
                       {
-                        backgroundColor: selected ? primaryColor : surfaceColor,
-                        borderColor: selected ? primaryColor : borderColor,
+                        backgroundColor: selected ? brandAccentColor : surfaceColor,
+                        borderColor: selected ? brandAccentColor : borderColor,
                         opacity: pressed ? 0.85 : 1,
                       },
                     ]}>

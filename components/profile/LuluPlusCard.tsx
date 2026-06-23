@@ -36,7 +36,7 @@ export function LuluPlusCard() {
         <Button
           accessibilityLabel={isPlusActive ? t('profile.manageA11y') : t('profile.upgradeA11y')}
           title={isPlusActive ? t('profile.manage') : t('profile.upgrade')}
-          variant="secondary"
+          variant="primary"
           onPress={handlePress}
           style={styles.button}
         />

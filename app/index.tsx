@@ -10,7 +10,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 
 export default function SplashScreen() {
   const { phase, error, retry } = useBootstrap();
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const primaryTextColor = useThemeColor({}, 'primaryText');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -23,7 +23,7 @@ export default function SplashScreen() {
         <View
           accessible={false}
           importantForAccessibility="no-hide-descendants"
-          style={[styles.logoContainer, { backgroundColor: primaryColor }]}>
+          style={[styles.logoContainer, { backgroundColor: brandAccentColor }]}>
           <MaterialIcons name="pets" size={40} color={primaryTextColor} />
         </View>
 
@@ -39,7 +39,7 @@ export default function SplashScreen() {
         </ThemedText>
 
         {isLoading ? (
-          <ActivityIndicator color={primaryColor} size="small" style={styles.spinner} />
+          <ActivityIndicator color={brandAccentColor} size="small" style={styles.spinner} />
         ) : null}
 
         {phase === 'error' && error ? (

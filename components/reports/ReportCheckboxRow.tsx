@@ -19,7 +19,7 @@ export function ReportCheckboxRow({
   onPress,
   isLast = false,
 }: ReportCheckboxRowProps) {
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
 
@@ -43,7 +43,7 @@ export function ReportCheckboxRow({
       <IconSymbol
         name={selected ? 'checkmark.circle' : 'circle'}
         size={22}
-        color={selected ? primaryColor : textSecondaryColor}
+        color={selected ? brandAccentColor : textSecondaryColor}
       />
       <ThemedText type="defaultSemiBold" style={styles.label}>
         {label}

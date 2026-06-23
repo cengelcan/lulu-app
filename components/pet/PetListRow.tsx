@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Spacing, Typography } from '@/constants/theme';
+import { Spacing, Radius, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -34,7 +34,10 @@ export function PetListRow({
 }: PetListRowProps) {
   const { t } = useTranslation();
   const { displayPetBreed, displayPetSpecies } = usePetDisplay();
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const brandAccentSoftColor = useThemeColor({}, 'brandAccentSoft');
+  const brandAccentBorderColor = useThemeColor({}, 'brandAccentBorder');
+  const brandAccentGlowColor = useThemeColor({}, 'brandAccentGlow');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
 
@@ -88,6 +91,18 @@ export function PetListRow({
         onPress={handleSelect}
         style={({ pressed }) => [
           styles.mainPressable,
+          isActive && {
+            backgroundColor: brandAccentSoftColor,
+            borderColor: brandAccentBorderColor,
+            borderWidth: 1,
+            borderRadius: Radius.md,
+            marginHorizontal: Spacing.xs,
+            shadowColor: brandAccentGlowColor,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 1,
+            shadowRadius: 6,
+            elevation: 2,
+          },
           { opacity: disabled ? 0.6 : pressed ? 0.7 : 1 },
         ]}>
         <PetAvatar photoUri={pet.photoUri} size={48} />
@@ -104,9 +119,9 @@ export function PetListRow({
           </ThemedText>
         </View>
         {isSwitching ? (
-          <ActivityIndicator color={primaryColor} size="small" />
+          <ActivityIndicator color={brandAccentColor} size="small" />
         ) : isActive ? (
-          <IconSymbol name="checkmark" size={20} color={primaryColor} />
+          <IconSymbol name="checkmark" size={20} color={brandAccentColor} />
         ) : null}
       </Pressable>
       <Pressable

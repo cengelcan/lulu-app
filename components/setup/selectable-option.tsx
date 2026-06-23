@@ -13,7 +13,7 @@ type SelectableOptionProps = {
 };
 
 export function SelectableOption({ label, selected, onPress, disabled = false }: SelectableOptionProps) {
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const primaryTextColor = useThemeColor({}, 'primaryText');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -39,8 +39,8 @@ export function SelectableOption({ label, selected, onPress, disabled = false }:
       style={({ pressed }) => [
         styles.option,
         {
-          backgroundColor: selected ? primaryColor : surfaceColor,
-          borderColor: selected ? primaryColor : borderColor,
+          backgroundColor: selected ? brandAccentColor : surfaceColor,
+          borderColor: selected ? brandAccentColor : borderColor,
           opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
         },
       ]}>

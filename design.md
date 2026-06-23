@@ -22,7 +22,11 @@ colors:
   on-primary: "#ffffff"
   on-dark: "#ffffff"
   on-dark-soft: "#a1a1aa"
-  brand-accent: "#3b82f6"
+  brand-accent: "#A998D6"
+  brand-accent-light: "#B8A8E8"
+  brand-accent-soft: "rgba(169,152,214,0.12)"
+  brand-accent-border: "rgba(169,152,214,0.35)"
+  brand-accent-glow: "rgba(169,152,214,0.25)"
   success: "#10b981"
   warning: "#f59e0b"
   error: "#ef4444"
@@ -296,8 +300,23 @@ The footer flips to `{colors.surface-dark}` (#101010) — a deep near-black that
 
 ### Brand & Accent
 - **Primary** (`{colors.primary}` — #111111): The dominant action color. All primary CTAs, h1/h2 display type. Press state shifts to `{colors.primary-active}` (#242424).
-- **Brand Accent** (`{colors.brand-accent}` — #3b82f6): Used sparely on inline links and on a small badge / "Customer story" highlight. Cal.com is a near-monochrome brand — the blue appears rarely.
+- **Brand Accent** (`{colors.brand-accent}` — #A998D6): Lulu's selective highlight on dark surfaces — active tabs, selected cards, primary CTAs, progress, and check states. Never floods normal cards or body text.
+- **Brand Accent Light** (`{colors.brand-accent-light}` — #B8A8E8): Pressed or hovered accent surfaces.
+- **Brand Accent Soft** (`{colors.brand-accent-soft}` — rgba(169,152,214,0.12)): Selected card fills (e.g. active pet row).
+- **Brand Accent Border** (`{colors.brand-accent-border}` — rgba(169,152,214,0.35)): Selected card outlines.
+- **Brand Accent Glow** (`{colors.brand-accent-glow}` — rgba(169,152,214,0.25)): Selected card shadow tint.
 - **Badge Pastels** — A small pastel set for category badges and avatar fills: `{colors.badge-orange}` (#fb923c), `{colors.badge-pink}` (#ec4899), `{colors.badge-violet}` (#8b5cf6), `{colors.badge-emerald}` (#34d399). These appear on tag pills and small accent moments inside product UI fragments — never on hero CTAs.
+
+#### Lulu app accent usage
+Reserve `{colors.brand-accent}` for active, selected, or high-priority UI only:
+- Active bottom tab icon + label
+- Selected pet card (`backgroundColor: {colors.brand-accent-soft}`, `borderColor: {colors.brand-accent-border}`, `shadowColor: {colors.brand-accent-glow}`)
+- Primary CTA buttons (`backgroundColor: {colors.brand-accent}`, `textColor: {colors.on-primary}`)
+- Selected segment / tab
+- Check icons, progress indicators, badges, splash logo + loading spinner
+- Lulu Plus card CTA
+
+Do **not** tint normal cards, body copy, or page backgrounds with accent — the dark theme stays near-black; accent is a premium, selective signal.
 
 ### Surface
 - **Canvas** (`{colors.canvas}` — #ffffff): The default page floor.

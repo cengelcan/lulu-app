@@ -22,7 +22,7 @@ const variantStyles: Record<
   }
 > = {
   primary: {
-    background: 'primary',
+    background: 'brandAccent',
     text: 'primaryText',
   },
   secondary: {

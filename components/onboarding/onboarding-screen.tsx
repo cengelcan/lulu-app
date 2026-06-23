@@ -30,7 +30,7 @@ export function OnboardingScreen({
   isLoading = false,
   error = null,
 }: OnboardingScreenProps) {
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const borderColor = useThemeColor({}, 'border');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -54,7 +54,7 @@ export function OnboardingScreen({
                 style={[
                   styles.progressDot,
                   {
-                    backgroundColor: isActive || isCompleted ? primaryColor : borderColor,
+                    backgroundColor: isActive || isCompleted ? brandAccentColor : borderColor,
                     opacity: isActive ? 1 : isCompleted ? 0.7 : 0.35,
                     width: isActive ? 24 : 8,
                   },

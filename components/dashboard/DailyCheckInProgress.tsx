@@ -4,7 +4,6 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -19,23 +18,16 @@ import {
 } from '@/utils/date';
 import { getLocaleTag } from '@/utils/locale';
 
-type MissedCheckInCta = {
-  message: string;
-  date: string;
-};
-
 type DayPillProps = {
   weekdayLabel: string;
   isCompleted: boolean;
-  isToday: boolean;
   isFuture: boolean;
   onPress: () => void;
 };
 
-function DayPill({ weekdayLabel, isCompleted, isToday, isFuture, onPress }: DayPillProps) {
+function DayPill({ weekdayLabel, isCompleted, isFuture, onPress }: DayPillProps) {
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
-  const primaryColor = useThemeColor({}, 'primary');
   const successColor = useThemeColor({}, 'success');
   const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -43,8 +35,6 @@ function DayPill({ weekdayLabel, isCompleted, isToday, isFuture, onPress }: DayP
 
   const backgroundColor = isCompleted ? successColor : surfaceColor;
   const labelColor = isCompleted ? primaryTextColor : isFuture ? textSecondaryColor : textColor;
-  const pillBorderColor = isToday ? primaryColor : borderColor;
-  const pillBorderWidth = isToday ? 2 : StyleSheet.hairlineWidth;
 
   return (
     <Pressable
@@ -57,8 +47,8 @@ function DayPill({ weekdayLabel, isCompleted, isToday, isFuture, onPress }: DayP
         styles.dayPill,
         {
           backgroundColor,
-          borderColor: pillBorderColor,
-          borderWidth: pillBorderWidth,
+          borderColor: isCompleted ? successColor : borderColor,
+          borderWidth: isCompleted ? 0 : StyleSheet.hairlineWidth,
           opacity: isFuture ? 0.45 : pressed ? 0.85 : 1,
         },
       ]}>
@@ -71,41 +61,8 @@ function DayPill({ weekdayLabel, isCompleted, isToday, isFuture, onPress }: DayP
         minimumFontScale={0.8}>
         {weekdayLabel}
       </ThemedText>
-      {isCompleted ? (
-        <IconSymbol name="checkmark" size={14} color={primaryTextColor} />
-      ) : (
-        <View style={styles.checkPlaceholder} />
-      )}
     </Pressable>
   );
-}
-
-function getMissedCheckInCta(
-  completedDayKeys: Set<string>,
-  today: Date,
-  t: (key: string) => string
-): MissedCheckInCta | null {
-  const todayKey = formatLocalDate(today);
-
-  if (!completedDayKeys.has(todayKey)) {
-    return {
-      message: t('dashboard.missedCheckInToday'),
-      date: todayKey,
-    };
-  }
-
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayKey = formatLocalDate(yesterday);
-
-  if (!completedDayKeys.has(yesterdayKey)) {
-    return {
-      message: t('dashboard.missedCheckInYesterday'),
-      date: yesterdayKey,
-    };
-  }
-
-  return null;
 }
 
 export function DailyCheckInProgress() {
@@ -115,11 +72,12 @@ export function DailyCheckInProgress() {
   const isLoading = useCheckInStore((state) => state.isLoading);
 
   const primaryColor = useThemeColor({}, 'primary');
-  const warningSurfaceColor = useThemeColor({}, 'surface');
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const locale = getLocaleTag(language);
 
   const weekDays = useMemo(() => getCurrentWeekDays(), []);
   const today = useMemo(() => getTodayStart(), []);
+  const todayKey = useMemo(() => formatLocalDate(today), [today]);
 
   const completedDayKeys = useMemo(() => {
     const weekDayKeys = new Set(weekDays.map(formatLocalDate));
@@ -134,50 +92,26 @@ export function DailyCheckInProgress() {
     return completed;
   }, [checkIns, weekDays]);
 
-  const missedCta = useMemo(
-    () => getMissedCheckInCta(completedDayKeys, today, t),
-    [completedDayKeys, today, t]
-  );
+  const isTodayCompleted = completedDayKeys.has(todayKey);
+
+  const statusMessage = isTodayCompleted
+    ? t('dashboard.checkInCompletedToday')
+    : t('dashboard.checkInPendingToday');
 
   const handleDayPress = (day: Date) => {
     const dayKey = formatLocalDate(day);
     router.push(`/check-in?date=${dayKey}`);
   };
 
-  const handleMissedCtaPress = () => {
-    if (!missedCta) {
-      return;
-    }
-
-    router.push(`/check-in?date=${missedCta.date}`);
-  };
-
   return (
     <Card>
-      <ThemedText type="subtitle">{t('dashboard.dailyCheckInProgress')}</ThemedText>
-
-      {missedCta ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={handleMissedCtaPress}
-          style={({ pressed }) => [
-            styles.missedBanner,
-            {
-              backgroundColor: warningSurfaceColor,
-              opacity: pressed ? 0.85 : 1,
-            },
-          ]}>
-          <ThemedText type="defaultSemiBold" style={styles.missedMessage} numberOfLines={2}>
-            {missedCta.message}
-          </ThemedText>
-          <View style={styles.missedCtaRow}>
-            <ThemedText lightColor={primaryColor} darkColor={primaryColor} type="defaultSemiBold">
-              {t('dashboard.missedCheckInCta')}
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={14} color={primaryColor} />
-          </View>
-        </Pressable>
-      ) : null}
+      <ThemedText type="subtitle">{t('dashboard.dailyCheckIn')}</ThemedText>
+      <ThemedText
+        lightColor={textSecondaryColor}
+        darkColor={textSecondaryColor}
+        style={styles.statusMessage}>
+        {statusMessage}
+      </ThemedText>
 
       {isLoading && checkIns.length === 0 ? (
         <ActivityIndicator color={primaryColor} style={styles.loading} />
@@ -192,7 +126,6 @@ export function DailyCheckInProgress() {
                 key={dayKey}
                 weekdayLabel={formatWeekdayShort(day, locale)}
                 isCompleted={completedDayKeys.has(dayKey)}
-                isToday={isSameLocalDate(day, today)}
                 isFuture={isFuture}
                 onPress={() => handleDayPress(day)}
               />
@@ -205,22 +138,11 @@ export function DailyCheckInProgress() {
 }
 
 const styles = StyleSheet.create({
-  loading: {
-    alignSelf: 'flex-start',
-  },
-  missedBanner: {
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    gap: Spacing.xs,
-  },
-  missedMessage: {
+  statusMessage: {
     ...Typography.body,
   },
-  missedCtaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
+  loading: {
+    alignSelf: 'flex-start',
   },
   weekRow: {
     flexDirection: 'row',
@@ -229,11 +151,10 @@ const styles = StyleSheet.create({
   dayPill: {
     flex: 1,
     minWidth: 0,
-    minHeight: 56,
+    minHeight: 44,
     borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.xs,
     paddingVertical: Spacing.sm,
     paddingHorizontal: 2,
   },
@@ -241,8 +162,5 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     fontWeight: '600',
     textAlign: 'center',
-  },
-  checkPlaceholder: {
-    height: 14,
   },
 });

@@ -136,6 +136,20 @@ export type Translations = {
     goHome: string;
   };
   dashboard: {
+    greeting: string;
+    greetingFallback: string;
+    greetingSubtitleHealthy: string;
+    greetingSubtitleAttention: string;
+    greetingSubtitlePending: string;
+    dailyCheckIn: string;
+    checkInCompletedToday: string;
+    checkInPendingToday: string;
+    healthy: string;
+    attention: string;
+    lastCheckIn: string;
+    lastCheckInWhenToday: string;
+    lastCheckInWhenYesterday: string;
+    lastCheckInWhenDate: string;
     startCheckIn: string;
     dailyCheckInProgress: string;
     todaysCheckIn: string;

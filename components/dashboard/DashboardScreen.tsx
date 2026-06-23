@@ -1,29 +1,28 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
 import { DailyCheckInProgress } from '@/components/dashboard/DailyCheckInProgress';
+import { GreetingHeader } from '@/components/dashboard/GreetingHeader';
+import { PetProfileCard } from '@/components/dashboard/PetProfileCard';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
-import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { QUICK_ACTIONS } from '@/constants/quick-actions';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
 import { getUpcomingReminder } from '@/services/notifications/upcoming';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
-import type { CheckIn } from '@/types/check-in';
-import { getAbnormalCheckInFields } from '@/utils/check-in';
+import { useUserStore } from '@/stores/user.store';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
+import { getLatestCheckIn } from '@/utils/last-check-in';
 
 type DetailRowProps = {
   label: string;
@@ -46,104 +45,6 @@ function DetailRow({ label, value }: DetailRowProps) {
   );
 }
 
-type NotesPreviewProps = {
-  notes: string;
-};
-
-function NotesPreview({ notes }: NotesPreviewProps) {
-  const { t } = useTranslation();
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
-
-  return (
-    <View style={styles.detailRow}>
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.detailLabel}>
-        {t('dashboard.notes')}
-      </ThemedText>
-      <ThemedText type="defaultSemiBold" numberOfLines={2} ellipsizeMode="tail">
-        &ldquo;{notes}&rdquo;
-      </ThemedText>
-    </View>
-  );
-}
-
-type TodaysCheckInCardProps = {
-  checkIn: CheckIn | null;
-  isLoading: boolean;
-  error: string | null;
-  onPress: () => void;
-  onRetry: () => void;
-};
-
-function TodaysCheckInCard({
-  checkIn,
-  isLoading,
-  error,
-  onPress,
-  onRetry,
-}: TodaysCheckInCardProps) {
-  const { t } = useTranslation();
-  const primaryColor = useThemeColor({}, 'primary');
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const successColor = useThemeColor({}, 'success');
-
-  const abnormalFields = checkIn ? getAbnormalCheckInFields(checkIn) : [];
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={
-        checkIn ? t('dashboard.todaysCheckInUpdate') : t('dashboard.todaysCheckInStart')
-      }
-      onPress={onPress}
-      style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}>
-      <Card>
-        <View style={styles.cardHeader}>
-          <ThemedText type="subtitle">{t('dashboard.todaysCheckIn')}</ThemedText>
-          <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
-        </View>
-        {isLoading && !checkIn ? (
-          <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
-        ) : error ? (
-          <View style={styles.checkInError}>
-            <ThemedText style={styles.message}>{error}</ThemedText>
-            <Button title={t('common.tryAgain')} variant="secondary" onPress={onRetry} />
-          </View>
-        ) : checkIn ? (
-          <>
-            {abnormalFields.length === 0 ? (
-              <View style={styles.allNormalRow}>
-                <IconSymbol name="checkmark.circle" size={18} color={successColor} />
-                <ThemedText type="defaultSemiBold" style={styles.allNormalText}>
-                  {t('dashboard.allNormalToday')}
-                </ThemedText>
-              </View>
-            ) : (
-              abnormalFields.map((field) => (
-                <DetailRow
-                  key={field.category}
-                  label={t(field.categoryTranslationKey)}
-                  value={t(field.valueTranslationKey)}
-                />
-              ))
-            )}
-            {checkIn.notes ? <NotesPreview notes={checkIn.notes} /> : null}
-          </>
-        ) : (
-          <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.message}>
-            {t('dashboard.notCheckedIn')}
-          </ThemedText>
-        )}
-      </Card>
-    </Pressable>
-  );
-}
-
 type DashboardScreenProps = {
   edges?: Edge[];
 };
@@ -151,7 +52,6 @@ type DashboardScreenProps = {
 export default function DashboardScreen({ edges = ['top', 'bottom'] }: DashboardScreenProps) {
   const router = useRouter();
   const { t, language } = useTranslation();
-  const { displayPetSpecies } = usePetDisplay();
   const pet = usePetStore((state) => state.pet);
   const isLoading = usePetStore((state) => state.isLoading);
   const error = usePetStore((state) => state.error);
@@ -159,15 +59,14 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   const clearError = usePetStore((state) => state.clearError);
 
   const checkIns = useCheckInStore((state) => state.checkIns);
-  const checkInIsLoading = useCheckInStore((state) => state.isLoading);
-  const checkInError = useCheckInStore((state) => state.error);
   const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
-  const clearCheckInError = useCheckInStore((state) => state.clearError);
 
   const reminderTime = useNotificationStore((state) => state.reminderTime);
   const reminderPermission = useNotificationStore((state) => state.permission);
   const reminderIsLoading = useNotificationStore((state) => state.isLoading);
   const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
+
+  const displayName = useUserStore((state) => state.displayName);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -179,6 +78,17 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     () => checkIns.find((checkIn) => checkIn.date === todayDateString) ?? null,
     [checkIns, todayDateString]
   );
+  const latestCheckIn = useMemo(() => getLatestCheckIn(checkIns), [checkIns]);
+
+  const ownerName = useMemo(() => {
+    const userName = displayName?.trim();
+    if (userName) {
+      return userName;
+    }
+
+    const petOwnerName = pet?.ownerName?.trim();
+    return petOwnerName || null;
+  }, [displayName, pet?.ownerName]);
 
   useEffect(() => {
     void loadPet();
@@ -212,27 +122,11 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     router.replace('/(setup)/pet-type');
   };
 
-  const handleOpenTodaysCheckIn = () => {
-    if (process.env.EXPO_OS === 'ios') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    router.push(`/check-in?date=${todayDateString}`);
-  };
-
   const handleOpenPetProfile = () => {
     if (process.env.EXPO_OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     router.push('/pet-profile');
-  };
-
-  const handleRetryCheckIn = () => {
-    if (!pet?.id) {
-      return;
-    }
-
-    clearCheckInError();
-    void loadCheckIns(pet.id);
   };
 
   const handleQuickActionPress = (route: (typeof QUICK_ACTIONS)[number]['route']) => {
@@ -272,25 +166,18 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
         </View>
       ) : (
         <View style={styles.body}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('dashboard.petProfileA11y', { name: pet.name })}
+          <GreetingHeader
+            petName={pet.name}
+            ownerName={ownerName}
+            todayCheckIn={todayCheckIn}
+          />
+
+          <PetProfileCard
+            pet={pet}
+            todayCheckIn={todayCheckIn}
+            latestCheckIn={latestCheckIn}
             onPress={handleOpenPetProfile}
-            style={({ pressed }) => [styles.petProfileAction, { opacity: pressed ? 0.7 : 1 }]}>
-            <PetAvatar photoUri={pet.photoUri} size={88} />
-            <View style={styles.petHeaderCenter}>
-              <ThemedText type="title" style={styles.petName}>
-                {pet.name}
-              </ThemedText>
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.petSpecies}>
-                {displayPetSpecies(pet.species)}
-              </ThemedText>
-            </View>
-            <IconSymbol name="chevron.right" size={20} color={textSecondaryColor} />
-          </Pressable>
+          />
 
           {isDeceased ? (
             <Card>
@@ -306,51 +193,43 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
             <>
               <DailyCheckInProgress />
 
-              <TodaysCheckInCard
-                checkIn={todayCheckIn}
-                error={checkInError}
-                isLoading={checkInIsLoading}
-                onPress={handleOpenTodaysCheckIn}
-                onRetry={handleRetryCheckIn}
-              />
-
               <Card>
                 <ThemedText type="subtitle">{t('dashboard.upcomingReminder')}</ThemedText>
                 {reminderIsLoading ? (
-              <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
-            ) : reminderPermission === 'later' ? (
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.message}>
-                {t('dashboard.remindersOff')}
-              </ThemedText>
-            ) : reminderPermission === 'denied' ? (
-              <View style={styles.deniedReminder}>
-                <ThemedText
-                  lightColor={textSecondaryColor}
-                  darkColor={textSecondaryColor}
-                  style={styles.message}>
-                  {t('dashboard.notificationsDisabled')}
-                </ThemedText>
-                <ThemedText
-                  lightColor={textSecondaryColor}
-                  darkColor={textSecondaryColor}
-                  style={styles.message}>
-                  {t('dashboard.enableInSettings')}
-                </ThemedText>
-                <Button
-                  title={t('settings.openSettings')}
-                  variant="secondary"
-                  onPress={handleOpenNotificationSettings}
-                  style={styles.openSettingsButton}
-                />
-              </View>
-            ) : upcomingReminder ? (
-              <>
-                <DetailRow label={t('common.date')} value={upcomingReminder.dateLabel} />
-                <DetailRow label={t('common.time')} value={upcomingReminder.timeLabel} />
-              </>
+                  <ActivityIndicator color={primaryColor} style={styles.checkInLoading} />
+                ) : reminderPermission === 'later' ? (
+                  <ThemedText
+                    lightColor={textSecondaryColor}
+                    darkColor={textSecondaryColor}
+                    style={styles.message}>
+                    {t('dashboard.remindersOff')}
+                  </ThemedText>
+                ) : reminderPermission === 'denied' ? (
+                  <View style={styles.deniedReminder}>
+                    <ThemedText
+                      lightColor={textSecondaryColor}
+                      darkColor={textSecondaryColor}
+                      style={styles.message}>
+                      {t('dashboard.notificationsDisabled')}
+                    </ThemedText>
+                    <ThemedText
+                      lightColor={textSecondaryColor}
+                      darkColor={textSecondaryColor}
+                      style={styles.message}>
+                      {t('dashboard.enableInSettings')}
+                    </ThemedText>
+                    <Button
+                      title={t('settings.openSettings')}
+                      variant="secondary"
+                      onPress={handleOpenNotificationSettings}
+                      style={styles.openSettingsButton}
+                    />
+                  </View>
+                ) : upcomingReminder ? (
+                  <>
+                    <DetailRow label={t('common.date')} value={upcomingReminder.dateLabel} />
+                    <DetailRow label={t('common.time')} value={upcomingReminder.timeLabel} />
+                  </>
                 ) : (
                   <ThemedText
                     lightColor={textSecondaryColor}
@@ -390,21 +269,6 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
   },
-  petProfileAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  petHeaderCenter: {
-    flex: 1,
-    gap: Spacing.xs,
-  },
-  petName: {
-    textAlign: 'left',
-  },
-  petSpecies: {
-    ...Typography.body,
-  },
   centered: {
     flex: 1,
     justifyContent: 'center',
@@ -427,24 +291,8 @@ const styles = StyleSheet.create({
   detailLabel: {
     ...Typography.caption,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  allNormalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  allNormalText: {
-    ...Typography.body,
-  },
   checkInLoading: {
     alignSelf: 'flex-start',
-  },
-  checkInError: {
-    gap: Spacing.sm,
   },
   deniedReminder: {
     gap: Spacing.sm,

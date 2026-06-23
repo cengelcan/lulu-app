@@ -1,6 +1,6 @@
 # Yapılacaklar
 
-**Son güncelleme:** 2026-06-22
+**Son güncelleme:** 2026-06-22 (Paket C — grid + kayıt türleri genişletmesi)
 
 Önceki task dosyalarının birleştirilmiş özeti. Tamamlanan işler arşivlendi; bu dosya yalnızca devam eden ve başlanmamış işleri içerir.
 
@@ -53,7 +53,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 |------|-----|-------|
 | A | Eksik/placeholder özelliklerin tespiti & kararı | 🟢 A2 + A3 yapıldı; A1 bilinçli ertelendi |
 | B | My Pets: pet silme + aktif/vefat eden ayrımı | ✅ B1 (silme) + B2 (status/anma) yapıldı |
-| C | Records tasarım & listeleme güncellemeleri | ⬜ Detay bekleniyor |
+| C | Records tasarım & listeleme güncellemeleri | 🟡 Grid + 8 kayıt türü yapıldı; listeleme/ekler bekliyor |
 | D | Genel tasarım yenileme (`design.md`) | ⬜ `design.md` bekleniyor |
 | E | Beslenme/aktivite plan sistemi (günlük/haftalık) | ⬜ Başlanmadı (karar gerekli) |
 
@@ -150,12 +150,23 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
 
 **Amaç:** Records ekranının tasarımsal ve listeleme açısından iyileştirilmesi.
 
-> **Durum:** Kullanıcı detaylandıracak. Aşağıdaki maddeler ön kapsam; netleşince güncellenecek.
+> **Durum (2026-06-22):** Grid tasarımı ve kayıt türü genişletmesi tamamlandı. Son Kayıtlar listelemesi ve ekler sonraki iterasyonda.
 
-- [ ] *(detay bekleniyor)* Listeleme iyileştirmeleri: gruplama (tür/tarih), filtre, arama, "tümünü gör"
-- [ ] *(detay bekleniyor)* Tasarım: kart/satır düzeni, ikonografi, boş durum
-- [ ] A3 (attachments) ile ilişki: ekler bu kapsamda mı ele alınacak?
-- [ ] D (genel tasarım) ile uyum: Records yeni design system'e göre
+**Yapıldı ✅**
+- [x] **Kayıt Oluştur grid'i** — 4 sütunlu pastel ikon grid (`RecordTypeGrid` / `RecordTypeGridItem`); grid üstte, Son Kayıtlar altta
+- [x] **8 kayıt türü** — Veteriner, Aşı, Parazit, İlaç, Semptom, Kilo, Operasyon, Test Sonuçları
+- [x] **Semptom formu** — serbest metin + öneri chip'leri (Kusma, Halsizlik, …) + opsiyonel şiddet
+- [x] **Operasyon formu** — işlem adı + opsiyonel klinik
+- [x] **Test Sonuçları formu** — test adı + notlar
+- [x] **Legacy migrasyon** — `vomiting` / `other` → `symptom` (yerel SQLite v11 + `0006_migrate_record_types.sql` + sync normalize)
+- [x] i18n grid kısa etiketleri + form başlıkları (en/tr/de)
+- [x] Commit: `90fd4d6` (grid), `e7bec09` (kayıt türleri)
+
+**Kalan**
+- [ ] **Son Kayıtlar** bölümü: gruplama (tür/tarih), filtre, arama, "tümünü gör" — sonraki iterasyon
+- [ ] Yeni ikon seti (kullanıcıdan gelecek) — `constants/record-types.ts` içinde `icon` alanları güncellenecek
+- [ ] A3 (attachments): gerçek foto/PDF ekleme → Supabase Storage (Paket C devamı)
+- [ ] Paket D (genel tasarım) ile görsel uyum / cilalama
 
 ---
 

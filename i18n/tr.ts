@@ -419,7 +419,7 @@ export const tr: Translations = {
       symptom: 'Semptom',
       weight: 'Kilo',
       operation: 'Operasyon',
-      testResult: 'Test Sonuçları',
+      testResult: 'Tetkik',
     },
   },
   notifications: {

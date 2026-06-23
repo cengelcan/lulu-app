@@ -9,7 +9,7 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 
 ## Mevcut durum (doğrulama)
 
-**Son güncelleme:** 2026-06-22 — Aşama 1 tamamlandı (email auth + pet/check-in/record/profil/foto cloud sync + Delete Account). Beş yeni iş paketi (A–E) eklendi ve sıraya yerleştirildi (bkz. "Yeni paketler — yürütme sırası").
+**Son güncelleme:** 2026-06-22 — Paket C kısmen tamamlandı (Records grid + 8 kayıt türü + legacy migrasyon). Beş yeni iş paketi (A–E) sıraya yerleştirildi; C'nin grid/tür kısmı D'den önce referans görselle uygulandı.
 
 | Alan | Durum |
 |------|-------|
@@ -17,7 +17,7 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 | Auth | `app/(auth)/index.tsx` gerçek email/şifre UI; "Continue as Guest" kaldırıldı; Apple/Google kaldı |
 | Bootstrap | `hooks/use-bootstrap.ts` auth guard aktif: `splash → onboarding → auth → setup → home` |
 | User store | `signIn/signOut/session listener` + `currentUserId↔user.id`; Supabase client (`lib/supabase.ts`) |
-| Sync | Pet'ler Supabase kaynak-doğruluk (write-through + pull); check-in/records hâlâ yerel |
+| Sync | Pet/check-in/record/profil Supabase kaynak-doğruluk (write-through + pull) |
 
 > **Guest kararı:** Canlı kullanıcı var ancak mevcut local veri korunmak zorunda değil (kullanıcılar yeniden profil oluşturacak). → Auth geçişinde **guest→hesap migration gerekmez**; temiz wipe yeterli. (Hesap izolasyonu: farklı hesap girişinde yerel veri wipe; pet'ler buluttan geri gelir.)
 
@@ -34,18 +34,19 @@ flowchart TD
   PBlogic --> DESIGN
   DESIGN --> PD[Paket D: Genel tasarım]
   PD --> PBui[Paket B-görsel: Aktif/Anma]
-  PD --> PC[Paket C: Records tasarım/listeleme]
+  PD --> PCrest[Paket C: Records listeleme + ekler]
+  PCgrid[Paket C: Records grid + türler ✅] -.D öncesi.-> PCrest
   A1 --> A2[Aşama 2: Aile Paylaşımı - Plus]
   A1 --> A3a[Aşama 3: Tier gating]
   A0 -.paralel.-> A3b[Aşama 3: PRD docs]
-  PC --> PE[Paket E: Beslenme/aktivite planı - en son]
+  PCrest --> PE[Paket E: Beslenme/aktivite planı - en son]
 ```
 
 **Yürütme sırası (klasik):** Aşama 0 (TS + QA paralel) → Aşama 1 (✅) → Aşama 2 + Aşama 3 paralel.
 
 ## Yeni paketler — yürütme sırası
 
-Kullanıcı kararları (2026-06-22): **quick wins önce**, **B-görsel + C tasarımı `design.md`'yi bekler**, **E en sona**.
+Kullanıcı kararları (2026-06-22): **quick wins önce**, **B-görsel + C listeleme `design.md`'yi bekleyebilir**, **E en sona**. Paket C grid/tür kısmı referans görselle D öncesi uygulandı.
 
 | Sıra | İş | Tasarıma bağlı? | Not |
 |------|-----|------|-----|
@@ -53,7 +54,7 @@ Kullanıcı kararları (2026-06-22): **quick wins önce**, **B-görsel + C tasar
 | 2 | **Paket B-mantık** — pet silme UI bağlama + `status` modeli + migration | Hayır | `deletePet` zaten var |
 | 3 | **Paket D** — genel tasarım | `design.md` gerekli | Token + component + ekranlar |
 | 4 | **Paket B-görsel** — Aktif/Anma bölümleri | Evet (D sonrası) | D ile aynı dil |
-| 5 | **Paket C** — Records tasarım & listeleme | Evet (D sonrası) | Kullanıcı detaylandıracak |
+| 5 | **Paket C** — Records tasarım & listeleme | Kısmen (grid + türler ✅) | Grid/türler referans görselle yapıldı; listeleme + ekler bekliyor |
 | 6 | **Paket E** — beslenme/aktivite planı | — | En sona; yaklaşım kararı bekliyor |
 
 > Paralel hatlar (bağımsız): Auth **Faz D (tier)**, **Aile Paylaşımı (Aşama 2)**, **PRD docs (Aşama 3)** istenirse araya alınabilir. Tier (Faz D), hem Aile Paylaşımı hem de Paket E'nin Plus gating'i için ön koşul olabilir.
@@ -201,13 +202,21 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 - [ ] My Pets: "Aktif" + "Anma / Vefat edenler" bölümleri (yeni tasarım dilinde)
 - [ ] Vefat eden pet için memorial kart/rozet stili
 
-## Paket C — Records tasarım & listeleme (Paket D sonrası, detay bekliyor)
+## Paket C — Records tasarım & listeleme — 🟡 kısmen tamam
 
-**Durum: kullanıcı detaylandıracak.**
+**Not:** Grid ve kayıt türleri, `design.md` beklemeden referans görselle uygulandı. Listeleme ve ekler sonraki iterasyonda.
 
-- [ ] Listeleme: gruplama/filtre/arama/"tümünü gör"
-- [ ] Tasarım: kart/satır, ikonografi, boş durum (yeni design system)
-- [ ] A3 (attachments) ilişkisini netleştir
+**Yapıldı ✅**
+- [x] **C1 — Grid tasarımı:** 4 sütun pastel ikon grid, kısa grid etiketleri, "Kayıt Oluştur" bölüm başlığı; grid üstte / Son Kayıtlar altta (`90fd4d6`)
+- [x] **C2 — Kayıt türleri:** 8 tür (Veteriner, Aşı, Parazit, İlaç, Semptom, Kilo, Operasyon, Test Sonuçları); formlar + validasyon + i18n (`e7bec09`)
+- [x] **C3 — Semptom:** serbest metin + öneri chip'leri + opsiyonel şiddet
+- [x] **C4 — Legacy migrasyon:** `vomiting`/`other` → `symptom`; SQLite v11 + Supabase `0006` + `pet-record-normalize.ts`
+
+**Kalan**
+- [ ] **C5 — Son Kayıtlar listeleme:** gruplama/filtre/arama/"tümünü gör"
+- [ ] **C6 — İkon seti:** kullanıcıdan gelecek yeni ikonlarla `record-types.ts` güncelle
+- [ ] **C7 — Attachments (A3):** foto/PDF → Supabase Storage
+- [ ] Paket D sonrası Records görsel cilalama (genel design system ile uyum)
 
 ## Paket E — Beslenme / aktivite planı (en son, karar bekliyor)
 

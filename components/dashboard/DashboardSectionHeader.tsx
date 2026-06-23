@@ -9,6 +9,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 type DashboardSectionHeaderProps = {
   title: string;
   icon?: IconSymbolName;
+  iconColor?: string;
   actionLabel?: string;
   onActionPress?: () => void;
 };
@@ -16,10 +17,12 @@ type DashboardSectionHeaderProps = {
 export function DashboardSectionHeader({
   title,
   icon,
+  iconColor,
   actionLabel,
   onActionPress,
 }: DashboardSectionHeaderProps) {
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const accentColor = iconColor ?? brandAccentColor;
 
   const handleActionPress = () => {
     if (!onActionPress) {
@@ -36,7 +39,7 @@ export function DashboardSectionHeader({
   return (
     <View style={styles.container}>
       <View style={styles.titleRow}>
-        {icon ? <IconSymbol name={icon} size={18} color={brandAccentColor} /> : null}
+        {icon ? <IconSymbol name={icon} size={18} color={accentColor} /> : null}
         <ThemedText type="defaultSemiBold" style={styles.title}>
           {title}
         </ThemedText>

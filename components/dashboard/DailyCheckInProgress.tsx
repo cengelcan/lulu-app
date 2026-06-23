@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, useColorScheme, View } from 'react-native';
 
 import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionHeader';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -16,33 +16,48 @@ import {
   getCurrentWeekDays,
   getTodayStart,
   isFutureLocalDate,
-  isSameLocalDate,
 } from '@/utils/date';
 import { getLocaleTag } from '@/utils/locale';
+
+const STATUS_CIRCLE_SIZE = 18;
+
+const CHECK_IN_COLORS = {
+  dark: {
+    accent: Palette.badgeViolet,
+    completedText: Palette.onDark,
+    statusText: Palette.onDarkSoft,
+    pendingText: '#71717A',
+    pendingTextFuture: '#52525B',
+    pendingBorder: '#27272A',
+    pendingRing: '#3F3F46',
+    pendingRingFuture: '#27272A',
+  },
+  light: {
+    accent: Palette.badgeViolet,
+    completedText: Palette.onDark,
+    statusText: Palette.muted,
+    pendingText: Palette.muted,
+    pendingTextFuture: Palette.mutedSoft,
+    pendingBorder: Palette.hairline,
+    pendingRing: Palette.mutedSoft,
+    pendingRingFuture: Palette.hairline,
+  },
+} as const;
 
 type DayPillProps = {
   weekdayLabel: string;
   isCompleted: boolean;
   isFuture: boolean;
-  isToday: boolean;
+  colors: (typeof CHECK_IN_COLORS)['dark'];
   onPress: () => void;
 };
 
-function DayPill({ weekdayLabel, isCompleted, isFuture, isToday, onPress }: DayPillProps) {
-  const borderColor = useThemeColor({}, 'border');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
-  const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
-  const textColor = useThemeColor({}, 'text');
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const primaryTextColor = useThemeColor({}, 'primaryText');
-
-  const backgroundColor = isCompleted ? brandAccentColor : isToday ? brandAccentSoft : 'transparent';
-  const pillBorderColor = isCompleted
-    ? brandAccentColor
-    : isToday
-      ? brandAccentColor
-      : borderColor;
-  const labelColor = isCompleted ? primaryTextColor : isFuture ? textSecondaryColor : textColor;
+function DayPill({ weekdayLabel, isCompleted, isFuture, colors, onPress }: DayPillProps) {
+  const labelColor = isCompleted
+    ? colors.completedText
+    : isFuture
+      ? colors.pendingTextFuture
+      : colors.pendingText;
 
   return (
     <Pressable
@@ -53,25 +68,32 @@ function DayPill({ weekdayLabel, isCompleted, isFuture, isToday, onPress }: DayP
       onPress={onPress}
       style={({ pressed }) => [
         styles.dayPill,
-        {
-          backgroundColor,
-          borderColor: pillBorderColor,
-          borderWidth: isCompleted ? 0 : StyleSheet.hairlineWidth,
-          opacity: isFuture ? 0.45 : pressed ? 0.85 : 1,
-        },
+        isCompleted
+          ? { backgroundColor: colors.accent, borderColor: colors.accent }
+          : { backgroundColor: 'transparent', borderColor: colors.pendingBorder },
+        { opacity: pressed && !isFuture ? 0.85 : 1 },
       ]}>
+      <ThemedText
+        lightColor={labelColor}
+        darkColor={labelColor}
+        style={styles.dayLabel}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.8}>
+        {weekdayLabel}
+      </ThemedText>
       {isCompleted ? (
-        <IconSymbol name="checkmark" size={14} color={primaryTextColor} />
+        <View style={[styles.statusCircle, { backgroundColor: colors.completedText }]}>
+          <IconSymbol name="checkmark" size={10} color={colors.accent} />
+        </View>
       ) : (
-        <ThemedText
-          lightColor={labelColor}
-          darkColor={labelColor}
-          style={styles.dayLabel}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.8}>
-          {weekdayLabel}
-        </ThemedText>
+        <View
+          style={[
+            styles.statusCircle,
+            styles.statusCirclePending,
+            { borderColor: isFuture ? colors.pendingRingFuture : colors.pendingRing },
+          ]}
+        />
       )}
     </Pressable>
   );
@@ -80,11 +102,12 @@ function DayPill({ weekdayLabel, isCompleted, isFuture, isToday, onPress }: DayP
 export function DailyCheckInProgress() {
   const router = useRouter();
   const { t, language } = useTranslation();
+  const colorScheme = useColorScheme();
   const checkIns = useCheckInStore((state) => state.checkIns);
   const isLoading = useCheckInStore((state) => state.isLoading);
 
   const primaryColor = useThemeColor({}, 'primary');
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const colors = colorScheme === 'dark' ? CHECK_IN_COLORS.dark : CHECK_IN_COLORS.light;
   const locale = getLocaleTag(language);
 
   const weekDays = useMemo(() => getCurrentWeekDays(), []);
@@ -117,10 +140,14 @@ export function DailyCheckInProgress() {
 
   return (
     <Card>
-      <DashboardSectionHeader title={t('dashboard.dailyCheckIn')} icon="calendar" />
+      <DashboardSectionHeader
+        title={t('dashboard.dailyCheckIn')}
+        icon="calendar.badge.checkmark"
+        iconColor={colors.accent}
+      />
       <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
+        lightColor={colors.statusText}
+        darkColor={colors.statusText}
         style={styles.statusMessage}>
         {statusMessage}
       </ThemedText>
@@ -139,7 +166,7 @@ export function DailyCheckInProgress() {
                 weekdayLabel={formatWeekdayShort(day, locale)}
                 isCompleted={completedDayKeys.has(dayKey)}
                 isFuture={isFuture}
-                isToday={isSameLocalDate(day, today)}
+                colors={colors}
                 onPress={() => handleDayPress(day)}
               />
             );
@@ -164,16 +191,30 @@ const styles = StyleSheet.create({
   dayPill: {
     flex: 1,
     minWidth: 0,
-    minHeight: 44,
+    minHeight: 58,
     borderRadius: Radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.xs,
     paddingHorizontal: 2,
+    gap: Spacing.xs,
   },
   dayLabel: {
     ...Typography.caption,
     fontWeight: '600',
     textAlign: 'center',
+    fontSize: 12,
+  },
+  statusCircle: {
+    width: STATUS_CIRCLE_SIZE,
+    height: STATUS_CIRCLE_SIZE,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusCirclePending: {
+    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: 'transparent',
   },
 });

@@ -68,6 +68,7 @@ const MAPPING = {
   'crown.fill': 'workspace-premium',
   'bell.fill': 'notifications',
   'calendar': 'event',
+  'calendar.badge.checkmark': 'event-available',
   'clock.fill': 'schedule',
 } as IconMapping;
 

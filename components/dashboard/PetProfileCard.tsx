@@ -5,7 +5,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePetDisplay } from '@/hooks/use-pet-display';
@@ -13,8 +12,6 @@ import { useTranslation } from '@/hooks/use-translation';
 import type { CheckIn } from '@/types/check-in';
 import type { Pet } from '@/types/pet';
 import { getAbnormalCheckInFields } from '@/utils/check-in';
-import { getLocaleTag } from '@/utils/locale';
-import { formatLastCheckInWhen } from '@/utils/last-check-in';
 
 type HealthBadgeProps = {
   variant: 'healthy' | 'attention';
@@ -43,20 +40,17 @@ function HealthBadge({ variant }: HealthBadgeProps) {
 type PetProfileCardProps = {
   pet: Pet;
   todayCheckIn: CheckIn | null;
-  latestCheckIn: CheckIn | null;
   onPress: () => void;
 };
 
 export function PetProfileCard({
   pet,
   todayCheckIn,
-  latestCheckIn,
   onPress,
 }: PetProfileCardProps) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const { displayPetBreed, displayPetSpecies } = usePetDisplay();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const locale = getLocaleTag(language);
 
   const breedLabel = pet.breed?.trim()
     ? displayPetBreed(pet.breed)
@@ -70,12 +64,6 @@ export function PetProfileCard({
     const abnormalFields = getAbnormalCheckInFields(todayCheckIn);
     return abnormalFields.length === 0 ? 'healthy' : 'attention';
   }, [todayCheckIn]);
-
-  const lastCheckInLabel = latestCheckIn
-    ? t('dashboard.lastCheckIn', {
-        when: formatLastCheckInWhen(latestCheckIn, locale, t),
-      })
-    : null;
 
   const handlePress = () => {
     if (process.env.EXPO_OS === 'ios') {
@@ -94,12 +82,9 @@ export function PetProfileCard({
         <View style={styles.topRow}>
           <PetAvatar photoUri={pet.photoUri} size={56} />
           <View style={styles.info}>
-            <View style={styles.nameRow}>
-              <ThemedText type="defaultSemiBold" style={styles.petName} numberOfLines={1}>
-                {pet.name}
-              </ThemedText>
-              {healthBadge ? <HealthBadge variant={healthBadge} /> : null}
-            </View>
+            <ThemedText type="defaultSemiBold" style={styles.petName} numberOfLines={1}>
+              {pet.name}
+            </ThemedText>
             <ThemedText
               lightColor={textSecondaryColor}
               darkColor={textSecondaryColor}
@@ -107,17 +92,12 @@ export function PetProfileCard({
               numberOfLines={1}>
               {breedLabel}
             </ThemedText>
-            {lastCheckInLabel ? (
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.lastCheckIn}
-                numberOfLines={1}>
-                {lastCheckInLabel}
-              </ThemedText>
-            ) : null}
           </View>
-          <IconSymbol name="chevron.right" size={18} color={textSecondaryColor} />
+          {healthBadge ? (
+            <View style={styles.badgeSlot}>
+              <HealthBadge variant={healthBadge} />
+            </View>
+          ) : null}
         </View>
       </Card>
     </Pressable>
@@ -127,7 +107,7 @@ export function PetProfileCard({
 const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: Spacing.md,
   },
   info: {
@@ -135,23 +115,16 @@ const styles = StyleSheet.create({
     gap: 2,
     minWidth: 0,
   },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    flexWrap: 'wrap',
+  badgeSlot: {
+    flexShrink: 0,
+    paddingTop: 2,
   },
   petName: {
     ...Typography.bodySemiBold,
     fontSize: 17,
-    flexShrink: 1,
   },
   breed: {
     ...Typography.caption,
-  },
-  lastCheckIn: {
-    ...Typography.caption,
-    marginTop: 2,
   },
   badge: {
     flexDirection: 'row',

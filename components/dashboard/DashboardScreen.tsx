@@ -24,7 +24,6 @@ import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useUserStore } from '@/stores/user.store';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
-import { getLatestCheckIn } from '@/utils/last-check-in';
 import { buildDashboardTrends } from '@/utils/trends';
 
 type DashboardScreenProps = {
@@ -58,7 +57,6 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     () => checkIns.find((checkIn) => checkIn.date === todayDateString) ?? null,
     [checkIns, todayDateString]
   );
-  const latestCheckIn = useMemo(() => getLatestCheckIn(checkIns), [checkIns]);
   const trends = useMemo(() => buildDashboardTrends(checkIns, records), [checkIns, records]);
 
   const ownerName = useMemo(() => {
@@ -149,7 +147,6 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
           <PetProfileCard
             pet={pet}
             todayCheckIn={todayCheckIn}
-            latestCheckIn={latestCheckIn}
             onPress={handleOpenPetProfile}
           />
 

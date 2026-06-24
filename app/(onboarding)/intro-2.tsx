@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 
 import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
-import { ONBOARDING_STEP_2_BACKGROUND } from '@/constants/onboarding';
 import { useTranslation } from '@/hooks/use-translation';
 
 export default function Onboarding2Screen() {
@@ -16,7 +15,6 @@ export default function Onboarding2Screen() {
       description={t('onboarding.intro2.description')}
       buttonTitle={t('onboarding.intro2.button')}
       onContinue={() => router.push('/(onboarding)/intro-3')}
-      backgroundSource={ONBOARDING_STEP_2_BACKGROUND}
     />
   );
 }

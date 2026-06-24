@@ -9,6 +9,10 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 
 const SPLASH_BG = require('@/assets/images/splash-screen-bg.png');
 const LULU_LOGO = require('@/assets/images/lulu-logo.png');
+const LOGO_SIZE = 259;
+const SPLASH_BG_HEIGHT_RATIO = 1.24;
+const SPLASH_BG_BOTTOM_OFFSET = 92;
+const FOOTER_ILLUSTRATION_SLOT_HEIGHT = 104;
 
 export default function SplashScreen() {
   const { phase, error, retry } = useBootstrap();
@@ -19,13 +23,16 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.root}>
-      <Image
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        source={SPLASH_BG}
-        style={StyleSheet.absoluteFill}
-        contentFit="cover"
-      />
+      <View style={styles.background}>
+        <Image
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          source={SPLASH_BG}
+          style={styles.backgroundImage}
+          contentFit="cover"
+          contentPosition="bottom"
+        />
+      </View>
 
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.branding}>
@@ -48,9 +55,12 @@ export default function SplashScreen() {
         </View>
 
         <View style={styles.footer}>
+          <View style={styles.illustrationSlot} />
+
           <Text allowFontScaling style={styles.footerLine}>
             Remember every symptom.
           </Text>
+
           <Text allowFontScaling style={styles.footerLine}>
             Explain <Text style={{ color: brandAccentColor }}>every</Text> vet visit.
           </Text>
@@ -78,6 +88,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    bottom: SPLASH_BG_BOTTOM_OFFSET,
+    width: '100%',
+    height: `${SPLASH_BG_HEIGHT_RATIO * 100}%`,
+  },
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
@@ -85,21 +105,21 @@ const styles = StyleSheet.create({
   },
   branding: {
     alignItems: 'center',
-    paddingTop: '14%',
-    gap: Spacing.sm,
+    paddingTop: '12%',
+    gap: Spacing.md,
   },
   logo: {
-    width: 168,
-    height: 168,
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
     marginBottom: Spacing.xs,
   },
   appName: {
     color: Palette.brandAccentLight,
     textAlign: 'center',
-    fontSize: Typography.displayLg.fontSize,
-    lineHeight: Typography.displayLg.lineHeight,
+    fontSize: 46,
+    lineHeight: 50,
     fontWeight: Typography.displayLg.fontWeight,
-    letterSpacing: Typography.displayLg.letterSpacing,
+    letterSpacing: -1.3,
     fontFamily: Platform.select({
       ios: Fonts?.rounded,
       web: Fonts?.rounded,
@@ -109,8 +129,8 @@ const styles = StyleSheet.create({
   subtitle: {
     color: Palette.onDark,
     textAlign: 'center',
-    fontSize: Typography.body.fontSize,
-    lineHeight: Typography.body.lineHeight,
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: '500',
     letterSpacing: 0.4,
   },
@@ -118,6 +138,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: Spacing.xl,
     gap: Spacing.xxs,
+  },
+  illustrationSlot: {
+    width: '100%',
+    height: FOOTER_ILLUSTRATION_SLOT_HEIGHT,
   },
   footerLine: {
     color: Palette.onDark,
@@ -127,7 +151,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   spinner: {
-    marginTop: Spacing.lg,
+    marginTop: Spacing.sm,
   },
   errorContainer: {
     marginTop: Spacing.lg,

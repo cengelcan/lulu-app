@@ -1,7 +1,7 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Modal, Platform, Pressable, StyleSheet, useColorScheme, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -38,7 +38,6 @@ export function TimePickerField({
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
   const backgroundColor = useThemeColor({}, 'background');
-  const colorScheme = useColorScheme();
 
   const displayValue = formatReminderTime(value);
 
@@ -151,7 +150,7 @@ export function TimePickerField({
               <DateTimePicker
                 display="spinner"
                 mode="time"
-                themeVariant={colorScheme === 'dark' ? 'dark' : 'light'}
+                themeVariant="dark"
                 value={pickerDate}
                 onChange={handleIosChange}
                 style={{ backgroundColor }}

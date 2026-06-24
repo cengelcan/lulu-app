@@ -3,13 +3,11 @@ import { useCallback } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
-import { AppearanceSection } from '@/components/settings/AppearanceSection';
 import { LanguageSection } from '@/components/settings/LanguageSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useAppearanceStore } from '@/stores/appearance.store';
 import { useLanguageStore } from '@/stores/language.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import type { ReminderTime } from '@/types/reminder';
@@ -35,9 +33,6 @@ export function SettingsScreenContent({
     (state) => state.petReminderNotificationsEnabled
   );
   const clearError = useNotificationStore((state) => state.clearError);
-
-  const appearance = useAppearanceStore((state) => state.appearance);
-  const saveAppearance = useAppearanceStore((state) => state.saveAppearance);
 
   const languagePreference = useLanguageStore((state) => state.languagePreference);
   const saveLanguage = useLanguageStore((state) => state.saveLanguage);
@@ -80,10 +75,6 @@ export function SettingsScreenContent({
     }
   };
 
-  const handleAppearanceSelect = (nextAppearance: typeof appearance) => {
-    void saveAppearance(nextAppearance);
-  };
-
   const handleLanguageSelect = (nextLanguage: typeof languagePreference) => {
     void saveLanguage(nextLanguage);
   };
@@ -106,10 +97,6 @@ export function SettingsScreenContent({
               onToggleCheckIn={(enabled) => void handleToggleCheckIn(enabled)}
               onTogglePetReminders={(enabled) => void handleTogglePetReminders(enabled)}
               onTimeChange={(time) => void handleTimeChange(time)}
-            />
-            <AppearanceSection
-              appearance={appearance}
-              onSelect={handleAppearanceSelect}
             />
             <LanguageSection language={languagePreference} onSelect={handleLanguageSelect} />
           </>

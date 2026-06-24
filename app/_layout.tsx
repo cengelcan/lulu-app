@@ -1,30 +1,25 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useNotificationResponse } from '@/hooks/use-notification-response';
 import { configureNotificationHandler } from '@/services/notifications';
-import { useAppearanceStore } from '@/stores/appearance.store';
 import { useLanguageStore } from '@/stores/language.store';
 
 configureNotificationHandler();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const loadAppearance = useAppearanceStore((state) => state.loadAppearance);
   const loadLanguage = useLanguageStore((state) => state.loadLanguage);
   useNotificationResponse();
 
   useEffect(() => {
-    void loadAppearance();
     void loadLanguage();
-  }, [loadAppearance, loadLanguage]);
+  }, [loadLanguage]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DarkTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(onboarding)" />
@@ -40,7 +35,7 @@ export default function RootLayout() {
         <Stack.Screen name="records" />
         <Stack.Screen name="reminders" />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }

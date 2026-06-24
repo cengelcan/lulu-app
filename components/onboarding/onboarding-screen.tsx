@@ -7,7 +7,6 @@ import { OnboardingCtaButton } from '@/components/onboarding/onboarding-cta-butt
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { getOnboardingBackground, getOnboardingImageScale } from '@/constants/onboarding';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const TOTAL_STEPS = 4;
 
@@ -34,21 +33,17 @@ export function OnboardingScreen({
   isLoading = false,
   error = null,
 }: OnboardingScreenProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const backgroundSource = getOnboardingBackground(step, colorScheme);
-  const imageScale = getOnboardingImageScale(step, colorScheme);
+  const backgroundSource = getOnboardingBackground(step);
+  const imageScale = getOnboardingImageScale(step);
 
   return (
-    <View style={[styles.root, { backgroundColor: isDark ? '#000000' : Palette.canvas }]}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+    <View style={styles.root}>
+      <StatusBar style="light" />
 
       <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
         <View style={styles.content}>
           <View style={styles.header}>
-            {onBack ? (
-              <ScreenHeader backTintColor={isDark ? Palette.onDark : Palette.ink} onBack={onBack} />
-            ) : null}
+            {onBack ? <ScreenHeader backTintColor={Palette.onDark} onBack={onBack} /> : null}
 
             <View
               accessibilityRole="progressbar"
@@ -67,13 +62,7 @@ export function OnboardingScreen({
                       styles.progressDot,
                       {
                         backgroundColor:
-                          isActive || isCompleted
-                            ? isDark
-                              ? Palette.brandAccentLight
-                              : Palette.brandAccentDark
-                            : isDark
-                              ? '#3A3A3A'
-                              : Palette.hairline,
+                          isActive || isCompleted ? Palette.brandAccentLight : '#3A3A3A',
                         opacity: isActive ? 1 : isCompleted ? 0.7 : 0.45,
                         width: isActive ? 24 : 8,
                       },
@@ -86,7 +75,7 @@ export function OnboardingScreen({
             <Text
               allowFontScaling
               maxFontSizeMultiplier={2}
-              style={[styles.stepLabel, { color: isDark ? Palette.onDarkSoft : Palette.muted }]}>
+              style={styles.stepLabel}>
               {step} of {TOTAL_STEPS}
             </Text>
 
@@ -94,26 +83,17 @@ export function OnboardingScreen({
               accessibilityRole="header"
               allowFontScaling
               maxFontSizeMultiplier={1.35}
-              style={[styles.title, { color: isDark ? Palette.onDark : Palette.ink }]}>
+              style={styles.title}>
               {title}
               {titleAccent ? (
                 <>
                   {'\n'}
-                  <Text
-                    style={[
-                      styles.titleAccentLine,
-                      { color: isDark ? Palette.brandAccentLight : Palette.brandAccentDark },
-                    ]}>
-                    {titleAccent}
-                  </Text>
+                  <Text style={styles.titleAccentLine}>{titleAccent}</Text>
                 </>
               ) : null}
             </Text>
 
-            <Text
-              allowFontScaling
-              maxFontSizeMultiplier={2}
-              style={[styles.description, { color: isDark ? Palette.onDarkSoft : Palette.muted }]}>
+            <Text allowFontScaling maxFontSizeMultiplier={2} style={styles.description}>
               {description}
             </Text>
           </View>
@@ -136,13 +116,7 @@ export function OnboardingScreen({
         </View>
 
         <View style={styles.footer}>
-          {error ? (
-            <Text
-              allowFontScaling
-              style={[styles.error, { color: isDark ? Palette.onDarkSoft : Palette.muted }]}>
-              {error}
-            </Text>
-          ) : null}
+          {error ? <Text allowFontScaling style={styles.error}>{error}</Text> : null}
 
           <OnboardingCtaButton title={buttonTitle} onPress={onContinue} disabled={isLoading} />
         </View>
@@ -154,6 +128,7 @@ export function OnboardingScreen({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: '#000000',
   },
   backgroundImage: {
     flex: 1,
@@ -184,17 +159,21 @@ const styles = StyleSheet.create({
   stepLabel: {
     ...Typography.caption,
     marginTop: Spacing.sm,
+    color: Palette.onDarkSoft,
   },
   title: {
     ...Typography.title,
     marginTop: Spacing.xs,
+    color: Palette.onDark,
   },
   titleAccentLine: {
     ...Typography.title,
+    color: Palette.brandAccentLight,
   },
   description: {
     ...Typography.body,
     marginTop: Spacing.md,
+    color: Palette.onDarkSoft,
   },
   visualArea: {
     flex: 1,
@@ -214,5 +193,6 @@ const styles = StyleSheet.create({
   error: {
     ...Typography.caption,
     textAlign: 'center',
+    color: Palette.onDarkSoft,
   },
 });

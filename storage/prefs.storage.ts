@@ -1,8 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { StorageKeys } from '@/constants/storage-keys';
-import type { AppAppearance } from '@/types/appearance';
-import { DEFAULT_APP_APPEARANCE } from '@/types/appearance';
 import type { AppLanguagePreference, ResolvedLanguage } from '@/types/language';
 import {
   DEFAULT_APP_LANGUAGE_PREFERENCE,
@@ -99,19 +97,6 @@ export async function setCheckInReminderTime(reminderTime: ReminderTime): Promis
 export async function removeCheckInReminderTime(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.checkInReminderTime);
   await AsyncStorage.removeItem(StorageKeys.checkInPreferences);
-}
-
-export async function getAppAppearance(): Promise<AppAppearance> {
-  const value = await AsyncStorage.getItem(StorageKeys.appAppearance);
-  if (value === 'system' || value === 'light' || value === 'dark') {
-    return value;
-  }
-
-  return DEFAULT_APP_APPEARANCE;
-}
-
-export async function setAppAppearance(appearance: AppAppearance): Promise<void> {
-  await AsyncStorage.setItem(StorageKeys.appAppearance, appearance);
 }
 
 export async function removeAppAppearance(): Promise<void> {

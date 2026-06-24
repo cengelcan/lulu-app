@@ -35,11 +35,6 @@ export type Translations = {
     reminderTime: string;
     notificationsDisabledFooter: string;
     openSettings: string;
-    appearance: string;
-    theme: string;
-    themeSystem: string;
-    themeLight: string;
-    themeDark: string;
     general: string;
     language: string;
     languageSystem: string;

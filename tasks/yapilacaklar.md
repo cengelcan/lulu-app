@@ -1,6 +1,6 @@
 # Yapılacaklar
 
-**Son güncelleme:** 2026-06-22 (Paket C — grid + kayıt türleri genişletmesi)
+**Son güncelleme:** 2026-06-24 (Yayın öncesi UX paketleri F–K eklendi)
 
 Önceki task dosyalarının birleştirilmiş özeti. Tamamlanan işler arşivlendi; bu dosya yalnızca devam eden ve başlanmamış işleri içerir.
 
@@ -26,7 +26,10 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | # | Konu | Karar |
 |---|------|-------|
 | K1 | "Check-In" terimi | Tüm dillerde ürün terimi olarak **"Check-In"** kalır |
-| K2 | Dil seçimi | Settings'te **System / Automatic** seçeneği |
+| K2 | Dil seçimi (v1) | Yalnızca **EN + DE**; Settings'te **System / Automatic** (cihaz dili en/de dışındaysa EN fallback) |
+| K19 | TR dili | **v1'de kaldırılacak** — TR pazarında yayın yok; ileride değerlendirilebilir |
+| K20 | Tema (v1) | **Tek tema — Dark**; Light/Dark seçici Settings'ten kaldırılır veya gizlenir |
+| K21 | Light mode | **Yayın sonrası** eklenecek (v1.1 veya sonrası) |
 | K14 | Backend | **Supabase** |
 | K15 | Guest modu | **Kaldırılacak** — tüm kullanıcılar auth zorunlu |
 | K16 | Ücretsiz / ücretli | İki tier (Free + Lulu Plus); ikisi de auth gerektirir |
@@ -46,16 +49,28 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | 4 | Aile paylaşımı hazırlık (Lulu Plus) | ⬜ Başlanmadı |
 | 5 | Free vs Plus rapor özellik farkları | ⬜ Başlanmadı (Auth sonrası) |
 | 6 | PRD güncellemeleri (Profile hub, Screen 17) | ⬜ Başlanmadı |
+| 7 | Auth ekranları geliştirme (Paket F) | ⬜ Başlanmadı |
+| 8 | Pet ekleme ekranları geliştirme (Paket G) | ⬜ Başlanmadı |
+| 9 | Home boş durum & kullanıcı yönlendirme (Paket H) | ⬜ Başlanmadı |
+| 10 | Tek tema — Dark-first launch (Paket I) | ⬜ Başlanmadı |
+| 11 | Dil: EN + DE, TR kaldır (Paket J) | ⬜ Başlanmadı |
+| 12 | Bildirim ekranları & mesajları (Paket K) | ⬜ Başlanmadı |
 
-> **Not:** Aşağıdaki **Yeni iş paketleri (A–E)** henüz öncelik sırasına yerleştirilmedi. `is-plani.md` güncellemesinde sıralanacak.
+> **Not:** Paketler **A–E** önceki turda tanımlandı; **F–K** yayın öncesi UX/ürün kararları (2026-06-24). Sıralama `is-plani.md`'de netleştirilecek. **F, G, H, I** Paket D (`design.md`) ile koordine edilmeli.
 
 | Sıra | Yeni iş paketi | Durum |
 |------|-----|-------|
 | A | Eksik/placeholder özelliklerin tespiti & kararı | 🟢 A2 + A3 yapıldı; A1 bilinçli ertelendi |
 | B | My Pets: pet silme + aktif/vefat eden ayrımı | ✅ B1 (silme) + B2 (status/anma) yapıldı |
 | C | Records tasarım & listeleme güncellemeleri | 🟡 Grid + 8 kayıt türü yapıldı; listeleme/ekler bekliyor |
-| D | Genel tasarım yenileme (`design.md`) | ⬜ `design.md` bekleniyor |
+| D | Genel tasarım yenileme (`design.md`) | 🟡 `design.md` mevcut; uygulama başlanmadı |
 | E | Beslenme/aktivite plan sistemi (günlük/haftalık) | ⬜ Başlanmadı (karar gerekli) |
+| F | Auth ekranları (giriş & kayıt) geliştirme | ⬜ Başlanmadı |
+| G | Pet ekleme ekranları geliştirme | ⬜ Başlanmadı |
+| H | Home boş durum & onboarding yönlendirme | ⬜ Başlanmadı |
+| I | Tek tema (Dark-first; Light yayın sonrası) | ⬜ Başlanmadı |
+| J | Dil kapsamı: EN + DE (TR kaldır) | ⬜ Başlanmadı |
+| K | Bildirim ekranları & mesajları | ⬜ Başlanmadı |
 
 ---
 
@@ -75,11 +90,12 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 
 ### 2. QA — kalan manuel testler
 
-#### Türkçe dil (İş #1)
-- [ ] EN ↔ TR geçiş QA (tüm ekranlar)
+#### Dil (İş #1) — *Paket J sonrası EN + DE*
+- [ ] EN ↔ DE geçiş QA (tüm ekranlar)
+- [ ] ~~EN ↔ TR~~ — TR v1'de kaldırılacak (Paket J); mevcut TR QA iptal
 
 #### Daily Check-In Redesign — Faz 5
-- [ ] EN/TR dil geçişi
+- [ ] EN/DE dil geçişi
 - [ ] Yeni kayıt + düzenleme
 - [ ] Eski kayıt migration
 - [ ] VoiceOver / Reduce Motion
@@ -174,18 +190,14 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
 
 **Amaç:** Uygulamanın genel görsel dilini yenilemek. Mevcut tasarım kullanıcıya yeterli gelmiyor.
 
-> **Durum:** Kullanıcı bir `design.md` dosyası verecek. O gelene kadar kapsam belirsiz.
+> **Durum (2026-06-24):** `design.md` repo'da mevcut. Uygulama başlanmadı. **Paket I** ile koordine: v1'de yalnızca Dark token'ları aktif; Light token'ları kodda tutulabilir ama kullanıcıya kapalı.
 
-- [ ] `design.md` alındığında: hedef tasarım dili, renk paleti, tipografi, spacing, component stilleri çıkar
-- [ ] `constants/theme.ts` + tema token'larını (Light/Dark) yeni sisteme göre güncelle
+- [ ] `design.md` analizi: hedef tasarım dili, renk paleti, tipografi, spacing, component stilleri
+- [ ] `constants/theme.ts` + tema token'ları — **v1: Dark-only** (Paket I); Light yayın sonrası
 - [ ] Ortak component'leri (Button, Card, ScreenContainer, list row'lar) yeni dile taşı
 - [ ] Ekran ekran uygulama (Home, My Pets, Records, Reports, Profile, Settings, Check-In, Auth)
-- [ ] Dark mode + Dynamic Type ile uyum doğrulama
-- [ ] C (Records tasarımı) bu paketle koordine
-
-**Açık sorular:**
-- `design.md` ne kadar kapsamlı (tam design system mi, yön mü)?
-- Mevcut HIG yapısı korunacak mı, tamamen yeni dil mi?
+- [ ] Dynamic Type ile uyum doğrulama (tek tema Dark)
+- [ ] C (Records), F (Auth), G (Setup), H (Home empty state) bu paketle koordine
 
 ---
 
@@ -202,13 +214,115 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
 - [ ] UI konumu (karar gerekli): Home'da yeni kart / yeni tab / Pet Profile altında
 - [ ] Tier kararı: **Free mi, Lulu Plus arkasında mı?**
 - [ ] Plan ile Check-In/Records etkileşimi (örn. öğün tamamlandı işaretleme, hatırlatma)
-- [ ] i18n (en/tr/de) + içerik lokalizasyonu
+- [ ] i18n (en/de) + içerik lokalizasyonu
 
 **Açık sorular (re-plan öncesi netleşmeli):**
 - Kural tabanlı mı AI mı?
 - Free mi Plus mı?
 - Sadece beslenme mi, aktivite dahil mi?
 - İçerik kaynağı / sorumluluk (sağlık tavsiyesi hassas konu)
+
+---
+
+## 🆕 Yayın öncesi UX paketleri (2026-06-24)
+
+Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kapsamı, bildirim metinleri. **Paket D (design.md) ile birlikte ele alınmalı** — F, G, H görsel dil D'den beslenir.
+
+---
+
+### F. Auth ekranları — giriş & kayıt geliştirme
+
+**Amaç:** Mevcut email/şifre auth işlevsel; ekranlar yayın kalitesinde yeniden tasarlanacak.
+
+**Kapsam:**
+- [ ] `app/(auth)/index.tsx` — giriş / kayıt UI yenileme (`design.md` + Paket D)
+- [ ] Form düzeni, hata durumları, loading state'leri
+- [ ] Marka dili (başlık, alt metin, CTA hiyerarşisi)
+- [ ] i18n: **en/de** (Paket J ile uyumlu)
+- [ ] Apple/Google butonları için yer tutucu düzen (native giriş bölüm 7'de bağlanacak)
+- [ ] Dynamic Type + erişilebilirlik (VoiceOver etiketleri)
+
+**Bağımlılık:** Paket D (tasarım token'ları); Paket J (dil)
+
+---
+
+### G. Pet ekleme ekranları geliştirme
+
+**Amaç:** İlk kurulum (`(setup)`) ve "Add Pet" akışındaki ekranlar yenilenecek.
+
+**Kapsam:**
+- [ ] Setup akışı: `pet-type` → `pet-name` → `pet-age` → `health-conditions` (+ add mode varyantı)
+- [ ] Görsel tutarlılık: `design.md` bileşenleri, ilerleme göstergesi, form alanları
+- [ ] Add mode vs ilk kurulum farklarının netleştirilmesi (check-in prefs / notification atlanır)
+- [ ] i18n: **en/de**
+- [ ] QA: ilk pet + 2. pet ekleme akışları
+
+**Bağımlılık:** Paket D; Paket J
+
+---
+
+### H. Home — boş durum & kullanıcı yönlendirme
+
+**Amaç:** Pet eklendikten sonra check-in, record vb. yapılmadığında Home boş kalıyor; kullanıcıyı uygulamayı öğretmek ve ilk aksiyona yönlendirmek.
+
+**Sorun:** Yeni pet + henüz veri yok → dashboard anlamsız / boş görünüm.
+
+**Kapsam (taslak):**
+- [ ] Boş durum tespiti: pet var, check-in yok / streak 0 / records yok
+- [ ] Onboarding-style yönlendirme kartı veya adım adım CTA'lar (örn. "İlk check-in'i yap", "Hatırlatıcıyı ayarla", "Kayıt ekle")
+- [ ] İlk check-in tamamlandığında boş durumun kalkması
+- [ ] Memorial (vefat) pet için ayrı boş/yönlendirme davranışı (salt-okunur)
+- [ ] i18n: **en/de**
+- [ ] `design.md` ile görsel uyum
+
+**Bağımlılık:** Paket D
+
+---
+
+### I. Tek tema — Dark-first launch
+
+**Karar (K20, K21):** v1 yalnızca **Dark** tema; Light mode yayın sonrası.
+
+**Kapsam:**
+- [ ] Settings'ten Light / Dark / System seçicisini kaldır veya gizle
+- [ ] Uygulama genelinde `colorScheme` sabitlenmesi veya tek tema zorlaması
+- [ ] `constants/theme.ts` — Dark token'ları `design.md`'ye göre güncelle; Light token'ları kodda tut (v1.1 için)
+- [ ] Status bar, tab bar, modal, sheet'lerde Dark tutarlılığı
+- [ ] QA: tüm ekranlarda Dark-only görsel kontrol
+
+**Not:** Paket D ile birlikte uygulanır; ayrı Light QA v1'de gerekmez.
+
+---
+
+### J. Dil kapsamı — EN + DE (TR kaldır)
+
+**Karar (K2 güncellendi, K19):** İlk yayın **EN ve DE**; TR pazarı yok, `i18n/tr.ts` kaldırılacak veya devre dışı.
+
+**Kapsam:**
+- [ ] `i18n/tr.ts` kaldır veya build'den çıkar; `i18n/index.ts` yalnızca `en` + `de`
+- [ ] Settings dil seçici: EN / DE / System (system → en veya de; diğerleri → EN fallback)
+- [ ] Tüm ekranlarda kalan TR referansları temizle
+- [ ] App Store / Play Store metadata: DE + EN pazarları
+- [ ] QA checklist: EN ↔ DE (TR QA maddeleri iptal)
+- [ ] *(Gelecek)* TR yeniden eklenebilir — ayrı karar
+
+**Bağımlılık:** F, G, H, K ile paralel veya önce (metin işi)
+
+---
+
+### K. Bildirim ekranları & mesajları
+
+**Amaç:** Bildirim izni ekranı, hatırlatıcı ayarları ve push/local notification metinleri güncellenecek.
+
+**Kapsam:**
+- [ ] Onboarding / setup: `notification-permission` ekranı tasarım & metin
+- [ ] Settings: hatırlatıcı saat seçimi UI/UX (`design.md`)
+- [ ] Local notification metinleri (`services/notifications/`) — ton, kişiselleştirme (pet adı), **en/de**
+- [ ] Pet reminder bildirimleri (`pet-reminder-schedule.ts`) metin gözden geçirme
+- [ ] İzin reddedildi / kısıtlı durumda kullanıcı yönlendirmesi (Settings'e git)
+- [ ] QA: farklı saat dilimleri, aktif pet değişimi, vefat pet reminder iptali
+
+**Bağımlılık:** Paket D (ekranlar); Paket J (dil)
 
 ---
 

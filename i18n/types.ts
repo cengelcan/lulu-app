@@ -44,7 +44,6 @@ export type Translations = {
     language: string;
     languageSystem: string;
     languageEnglish: string;
-    languageTurkish: string;
     languageGerman: string;
   };
   onboarding: {

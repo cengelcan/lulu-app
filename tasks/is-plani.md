@@ -9,7 +9,7 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 
 ## Mevcut durum (doğrulama)
 
-**Son güncelleme:** 2026-06-22 — Paket C kısmen tamamlandı (Records grid + 8 kayıt türü + legacy migrasyon). Beş yeni iş paketi (A–E) sıraya yerleştirildi; C'nin grid/tür kısmı D'den önce referans görselle uygulandı.
+**Son güncelleme:** 2026-06-24 — Paket F–K (yayın öncesi UX) eklendi; `design.md` mevcut.
 
 | Alan | Durum |
 |------|-------|
@@ -77,7 +77,7 @@ Auth'a başlamadan kod tabanını yeşile çekmek. **Tahmini: ~0.5–1 gün.**
 
 ### 0.2 QA — kalan manuel testler (Öncelik 2, paralel)
 
-- [ ] TR ↔ EN dil geçişi (tüm ekranlar)
+- [ ] EN ↔ DE dil geçişi (tüm ekranlar) — *Paket J sonrası; TR QA iptal*
 - [ ] Daily Check-In Faz 5: dil geçişi, yeni kayıt + düzenleme, eski kayıt migration, VoiceOver / Reduce Motion
 - [ ] Profile Tab matrisi T1–T12 + 2 pet ile delete akışı
 - [ ] Multi-Pet matrisi T1–T10
@@ -188,14 +188,14 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 - [x] B2: My Pets "Aktif" / "Anma" bölüm ayrımı (basit; D sonrası cilalanacak)
 - [ ] B2: *(QA)* Vefat işaretle/geri al akışını cihazda doğrula
 
-## Paket D — Genel tasarım (design.md bekliyor)
+## Paket D — Genel tasarım (`design.md` mevcut)
 
-**Tahmini: design.md kapsamına bağlı.** Detay: `yapilacaklar.md` → "D".
+**Tahmini: design.md kapsamına bağlı.** Detay: `yapilacaklar.md` → "D". **Paket I** ile koordine: v1 Dark-only.
 
 - [ ] `design.md` analizi → tasarım dili, palet, tipografi, spacing, component stilleri
-- [ ] `constants/theme.ts` + Light/Dark token güncelle
+- [ ] `constants/theme.ts` — Dark token güncelle (Light kodda kalır, kullanıcıya kapalı)
 - [ ] Ortak component'ler (Button, Card, ScreenContainer, list row'lar)
-- [ ] Ekran ekran uygulama + Dark mode / Dynamic Type doğrulama
+- [ ] Ekran ekran uygulama + Dynamic Type doğrulama
 
 ## Paket B (görsel) — Aktif / Anma bölümleri (Paket D sonrası)
 
@@ -222,7 +222,22 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 
 **Açık kararlar (re-plan):** kural tabanlı vs AI · Free vs Plus · sadece beslenme mi aktivite de mi · içerik kaynağı/sorumluluk.
 
-- [ ] Yaklaşım kararı sonrası detaylı plan (`types/plan.ts`, üretim motoru, UI konumu, tier gating, i18n, disclaimer)
+- [ ] Yaklaşım kararı sonrası detaylı plan (`types/plan.ts`, üretim motoru, UI konumu, tier gating, i18n en/de, disclaimer)
+
+---
+
+## Paket F–K — Yayın öncesi UX (2026-06-24)
+
+Detay: `yapilacaklar.md` → "Yayın öncesi UX paketleri". **Önerilen sıra:** J (dil) erken · D+I (tema) · F+G+K (ekranlar) · H (Home empty) — hepsi `design.md` ile koordine.
+
+| Paket | Konu | Tasarıma bağlı? |
+|-------|------|-----------------|
+| F | Auth giriş & kayıt ekranları | Evet (D) |
+| G | Pet ekleme / setup ekranları | Evet (D) |
+| H | Home boş durum & yönlendirme | Evet (D) |
+| I | Tek tema — Dark-first (Light sonra) | Evet (D) |
+| J | EN + DE; TR kaldır | Hayır |
+| K | Bildirim ekranları & mesajları | Kısmen (D + J) |
 
 ---
 

@@ -42,7 +42,6 @@ export const de: Translations = {
     language: 'Sprache',
     languageSystem: 'System',
     languageEnglish: 'English',
-    languageTurkish: 'Türkçe',
     languageGerman: 'Deutsch',
   },
   onboarding: {

@@ -2,7 +2,6 @@ import type { ResolvedLanguage } from '@/types/language';
 
 const LOCALE_BY_LANGUAGE: Record<ResolvedLanguage, string> = {
   en: 'en-US',
-  tr: 'tr-TR',
   de: 'de-DE',
 };
 

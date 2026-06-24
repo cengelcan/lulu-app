@@ -48,10 +48,30 @@ export type Translations = {
     languageGerman: string;
   };
   onboarding: {
-    intro1: { title: string; description: string; button: string };
-    intro2: { title: string; description: string; button: string };
-    intro3: { title: string; description: string; button: string };
-    intro4: { title: string; description: string; button: string };
+    intro1: {
+      title: string;
+      titleAccent: string;
+      description: string;
+      button: string;
+    };
+    intro2: {
+      title: string;
+      titleAccent: string;
+      description: string;
+      button: string;
+    };
+    intro3: {
+      title: string;
+      titleAccent: string;
+      description: string;
+      button: string;
+    };
+    intro4: {
+      title: string;
+      titleAccent: string;
+      description: string;
+      button: string;
+    };
   };
   auth: {
     title: string;

@@ -10,10 +10,12 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 type ScreenHeaderProps = {
   onBack: () => void;
   title?: string;
+  backTintColor?: string;
 };
 
-export function ScreenHeader({ onBack, title }: ScreenHeaderProps) {
+export function ScreenHeader({ onBack, title, backTintColor }: ScreenHeaderProps) {
   const primaryColor = useThemeColor({}, 'primary');
+  const resolvedBackTintColor = backTintColor ?? primaryColor;
 
   useAndroidBackHandler(
     useCallback(() => {
@@ -24,7 +26,7 @@ export function ScreenHeader({ onBack, title }: ScreenHeaderProps) {
 
   return (
     <View style={styles.container}>
-      <HeaderBackButton tintColor={primaryColor} onPress={onBack} />
+      <HeaderBackButton tintColor={resolvedBackTintColor} onPress={onBack} />
       {title ? (
         <ThemedText type="defaultSemiBold" style={styles.title}>
           {title}

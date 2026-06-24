@@ -47,23 +47,27 @@ export const en: Translations = {
   },
   onboarding: {
     intro1: {
-      title: 'Never forget the small changes.',
+      title: 'Every little change',
+      titleAccent: 'matters.',
       description:
         "Keep track of your pet's appetite, energy, and symptoms before they become easy to overlook.",
       button: 'Next',
     },
     intro2: {
-      title: 'Check in within seconds.',
+      title: 'Check in within',
+      titleAccent: 'seconds.',
       description: 'Record how your pet is doing in under 10 seconds — anytime, anywhere.',
       button: 'Sounds Good',
     },
     intro3: {
-      title: 'See patterns over time.',
+      title: 'See patterns over',
+      titleAccent: 'time.',
       description: 'Build a simple health history that helps you notice changes early.',
       button: "I'm Ready",
     },
     intro4: {
-      title: 'Be prepared for every vet visit.',
+      title: 'Be prepared for every vet',
+      titleAccent: 'visit.',
       description: 'Bring organized notes and health records when your pet needs care.',
       button: 'Start Tracking',
     },

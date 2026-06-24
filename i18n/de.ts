@@ -47,23 +47,27 @@ export const de: Translations = {
   },
   onboarding: {
     intro1: {
-      title: 'Vergiss keine kleinen Veränderungen.',
+      title: 'Jede kleine Veränderung',
+      titleAccent: 'zählt.',
       description:
-        "Keep track of your pet's appetite, energy, and symptoms before they become easy to overlook.",
+        'Behalte Appetit, Energie und Symptome deines Haustiers im Blick, bevor sie leicht übersehen werden.',
       button: 'Weiter',
     },
     intro2: {
-      title: 'Check-In in Sekunden.',
+      title: 'Check-In in',
+      titleAccent: 'Sekunden.',
       description: 'Record how your pet is doing in under 10 seconds — anytime, anywhere.',
       button: 'Klingt gut',
     },
     intro3: {
-      title: 'Muster im Zeitverlauf erkennen.',
+      title: 'Muster im Zeitverlauf',
+      titleAccent: 'erkennen.',
       description: 'Build a simple health history that helps you notice changes early.',
       button: 'Ich bin bereit',
     },
     intro4: {
-      title: 'Für jeden Tierarztbesuch vorbereitet.',
+      title: 'Für jeden Tierarztbesuch',
+      titleAccent: 'vorbereitet.',
       description: 'Bring organized notes and health records when your pet needs care.',
       button: 'Tracking starten',
     },

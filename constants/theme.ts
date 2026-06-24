@@ -28,6 +28,7 @@ export const Palette = {
   onDarkSoft: '#a1a1aa',
   brandAccent: '#A998D6',
   brandAccentLight: '#B8A8E8',
+  brandAccentDark: '#7362A8',
   brandAccentSoft: 'rgba(169,152,214,0.12)',
   brandAccentBorder: 'rgba(169,152,214,0.35)',
   brandAccentGlow: 'rgba(169,152,214,0.25)',

@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
 import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
+import { ONBOARDING_STEP_4_BACKGROUND } from '@/constants/onboarding';
 import { useTranslation } from '@/hooks/use-translation';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 
@@ -28,12 +29,13 @@ export default function Onboarding4Screen() {
     <OnboardingScreen
       step={4}
       title={t('onboarding.intro4.title')}
+      titleAccent={t('onboarding.intro4.titleAccent')}
       description={t('onboarding.intro4.description')}
       buttonTitle={t('onboarding.intro4.button')}
       onContinue={() => void handleContinue()}
-      onBack={() => router.back()}
       isLoading={isLoading}
       error={error}
+      backgroundSource={ONBOARDING_STEP_4_BACKGROUND}
     />
   );
 }

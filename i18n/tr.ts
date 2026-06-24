@@ -47,23 +47,27 @@ export const tr: Translations = {
   },
   onboarding: {
     intro1: {
-      title: 'Küçük değişiklikleri asla unutma.',
+      title: 'Her küçük değişiklik',
+      titleAccent: 'önemli.',
       description:
         'Gözden kaçmadan önce petinin iştahını, enerjisini ve belirtilerini takip et.',
       button: 'İleri',
     },
     intro2: {
-      title: 'Saniyeler içinde check-in yap.',
+      title: 'Saniyeler içinde check-in',
+      titleAccent: 'yap.',
       description: 'Petinin durumunu 10 saniyeden kısa sürede kaydet — her yerde, her zaman.',
       button: 'Harika',
     },
     intro3: {
-      title: 'Zaman içindeki örüntüleri gör.',
+      title: 'Zaman içindeki örüntüleri',
+      titleAccent: 'gör.',
       description: 'Değişiklikleri erken fark etmeni sağlayan basit bir sağlık geçmişi oluştur.',
       button: 'Hazırım',
     },
     intro4: {
-      title: 'Her veteriner ziyaretine hazır ol.',
+      title: 'Her veteriner ziyaretine hazır',
+      titleAccent: 'ol.',
       description: 'Petinin bakıma ihtiyacı olduğunda düzenli notlar ve sağlık kayıtları yanında olsun.',
       button: 'Takibe Başla',
     },

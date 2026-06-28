@@ -91,6 +91,7 @@ export type Translations = {
     orDivider: string;
     continueWithGoogle: string;
     continueWithApple: string;
+    continueWithEmail: string;
     signInButton: string;
     signUpButton: string;
     toggleToSignUpPrefix: string;

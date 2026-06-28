@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
@@ -10,7 +10,10 @@ type AuthInputProps = Omit<TextInputProps, 'style'> & {
   secureToggle?: boolean;
 };
 
-export function AuthInput({ icon, secureToggle, secureTextEntry, ...rest }: AuthInputProps) {
+export const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInput(
+  { icon, secureToggle, secureTextEntry, ...rest },
+  ref
+) {
   const [isHidden, setIsHidden] = useState(Boolean(secureTextEntry));
 
   const textColor = useThemeColor({}, 'text');
@@ -25,6 +28,7 @@ export function AuthInput({ icon, secureToggle, secureTextEntry, ...rest }: Auth
     <View style={[styles.container, { backgroundColor: surfaceColor, borderColor }]}>
       <IconSymbol name={icon} size={20} color={iconColor} style={styles.leadingIcon} />
       <TextInput
+        ref={ref}
         placeholderTextColor={textSecondaryColor}
         secureTextEntry={showSecureToggle ? isHidden : secureTextEntry}
         style={[styles.input, { color: textColor }]}
@@ -42,7 +46,7 @@ export function AuthInput({ icon, secureToggle, secureTextEntry, ...rest }: Auth
       ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -90,6 +90,7 @@ export const de: Translations = {
     orDivider: 'oder',
     continueWithGoogle: 'Mit Google fortfahren',
     continueWithApple: 'Mit Apple fortfahren',
+    continueWithEmail: 'Mit E-Mail fortfahren',
     signInButton: 'Anmelden',
     signUpButton: 'Registrieren',
     toggleToSignUpPrefix: 'Noch kein Konto? ',

@@ -1,18 +1,25 @@
+import { Image } from 'expo-image';
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { SelectableOption } from '@/components/setup/selectable-option';
+import { BreedSearchField } from '@/components/setup/BreedSearchField';
 import { ThemedText } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { PET_SPECIES_ICONS } from '@/constants/pet-species';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { PET_NAME_MAX_LENGTH } from '@/types/pet';
+import { PET_NAME_MAX_LENGTH, type PetSpecies } from '@/types/pet';
+
+const NAME_FIELD_ICON_SIZE = 24;
 
 type PetNameBreedFormProps = {
+  species: PetSpecies | null;
   name: string;
   breed: string | null;
   nameLabel: string;
   breedLabel: string;
   breedOptionalHint: string;
+  breedPlaceholder: string;
+  breedNoResultsLabel: string;
+  breedAccessibilityLabel: string;
   namePlaceholder: string;
   nameAccessibilityLabel: string;
   breedOptions: { value: string; label: string }[];
@@ -22,11 +29,15 @@ type PetNameBreedFormProps = {
 };
 
 export function PetNameBreedForm({
+  species,
   name,
   breed,
   nameLabel,
   breedLabel,
   breedOptionalHint,
+  breedPlaceholder,
+  breedNoResultsLabel,
+  breedAccessibilityLabel,
   namePlaceholder,
   nameAccessibilityLabel,
   breedOptions,
@@ -59,9 +70,16 @@ export function PetNameBreedForm({
               borderWidth: 1.5,
             },
           ]}>
-          <View style={[styles.nameIconWrap, { backgroundColor: brandAccentSoft }]}>
-            <IconSymbol name="pawprint.fill" size={18} color={brandAccentColor} />
-          </View>
+          {species ? (
+            <View style={[styles.nameIconWrap, { backgroundColor: brandAccentSoft }]}>
+              <Image
+                accessibilityIgnoresInvertColors
+                contentFit="contain"
+                source={PET_SPECIES_ICONS[species]}
+                style={styles.nameIcon}
+              />
+            </View>
+          ) : null}
           <TextInput
             accessibilityLabel={nameAccessibilityLabel}
             autoCapitalize="words"
@@ -94,14 +112,14 @@ export function PetNameBreedForm({
             {breedOptionalHint}
           </ThemedText>
         </View>
-        {breedOptions.map((option) => (
-          <SelectableOption
-            key={option.value}
-            label={option.label}
-            selected={breed === option.value}
-            onPress={() => onBreedChange(breed === option.value ? null : option.value)}
-          />
-        ))}
+        <BreedSearchField
+          breed={breed}
+          breedOptions={breedOptions}
+          placeholder={breedPlaceholder}
+          noResultsLabel={breedNoResultsLabel}
+          accessibilityLabel={breedAccessibilityLabel}
+          onBreedChange={onBreedChange}
+        />
       </View>
     </View>
   );
@@ -140,6 +158,10 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  nameIcon: {
+    width: NAME_FIELD_ICON_SIZE,
+    height: NAME_FIELD_ICON_SIZE,
   },
   nameInput: {
     ...Typography.body,

@@ -134,6 +134,8 @@ export const en: Translations = {
       description: 'Give them a name and optionally choose their breed.',
       nameLabel: 'Name',
       breedLabel: 'Breed',
+      breedPlaceholder: 'Search breed',
+      breedNoResults: 'No breeds found',
       namePlaceholder: 'Pet name',
     },
     petAgeHealth: {

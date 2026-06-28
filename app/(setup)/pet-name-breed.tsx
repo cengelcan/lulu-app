@@ -59,11 +59,15 @@ export default function PetNameBreedScreen() {
       continueDisabled={!name.trim()}
       error={translateValidationError(t, error)}>
       <PetNameBreedForm
+        species={species}
         name={name}
         breed={breed}
         nameLabel={t('setup.petNameBreed.nameLabel')}
         breedLabel={t('setup.petNameBreed.breedLabel')}
         breedOptionalHint={t('common.optional')}
+        breedPlaceholder={t('setup.petNameBreed.breedPlaceholder')}
+        breedNoResultsLabel={t('setup.petNameBreed.breedNoResults')}
+        breedAccessibilityLabel={t('pet.fields.breed')}
         namePlaceholder={t('setup.petNameBreed.namePlaceholder')}
         nameAccessibilityLabel={t('pet.fields.petName')}
         breedOptions={breedOptions}

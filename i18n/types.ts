@@ -133,6 +133,8 @@ export type Translations = {
       description: string;
       nameLabel: string;
       breedLabel: string;
+      breedPlaceholder: string;
+      breedNoResults: string;
       namePlaceholder: string;
     };
     petAgeHealth: {

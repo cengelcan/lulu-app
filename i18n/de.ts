@@ -136,6 +136,8 @@ export const de: Translations = {
       description: 'Gib einen Namen ein und wähle optional die Rasse.',
       nameLabel: 'Name',
       breedLabel: 'Rasse',
+      breedPlaceholder: 'Rasse suchen',
+      breedNoResults: 'Keine Rassen gefunden',
       namePlaceholder: 'Name des Haustiers',
     },
     petAgeHealth: {

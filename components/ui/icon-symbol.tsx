@@ -78,6 +78,7 @@ const MAPPING = {
   'calendar.badge.checkmark': 'event-available',
   'clock.fill': 'schedule',
   'plus': 'add',
+  'magnifyingglass': 'search',
 } as IconMapping;
 
 /**

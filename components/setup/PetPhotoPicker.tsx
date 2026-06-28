@@ -7,7 +7,7 @@ import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { PetSpecies } from '@/types/pet';
 
-const PHOTO_PICKER_AVATAR_SIZE = 168;
+const PHOTO_PICKER_AVATAR_SIZE = 216;
 
 type PetPhotoPickerProps = {
   species: PetSpecies | null;

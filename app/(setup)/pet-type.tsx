@@ -1,11 +1,11 @@
-import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 
 import { PetSpeciesSelector } from '@/components/setup/PetSpeciesSelector';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
-import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
+import { setupRoute, setupTotalSteps, parseSetupModeParam, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { useSetupStore, validateSpecies } from '@/stores/setup.store';
 import { translateValidationError } from '@/utils/translate-error';
@@ -20,7 +20,15 @@ export default function PetTypeScreen() {
 
   const species = useSetupStore((state) => state.species);
   const setSpecies = useSetupStore((state) => state.setSpecies);
+  const setSetupMode = useSetupStore((state) => state.setSetupMode);
+  const { mode: modeParam } = useLocalSearchParams<{ mode?: string | string[] }>();
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (parseSetupModeParam(modeParam) === 'add') {
+      setSetupMode('add');
+    }
+  }, [modeParam, setSetupMode]);
 
   const handleContinue = useCallback(() => {
     const validationError = validateSpecies(species);

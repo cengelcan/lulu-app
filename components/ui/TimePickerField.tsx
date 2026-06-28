@@ -1,7 +1,7 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Platform, Pressable, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -16,8 +16,9 @@ type TimePickerFieldProps = {
   value: ReminderTime;
   onChange: (value: ReminderTime) => void;
   disabled?: boolean;
-  variant?: 'field' | 'row';
+  variant?: 'field' | 'row' | 'hero';
   label?: string;
+  changeTimeLabel?: string;
   isLast?: boolean;
 };
 
@@ -28,6 +29,7 @@ export function TimePickerField({
   disabled = false,
   variant = 'field',
   label,
+  changeTimeLabel,
   isLast = false,
 }: TimePickerFieldProps) {
   const [showPicker, setShowPicker] = useState(false);
@@ -38,6 +40,8 @@ export function TimePickerField({
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
   const backgroundColor = useThemeColor({}, 'background');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
 
   const displayValue = formatReminderTime(value);
 
@@ -81,7 +85,33 @@ export function TimePickerField({
 
   return (
     <>
-      {variant === 'row' ? (
+      {variant === 'hero' ? (
+        <Pressable
+          accessibilityLabel={accessibilityLabel}
+          accessibilityRole="button"
+          accessibilityState={{ disabled }}
+          disabled={disabled}
+          onPress={openPicker}
+          style={({ pressed }) => [
+            styles.hero,
+            { opacity: disabled ? 0.5 : pressed ? 0.88 : 1 },
+          ]}>
+          <View style={[styles.heroIconCircle, { backgroundColor: brandAccentSoft }]}>
+            <IconSymbol name="bell.fill" size={28} color={brandAccentColor} />
+          </View>
+          <ThemedText type="title" style={styles.heroTime}>
+            {displayValue}
+          </ThemedText>
+          {changeTimeLabel ? (
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.heroHint}>
+              {changeTimeLabel}
+            </ThemedText>
+          ) : null}
+        </Pressable>
+      ) : variant === 'row' ? (
         <Pressable
           accessibilityLabel={accessibilityLabel}
           accessibilityRole="button"
@@ -155,6 +185,26 @@ export function TimePickerField({
 }
 
 const styles = StyleSheet.create({
+  hero: {
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+  },
+  heroIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xs,
+  },
+  heroTime: {
+    textAlign: 'center',
+  },
+  heroHint: {
+    ...Typography.caption,
+    textAlign: 'center',
+  },
   field: {
     minHeight: 52,
     borderWidth: 1,

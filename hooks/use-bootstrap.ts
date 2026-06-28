@@ -5,6 +5,7 @@ import { getNotificationLaunchRoute, syncCheckInReminderSchedule, syncPetReminde
 import * as petStorage from '@/storage/pet.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
+import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
 
 export type BootstrapPhase = 'loading' | 'error' | 'redirecting';
@@ -103,7 +104,11 @@ export function useBootstrap() {
     }
 
     setPhase('redirecting');
-    router.replace(resolveBootstrapRoute(hasCompletedOnboarding, isAuthenticated, hasAnyPet));
+    const route = resolveBootstrapRoute(hasCompletedOnboarding, isAuthenticated, hasAnyPet);
+    if (route === '/(setup)/pet-type') {
+      useSetupStore.getState().beginSetup('initial');
+    }
+    router.replace(route);
   }, [
     clearOnboardingError,
     clearPetError,

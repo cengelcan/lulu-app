@@ -38,7 +38,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
   const clearError = usePetStore((state) => state.clearError);
 
   const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
-  const resetDraft = useSetupStore((state) => state.resetDraft);
+  const beginSetup = useSetupStore((state) => state.beginSetup);
 
   const [isSwitching, setIsSwitching] = useState(false);
   const [switchingPetId, setSwitchingPetId] = useState<string | null>(null);
@@ -71,11 +71,12 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
   );
 
   const handleSetupPet = () => {
+    beginSetup('initial');
     router.replace('/(setup)/pet-type');
   };
 
   const handleAddPet = () => {
-    resetDraft();
+    beginSetup('add');
     router.push('/(setup)/pet-type?mode=add');
   };
 

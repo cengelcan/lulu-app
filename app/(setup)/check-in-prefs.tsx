@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
+import { CheckInReminderPicker } from '@/components/setup/CheckInReminderPicker';
 import { SetupScreen } from '@/components/setup/setup-screen';
-import { TimePickerField } from '@/components/ui/TimePickerField';
 import { useTranslation } from '@/hooks/use-translation';
 import { setupTotalSteps } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
@@ -63,10 +63,17 @@ export default function CheckInPrefsScreen() {
       onBack={onBack}
       isLoading={isLoading}
       error={error ?? storeError}>
-      <TimePickerField
-        accessibilityLabel={t('settings.reminderTime')}
+      <CheckInReminderPicker
         value={reminderTime}
         onChange={setReminderTime}
+        disabled={isLoading}
+        presetsTitle={t('setup.checkInPrefs.presetsTitle')}
+        morningLabel={t('setup.checkInPrefs.morning')}
+        afternoonLabel={t('setup.checkInPrefs.afternoon')}
+        eveningLabel={t('setup.checkInPrefs.evening')}
+        changeTimeLabel={t('setup.checkInPrefs.changeTime')}
+        hint={t('setup.checkInPrefs.hint')}
+        timeAccessibilityLabel={t('settings.reminderTime')}
       />
     </SetupScreen>
   );

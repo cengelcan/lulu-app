@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { isBreedValidForSpecies } from '@/constants/pet-breeds';
+import type { SetupMode } from '@/types/setup';
 import { isValidLocalDateString } from '@/utils/date';
 import { getPetAgeParts } from '@/utils/pet-age';
 
@@ -16,6 +17,7 @@ import {
 } from '@/types/pet';
 
 type SetupDraftState = {
+  setupMode: SetupMode;
   species: PetSpecies | null;
   breed: string | null;
   name: string;
@@ -23,6 +25,7 @@ type SetupDraftState = {
   healthConditions: HealthCondition[];
   photoUri: string | null;
   photoUpload: { base64: string; mimeType: string } | null;
+  setSetupMode: (mode: SetupMode) => void;
   setSpecies: (species: PetSpecies) => void;
   setBreed: (breed: string | null) => void;
   setName: (name: string) => void;
@@ -30,6 +33,7 @@ type SetupDraftState = {
   toggleHealthCondition: (condition: HealthCondition) => void;
   clearHealthConditions: () => void;
   setPhoto: (uri: string | null, upload?: { base64: string; mimeType: string } | null) => void;
+  beginSetup: (mode: SetupMode) => void;
   resetDraft: () => void;
 };
 
@@ -126,6 +130,7 @@ export function validateOptionalMicrochipId(microchipId: string): string | null 
 }
 
 const initialDraft = {
+  setupMode: 'initial' as SetupMode,
   species: null,
   breed: null as string | null,
   name: '',
@@ -137,6 +142,10 @@ const initialDraft = {
 
 export const useSetupStore = create<SetupDraftState>((set, get) => ({
   ...initialDraft,
+
+  setSetupMode: (setupMode) => set({ setupMode }),
+
+  beginSetup: (setupMode) => set({ ...initialDraft, setupMode }),
 
   setSpecies: (species) => {
     const { breed } = get();
@@ -172,5 +181,5 @@ export const useSetupStore = create<SetupDraftState>((set, get) => ({
 
   setPhoto: (uri, upload = null) => set({ photoUri: uri, photoUpload: upload ?? null }),
 
-  resetDraft: () => set(initialDraft),
+  resetDraft: () => set((state) => ({ ...initialDraft, setupMode: state.setupMode })),
 }));

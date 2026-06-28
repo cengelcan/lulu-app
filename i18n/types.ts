@@ -168,10 +168,25 @@ export type Translations = {
     petBreed: { title: string; description: string };
     petAge: { title: string; description: string };
     healthConditions: { title: string; description: string; addPet: string };
-    checkInPrefs: { title: string; description: string };
+    checkInPrefs: {
+      title: string;
+      description: string;
+      presetsTitle: string;
+      morning: string;
+      afternoon: string;
+      evening: string;
+      changeTime: string;
+      hint: string;
+    };
     notifications: {
       title: string;
       description: string;
+      previewTitle: string;
+      previewBody: string;
+      previewTimeFallback: string;
+      benefitDaily: string;
+      benefitSettings: string;
+      hint: string;
       allow: string;
       maybeLater: string;
     };

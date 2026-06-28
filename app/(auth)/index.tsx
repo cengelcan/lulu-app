@@ -24,6 +24,7 @@ import {
 } from '@/services/auth';
 import * as petStorage from '@/storage/pet.storage';
 import { usePetStore } from '@/stores/pet.store';
+import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
 
 type AuthMode = 'signIn' | 'signUp';
@@ -131,7 +132,11 @@ export default function AuthScreen() {
       }
 
       await loadPets();
-      router.replace(await resolvePostAuthRoute());
+      const route = await resolvePostAuthRoute();
+      if (route === '/(setup)/pet-type') {
+        useSetupStore.getState().beginSetup('initial');
+      }
+      router.replace(route);
     } catch (error) {
       const code: AuthErrorCode = error instanceof AuthError ? error.code : 'unknown';
       setErrorKey(`auth.errors.${code}`);

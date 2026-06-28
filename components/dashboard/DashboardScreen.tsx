@@ -24,6 +24,7 @@ import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
 import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
+import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { buildDashboardTrends } from '@/utils/trends';
@@ -51,6 +52,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   const loadReminders = usePetReminderStore((state) => state.loadReminders);
 
   const displayName = useUserStore((state) => state.displayName);
+  const beginSetup = useSetupStore((state) => state.beginSetup);
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -117,6 +119,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   };
 
   const handleSetupPet = () => {
+    beginSetup('initial');
     router.replace('/(setup)/pet-type');
   };
 

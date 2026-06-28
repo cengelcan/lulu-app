@@ -1,6 +1,9 @@
-import { type Href, useLocalSearchParams } from 'expo-router';
+import { type Href } from 'expo-router';
 
-export type SetupMode = 'initial' | 'add';
+import { useSetupStore } from '@/stores/setup.store';
+import type { SetupMode } from '@/types/setup';
+
+export type { SetupMode } from '@/types/setup';
 
 type SetupRoutePath =
   | '/(setup)/pet-name-breed'
@@ -11,8 +14,12 @@ type SetupRoutePath =
 const ADD_MODE_PARAM = 'add';
 
 export function useSetupMode(): SetupMode {
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
-  return mode === ADD_MODE_PARAM ? 'add' : 'initial';
+  return useSetupStore((state) => state.setupMode);
+}
+
+export function parseSetupModeParam(mode?: string | string[]): SetupMode {
+  const value = Array.isArray(mode) ? mode[0] : mode;
+  return value === ADD_MODE_PARAM ? 'add' : 'initial';
 }
 
 export function setupRoute(path: SetupRoutePath, mode: SetupMode): Href {

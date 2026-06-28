@@ -189,12 +189,24 @@ export const en: Translations = {
     },
     checkInPrefs: {
       title: 'When should we remind you?',
-      description: 'Choose your preferred daily reminder time.',
+      description:
+        'Set your daily check-in reminder — one gentle nudge each day to log how your pet is doing.',
+      presetsTitle: 'Quick picks',
+      morning: 'Morning',
+      afternoon: 'Afternoon',
+      evening: 'Evening',
+      changeTime: 'Tap to set a custom time',
+      hint: 'You can change this anytime in Settings.',
     },
     notifications: {
-      title: 'Stay on track with reminders',
-      description:
-        'We can send gentle reminders for daily check-ins. You can change this later in settings.',
+      title: 'Never miss a check-in',
+      description: 'Turn on notifications so we can remind you at the time you chose.',
+      previewTitle: 'Daily check-in',
+      previewBody: 'How is {{name}} today?',
+      previewTimeFallback: 'Daily',
+      benefitDaily: 'One gentle reminder at your chosen time',
+      benefitSettings: 'Change or turn off anytime in Settings',
+      hint: 'No spam — just your daily check-in nudge.',
       allow: 'Allow Notifications',
       maybeLater: 'Maybe Later',
     },

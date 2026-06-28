@@ -1,11 +1,15 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
+import { NotificationPermissionPrompt } from '@/components/setup/NotificationPermissionPrompt';
 import { SetupScreen } from '@/components/setup/setup-screen';
+import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { Spacing } from '@/constants/theme';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import {
@@ -16,6 +20,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
+import { formatReminderTime } from '@/utils/time';
 import { translateValidationError } from '@/utils/translate-error';
 
 export default function NotificationPermissionScreen() {
@@ -24,6 +29,8 @@ export default function NotificationPermissionScreen() {
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
   const { onBack } = useSetupScreenBack(6, mode);
+  const primaryTextColor = useThemeColor({}, 'primaryText');
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const species = useSetupStore((state) => state.species);
   const breed = useSetupStore((state) => state.breed);
@@ -41,6 +48,7 @@ export default function NotificationPermissionScreen() {
   const petError = usePetStore((state) => state.error);
   const clearPetError = usePetStore((state) => state.clearError);
 
+  const reminderTime = useNotificationStore((state) => state.reminderTime);
   const savePermission = useNotificationStore((state) => state.savePermission);
   const notificationIsLoading = useNotificationStore((state) => state.isLoading);
   const notificationError = useNotificationStore((state) => state.error);
@@ -50,6 +58,11 @@ export default function NotificationPermissionScreen() {
 
   const isLoading = petIsLoading || notificationIsLoading;
   const error = translateValidationError(t, validationError) ?? petError ?? notificationError;
+
+  const previewTimeLabel = useMemo(
+    () => (reminderTime ? formatReminderTime(reminderTime) : t('setup.notifications.previewTimeFallback')),
+    [reminderTime, t]
+  );
 
   const completeSetup = useCallback(
     async (permission: NotificationPermissionStatus) => {
@@ -79,7 +92,7 @@ export default function NotificationPermissionScreen() {
           return;
         }
       } catch {
-        // Stores set error state.
+        // Store sets error state.
       }
     },
     [
@@ -110,27 +123,68 @@ export default function NotificationPermissionScreen() {
       onBack={onBack}
       error={error}
       footer={
-        <View style={styles.actions}>
+        <View style={styles.footer}>
           <Button
             title={t('setup.notifications.allow')}
             disabled={isLoading}
             onPress={() => void completeSetup('allowed')}
+            style={styles.primaryButton}
+            trailingIcon={
+              isLoading ? (
+                <ActivityIndicator color={primaryTextColor} size="small" />
+              ) : (
+                <IconSymbol name="bell.fill" size={18} color={primaryTextColor} />
+              )
+            }
           />
-          <Button
-            title={t('setup.notifications.maybeLater')}
-            variant="ghost"
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('setup.notifications.maybeLater')}
             disabled={isLoading}
             onPress={() => void completeSetup('later')}
-          />
+            style={({ pressed }) => [
+              styles.secondaryAction,
+              { opacity: isLoading ? 0.5 : pressed ? 0.7 : 1 },
+            ]}>
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.secondaryLabel}>
+              {t('setup.notifications.maybeLater')}
+            </ThemedText>
+          </Pressable>
         </View>
-      }
-    />
+      }>
+      <NotificationPermissionPrompt
+        petName={name}
+        previewAppName={t('welcome.appName')}
+        previewTitle={t('setup.notifications.previewTitle')}
+        previewBody={t('setup.notifications.previewBody')}
+        previewTimeLabel={previewTimeLabel}
+        benefitDaily={t('setup.notifications.benefitDaily')}
+        benefitSettings={t('setup.notifications.benefitSettings')}
+        hint={t('setup.notifications.hint')}
+      />
+    </SetupScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  actions: {
+  footer: {
     gap: Spacing.sm,
     marginBottom: Spacing.md,
+  },
+  primaryButton: {
+    borderRadius: Radius.pill,
+    minHeight: 52,
+  },
+  secondaryAction: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    paddingHorizontal: Spacing.md,
+  },
+  secondaryLabel: {
+    ...Typography.bodySemiBold,
   },
 });

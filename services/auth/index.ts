@@ -1,4 +1,5 @@
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import * as Linking from 'expo-linking';
 
 import { supabase } from '@/lib/supabase';
 
@@ -92,6 +93,184 @@ export async function signUpWithEmail(
     session: data.session,
     needsEmailConfirmation: data.session === null,
   };
+}
+
+export function getPasswordResetRedirectUrl(): string {
+  const envRedirect = process.env.EXPO_PUBLIC_AUTH_REDIRECT_URL?.trim();
+
+  if (envRedirect) {
+    return envRedirect;
+  }
+
+  // Expo Go: exp://192.168.x.x:8081/--/reset-password
+  // Dev/prod build: luluapp://reset-password
+  return Linking.createURL('reset-password');
+}
+
+function parseParamString(paramsString: string): Record<string, string> {
+  const params: Record<string, string> = {};
+
+  for (const part of paramsString.split('&')) {
+    if (!part) {
+      continue;
+    }
+
+    const [rawKey, rawValue = ''] = part.split('=');
+    params[decodeURIComponent(rawKey)] = decodeURIComponent(rawValue);
+  }
+
+  return params;
+}
+
+function parseAuthParamsFromUrl(url: string): Record<string, string> {
+  const extractFromUrl = (value: string): Record<string, string> => {
+    const hashIndex = value.indexOf('#');
+    const queryIndex = value.indexOf('?');
+    const paramsString =
+      hashIndex >= 0
+        ? value.slice(hashIndex + 1)
+        : queryIndex >= 0
+          ? value.slice(queryIndex + 1)
+          : '';
+
+    return parseParamString(paramsString);
+  };
+
+  const fromOriginal = extractFromUrl(url);
+
+  if (Object.keys(fromOriginal).length > 0) {
+    return fromOriginal;
+  }
+
+  // Some platforms deliver Supabase tokens after # instead of ?.
+  return extractFromUrl(url.replace('#', '?'));
+}
+
+function hasAuthParam(params: Record<string, string>, key: string): boolean {
+  return typeof params[key] === 'string' && params[key].length > 0;
+}
+
+export function hasAuthParamsInUrl(url: string): boolean {
+  const params = parseAuthParamsFromUrl(url);
+
+  return (
+    hasAuthParam(params, 'access_token') ||
+    hasAuthParam(params, 'refresh_token') ||
+    hasAuthParam(params, 'code') ||
+    hasAuthParam(params, 'token_hash')
+  );
+}
+
+export async function setSessionFromUrl(url: string): Promise<Session | null> {
+  const params = parseAuthParamsFromUrl(url);
+  const { access_token, refresh_token, code, token_hash, type } = params;
+
+  try {
+    if (code) {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+      if (error) {
+        console.warn('[auth] Could not exchange code for session', error.message);
+        return null;
+      }
+
+      return data.session;
+    }
+
+    if (token_hash && type === 'recovery') {
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash,
+        type: 'recovery',
+      });
+
+      if (error) {
+        console.warn('[auth] Could not verify recovery token', error.message);
+        return null;
+      }
+
+      return data.session;
+    }
+
+    if (!access_token || !refresh_token) {
+      return null;
+    }
+
+    const { data, error } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+
+    if (error) {
+      console.warn('[auth] Could not set session from URL', error.message);
+      return null;
+    }
+
+    return data.session;
+  } catch (error) {
+    console.warn('[auth] Failed to parse auth deep link', error);
+    return null;
+  }
+}
+
+let sessionFromUrlInFlight: Promise<Session | null> | null = null;
+let sessionFromUrlKey: string | null = null;
+
+async function establishSessionFromUrl(url: string): Promise<Session | null> {
+  if (!hasAuthParamsInUrl(url)) {
+    return null;
+  }
+
+  if (sessionFromUrlInFlight && sessionFromUrlKey === url) {
+    return sessionFromUrlInFlight;
+  }
+
+  sessionFromUrlKey = url;
+  sessionFromUrlInFlight = setSessionFromUrl(url).finally(() => {
+    sessionFromUrlInFlight = null;
+    sessionFromUrlKey = null;
+  });
+
+  return sessionFromUrlInFlight;
+}
+
+export async function ensureRecoverySession(url?: string | null): Promise<Session | null> {
+  if (url) {
+    const session = await establishSessionFromUrl(url);
+
+    if (session) {
+      return session;
+    }
+  }
+
+  return getCurrentSession();
+}
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  const redirectTo = getPasswordResetRedirectUrl();
+
+  if (__DEV__) {
+    console.warn(
+      '[auth] Password reset redirect URL:',
+      redirectTo,
+      '\nAdd this URL (or exp://**) to Supabase → Auth → URL Configuration → Redirect URLs.'
+    );
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    redirectTo,
+  });
+
+  if (error) {
+    throw mapSupabaseAuthError(error);
+  }
+}
+
+export async function updatePassword(password: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    throw mapSupabaseAuthError(error);
+  }
 }
 
 /**

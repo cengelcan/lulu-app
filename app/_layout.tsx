@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useNotificationResponse } from '@/hooks/use-notification-response';
+import { useAuthDeepLink } from '@/hooks/use-auth-deep-link';
 import { configureNotificationHandler } from '@/services/notifications';
 import { useLanguageStore } from '@/stores/language.store';
 
@@ -13,6 +14,7 @@ configureNotificationHandler();
 export default function RootLayout() {
   const loadLanguage = useLanguageStore((state) => state.loadLanguage);
   useNotificationResponse();
+  useAuthDeepLink();
 
   useEffect(() => {
     void loadLanguage();

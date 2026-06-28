@@ -1,9 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AuthFeedback } from '@/components/auth/AuthFeedback';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { SocialAuthSection } from '@/components/auth/SocialAuthSection';
 import { ThemedText } from '@/components/themed-text';
@@ -12,7 +13,11 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
-import { AuthError, type AuthErrorCode } from '@/services/auth';
+import {
+  AuthError,
+  type AuthErrorCode,
+  requestPasswordReset,
+} from '@/services/auth';
 import * as petStorage from '@/storage/pet.storage';
 import { usePetStore } from '@/stores/pet.store';
 import { useUserStore } from '@/stores/user.store';
@@ -48,6 +53,7 @@ export default function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   useEffect(() => {
     setMode(resolveAuthMode(modeParam));
@@ -136,6 +142,34 @@ export default function AuthScreen() {
     setConfirmPassword('');
   }, []);
 
+  const handleForgotPassword = useCallback(async () => {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      setErrorKey('auth.errors.emailRequired');
+      return;
+    }
+
+    if (!EMAIL_PATTERN.test(trimmedEmail)) {
+      setErrorKey('auth.errors.emailInvalid');
+      return;
+    }
+
+    setErrorKey(null);
+    setResetEmailSent(false);
+    setIsSubmitting(true);
+
+    try {
+      await requestPasswordReset(trimmedEmail);
+      setResetEmailSent(true);
+    } catch (error) {
+      const code: AuthErrorCode = error instanceof AuthError ? error.code : 'unknown';
+      setErrorKey(`auth.errors.${code}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [email, t]);
+
   return (
     <View style={styles.root}>
       <LinearGradient
@@ -178,6 +212,7 @@ export default function AuthScreen() {
               value={email}
               onChangeText={(value) => {
                 setErrorKey(null);
+                setResetEmailSent(false);
                 setEmail(value);
               }}
             />
@@ -217,12 +252,24 @@ export default function AuthScreen() {
                 onSubmitEditing={() => void handleSubmit()}
               />
             ) : (
-              <Pressable accessibilityRole="button" style={styles.forgotPassword}>
+              <Pressable
+                accessibilityRole="button"
+                disabled={isSubmitting}
+                onPress={() => void handleForgotPassword()}
+                style={styles.forgotPassword}>
                 <Text allowFontScaling style={[styles.forgotPasswordText, { color: brandAccentColor }]}>
                   {t('auth.forgotPassword')}
                 </Text>
               </Pressable>
             )}
+
+            {resetEmailSent ? (
+              <AuthFeedback
+                variant="info"
+                title={t('auth.resetPasswordTitle')}
+                message={t('auth.resetPasswordMessage')}
+              />
+            ) : null}
 
             {errorKey ? (
               <ThemedText lightColor={alertColor} darkColor={alertColor} style={styles.error}>

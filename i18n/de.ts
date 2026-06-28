@@ -99,6 +99,18 @@ export const de: Translations = {
     confirmEmailTitle: 'E-Mail bestätigen',
     confirmEmailMessage:
       'Wir haben dir einen Bestätigungslink gesendet. Bitte bestätige deine E-Mail und melde dich dann an.',
+    resetPasswordTitle: 'E-Mail prüfen',
+    resetPasswordMessage:
+      'Falls ein Konto mit dieser E-Mail existiert, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.',
+    resetPasswordScreenTitle: 'Neues Passwort wählen',
+    resetPasswordScreenSubtitle: 'Gib ein neues Passwort für dein Konto ein.',
+    resetPasswordButton: 'Passwort aktualisieren',
+    resetPasswordSuccessTitle: 'Passwort aktualisiert',
+    resetPasswordSuccessMessage:
+      'Dein Passwort wurde aktualisiert. Du kannst dich jetzt anmelden.',
+    resetPasswordInvalidLink:
+      'Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.',
+    newPasswordPlaceholder: 'Neues Passwort',
     errors: {
       emailRequired: 'Bitte gib deine E-Mail ein.',
       emailInvalid: 'Bitte gib eine gültige E-Mail-Adresse ein.',

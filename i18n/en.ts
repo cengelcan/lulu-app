@@ -99,6 +99,16 @@ export const en: Translations = {
     confirmEmailTitle: 'Confirm your email',
     confirmEmailMessage:
       'We sent you a confirmation link. Please confirm your email, then sign in.',
+    resetPasswordTitle: 'Check your email',
+    resetPasswordMessage:
+      'If an account exists for this email, we sent a link to reset your password.',
+    resetPasswordScreenTitle: 'Choose a new password',
+    resetPasswordScreenSubtitle: 'Enter a new password for your account.',
+    resetPasswordButton: 'Update password',
+    resetPasswordSuccessTitle: 'Password updated',
+    resetPasswordSuccessMessage: 'Your password has been updated. You can sign in now.',
+    resetPasswordInvalidLink: 'This reset link is invalid or has expired. Please request a new one.',
+    newPasswordPlaceholder: 'New password',
     errors: {
       emailRequired: 'Please enter your email.',
       emailInvalid: 'Please enter a valid email address.',

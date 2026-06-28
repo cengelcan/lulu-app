@@ -99,6 +99,15 @@ export type Translations = {
     toggleToSignInLink: string;
     confirmEmailTitle: string;
     confirmEmailMessage: string;
+    resetPasswordTitle: string;
+    resetPasswordMessage: string;
+    resetPasswordScreenTitle: string;
+    resetPasswordScreenSubtitle: string;
+    resetPasswordButton: string;
+    resetPasswordSuccessTitle: string;
+    resetPasswordSuccessMessage: string;
+    resetPasswordInvalidLink: string;
+    newPasswordPlaceholder: string;
     errors: {
       emailRequired: string;
       emailInvalid: string;

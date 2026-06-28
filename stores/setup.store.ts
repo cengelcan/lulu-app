@@ -20,11 +20,14 @@ type SetupDraftState = {
   name: string;
   ageGroup: PetAgeGroup | null;
   healthConditions: HealthCondition[];
+  photoUri: string | null;
+  photoUpload: { base64: string; mimeType: string } | null;
   setSpecies: (species: PetSpecies) => void;
   setBreed: (breed: string | null) => void;
   setName: (name: string) => void;
   setAgeGroup: (ageGroup: PetAgeGroup) => void;
   toggleHealthCondition: (condition: HealthCondition) => void;
+  setPhoto: (uri: string | null, upload?: { base64: string; mimeType: string } | null) => void;
   resetDraft: () => void;
 };
 
@@ -108,6 +111,8 @@ const initialDraft = {
   name: '',
   ageGroup: null,
   healthConditions: [] as HealthCondition[],
+  photoUri: null as string | null,
+  photoUpload: null as { base64: string; mimeType: string } | null,
 };
 
 export const useSetupStore = create<SetupDraftState>((set, get) => ({
@@ -142,6 +147,8 @@ export const useSetupStore = create<SetupDraftState>((set, get) => ({
 
     set({ healthConditions: [...withoutNone, condition] });
   },
+
+  setPhoto: (uri, upload = null) => set({ photoUri: uri, photoUpload: upload ?? null }),
 
   resetDraft: () => set(initialDraft),
 }));

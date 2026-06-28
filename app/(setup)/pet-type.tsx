@@ -1,9 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 
-import { SelectableOption } from '@/components/setup/selectable-option';
+import { PetSpeciesSelector } from '@/components/setup/PetSpeciesSelector';
 import { SetupScreen } from '@/components/setup/setup-screen';
-import { PET_SPECIES_OPTIONS } from '@/constants/check-in';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
 import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
@@ -30,7 +29,7 @@ export default function PetTypeScreen() {
       return;
     }
 
-    router.push(setupRoute('/(setup)/pet-name', mode));
+    router.push(setupRoute('/(setup)/pet-name-breed', mode));
   }, [mode, router, species]);
 
   return (
@@ -43,17 +42,14 @@ export default function PetTypeScreen() {
       onBack={showBack ? onBack : undefined}
       continueDisabled={!species}
       error={translateValidationError(t, error)}>
-      {PET_SPECIES_OPTIONS.map((option) => (
-        <SelectableOption
-          key={option.value}
-          label={getSpeciesLabel(option.value)}
-          selected={species === option.value}
-          onPress={() => {
-            setError(null);
-            setSpecies(option.value);
-          }}
-        />
-      ))}
+      <PetSpeciesSelector
+        selected={species}
+        getLabel={getSpeciesLabel}
+        onSelect={(value) => {
+          setError(null);
+          setSpecies(value);
+        }}
+      />
     </SetupScreen>
   );
 }

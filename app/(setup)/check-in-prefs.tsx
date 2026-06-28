@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { TimePickerField } from '@/components/ui/TimePickerField';
 import { useTranslation } from '@/hooks/use-translation';
+import { setupTotalSteps } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_REMINDER_TIME, type ReminderTime } from '@/types/reminder';
@@ -11,7 +12,8 @@ import { DEFAULT_REMINDER_TIME, type ReminderTime } from '@/types/reminder';
 export default function CheckInPrefsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { onBack } = useSetupScreenBack(6, 'initial');
+  const totalSteps = setupTotalSteps('initial');
+  const { onBack } = useSetupScreenBack(5, 'initial');
   const savedReminderTime = useNotificationStore((state) => state.reminderTime);
   const saveReminderTime = useNotificationStore((state) => state.saveReminderTime);
   const loadNotificationSettings = useNotificationStore((state) => state.loadNotificationSettings);
@@ -53,7 +55,8 @@ export default function CheckInPrefsScreen() {
 
   return (
     <SetupScreen
-      step={6}
+      step={5}
+      totalSteps={totalSteps}
       title={t('setup.checkInPrefs.title')}
       description={t('setup.checkInPrefs.description')}
       onContinue={() => void handleContinue()}

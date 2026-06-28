@@ -13,6 +13,7 @@ import {
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
+import { PetSpeciesSelector } from '@/components/setup/PetSpeciesSelector';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -24,7 +25,6 @@ import {
   PET_AGE_GROUP_OPTIONS,
   PET_SEX_OPTIONS,
   PET_SPAY_NEUTER_STATUS_OPTIONS,
-  PET_SPECIES_OPTIONS,
 } from '@/constants/check-in';
 import { getBreedOptionsForSpecies, isBreedValidForSpecies } from '@/constants/pet-breeds';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
@@ -551,21 +551,19 @@ export default function EditPetScreen() {
 
           <GroupedSection title={t('pet.sections.petType')}>
             <View style={styles.formSectionBody}>
-              {PET_SPECIES_OPTIONS.map((option) => (
-                <SelectableOption
-                  key={option.value}
-                  label={getSpeciesLabel(option.value)}
-                  selected={species === option.value}
-                  onPress={() => {
-                    setValidationError(null);
-                    clearError();
-                    if (breed && !isBreedValidForSpecies(breed, option.value)) {
-                      setBreed(null);
-                    }
-                    setSpecies(option.value);
-                  }}
-                />
-              ))}
+              <PetSpeciesSelector
+                selected={species}
+                getLabel={getSpeciesLabel}
+                disabled={isSaving}
+                onSelect={(value) => {
+                  setValidationError(null);
+                  clearError();
+                  if (breed && !isBreedValidForSpecies(breed, value)) {
+                    setBreed(null);
+                  }
+                  setSpecies(value);
+                }}
+              />
             </View>
           </GroupedSection>
 

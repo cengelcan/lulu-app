@@ -131,6 +131,27 @@ export const de: Translations = {
     },
   },
   setup: {
+    petNameBreed: {
+      title: 'Wie heißt dein Haustier?',
+      description: 'Gib einen Namen ein und wähle optional die Rasse.',
+      nameLabel: 'Name',
+      breedLabel: 'Rasse',
+      namePlaceholder: 'Name des Haustiers',
+    },
+    petAgeHealth: {
+      title: 'Alter & Gesundheit',
+      description: 'Hilf uns, Pflegetipps für dein Haustier zu personalisieren.',
+      ageLabel: 'Alter',
+      healthLabel: 'Gesundheitsprobleme',
+      healthOptionalHint: 'Optional. Wähle alle zutreffenden aus.',
+    },
+    petPhoto: {
+      title: 'Foto hinzufügen',
+      description: 'Ein Bild macht das Profil deines Haustiers komplett.',
+      hint: 'Du kannst dies überspringen und später ein Foto hinzufügen.',
+      addPhoto: 'Foto auswählen',
+      addPet: 'Haustier hinzufügen',
+    },
     petType: {
       title: 'Welche Art von Haustier hast du?',
       description: 'Wähle eine Option, um fortzufahren.',

@@ -8,10 +8,10 @@ import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-const DEFAULT_TOTAL_STEPS = 7;
+const DEFAULT_TOTAL_STEPS = 6;
 
 type SetupScreenProps = {
-  step: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  step: 1 | 2 | 3 | 4 | 5 | 6;
   totalSteps?: number;
   title: string;
   description?: string;

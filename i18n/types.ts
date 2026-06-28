@@ -128,6 +128,27 @@ export type Translations = {
     };
   };
   setup: {
+    petNameBreed: {
+      title: string;
+      description: string;
+      nameLabel: string;
+      breedLabel: string;
+      namePlaceholder: string;
+    };
+    petAgeHealth: {
+      title: string;
+      description: string;
+      ageLabel: string;
+      healthLabel: string;
+      healthOptionalHint: string;
+    };
+    petPhoto: {
+      title: string;
+      description: string;
+      hint: string;
+      addPhoto: string;
+      addPet: string;
+    };
     petType: { title: string; description: string };
     petName: { title: string; description: string; placeholder: string };
     petBreed: { title: string; description: string };

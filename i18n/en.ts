@@ -129,6 +129,27 @@ export const en: Translations = {
     },
   },
   setup: {
+    petNameBreed: {
+      title: "What's your pet's name?",
+      description: 'Give them a name and optionally choose their breed.',
+      nameLabel: 'Name',
+      breedLabel: 'Breed',
+      namePlaceholder: 'Pet name',
+    },
+    petAgeHealth: {
+      title: 'Age & health',
+      description: 'Help us personalize care tips for your pet.',
+      ageLabel: 'Age',
+      healthLabel: 'Health conditions',
+      healthOptionalHint: 'Optional. Select all that apply.',
+    },
+    petPhoto: {
+      title: 'Add a photo',
+      description: 'A picture makes your pet profile feel complete.',
+      hint: 'You can skip this and add a photo later.',
+      addPhoto: 'Choose photo',
+      addPet: 'Add Pet',
+    },
     petType: {
       title: 'What type of pet do you have?',
       description: 'Select one option to continue.',

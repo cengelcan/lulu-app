@@ -23,16 +23,19 @@ export default function NotificationPermissionScreen() {
   const { t } = useTranslation();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
-  const { onBack } = useSetupScreenBack(7, mode);
+  const { onBack } = useSetupScreenBack(6, mode);
 
   const species = useSetupStore((state) => state.species);
   const breed = useSetupStore((state) => state.breed);
   const name = useSetupStore((state) => state.name);
   const ageGroup = useSetupStore((state) => state.ageGroup);
   const healthConditions = useSetupStore((state) => state.healthConditions);
+  const photoUri = useSetupStore((state) => state.photoUri);
+  const photoUpload = useSetupStore((state) => state.photoUpload);
   const resetDraft = useSetupStore((state) => state.resetDraft);
 
   const createPet = usePetStore((state) => state.createPet);
+  const updatePet = usePetStore((state) => state.updatePet);
   const setActivePet = usePetStore((state) => state.setActivePet);
   const petIsLoading = usePetStore((state) => state.isLoading);
   const petError = usePetStore((state) => state.error);
@@ -50,7 +53,7 @@ export default function NotificationPermissionScreen() {
 
   const completeSetup = useCallback(
     async (permission: NotificationPermissionStatus) => {
-      const draft = { species, breed, name, ageGroup, healthConditions };
+      const draft = { species, breed, name, ageGroup, healthConditions, photoUri, photoUpload };
       const draftError = validateSetupDraft(draft);
 
       if (draftError) {
@@ -65,6 +68,7 @@ export default function NotificationPermissionScreen() {
       try {
         await finalizeInitialModePet(draft, permission, {
           createPet,
+          updatePet,
           setActivePet,
           savePermission,
           resetDraft,
@@ -84,9 +88,12 @@ export default function NotificationPermissionScreen() {
       clearNotificationError,
       clearPetError,
       createPet,
+      updatePet,
       setActivePet,
       healthConditions,
       name,
+      photoUri,
+      photoUpload,
       resetDraft,
       router,
       savePermission,
@@ -96,7 +103,7 @@ export default function NotificationPermissionScreen() {
 
   return (
     <SetupScreen
-      step={7}
+      step={6}
       totalSteps={totalSteps}
       title={t('setup.notifications.title')}
       description={t('setup.notifications.description')}

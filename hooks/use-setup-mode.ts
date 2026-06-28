@@ -3,10 +3,9 @@ import { type Href, useLocalSearchParams } from 'expo-router';
 export type SetupMode = 'initial' | 'add';
 
 type SetupRoutePath =
-  | '/(setup)/pet-name'
-  | '/(setup)/pet-breed'
-  | '/(setup)/pet-age'
-  | '/(setup)/health-conditions'
+  | '/(setup)/pet-name-breed'
+  | '/(setup)/pet-age-health'
+  | '/(setup)/pet-photo'
   | '/(setup)/check-in-prefs';
 
 const ADD_MODE_PARAM = 'add';
@@ -25,5 +24,5 @@ export function setupRoute(path: SetupRoutePath, mode: SetupMode): Href {
 }
 
 export function setupTotalSteps(mode: SetupMode): number {
-  return mode === 'add' ? 5 : 7;
+  return mode === 'add' ? 4 : 6;
 }

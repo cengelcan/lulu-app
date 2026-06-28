@@ -1,17 +1,16 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
-import { Fonts, Palette, Spacing, Typography } from '@/constants/theme';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Fonts, Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-const SPLASH_BG = require('@/assets/images/splash-screen-bg.png');
+const WELCOME_BG = require('@/assets/images/welcome-bg.png');
 const LULU_LOGO = require('@/assets/images/lulu-logo.png');
 const LOGO_SIZE = 259;
-const SPLASH_BG_HEIGHT_RATIO = 1.24;
-const SPLASH_BG_BOTTOM_OFFSET = 92;
-const FOOTER_ILLUSTRATION_SLOT_HEIGHT = 104;
 
 type WelcomeScreenProps = {
   appName: string;
@@ -37,22 +36,12 @@ export function WelcomeScreen({
   isLoading = false,
 }: WelcomeScreenProps) {
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const buttonTextColor = useThemeColor({}, 'primaryText');
 
   return (
     <View style={styles.root}>
-      <View style={styles.background}>
-        <Image
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-          source={SPLASH_BG}
-          style={styles.backgroundImage}
-          contentFit="cover"
-          contentPosition="bottom"
-        />
-      </View>
-
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.branding}>
+        <View style={styles.header}>
           <Image
             accessibilityLabel="Lulu"
             source={LULU_LOGO}
@@ -69,28 +58,47 @@ export function WelcomeScreen({
             {tagline}
             <Text style={{ color: brandAccentColor }}> •</Text>
           </Text>
+
+          <View style={styles.taglines}>
+            <Text allowFontScaling style={styles.taglineLine}>
+              {footerLine1}
+            </Text>
+
+            <Text allowFontScaling style={styles.taglineLine}>
+              {footerLine2Before}
+              <Text style={{ color: brandAccentColor }}>{footerLine2Accent}</Text>
+              {footerLine2After}
+            </Text>
+          </View>
         </View>
 
-        <View style={styles.footer}>
-          <View style={styles.illustrationSlot} />
-
-          <Text allowFontScaling style={styles.footerLine}>
-            {footerLine1}
-          </Text>
-
-          <Text allowFontScaling style={styles.footerLine}>
-            {footerLine2Before}
-            <Text style={{ color: brandAccentColor }}>{footerLine2Accent}</Text>
-            {footerLine2After}
-          </Text>
-
-          <Button
-            title={startButtonTitle}
-            accessibilityLabel={startButtonTitle}
-            onPress={onStart}
-            disabled={isLoading}
-            style={styles.startButton}
+        <View style={styles.scene}>
+          <Image
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            source={WELCOME_BG}
+            style={styles.sceneImage}
+            contentFit="cover"
+            contentPosition="bottom"
           />
+
+          <LinearGradient
+            colors={['#000000', 'rgba(0,0,0,0.65)', 'transparent']}
+            locations={[0, 0.45, 1]}
+            style={styles.sceneFade}
+            pointerEvents="none"
+          />
+
+          <View style={styles.footer}>
+            <Button
+              title={startButtonTitle}
+              accessibilityLabel={startButtonTitle}
+              onPress={onStart}
+              disabled={isLoading}
+              style={styles.startButton}
+              trailingIcon={<IconSymbol name="pawprint.fill" size={18} color={buttonTextColor} />}
+            />
+          </View>
         </View>
       </SafeAreaView>
     </View>
@@ -102,30 +110,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
-  background: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-  },
-  backgroundImage: {
-    position: 'absolute',
-    bottom: SPLASH_BG_BOTTOM_OFFSET,
-    width: '100%',
-    height: `${SPLASH_BG_HEIGHT_RATIO * 100}%`,
-  },
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
-    justifyContent: 'space-between',
   },
-  branding: {
+  header: {
     alignItems: 'center',
-    paddingTop: '12%',
-    gap: Spacing.md,
+    paddingTop: '8%',
+    gap: Spacing.xs,
   },
   logo: {
     width: LOGO_SIZE,
     height: LOGO_SIZE,
-    marginBottom: Spacing.xs,
   },
   appName: {
     color: Palette.brandAccentLight,
@@ -148,24 +144,42 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: 0.4,
   },
-  footer: {
+  taglines: {
     alignItems: 'center',
-    paddingBottom: Spacing.xl,
+    marginTop: Spacing.xxs,
     gap: Spacing.xxs,
   },
-  illustrationSlot: {
-    width: '100%',
-    height: FOOTER_ILLUSTRATION_SLOT_HEIGHT,
-  },
-  footerLine: {
+  taglineLine: {
     color: Palette.onDark,
     textAlign: 'center',
     fontSize: Typography.body.fontSize,
     lineHeight: Typography.body.lineHeight,
     fontWeight: '400',
   },
+  scene: {
+    flex: 1,
+    marginTop: Spacing.xl,
+    overflow: 'hidden',
+  },
+  sceneImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  sceneFade: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 120,
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: Spacing.lg,
+  },
   startButton: {
-    marginTop: Spacing.lg,
     width: '100%',
+    minHeight: 52,
+    borderRadius: Radius.pill,
   },
 });

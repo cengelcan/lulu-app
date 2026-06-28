@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { type Href, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 
 import { OnboardingScreen } from '@/components/onboarding/onboarding-screen';
@@ -21,7 +21,7 @@ export default function Onboarding4Screen() {
       return;
     }
 
-    router.replace({ pathname: '/(auth)', params: { mode: 'signUp' } });
+    router.replace('/(auth)?mode=signUp' as Href);
   }, [clearError, completeOnboarding, router]);
 
   return (

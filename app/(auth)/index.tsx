@@ -17,6 +17,12 @@ type AuthMode = 'signIn' | 'signUp';
 
 const PASSWORD_MIN_LENGTH = 6;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SIGN_UP_MODE_PARAM = 'signUp';
+
+function resolveAuthMode(modeParam?: string | string[]): AuthMode {
+  const value = Array.isArray(modeParam) ? modeParam[0] : modeParam;
+  return value === SIGN_UP_MODE_PARAM ? 'signUp' : 'signIn';
+}
 
 async function resolvePostAuthRoute(): Promise<Href> {
   const hasAnyPet = await petStorage.hasAnyPet();
@@ -25,23 +31,21 @@ async function resolvePostAuthRoute(): Promise<Href> {
 
 export default function AuthScreen() {
   const router = useRouter();
-  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
+  const { mode: modeParam } = useLocalSearchParams<{ mode?: string | string[] }>();
   const { t } = useTranslation();
 
   const signInWithEmail = useUserStore((state) => state.signInWithEmail);
   const signUpWithEmail = useUserStore((state) => state.signUpWithEmail);
   const loadPets = usePetStore((state) => state.loadPets);
 
-  const [mode, setMode] = useState<AuthMode>('signIn');
+  const [mode, setMode] = useState<AuthMode>(() => resolveAuthMode(modeParam));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (modeParam === 'signUp') {
-      setMode('signUp');
-    }
+    setMode(resolveAuthMode(modeParam));
   }, [modeParam]);
 
   const textColor = useThemeColor({}, 'text');

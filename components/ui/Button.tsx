@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BrandGradientFill } from '@/components/ui/BrandGradient';
 import { Radius, Spacing, Typography, type ThemeColor } from '@/constants/theme';
@@ -11,6 +11,7 @@ type ButtonProps = Omit<PressableProps, 'style'> & {
   title: string;
   variant?: ButtonVariant;
   style?: StyleProp<ViewStyle>;
+  trailingIcon?: React.ReactNode;
 };
 
 const variantStyles: Record<
@@ -43,7 +44,7 @@ const variantStyles: Record<
   },
 };
 
-export function Button({ title, variant = 'primary', disabled, style, onPress, ...rest }: ButtonProps) {
+export function Button({ title, variant = 'primary', disabled, style, trailingIcon, onPress, ...rest }: ButtonProps) {
   const tokens = variantStyles[variant];
   const backgroundColor = useThemeColor({}, tokens.background ?? 'background');
   const textColor = useThemeColor({}, tokens.text);
@@ -78,12 +79,15 @@ export function Button({ title, variant = 'primary', disabled, style, onPress, .
       ]}
       {...rest}>
       {tokens.gradient ? <BrandGradientFill /> : null}
-      <Text
-        allowFontScaling
-        maxFontSizeMultiplier={Typography.button.maxFontSizeMultiplier}
-        style={[styles.label, { color: textColor }]}>
-        {title}
-      </Text>
+      <View style={styles.content}>
+        <Text
+          allowFontScaling
+          maxFontSizeMultiplier={Typography.button.maxFontSizeMultiplier}
+          style={[styles.label, { color: textColor }]}>
+          {title}
+        </Text>
+        {trailingIcon}
+      </View>
     </Pressable>
   );
 }
@@ -102,6 +106,12 @@ const styles = StyleSheet.create({
   },
   bordered: {
     borderWidth: 1,
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
   },
   label: {
     ...Typography.button,

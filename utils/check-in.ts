@@ -3,7 +3,20 @@ import {
   CHECK_IN_NORMAL_VALUES,
   CHECK_IN_OPTIONS_BY_CATEGORY,
 } from '@/constants/check-in';
+import type { CheckInOptionTone } from '@/constants/check-in-theme';
 import type { CheckIn, CheckInCategory, CheckInFormState, CheckInFormValues } from '@/types/check-in';
+
+export function getCheckInOptionTone(category: CheckInCategory, value: string): CheckInOptionTone {
+  if (value === 'not_observed') {
+    return 'neutral';
+  }
+
+  if (value === CHECK_IN_NORMAL_VALUES[category]) {
+    return 'normal';
+  }
+
+  return 'abnormal';
+}
 
 export function isCheckInFormComplete(values: CheckInFormState): values is CheckInFormValues {
   return (

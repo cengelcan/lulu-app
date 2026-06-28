@@ -8,10 +8,23 @@ import {
   CHECK_IN_CATEGORIES,
   CHECK_IN_OPTIONS_BY_CATEGORY,
 } from '@/constants/check-in';
+import { CheckInTheme } from '@/constants/check-in-theme';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import type { CheckInCategory, CheckInFormState } from '@/types/check-in';
+import { getCheckInOptionTone } from '@/utils/check-in';
+
+const SEGMENTED_CATEGORIES = CHECK_IN_CATEGORIES.filter((category) => category.controlType === 'segmented');
+const SLIDER_CATEGORIES = CHECK_IN_CATEGORIES.filter((category) => category.controlType === 'slider');
+
+type MetricCardProps = {
+  children: React.ReactNode;
+};
+
+function MetricCard({ children }: MetricCardProps) {
+  return <View style={styles.metricCard}>{children}</View>;
+}
 
 type CheckInMetricRowProps = {
   category: (typeof CHECK_IN_CATEGORIES)[number];
@@ -20,7 +33,7 @@ type CheckInMetricRowProps = {
   disabled?: boolean;
 };
 
-export function CheckInMetricRow({ category, value, onChange, disabled = false }: CheckInMetricRowProps) {
+function SegmentedMetricRow({ category, value, onChange, disabled = false }: CheckInMetricRowProps) {
   const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -31,6 +44,7 @@ export function CheckInMetricRow({ category, value, onChange, disabled = false }
     icon: option.icon,
     label: t(`${category.optionsTranslationKey}.${option.value}`),
     accessibilityLabel: `${categoryLabel}, ${t(`${category.optionsTranslationKey}.${option.value}`)}`,
+    tone: getCheckInOptionTone(category.key, option.value),
   }));
 
   const statusText =
@@ -46,7 +60,61 @@ export function CheckInMetricRow({ category, value, onChange, disabled = false }
   };
 
   return (
-    <View style={[styles.row, category.controlType === 'segmented' && styles.rowSegmented]}>
+    <View style={styles.segmentedContent}>
+      <View style={styles.titleRow}>
+        <View style={[styles.iconCircle, { backgroundColor: `${category.iconColor}22` }]}>
+          <IconSymbol name={category.icon} size={20} color={category.iconColor} />
+        </View>
+        <ThemedText type="defaultSemiBold" style={styles.title} numberOfLines={1}>
+          {categoryLabel}
+        </ThemedText>
+      </View>
+
+      <ThemedText
+        lightColor={textSecondaryColor}
+        darkColor={textSecondaryColor}
+        style={styles.status}
+        numberOfLines={1}>
+        {statusText}
+      </ThemedText>
+
+      <CheckInIconSegmented
+        options={options}
+        value={value as (typeof options)[number]['value'] | null}
+        onChange={handleChange}
+      />
+    </View>
+  );
+}
+
+function SliderMetricRow({ category, value, onChange, disabled = false }: CheckInMetricRowProps) {
+  const { t } = useTranslation();
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  const categoryLabel = t(category.translationKey);
+  const rawOptions = CHECK_IN_OPTIONS_BY_CATEGORY[category.key];
+  const options = rawOptions.map((option) => ({
+    value: option.value,
+    icon: option.icon,
+    label: t(`${category.optionsTranslationKey}.${option.value}`),
+    accessibilityLabel: `${categoryLabel}, ${t(`${category.optionsTranslationKey}.${option.value}`)}`,
+    tone: getCheckInOptionTone(category.key, option.value),
+  }));
+
+  const statusText =
+    value !== null
+      ? t(`${category.statusTranslationKey}.${value}`)
+      : t('checkIn.progressCard.inProgressSubtitle');
+
+  const handleChange = (nextValue: string) => {
+    if (disabled) {
+      return;
+    }
+    onChange(nextValue);
+  };
+
+  return (
+    <View style={styles.sliderContent}>
       <View style={styles.left}>
         <View style={[styles.iconCircle, { backgroundColor: `${category.iconColor}22` }]}>
           <IconSymbol name={category.icon} size={20} color={category.iconColor} />
@@ -59,29 +127,21 @@ export function CheckInMetricRow({ category, value, onChange, disabled = false }
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.status}
-            numberOfLines={2}>
+            numberOfLines={1}>
             {statusText}
           </ThemedText>
         </View>
       </View>
 
-      <View style={[styles.control, category.controlType === 'segmented' && styles.controlSegmented]}>
-        {category.controlType === 'segmented' ? (
-          <CheckInIconSegmented
-            options={options}
-            value={value as (typeof options)[number]['value'] | null}
-            onChange={handleChange}
-            accentColor={category.iconColor}
-          />
-        ) : (
-          <CheckInSnapSlider
-            options={options.map((option) => ({ value: option.value, label: option.label }))}
-            value={value as (typeof options)[number]['value'] | null}
-            onChange={handleChange}
-            accentColor={category.iconColor}
-          />
-        )}
-      </View>
+      <CheckInSnapSlider
+        options={options.map((option) => ({
+          value: option.value,
+          label: option.label,
+          tone: option.tone,
+        }))}
+        value={value as (typeof options)[number]['value'] | null}
+        onChange={handleChange}
+      />
     </View>
   );
 }
@@ -98,30 +158,38 @@ export function DailyEssentialsCard({
   disabled = false,
 }: DailyEssentialsCardProps) {
   const { t } = useTranslation();
-  const surfaceColor = useThemeColor({}, 'surface');
-  const borderColor = useThemeColor({}, 'border');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
 
   return (
-    <View style={[styles.card, { backgroundColor: surfaceColor, borderColor }]}>
+    <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <View style={styles.sectionTitleRow}>
-          <IconSymbol name="doc.text.fill" size={18} color={brandAccentColor} />
-          <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
-            {t('checkIn.dailyEssentials')}
-          </ThemedText>
-        </View>
+        <IconSymbol name="doc.text.fill" size={18} color={brandAccentColor} />
+        <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+          {t('checkIn.dailyEssentials')}
+        </ThemedText>
       </View>
 
-      <View style={styles.metrics}>
-        {CHECK_IN_CATEGORIES.map((category) => (
-          <CheckInMetricRow
-            key={category.key}
-            category={category}
-            value={formValues[category.key]}
-            onChange={(nextValue) => onCategoryChange(category.key, nextValue)}
-            disabled={disabled}
-          />
+      <View style={styles.cards}>
+        {SEGMENTED_CATEGORIES.map((category) => (
+          <MetricCard key={category.key}>
+            <SegmentedMetricRow
+              category={category}
+              value={formValues[category.key]}
+              onChange={(nextValue) => onCategoryChange(category.key, nextValue)}
+              disabled={disabled}
+            />
+          </MetricCard>
+        ))}
+
+        {SLIDER_CATEGORIES.map((category) => (
+          <MetricCard key={category.key}>
+            <SliderMetricRow
+              category={category}
+              value={formValues[category.key]}
+              onChange={(nextValue) => onCategoryChange(category.key, nextValue)}
+              disabled={disabled}
+            />
+          </MetricCard>
         ))}
       </View>
     </View>
@@ -129,18 +197,10 @@ export function DailyEssentialsCard({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: Spacing.md,
-    gap: Spacing.lg,
+  section: {
+    gap: Spacing.md,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  sectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
@@ -148,24 +208,23 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...Typography.subtitle,
   },
-  metrics: {
-    gap: Spacing.xl,
+  cards: {
+    gap: Spacing.sm,
   },
-  row: {
-    gap: Spacing.md,
+  metricCard: {
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: CheckInTheme.glassBorder,
+    backgroundColor: CheckInTheme.glassSurface,
+    padding: Spacing.md,
   },
-  rowSegmented: {
+  segmentedContent: {
+    gap: Spacing.sm,
+  },
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: Spacing.sm,
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.sm,
-    flex: 1,
-    minWidth: 0,
   },
   iconCircle: {
     width: 40,
@@ -174,21 +233,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  textBlock: {
-    flex: 1,
-    gap: 2,
-  },
   title: {
     ...Typography.bodySemiBold,
+    flex: 1,
   },
   status: {
     ...Typography.caption,
   },
-  control: {
-    width: '100%',
+  sliderContent: {
+    gap: Spacing.lg,
   },
-  controlSegmented: {
-    width: 148,
-    flexShrink: 0,
+  left: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+  },
+  textBlock: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
   },
 });

@@ -75,7 +75,7 @@ export const CHECK_IN_CATEGORIES: {
   {
     key: 'appetite',
     icon: 'fork.knife',
-    iconColor: '#F97316',
+    iconColor: '#FDBA74',
     translationKey: 'checkIn.categories.appetite',
     optionsTranslationKey: 'checkIn.options.appetite',
     statusTranslationKey: 'checkIn.status.appetite',
@@ -84,7 +84,7 @@ export const CHECK_IN_CATEGORIES: {
   {
     key: 'waterIntake',
     icon: 'drop.fill',
-    iconColor: '#3B82F6',
+    iconColor: '#93C5FD',
     translationKey: 'checkIn.categories.waterIntake',
     optionsTranslationKey: 'checkIn.options.waterIntake',
     statusTranslationKey: 'checkIn.status.waterIntake',
@@ -93,7 +93,7 @@ export const CHECK_IN_CATEGORIES: {
   {
     key: 'poop',
     icon: 'leaf.fill',
-    iconColor: '#A16207',
+    iconColor: '#D6B36A',
     translationKey: 'checkIn.categories.poop',
     optionsTranslationKey: 'checkIn.options.poop',
     statusTranslationKey: 'checkIn.status.poop',
@@ -102,7 +102,7 @@ export const CHECK_IN_CATEGORIES: {
   {
     key: 'pee',
     icon: 'drop.triangle.fill',
-    iconColor: '#8B5CF6',
+    iconColor: '#C4B5FD',
     translationKey: 'checkIn.categories.pee',
     optionsTranslationKey: 'checkIn.options.pee',
     statusTranslationKey: 'checkIn.status.pee',
@@ -111,7 +111,7 @@ export const CHECK_IN_CATEGORIES: {
   {
     key: 'energy',
     icon: 'bolt.fill',
-    iconColor: '#EAB308',
+    iconColor: '#FDE68A',
     translationKey: 'checkIn.categories.energy',
     optionsTranslationKey: 'checkIn.options.energy',
     statusTranslationKey: 'checkIn.status.energy',
@@ -120,7 +120,7 @@ export const CHECK_IN_CATEGORIES: {
   {
     key: 'mood',
     icon: 'face.smiling',
-    iconColor: '#8B5CF6',
+    iconColor: '#C4B5FD',
     translationKey: 'checkIn.categories.mood',
     optionsTranslationKey: 'checkIn.options.mood',
     statusTranslationKey: 'checkIn.status.mood',

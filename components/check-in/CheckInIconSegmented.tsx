@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
+import { CheckInTheme, getCheckInToneColors, type CheckInOptionTone } from '@/constants/check-in-theme';
 import { Radius, Spacing } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -9,26 +10,22 @@ export type CheckInIconSegmentOption<T extends string> = {
   value: T;
   icon: IconSymbolName;
   accessibilityLabel: string;
+  tone?: CheckInOptionTone;
 };
 
 type CheckInIconSegmentedProps<T extends string> = {
   options: CheckInIconSegmentOption<T>[];
   value: T | null;
   onChange: (value: T) => void;
-  accentColor?: string;
 };
 
 export function CheckInIconSegmented<T extends string>({
   options,
   value,
   onChange,
-  accentColor,
 }: CheckInIconSegmentedProps<T>) {
-  const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const iconColor = useThemeColor({}, 'icon');
-  const selectedColor = accentColor ?? brandAccentColor;
 
   const handleSelect = (nextValue: T) => {
     if (nextValue === value) {
@@ -45,9 +42,10 @@ export function CheckInIconSegmented<T extends string>({
   return (
     <View
       accessibilityRole="radiogroup"
-      style={[styles.container, { backgroundColor: surfaceColor, borderColor }]}>
+      style={[styles.container, { borderColor }]}>
       {options.map((option) => {
         const isSelected = option.value === value;
+        const toneColors = option.tone ? getCheckInToneColors(option.tone) : null;
 
         return (
           <Pressable
@@ -58,13 +56,13 @@ export function CheckInIconSegmented<T extends string>({
             onPress={() => handleSelect(option.value)}
             style={({ pressed }) => [
               styles.segment,
-              isSelected && { backgroundColor: selectedColor },
+              isSelected && toneColors && { backgroundColor: toneColors.background },
               pressed && !isSelected && styles.segmentPressed,
             ]}>
             <IconSymbol
               name={option.icon}
               size={18}
-              color={isSelected ? '#FFFFFF' : iconColor}
+              color={isSelected && toneColors ? toneColors.foreground : iconColor}
             />
           </Pressable>
         );
@@ -78,6 +76,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: Radius.md,
     borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: CheckInTheme.toneNeutralBg,
     padding: Spacing.xxs,
     gap: Spacing.xxs,
   },

@@ -42,7 +42,7 @@ export function translate(
   const catalog = catalogs[language] ?? catalogs[DEFAULT_APP_LANGUAGE];
   const value = getNestedValue(catalog as unknown as Record<string, unknown>, key);
 
-  if (value) {
+  if (value !== undefined) {
     return interpolate(value, params);
   }
 
@@ -51,7 +51,7 @@ export function translate(
     key
   );
 
-  if (fallback) {
+  if (fallback !== undefined) {
     return interpolate(fallback, params);
   }
 

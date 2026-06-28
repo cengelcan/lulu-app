@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthFeedback } from '@/components/auth/AuthFeedback';
 import { AuthInput } from '@/components/auth/AuthInput';
+import { AuthLegalNotice } from '@/components/auth/AuthLegalNotice';
 import { SocialAuthSection } from '@/components/auth/SocialAuthSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -54,6 +55,7 @@ export default function AuthScreen() {
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [confirmEmailSent, setConfirmEmailSent] = useState(false);
 
   useEffect(() => {
     setMode(resolveAuthMode(modeParam));
@@ -106,7 +108,7 @@ export default function AuthScreen() {
         const { needsEmailConfirmation } = await signUpWithEmail(trimmedEmail, password);
 
         if (needsEmailConfirmation) {
-          Alert.alert(t('auth.confirmEmailTitle'), t('auth.confirmEmailMessage'));
+          setConfirmEmailSent(true);
           setMode('signIn');
           setPassword('');
           setConfirmPassword('');
@@ -140,6 +142,7 @@ export default function AuthScreen() {
     setMode((current) => (current === 'signIn' ? 'signUp' : 'signIn'));
     setErrorKey(null);
     setConfirmPassword('');
+    setConfirmEmailSent(false);
   }, []);
 
   const handleForgotPassword = useCallback(async () => {
@@ -213,6 +216,7 @@ export default function AuthScreen() {
               onChangeText={(value) => {
                 setErrorKey(null);
                 setResetEmailSent(false);
+                setConfirmEmailSent(false);
                 setEmail(value);
               }}
             />
@@ -263,6 +267,14 @@ export default function AuthScreen() {
               </Pressable>
             )}
 
+            {confirmEmailSent ? (
+              <AuthFeedback
+                variant="info"
+                title={t('auth.confirmEmailTitle')}
+                message={t('auth.confirmEmailMessage')}
+              />
+            ) : null}
+
             {resetEmailSent ? (
               <AuthFeedback
                 variant="info"
@@ -300,6 +312,8 @@ export default function AuthScreen() {
               </Text>
             </Text>
           </Pressable>
+
+          <AuthLegalNotice />
         </ScrollView>
       </SafeAreaView>
     </View>

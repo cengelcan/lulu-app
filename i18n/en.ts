@@ -109,6 +109,9 @@ export const en: Translations = {
     resetPasswordSuccessMessage: 'Your password has been updated. You can sign in now.',
     resetPasswordInvalidLink: 'This reset link is invalid or has expired. Please request a new one.',
     newPasswordPlaceholder: 'New password',
+    termsNoticePrefix: 'By continuing to use Lulu you agree to our ',
+    termsNoticeMiddle: ' and ',
+    termsNoticeSuffix: '',
     errors: {
       emailRequired: 'Please enter your email.',
       emailInvalid: 'Please enter a valid email address.',

@@ -108,6 +108,9 @@ export type Translations = {
     resetPasswordSuccessMessage: string;
     resetPasswordInvalidLink: string;
     newPasswordPlaceholder: string;
+    termsNoticePrefix: string;
+    termsNoticeMiddle: string;
+    termsNoticeSuffix: string;
     errors: {
       emailRequired: string;
       emailInvalid: string;

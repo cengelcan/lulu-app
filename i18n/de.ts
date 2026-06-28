@@ -111,6 +111,9 @@ export const de: Translations = {
     resetPasswordInvalidLink:
       'Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.',
     newPasswordPlaceholder: 'Neues Passwort',
+    termsNoticePrefix: 'Mit der Nutzung von Lulu stimmst du unseren ',
+    termsNoticeMiddle: ' und der ',
+    termsNoticeSuffix: ' zu.',
     errors: {
       emailRequired: 'Bitte gib deine E-Mail ein.',
       emailInvalid: 'Bitte gib eine gültige E-Mail-Adresse ein.',

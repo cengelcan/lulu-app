@@ -291,6 +291,10 @@ export default function EditPetScreen() {
   }, [canLeave, router]);
 
   const handleChangePhoto = useCallback(async () => {
+    if (!pet || isPickingPhoto || isSaving) {
+      return;
+    }
+
     setValidationError(null);
     clearError();
     setIsPickingPhoto(true);
@@ -300,7 +304,7 @@ export default function EditPetScreen() {
 
       if (!result.ok) {
         if (result.reason === 'permission_denied') {
-          setValidationError(t('pet.photoPermissionError'));
+          Alert.alert(t('profile.photoAccessTitle'), t('profile.photoAccessMessage'));
         }
         return;
       }
@@ -310,7 +314,7 @@ export default function EditPetScreen() {
       let nextPhotoUri = result.uri;
       const userId = useUserStore.getState().userId;
 
-      if (userId && pet && result.base64) {
+      if (userId && result.base64) {
         try {
           nextPhotoUri = await uploadPetPhoto(userId, pet.id, result.base64, result.mimeType);
         } catch (uploadError) {
@@ -319,10 +323,12 @@ export default function EditPetScreen() {
       }
 
       setPhotoUri(nextPhotoUri);
+    } catch {
+      Alert.alert(t('profile.couldNotSavePhoto'), t('common.tryAgain'));
     } finally {
       setIsPickingPhoto(false);
     }
-  }, [clearError, pet, t]);
+  }, [clearError, isPickingPhoto, isSaving, pet, t]);
 
   const handleSave = useCallback(async () => {
     if (!pet) {

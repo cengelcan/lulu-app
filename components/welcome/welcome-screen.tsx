@@ -9,7 +9,7 @@ import { Fonts, Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 const WELCOME_BG = require('@/assets/images/welcome-bg.png');
-const LULU_LOGO = require('@/assets/images/lulu-logo.png');
+const LULU_LOGO = require('@/assets/images/lulu-logo-transparent.png');
 const LOGO_SIZE = 259;
 
 type WelcomeScreenProps = {
@@ -40,7 +40,28 @@ export function WelcomeScreen({
 
   return (
     <View style={styles.root}>
-      <SafeAreaView style={styles.safeArea}>
+      <Image
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        source={WELCOME_BG}
+        style={styles.backgroundImage}
+        contentFit="cover"
+        contentPosition="bottom center"
+      />
+
+      <LinearGradient
+        colors={[
+          'rgba(0,0,0,0.78)',
+          'rgba(0,0,0,0.35)',
+          'rgba(0,0,0,0.2)',
+          'rgba(0,0,0,0.72)',
+        ]}
+        locations={[0, 0.32, 0.62, 1]}
+        style={styles.gradientOverlay}
+        pointerEvents="none"
+      />
+
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <Image
             accessibilityLabel="Lulu"
@@ -72,33 +93,17 @@ export function WelcomeScreen({
           </View>
         </View>
 
-        <View style={styles.scene}>
-          <Image
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-            source={WELCOME_BG}
-            style={styles.sceneImage}
-            contentFit="cover"
-            contentPosition="bottom"
-          />
+        <View style={styles.spacer} />
 
-          <LinearGradient
-            colors={['#000000', 'rgba(0,0,0,0.65)', 'transparent']}
-            locations={[0, 0.45, 1]}
-            style={styles.sceneFade}
-            pointerEvents="none"
+        <View style={styles.footer}>
+          <Button
+            title={startButtonTitle}
+            accessibilityLabel={startButtonTitle}
+            onPress={onStart}
+            disabled={isLoading}
+            style={styles.startButton}
+            trailingIcon={<IconSymbol name="pawprint.fill" size={18} color={buttonTextColor} />}
           />
-
-          <View style={styles.footer}>
-            <Button
-              title={startButtonTitle}
-              accessibilityLabel={startButtonTitle}
-              onPress={onStart}
-              disabled={isLoading}
-              style={styles.startButton}
-              trailingIcon={<IconSymbol name="pawprint.fill" size={18} color={buttonTextColor} />}
-            />
-          </View>
         </View>
       </SafeAreaView>
     </View>
@@ -108,7 +113,19 @@ export function WelcomeScreen({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#000000',
+    overflow: 'hidden',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   safeArea: {
     flex: 1,
@@ -116,12 +133,13 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    paddingTop: '8%',
+    paddingTop: Spacing.md,
     gap: Spacing.xs,
   },
   logo: {
     width: LOGO_SIZE,
     height: LOGO_SIZE,
+    backgroundColor: 'transparent',
   },
   appName: {
     color: Palette.brandAccentLight,
@@ -156,26 +174,11 @@ const styles = StyleSheet.create({
     lineHeight: Typography.body.lineHeight,
     fontWeight: '400',
   },
-  scene: {
+  spacer: {
     flex: 1,
-    marginTop: Spacing.xl,
-    overflow: 'hidden',
-  },
-  sceneImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  sceneFade: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 120,
   },
   footer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: Spacing.lg,
+    paddingBottom: Spacing.sm,
   },
   startButton: {
     width: '100%',

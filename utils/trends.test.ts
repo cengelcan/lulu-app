@@ -49,7 +49,7 @@ describe('buildDashboardTrends', () => {
   it('calculates appetite and energy averages from recent check-ins', () => {
     const checkIns = [
       createCheckIn({ date: '2026-06-20', appetite: 'normal', energy: 'normal' }),
-      createCheckIn({ date: '2026-06-22', appetite: 'reduced', energy: 'low' }),
+      createCheckIn({ date: '2026-06-22', appetite: 'less', energy: 'low' }),
     ];
 
     const trends = buildDashboardTrends(checkIns, [], REFERENCE_DATE);

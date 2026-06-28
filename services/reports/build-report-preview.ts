@@ -37,8 +37,8 @@ function getCheckInFieldValue(checkIn: CheckIn, category: CheckInCategory, t: Tr
   return t(`${definition.optionsTranslationKey}.${checkIn[category]}`);
 }
 
-function getCheckInEmoji(category: CheckInCategory): string {
-  return CHECK_IN_CATEGORIES.find((item) => item.key === category)?.emoji ?? '•';
+function getCheckInEmoji(_category: CheckInCategory): string {
+  return '•';
 }
 
 function formatRecordTime(createdAt: string, locale: string): string {

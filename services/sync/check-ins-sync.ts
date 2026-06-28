@@ -1,14 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import * as checkInStorage from '@/storage/check-in.storage';
-import type {
-  Appetite,
-  CheckIn,
-  Energy,
-  Mood,
-  Pee,
-  Poop,
-  WaterIntake,
-} from '@/types/check-in';
+import type { CheckIn } from '@/types/check-in';
 
 type RemoteCheckInRow = {
   id: string;
@@ -47,15 +39,113 @@ function fromRemoteRow(row: RemoteCheckInRow): CheckIn {
     id: row.id,
     petId: row.pet_id,
     date: row.date,
-    appetite: row.appetite as Appetite,
-    waterIntake: (row.water_intake as WaterIntake | null) ?? 'normal',
-    energy: row.energy as Energy,
-    mood: (row.mood as Mood | null) ?? 'normal',
-    pee: (row.pee as Pee | null) ?? 'normal',
-    poop: (row.poop as Poop | null) ?? 'normal',
+    appetite: normalizeLegacyAppetite(row.appetite),
+    waterIntake: normalizeLegacyWaterIntake(row.water_intake),
+    energy: normalizeLegacyEnergy(row.energy),
+    mood: normalizeLegacyMood(row.mood),
+    pee: normalizeLegacyPee(row.pee),
+    poop: normalizeLegacyPoop(row.poop),
     notes: row.notes,
     createdAt: row.created_at,
   };
+}
+
+function normalizeLegacyAppetite(value: string): CheckIn['appetite'] {
+  switch (value) {
+    case 'less':
+    case 'normal':
+    case 'more':
+      return value;
+    case 'no_appetite':
+    case 'reduced':
+    case 'not_eating':
+      return 'less';
+    case 'increased':
+    case 'good':
+      return 'more';
+    default:
+      return 'normal';
+  }
+}
+
+function normalizeLegacyWaterIntake(value: string | null): CheckIn['waterIntake'] {
+  switch (value) {
+    case 'less':
+    case 'normal':
+    case 'more':
+      return value;
+    case 'very_low':
+    case 'low':
+      return 'less';
+    case 'high':
+    case 'very_high':
+      return 'more';
+    default:
+      return 'normal';
+  }
+}
+
+function normalizeLegacyEnergy(value: string): CheckIn['energy'] {
+  switch (value) {
+    case 'low':
+    case 'normal':
+    case 'high':
+      return value;
+    case 'very_low':
+      return 'low';
+    case 'very_high':
+      return 'high';
+    default:
+      return 'normal';
+  }
+}
+
+function normalizeLegacyMood(value: string | null): CheckIn['mood'] {
+  switch (value) {
+    case 'low':
+    case 'normal':
+    case 'high':
+      return value;
+    case 'restless':
+    case 'irritable':
+      return 'low';
+    case 'happy':
+    case 'playful':
+      return 'high';
+    default:
+      return 'normal';
+  }
+}
+
+function normalizeLegacyPee(value: string | null): CheckIn['pee'] {
+  switch (value) {
+    case 'not_observed':
+    case 'normal':
+    case 'not_normal':
+      return value;
+    case 'straining':
+    case 'less_than_normal':
+    case 'more_than_normal':
+      return 'not_normal';
+    default:
+      return 'normal';
+  }
+}
+
+function normalizeLegacyPoop(value: string | null): CheckIn['poop'] {
+  switch (value) {
+    case 'not_observed':
+    case 'normal':
+    case 'not_normal':
+      return value;
+    case 'diarrhea':
+    case 'soft':
+    case 'hard':
+    case 'none':
+      return 'not_normal';
+    default:
+      return 'normal';
+  }
 }
 
 export async function fetchRemoteCheckIns(userId: string): Promise<CheckIn[]> {

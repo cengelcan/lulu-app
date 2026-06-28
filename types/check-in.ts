@@ -1,21 +1,16 @@
-export type Appetite = 'no_appetite' | 'reduced' | 'normal' | 'increased';
+export type Appetite = 'less' | 'normal' | 'more';
 
-export type WaterIntake = 'very_low' | 'low' | 'normal' | 'high' | 'very_high';
+export type WaterIntake = 'less' | 'normal' | 'more';
 
-export type Energy = 'very_low' | 'low' | 'normal' | 'high' | 'very_high';
+export type Energy = 'low' | 'normal' | 'high';
 
-export type Mood = 'restless' | 'irritable' | 'normal' | 'happy' | 'playful';
+export type Mood = 'low' | 'normal' | 'high';
 
-export type Pee =
-  | 'straining'
-  | 'less_than_normal'
-  | 'normal'
-  | 'more_than_normal'
-  | 'not_observed';
+export type Pee = 'not_observed' | 'normal' | 'not_normal';
 
-export type Poop = 'diarrhea' | 'soft' | 'normal' | 'hard' | 'none' | 'not_observed';
+export type Poop = 'not_observed' | 'normal' | 'not_normal';
 
-export type CheckInCategory = 'appetite' | 'waterIntake' | 'energy' | 'mood' | 'pee' | 'poop';
+export type CheckInCategory = 'appetite' | 'waterIntake' | 'poop' | 'pee' | 'energy' | 'mood';
 
 export type CheckIn = {
   id: string;

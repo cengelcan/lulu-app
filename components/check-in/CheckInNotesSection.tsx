@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -20,68 +19,42 @@ export function CheckInNotesSection({
   onChangeNotes,
 }: CheckInNotesSectionProps) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(notes.length > 0);
 
   const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
   const primaryColor = useThemeColor({}, 'primary');
-
-  if (!expanded) {
-    return (
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => setExpanded(true)}
-        style={({ pressed }) => [styles.expandRow, { opacity: pressed ? 0.7 : 1 }]}>
-        <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.expandLabel}>
-          {t('checkIn.notesExpand')}
-        </ThemedText>
-      </Pressable>
-    );
-  }
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
 
   return (
     <View style={styles.section}>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => setExpanded(false)}
-        style={({ pressed }) => [styles.collapseRow, { opacity: pressed ? 0.7 : 1 }]}>
-        <ThemedText type="subtitle">{t('checkIn.notesTitle')}</ThemedText>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.collapseLabel}>
-          {t('checkIn.notesCollapse')}
-        </ThemedText>
-      </Pressable>
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.subtitle}>
-        {t('checkIn.notesSubtitle')}
-      </ThemedText>
-      <TextInput
-        accessibilityLabel={t('checkIn.notesTitle')}
-        multiline
-        placeholder={t('checkIn.notesPlaceholder')}
-        placeholderTextColor={textSecondaryColor}
-        style={[
-          styles.input,
-          {
-            color: textColor,
-            backgroundColor: surfaceColor,
-            borderColor: isOverLimit ? primaryColor : borderColor,
-          },
-        ]}
-        textAlignVertical="top"
-        value={notes}
-        onChangeText={onChangeNotes}
-      />
+      <View style={styles.titleRow}>
+        <IconSymbol name="doc.text.fill" size={18} color={brandAccentColor} />
+        <ThemedText type="defaultSemiBold">{t('checkIn.notesTitle')}</ThemedText>
+      </View>
+      <View style={styles.inputWrap}>
+        <TextInput
+          accessibilityLabel={t('checkIn.notesTitle')}
+          multiline
+          placeholder={t('checkIn.notesPlaceholder')}
+          placeholderTextColor={textSecondaryColor}
+          style={[
+            styles.input,
+            {
+              color: textColor,
+              backgroundColor: surfaceColor,
+              borderColor: isOverLimit ? primaryColor : borderColor,
+            },
+          ]}
+          textAlignVertical="top"
+          value={notes}
+          onChangeText={onChangeNotes}
+        />
+        <View style={styles.pencilIcon} pointerEvents="none">
+          <IconSymbol name="pencil" size={16} color={textSecondaryColor} />
+        </View>
+      </View>
       <ThemedText
         accessibilityLiveRegion="polite"
         accessibilityLabel={`${notes.length} of ${CHECK_IN_NOTES_MAX_LENGTH}`}
@@ -95,29 +68,16 @@ export function CheckInNotesSection({
 }
 
 const styles = StyleSheet.create({
-  expandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    paddingVertical: Spacing.sm,
-  },
-  expandLabel: {
-    ...Typography.body,
-  },
   section: {
     gap: Spacing.sm,
   },
-  collapseRow: {
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: Spacing.sm,
   },
-  collapseLabel: {
-    ...Typography.caption,
-  },
-  subtitle: {
-    ...Typography.body,
+  inputWrap: {
+    position: 'relative',
   },
   input: {
     ...Typography.body,
@@ -125,7 +85,13 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
-    minHeight: 120,
+    paddingRight: Spacing.xl,
+    minHeight: 100,
+  },
+  pencilIcon: {
+    position: 'absolute',
+    right: Spacing.md,
+    bottom: Spacing.md,
   },
   counter: {
     ...Typography.caption,

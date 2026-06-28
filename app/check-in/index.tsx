@@ -1,16 +1,18 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CheckInCategorySection } from '@/components/check-in/CheckInCategorySection';
+import { CheckInDatePicker, CheckInHeader } from '@/components/check-in/CheckInHeader';
 import { CheckInNotesSection } from '@/components/check-in/CheckInNotesSection';
-import { CheckInProgress } from '@/components/check-in/CheckInProgress';
+import { CheckInProgressCard } from '@/components/check-in/CheckInProgressCard';
+import { DailyEssentialsCard } from '@/components/check-in/DailyEssentialsCard';
 import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/Button';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES, CHECK_IN_NOTES_MAX_LENGTH } from '@/constants/check-in';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
-import { Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -50,6 +52,7 @@ function getTodayDateString(): string {
 
 export default function CheckInScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { date: dateParam } = useLocalSearchParams<{ date?: string | string[] }>();
 
@@ -73,9 +76,13 @@ export default function CheckInScreen() {
   const [poop, setPoop] = useState<Poop | null>(null);
   const [notes, setNotes] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const primaryTextColor = useThemeColor({}, 'primaryText');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const backgroundColor = useThemeColor({}, 'background');
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
   const selectedDate = useMemo(() => {
@@ -191,6 +198,17 @@ export default function CheckInScreen() {
     clearCheckInError();
   }, [clearCheckInError]);
 
+  const handleDateChange = useCallback(
+    (date: string) => {
+      if (!date || date === selectedDate) {
+        return;
+      }
+
+      router.setParams({ date });
+    },
+    [router, selectedDate]
+  );
+
   const handleSave = useCallback(async () => {
     if (!pet || isFutureDate || isReadOnly) {
       return;
@@ -261,15 +279,6 @@ export default function CheckInScreen() {
     (isReadOnly ? t('checkIn.deceasedReadOnly') : null) ??
     (isFutureDate ? t('checkIn.futureDateError') : null);
 
-  const categoryState = {
-    appetite: { value: appetite, onChange: setAppetite },
-    waterIntake: { value: waterIntake, onChange: setWaterIntake },
-    energy: { value: energy, onChange: setEnergy },
-    mood: { value: mood, onChange: setMood },
-    pee: { value: pee, onChange: setPee },
-    poop: { value: poop, onChange: setPoop },
-  } as const;
-
   const handleCategorySelect = (category: (typeof CHECK_IN_CATEGORIES)[number]['key'], value: string) => {
     if (isReadOnly) {
       return;
@@ -300,6 +309,20 @@ export default function CheckInScreen() {
     }
   };
 
+  const headerRight = useCallback(
+    () => (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('checkIn.title')}
+        hitSlop={8}
+        onPress={() => setDatePickerVisible(true)}
+        style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
+        <IconSymbol name="calendar" size={22} color={brandAccentColor} />
+      </Pressable>
+    ),
+    [brandAccentColor, t]
+  );
+
   if (petIsLoading || !pet) {
     return (
       <>
@@ -324,32 +347,30 @@ export default function CheckInScreen() {
           ...STACK_BACK_ONLY_OPTIONS,
           headerShown: true,
           title: t('checkIn.title'),
+          headerRight,
         }}
       />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
-        <View style={styles.body}>
-          <View style={styles.header}>
-            <ThemedText type="title">{screenTitle}</ThemedText>
-            <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
-              style={styles.description}>
-              {isUpdating ? t('checkIn.subtitleUpdate') : t('checkIn.subtitle')}
-            </ThemedText>
-            <CheckInProgress completedCount={completedCount} totalCount={CHECK_IN_CATEGORIES.length} />
-          </View>
+        <View style={[styles.body, { paddingBottom: insets.bottom + 88 }]}>
+          <CheckInHeader
+            petName={pet.name}
+            petPhotoUri={pet.photoUri}
+            screenTitle={screenTitle}
+            selectedDate={selectedDate}
+            onOpenDatePicker={() => setDatePickerVisible(true)}
+          />
 
-          {CHECK_IN_CATEGORIES.map((category) => (
-            <CheckInCategorySection
-              key={category.key}
-              emoji={category.emoji}
-              category={category.key}
-              titleTranslationKey={category.translationKey}
-              optionsTranslationKey={category.optionsTranslationKey}
-              selected={categoryState[category.key].value}
-              onSelect={(value) => handleCategorySelect(category.key, value)}
-            />
-          ))}
+          <CheckInProgressCard
+            formValues={formValues}
+            completedCount={completedCount}
+            totalCount={CHECK_IN_CATEGORIES.length}
+          />
+
+          <DailyEssentialsCard
+            formValues={formValues}
+            onCategoryChange={handleCategorySelect}
+            disabled={isReadOnly}
+          />
 
           <CheckInNotesSection
             notes={notes}
@@ -362,9 +383,7 @@ export default function CheckInScreen() {
               setNotes(value);
             }}
           />
-        </View>
 
-        <View style={styles.footer}>
           {errorMessage ? (
             <ThemedText
               lightColor={textSecondaryColor}
@@ -373,16 +392,52 @@ export default function CheckInScreen() {
               {errorMessage}
             </ThemedText>
           ) : null}
-
-          <Button
-            title={saveButtonTitle}
-            onPress={() => void handleSave()}
-            disabled={
-              !isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly
-            }
-          />
         </View>
       </ScreenContainer>
+
+      <View
+        style={[
+          styles.footer,
+          {
+            paddingBottom: Math.max(insets.bottom, Spacing.md),
+            backgroundColor,
+          },
+        ]}>
+        <Pressable
+          accessibilityRole="button"
+          disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly}
+          onPress={() => void handleSave()}
+          style={({ pressed }) => [
+            styles.saveButton,
+            {
+              backgroundColor: brandAccentColor,
+              opacity:
+                !isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly
+                  ? 0.45
+                  : pressed
+                    ? 0.85
+                    : 1,
+            },
+          ]}>
+          <View style={styles.saveIconCircle}>
+            <IconSymbol name="checkmark" size={16} color={brandAccentColor} />
+          </View>
+          <ThemedText
+            lightColor={primaryTextColor}
+            darkColor={primaryTextColor}
+            style={styles.saveLabel}>
+            {saveButtonTitle}
+          </ThemedText>
+        </Pressable>
+      </View>
+
+      <CheckInDatePicker
+        selectedDate={selectedDate}
+        onDateChange={handleDateChange}
+        disabled={isReadOnly}
+        visible={datePickerVisible}
+        onClose={() => setDatePickerVisible(false)}
+      />
     </>
   );
 }
@@ -390,30 +445,48 @@ export default function CheckInScreen() {
 const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
-    justifyContent: 'space-between',
   },
   body: {
-    flex: 1,
     gap: Spacing.xl,
     paddingTop: Spacing.sm,
-  },
-  header: {
-    gap: Spacing.sm,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  description: {
-    ...Typography.body,
-  },
-  footer: {
-    gap: Spacing.sm,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.md,
-  },
   error: {
     textAlign: 'center',
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+  },
+  saveButton: {
+    minHeight: 52,
+    borderRadius: Radius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+  },
+  saveIconCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: Radius.full,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveLabel: {
+    ...Typography.button,
+    color: '#FFFFFF',
   },
 });

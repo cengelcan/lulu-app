@@ -27,15 +27,17 @@ type CheckInRow = {
 
 function normalizeAppetite(value: string): Appetite {
   switch (value) {
-    case 'good':
-      return 'increased';
-    case 'not_eating':
-      return 'no_appetite';
+    case 'less':
+    case 'normal':
+    case 'more':
+      return value;
     case 'no_appetite':
     case 'reduced':
-    case 'normal':
+    case 'not_eating':
+      return 'less';
     case 'increased':
-      return value;
+    case 'good':
+      return 'more';
     default:
       return 'normal';
   }
@@ -43,56 +45,65 @@ function normalizeAppetite(value: string): Appetite {
 
 function normalizeEnergy(value: string): Energy {
   switch (value) {
-    case 'high':
-      return 'high';
     case 'low':
-      return 'low';
-    case 'very_low':
     case 'normal':
-    case 'very_high':
+    case 'high':
       return value;
+    case 'very_low':
+      return 'low';
+    case 'very_high':
+      return 'high';
     default:
       return 'normal';
   }
 }
 
 function normalizeWaterIntake(value: string | null): WaterIntake {
-  if (
-    value === 'very_low' ||
-    value === 'low' ||
-    value === 'normal' ||
-    value === 'high' ||
-    value === 'very_high'
-  ) {
-    return value;
+  switch (value) {
+    case 'less':
+    case 'normal':
+    case 'more':
+      return value;
+    case 'very_low':
+    case 'low':
+      return 'less';
+    case 'high':
+    case 'very_high':
+      return 'more';
+    default:
+      return 'normal';
   }
-
-  return 'normal';
 }
 
 function normalizeMood(value: string | null): Mood {
-  if (
-    value === 'restless' ||
-    value === 'irritable' ||
-    value === 'normal' ||
-    value === 'happy' ||
-    value === 'playful'
-  ) {
-    return value;
+  switch (value) {
+    case 'low':
+    case 'normal':
+    case 'high':
+      return value;
+    case 'restless':
+    case 'irritable':
+      return 'low';
+    case 'happy':
+    case 'playful':
+      return 'high';
+    default:
+      return 'normal';
   }
-
-  return 'normal';
 }
 
 function normalizePee(value: string | null, symptom: string | null): Pee {
-  if (
-    value === 'straining' ||
-    value === 'less_than_normal' ||
-    value === 'normal' ||
-    value === 'more_than_normal' ||
-    value === 'not_observed'
-  ) {
-    return value;
+  switch (value) {
+    case 'not_observed':
+    case 'normal':
+    case 'not_normal':
+      return value;
+    case 'straining':
+    case 'less_than_normal':
+    case 'more_than_normal':
+      return 'not_normal';
+    default:
+      break;
   }
 
   if (symptom === 'none' || symptom === null) {
@@ -103,19 +114,22 @@ function normalizePee(value: string | null, symptom: string | null): Pee {
 }
 
 function normalizePoop(value: string | null, symptom: string | null): Poop {
-  if (
-    value === 'diarrhea' ||
-    value === 'soft' ||
-    value === 'normal' ||
-    value === 'hard' ||
-    value === 'none' ||
-    value === 'not_observed'
-  ) {
-    return value;
+  switch (value) {
+    case 'not_observed':
+    case 'normal':
+    case 'not_normal':
+      return value;
+    case 'diarrhea':
+    case 'soft':
+    case 'hard':
+    case 'none':
+      return 'not_normal';
+    default:
+      break;
   }
 
   if (symptom === 'diarrhea') {
-    return 'diarrhea';
+    return 'not_normal';
   }
 
   if (symptom === 'none' || symptom === null) {

@@ -90,11 +90,20 @@ export const usePetStore = create<PetState>((set, get) => ({
         return;
       }
 
-      useCheckInStore.getState().clearCheckIns();
-      await petStorage.setActivePet(id);
+      const isSameActivePet = get().activePetId === id;
+
+      if (!isSameActivePet) {
+        useCheckInStore.getState().clearCheckIns();
+        await petStorage.setActivePet(id);
+      }
+
       set({ pets, pet, activePetId: pet.id, isLoading: false });
-      await syncCheckInReminderSchedule({ petName: pet.name });
-      await syncPetReminderNotificationSchedule();
+
+      if (!isSameActivePet) {
+        await useCheckInStore.getState().loadCheckIns(pet.id);
+        await syncCheckInReminderSchedule({ petName: pet.name });
+        await syncPetReminderNotificationSchedule();
+      }
     } catch (error) {
       set({
         isLoading: false,
@@ -105,12 +114,17 @@ export const usePetStore = create<PetState>((set, get) => ({
   },
 
   setActivePet: async (petId) => {
+    if (get().activePetId === petId) {
+      return;
+    }
+
     set({ error: null });
     useCheckInStore.getState().clearCheckIns();
 
     try {
       const pet = await petStorage.setActivePet(petId);
       set({ pet, activePetId: pet.id });
+      await useCheckInStore.getState().loadCheckIns(pet.id);
 
       // Never schedule check-in reminders for a deceased pet (e.g. when opening
       // its memorial profile temporarily makes it the active context).

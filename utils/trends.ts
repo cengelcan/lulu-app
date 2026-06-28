@@ -6,18 +6,15 @@ import { formatLocalDate } from '@/utils/date';
 export const TREND_WINDOW_DAYS = 30;
 
 const APPETITE_SCORES: Record<Appetite, number> = {
-  no_appetite: 0,
-  reduced: 40,
+  less: 40,
   normal: 100,
-  increased: 90,
+  more: 90,
 };
 
 const ENERGY_SCORES: Record<Energy, number> = {
-  very_low: 0,
   low: 30,
   normal: 100,
   high: 85,
-  very_high: 75,
 };
 
 export type TrendMetricKind = 'weight' | 'appetite' | 'energy';

@@ -116,6 +116,7 @@ export type Translations = {
     subtitle: string;
     subtitleUpdate: string;
     progress: string;
+    dailyEssentials: string;
     notesTitle: string;
     notesSubtitle: string;
     notesPlaceholder: string;
@@ -127,6 +128,16 @@ export type Translations = {
     validationNotesLength: string;
     futureDateError: string;
     deceasedReadOnly: string;
+    progressCard: {
+      completed: string;
+      completedSubtitle: string;
+      completedLabel: string;
+      inProgress: string;
+      inProgressSubtitle: string;
+      attention: string;
+      attentionSubtitle: string;
+      percentComplete: string;
+    };
     categories: {
       appetite: string;
       waterIntake: string;
@@ -134,6 +145,14 @@ export type Translations = {
       mood: string;
       pee: string;
       poop: string;
+    };
+    status: {
+      appetite: PetOptionMap;
+      waterIntake: PetOptionMap;
+      energy: PetOptionMap;
+      mood: PetOptionMap;
+      pee: PetOptionMap;
+      poop: PetOptionMap;
     };
     options: {
       appetite: PetOptionMap;

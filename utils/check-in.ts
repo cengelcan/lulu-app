@@ -62,6 +62,20 @@ export function getAbnormalCheckInFields(checkIn: CheckIn): AbnormalCheckInField
   return abnormal;
 }
 
+export function getAbnormalCheckInFieldsFromForm(values: CheckInFormState): AbnormalCheckInField[] {
+  if (!isCheckInFormComplete(values)) {
+    return [];
+  }
+
+  return getAbnormalCheckInFields({
+    id: '',
+    petId: '',
+    date: '',
+    createdAt: '',
+    ...values,
+  });
+}
+
 export function getCheckInCategoryOptions(category: CheckInCategory) {
   return CHECK_IN_OPTIONS_BY_CATEGORY[category];
 }

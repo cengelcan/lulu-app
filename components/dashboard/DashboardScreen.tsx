@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import { useEffect, useMemo } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
@@ -85,6 +85,15 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
 
     void loadCheckIns(pet.id);
   }, [loadCheckIns, pet?.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const activePetId = usePetStore.getState().pet?.id;
+      if (activePetId) {
+        void loadCheckIns(activePetId);
+      }
+    }, [loadCheckIns])
+  );
 
   useEffect(() => {
     if (!pet?.id) {

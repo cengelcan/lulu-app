@@ -3,9 +3,10 @@ import type { Router } from 'expo-router';
 import { uploadPetPhoto } from '@/services/sync/pets-sync';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
 import { useUserStore } from '@/stores/user.store';
-import type { HealthCondition, Pet, PetAgeGroup, PetSpecies } from '@/types/pet';
+import type { HealthCondition, Pet, PetSpecies } from '@/types/pet';
+import { derivePetAgeGroupFromBirthDate } from '@/utils/pet-age';
 import {
-  validateAgeGroup,
+  validateBirthDate,
   validatePetName,
   validateSpecies,
 } from '@/stores/setup.store';
@@ -19,7 +20,7 @@ export type SetupDraft = {
   species: PetSpecies | null;
   breed: string | null;
   name: string;
-  ageGroup: PetAgeGroup | null;
+  birthDate: string;
   healthConditions: HealthCondition[];
   photoUri?: string | null;
   photoUpload?: SetupPhotoUpload | null;
@@ -37,7 +38,7 @@ export function validateSetupDraft(draft: SetupDraft): string | null {
   return (
     validatePetName(draft.name) ??
     validateSpecies(draft.species) ??
-    validateAgeGroup(draft.ageGroup)
+    validateBirthDate(draft.birthDate)
   );
 }
 
@@ -52,8 +53,9 @@ function buildPetFromDraft(draft: SetupDraft): Pet {
     name: draft.name.trim(),
     species: draft.species!,
     breed: draft.breed,
-    ageGroup: draft.ageGroup!,
+    ageGroup: derivePetAgeGroupFromBirthDate(draft.birthDate)!,
     healthConditions: draft.healthConditions.length > 0 ? draft.healthConditions : ['none'],
+    birthDate: draft.birthDate.trim(),
     photoUri: draft.photoUri ?? null,
     status: 'active',
     createdAt: new Date().toISOString(),

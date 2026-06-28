@@ -1,3 +1,4 @@
+import type { PetAgeGroup } from '@/types/pet';
 import { parseLocalDate } from '@/utils/date';
 
 export type PetAgeParts = {
@@ -53,4 +54,72 @@ export function formatPetAgeFromBirthDate(
   }
 
   return `${years}y ${months}mo`;
+}
+
+export function derivePetAgeGroupFromBirthDate(
+  birthDate: string,
+  referenceDate: Date = new Date()
+): PetAgeGroup | null {
+  const parts = getPetAgeParts(birthDate, referenceDate);
+  if (!parts) {
+    return null;
+  }
+
+  const totalMonths = parts.years * 12 + parts.months;
+
+  if (totalMonths < 12) {
+    return 'under_1_year';
+  }
+
+  if (parts.years <= 3) {
+    return '1_3_years';
+  }
+
+  if (parts.years <= 7) {
+    return '4_7_years';
+  }
+
+  if (parts.years <= 12) {
+    return '8_12_years';
+  }
+
+  return '13_plus_years';
+}
+
+type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
+
+export function formatSetupPetAgeHint(
+  birthDate: string,
+  petName: string,
+  t: TranslateFn
+): string | null {
+  const parts = getPetAgeParts(birthDate);
+  if (!parts) {
+    return null;
+  }
+
+  const name = petName.trim() || t('setup.petAgeHealth.ageHintFallbackName');
+  const { years, months } = parts;
+
+  if (years === 0 && months === 0) {
+    return t('setup.petAgeHealth.ageHintNewborn', { name });
+  }
+
+  if (years === 0) {
+    if (months === 1) {
+      return t('setup.petAgeHealth.ageHintOneMonth', { name });
+    }
+
+    return t('setup.petAgeHealth.ageHintMonths', { name, months });
+  }
+
+  if (months === 0) {
+    if (years === 1) {
+      return t('setup.petAgeHealth.ageHintOneYear', { name });
+    }
+
+    return t('setup.petAgeHealth.ageHintYears', { name, years });
+  }
+
+  return t('setup.petAgeHealth.ageHintYearsMonths', { name, years, months });
 }

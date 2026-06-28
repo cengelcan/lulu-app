@@ -140,9 +140,21 @@ export type Translations = {
     petAgeHealth: {
       title: string;
       description: string;
-      ageLabel: string;
+      birthDateLabel: string;
+      birthDatePlaceholder: string;
+      birthDateAccessibilityLabel: string;
       healthLabel: string;
       healthOptionalHint: string;
+      healthPlaceholder: string;
+      healthNoResults: string;
+      healthAccessibilityLabel: string;
+      ageHintFallbackName: string;
+      ageHintNewborn: string;
+      ageHintOneMonth: string;
+      ageHintMonths: string;
+      ageHintOneYear: string;
+      ageHintYears: string;
+      ageHintYearsMonths: string;
     };
     petPhoto: {
       title: string;
@@ -694,6 +706,7 @@ export type Translations = {
       nameMaxLength: string;
       speciesRequired: string;
       ageGroupRequired: string;
+      birthDateRequired: string;
       invalidDate: string;
       colorMaxLength: string;
       ownerNameMaxLength: string;

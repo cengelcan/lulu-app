@@ -24,7 +24,7 @@ export default function PetPhotoScreen() {
   const species = useSetupStore((state) => state.species);
   const breed = useSetupStore((state) => state.breed);
   const name = useSetupStore((state) => state.name);
-  const ageGroup = useSetupStore((state) => state.ageGroup);
+  const birthDate = useSetupStore((state) => state.birthDate);
   const healthConditions = useSetupStore((state) => state.healthConditions);
   const photoUri = useSetupStore((state) => state.photoUri);
   const photoUpload = useSetupStore((state) => state.photoUpload);
@@ -79,7 +79,7 @@ export default function PetPhotoScreen() {
       species,
       breed,
       name,
-      ageGroup,
+      birthDate,
       healthConditions,
       photoUri,
       photoUpload,
@@ -107,7 +107,7 @@ export default function PetPhotoScreen() {
       // Store sets error state.
     }
   }, [
-    ageGroup,
+    birthDate,
     breed,
     clearPetError,
     createPet,
@@ -133,7 +133,7 @@ export default function PetPhotoScreen() {
       species,
       breed,
       name,
-      ageGroup,
+      birthDate,
       healthConditions,
       photoUri,
       photoUpload,
@@ -146,7 +146,7 @@ export default function PetPhotoScreen() {
     setValidationError(null);
     router.push(setupRoute('/(setup)/check-in-prefs', mode));
   }, [
-    ageGroup,
+    birthDate,
     breed,
     handleContinueAdd,
     healthConditions,

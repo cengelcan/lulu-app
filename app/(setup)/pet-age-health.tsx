@@ -3,36 +3,31 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { PetAgeHealthForm } from '@/components/setup/PetAgeHealthForm';
 import { SetupScreen } from '@/components/setup/setup-screen';
-import { HEALTH_CONDITION_OPTIONS, PET_AGE_GROUP_OPTIONS } from '@/constants/check-in';
+import { HEALTH_CONDITION_OPTIONS } from '@/constants/check-in';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
 import { setupRoute, setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
-import { useSetupStore, validateAgeGroup } from '@/stores/setup.store';
+import { useSetupStore, validateBirthDate } from '@/stores/setup.store';
+import { formatSetupPetAgeHint } from '@/utils/pet-age';
 import { translateValidationError } from '@/utils/translate-error';
 
 export default function PetAgeHealthScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { getAgeGroupLabel, getHealthConditionLabel } = usePetDisplay();
+  const { getHealthConditionLabel } = usePetDisplay();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
   const { onBack } = useSetupScreenBack(3, mode);
 
-  const ageGroup = useSetupStore((state) => state.ageGroup);
+  const name = useSetupStore((state) => state.name);
+  const species = useSetupStore((state) => state.species);
+  const birthDate = useSetupStore((state) => state.birthDate);
   const healthConditions = useSetupStore((state) => state.healthConditions);
-  const setAgeGroup = useSetupStore((state) => state.setAgeGroup);
+  const setBirthDate = useSetupStore((state) => state.setBirthDate);
   const toggleHealthCondition = useSetupStore((state) => state.toggleHealthCondition);
+  const clearHealthConditions = useSetupStore((state) => state.clearHealthConditions);
   const [error, setError] = useState<string | null>(null);
-
-  const ageOptions = useMemo(
-    () =>
-      PET_AGE_GROUP_OPTIONS.map((option) => ({
-        value: option.value,
-        label: getAgeGroupLabel(option.value),
-      })),
-    [getAgeGroupLabel]
-  );
 
   const healthOptions = useMemo(
     () =>
@@ -43,15 +38,20 @@ export default function PetAgeHealthScreen() {
     [getHealthConditionLabel]
   );
 
+  const ageHint = useMemo(
+    () => (birthDate.trim() ? formatSetupPetAgeHint(birthDate, name, t) : null),
+    [birthDate, name, t]
+  );
+
   const handleContinue = useCallback(() => {
-    const validationError = validateAgeGroup(ageGroup);
+    const validationError = validateBirthDate(birthDate);
     if (validationError) {
       setError(validationError);
       return;
     }
 
     router.push(setupRoute('/(setup)/pet-photo', mode));
-  }, [ageGroup, mode, router]);
+  }, [birthDate, mode, router]);
 
   return (
     <SetupScreen
@@ -61,21 +61,28 @@ export default function PetAgeHealthScreen() {
       description={t('setup.petAgeHealth.description')}
       onContinue={handleContinue}
       onBack={onBack}
-      continueDisabled={!ageGroup}
+      continueDisabled={!birthDate.trim()}
       error={translateValidationError(t, error)}>
       <PetAgeHealthForm
-        ageLabel={t('setup.petAgeHealth.ageLabel')}
+        species={species}
+        birthDateLabel={t('setup.petAgeHealth.birthDateLabel')}
+        birthDatePlaceholder={t('setup.petAgeHealth.birthDatePlaceholder')}
+        birthDateAccessibilityLabel={t('setup.petAgeHealth.birthDateAccessibilityLabel')}
+        ageHint={ageHint}
         healthLabel={t('setup.petAgeHealth.healthLabel')}
         healthOptionalHint={t('setup.petAgeHealth.healthOptionalHint')}
-        ageGroup={ageGroup}
+        healthPlaceholder={t('setup.petAgeHealth.healthPlaceholder')}
+        healthNoResultsLabel={t('setup.petAgeHealth.healthNoResults')}
+        healthAccessibilityLabel={t('setup.petAgeHealth.healthAccessibilityLabel')}
+        birthDate={birthDate}
         healthConditions={healthConditions}
-        ageOptions={ageOptions}
         healthOptions={healthOptions}
-        onAgeGroupChange={(value) => {
+        onBirthDateChange={(value) => {
           setError(null);
-          setAgeGroup(value);
+          setBirthDate(value);
         }}
         onToggleHealthCondition={toggleHealthCondition}
+        onClearHealthConditions={clearHealthConditions}
       />
     </SetupScreen>
   );

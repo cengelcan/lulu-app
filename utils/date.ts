@@ -92,6 +92,20 @@ export function formatCheckInTitleDate(dateString: string, locale?: string): str
   return `${weekday}, ${day} ${month}`;
 }
 
+export function formatFullTitleDate(dateString: string, locale?: string): string {
+  const parsed = parseLocalDate(dateString);
+  if (!parsed) {
+    return dateString;
+  }
+
+  const weekday = parsed.toLocaleDateString(locale, { weekday: 'long' });
+  const day = parsed.getDate();
+  const month = parsed.toLocaleDateString(locale, { month: 'short' });
+  const year = parsed.getFullYear();
+
+  return `${weekday}, ${day} ${month} ${year}`;
+}
+
 export function formatMemorialDate(dateString: string, locale = 'en-US'): string {
   const parsed = new Date(dateString);
   if (Number.isNaN(parsed.getTime())) {

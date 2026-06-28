@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 import { isBreedValidForSpecies } from '@/constants/pet-breeds';
 import { isValidLocalDateString } from '@/utils/date';
+import { getPetAgeParts } from '@/utils/pet-age';
 
 import {
   PET_COLOR_MAX_LENGTH,
@@ -18,15 +19,16 @@ type SetupDraftState = {
   species: PetSpecies | null;
   breed: string | null;
   name: string;
-  ageGroup: PetAgeGroup | null;
+  birthDate: string;
   healthConditions: HealthCondition[];
   photoUri: string | null;
   photoUpload: { base64: string; mimeType: string } | null;
   setSpecies: (species: PetSpecies) => void;
   setBreed: (breed: string | null) => void;
   setName: (name: string) => void;
-  setAgeGroup: (ageGroup: PetAgeGroup) => void;
+  setBirthDate: (birthDate: string) => void;
   toggleHealthCondition: (condition: HealthCondition) => void;
+  clearHealthConditions: () => void;
   setPhoto: (uri: string | null, upload?: { base64: string; mimeType: string } | null) => void;
   resetDraft: () => void;
 };
@@ -56,6 +58,24 @@ export function validateSpecies(species: PetSpecies | null): string | null {
 export function validateAgeGroup(ageGroup: PetAgeGroup | null): string | null {
   if (!ageGroup) {
     return 'pet.validation.ageGroupRequired';
+  }
+
+  return null;
+}
+
+export function validateBirthDate(birthDate: string): string | null {
+  const trimmed = birthDate.trim();
+
+  if (!trimmed) {
+    return 'pet.validation.birthDateRequired';
+  }
+
+  if (!isValidLocalDateString(trimmed)) {
+    return 'pet.validation.invalidDate';
+  }
+
+  if (!getPetAgeParts(trimmed)) {
+    return 'pet.validation.invalidDate';
   }
 
   return null;
@@ -109,7 +129,7 @@ const initialDraft = {
   species: null,
   breed: null as string | null,
   name: '',
-  ageGroup: null,
+  birthDate: '',
   healthConditions: [] as HealthCondition[],
   photoUri: null as string | null,
   photoUpload: null as { base64: string; mimeType: string } | null,
@@ -128,7 +148,7 @@ export const useSetupStore = create<SetupDraftState>((set, get) => ({
 
   setName: (name) => set({ name }),
 
-  setAgeGroup: (ageGroup) => set({ ageGroup }),
+  setBirthDate: (birthDate) => set({ birthDate }),
 
   toggleHealthCondition: (condition) => {
     const { healthConditions } = get();
@@ -147,6 +167,8 @@ export const useSetupStore = create<SetupDraftState>((set, get) => ({
 
     set({ healthConditions: [...withoutNone, condition] });
   },
+
+  clearHealthConditions: () => set({ healthConditions: [] }),
 
   setPhoto: (uri, upload = null) => set({ photoUri: uri, photoUpload: upload ?? null }),
 

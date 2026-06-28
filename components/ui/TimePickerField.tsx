@@ -1,11 +1,11 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { IOS_PICKER_HEIGHT, IOS_PICKER_WIDTH, IosPickerSheet } from '@/components/ui/IosPickerSheet';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { ReminderTime } from '@/types/reminder';
@@ -135,32 +135,20 @@ export function TimePickerField({
       ) : null}
 
       {Platform.OS === 'ios' ? (
-        <Modal animationType="slide" transparent visible={showPicker} onRequestClose={closePicker}>
-          <Pressable style={styles.backdrop} onPress={closePicker}>
-            <Pressable
-              style={[styles.sheet, { backgroundColor: surfaceColor }]}
-              onPress={(event) => event.stopPropagation()}>
-              <View style={[styles.sheetHeader, { borderBottomColor: borderColor }]}>
-                <View style={styles.headerSpacer} />
-                <ThemedText type="defaultSemiBold">Select Time</ThemedText>
-                <Pressable accessibilityRole="button" hitSlop={8} onPress={handleIosDone}>
-                  <ThemedText type="defaultSemiBold">Done</ThemedText>
-                </Pressable>
-              </View>
-              <DateTimePicker
-                display="spinner"
-                mode="time"
-                themeVariant="dark"
-                value={pickerDate}
-                onChange={handleIosChange}
-                style={{ backgroundColor }}
-              />
-              <View style={styles.sheetFooter}>
-                <Button title="Done" onPress={handleIosDone} />
-              </View>
-            </Pressable>
-          </Pressable>
-        </Modal>
+        <IosPickerSheet
+          visible={showPicker}
+          title="Select Time"
+          onClose={closePicker}
+          onDone={handleIosDone}>
+          <DateTimePicker
+            display="spinner"
+            mode="time"
+            themeVariant="dark"
+            value={pickerDate}
+            onChange={handleIosChange}
+            style={{ width: IOS_PICKER_WIDTH, height: IOS_PICKER_HEIGHT, backgroundColor }}
+          />
+        </IosPickerSheet>
       ) : null}
     </>
   );
@@ -192,30 +180,5 @@ const styles = StyleSheet.create({
   },
   rowValue: {
     ...Typography.body,
-  },
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  sheet: {
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    paddingBottom: Spacing.lg,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  headerSpacer: {
-    width: 48,
-  },
-  sheetFooter: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
   },
 });

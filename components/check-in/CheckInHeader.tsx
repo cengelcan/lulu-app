@@ -1,11 +1,11 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { IOS_PICKER_HEIGHT, IOS_PICKER_WIDTH, IosPickerSheet } from '@/components/ui/IosPickerSheet';
 import { CheckInTheme } from '@/constants/check-in-theme';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -30,10 +30,7 @@ export function CheckInDatePicker({
 }: CheckInDatePickerProps) {
   const [pickerDate, setPickerDate] = useState(() => parseLocalDate(selectedDate) ?? getTodayStart());
 
-  const surfaceColor = useThemeColor({}, 'surface');
-  const borderColor = useThemeColor({}, 'border');
   const backgroundColor = useThemeColor({}, 'background');
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const handleAndroidChange = (event: DateTimePickerEvent, date?: Date) => {
     onClose();
@@ -67,41 +64,26 @@ export function CheckInDatePicker({
   }
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable
-          style={[styles.sheet, { backgroundColor: surfaceColor }]}
-          onPress={(event) => event.stopPropagation()}>
-          <View style={[styles.sheetHeader, { borderBottomColor: borderColor }]}>
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={onClose}>
-              <ThemedText lightColor={textSecondaryColor} darkColor={textSecondaryColor}>
-                Cancel
-              </ThemedText>
-            </Pressable>
-            <ThemedText type="defaultSemiBold">Select Date</ThemedText>
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={handleIosDone}>
-              <ThemedText type="defaultSemiBold">Done</ThemedText>
-            </Pressable>
-          </View>
-          <DateTimePicker
-            display="spinner"
-            maximumDate={getTodayStart()}
-            mode="date"
-            themeVariant="dark"
-            value={pickerDate}
-            onChange={(_event, date) => {
-              if (date) {
-                setPickerDate(date);
-              }
-            }}
-            style={{ backgroundColor }}
-          />
-          <View style={styles.sheetFooter}>
-            <Button title="Done" onPress={handleIosDone} />
-          </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
+    <IosPickerSheet
+      visible={visible}
+      title="Select Date"
+      leftAction={{ label: 'Cancel', onPress: onClose }}
+      onClose={onClose}
+      onDone={handleIosDone}>
+      <DateTimePicker
+        display="spinner"
+        maximumDate={getTodayStart()}
+        mode="date"
+        themeVariant="dark"
+        value={pickerDate}
+        onChange={(_event, date) => {
+          if (date) {
+            setPickerDate(date);
+          }
+        }}
+        style={{ width: IOS_PICKER_WIDTH, height: IOS_PICKER_HEIGHT, backgroundColor }}
+      />
+    </IosPickerSheet>
   );
 }
 
@@ -200,27 +182,5 @@ const styles = StyleSheet.create({
   },
   dateText: {
     ...Typography.body,
-  },
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  sheet: {
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    paddingBottom: Spacing.lg,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  sheetFooter: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
   },
 });

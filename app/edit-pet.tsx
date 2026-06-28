@@ -682,6 +682,7 @@ export default function EditPetScreen() {
               <DatePickerField
                 accessibilityLabel={t('pet.fields.birthDate')}
                 disabled={isSaving}
+                displayFormat="full"
                 placeholder={t('pet.fields.birthDatePlaceholder')}
                 value={birthDate}
                 onChange={(nextValue) => {

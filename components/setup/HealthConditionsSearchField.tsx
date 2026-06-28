@@ -6,14 +6,16 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import type { HealthCondition } from '@/types/pet';
 
-type BreedSearchFieldProps = {
-  breed: string | null;
-  breedOptions: { value: string; label: string }[];
+type HealthConditionsSearchFieldProps = {
+  healthConditions: HealthCondition[];
+  healthOptions: { value: HealthCondition; label: string }[];
   placeholder: string;
   noResultsLabel: string;
   accessibilityLabel: string;
-  onBreedChange: (breed: string | null) => void;
+  onToggleHealthCondition: (condition: HealthCondition) => void;
+  onClearHealthConditions: () => void;
 };
 
 const RESULTS_MAX_HEIGHT = 220;
@@ -23,14 +25,15 @@ function normalizeForSearch(value: string): string {
   return value.trim().toLocaleLowerCase();
 }
 
-export function BreedSearchField({
-  breed,
-  breedOptions,
+export function HealthConditionsSearchField({
+  healthConditions,
+  healthOptions,
   placeholder,
   noResultsLabel,
   accessibilityLabel,
-  onBreedChange,
-}: BreedSearchFieldProps) {
+  onToggleHealthCondition,
+  onClearHealthConditions,
+}: HealthConditionsSearchFieldProps) {
   const inputRef = useRef<TextInput>(null);
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -46,73 +49,65 @@ export function BreedSearchField({
   const brandAccentGlow = useThemeColor({}, 'brandAccentGlow');
   const primaryTextColor = useThemeColor({}, 'primaryText');
 
-  const selectedLabel = useMemo(
-    () => breedOptions.find((option) => option.value === breed)?.label ?? '',
-    [breed, breedOptions]
-  );
+  const selectedLabels = useMemo(() => {
+    const activeConditions = healthConditions.filter((condition) => condition !== 'none');
+    return activeConditions
+      .map((condition) => healthOptions.find((option) => option.value === condition)?.label ?? '')
+      .filter(Boolean)
+      .join(', ');
+  }, [healthConditions, healthOptions]);
 
   useEffect(() => {
     if (!focused) {
-      setQuery(selectedLabel);
+      setQuery(selectedLabels);
     }
-  }, [focused, selectedLabel]);
+  }, [focused, selectedLabels]);
 
   const filteredOptions = useMemo(() => {
-    const search = normalizeForSearch(focused ? query : selectedLabel);
+    const search = normalizeForSearch(focused ? query : selectedLabels);
     if (!search) {
-      return breedOptions;
+      return healthOptions;
     }
 
-    return breedOptions.filter((option) => normalizeForSearch(option.label).includes(search));
-  }, [breedOptions, focused, query, selectedLabel]);
+    return healthOptions.filter((option) => normalizeForSearch(option.label).includes(search));
+  }, [focused, healthOptions, query, selectedLabels]);
 
   const showResults = focused;
-  const isActive = focused || Boolean(breed);
+  const hasSelection = healthConditions.some((condition) => condition !== 'none');
+  const isActive = focused || hasSelection;
 
   const handleFocus = () => {
     setFocused(true);
-    setQuery(selectedLabel);
+    setQuery('');
   };
 
   const handleBlur = () => {
     setTimeout(() => {
       setFocused(false);
-      setQuery(selectedLabel);
+      setQuery(selectedLabels);
     }, 150);
   };
 
   const handleChangeText = (text: string) => {
     setQuery(text);
-
-    if (!text.trim()) {
-      onBreedChange(null);
-      return;
-    }
-
-    if (breed && text !== selectedLabel) {
-      onBreedChange(null);
-    }
   };
 
   const handleClear = () => {
-    onBreedChange(null);
+    onClearHealthConditions();
     setQuery('');
     inputRef.current?.focus();
   };
 
-  const handleSelect = (value: string, label: string) => {
+  const handleToggle = (condition: HealthCondition) => {
     if (process.env.EXPO_OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
-    onBreedChange(value);
-    setQuery(label);
-    setFocused(false);
-    inputRef.current?.blur();
+    onToggleHealthCondition(condition);
   };
 
   const handleClose = () => {
-    setQuery(selectedLabel);
+    setQuery(selectedLabels);
     setFocused(false);
     inputRef.current?.blur();
   };
@@ -153,16 +148,16 @@ export function BreedSearchField({
           placeholderTextColor={textSecondaryColor}
           returnKeyType="done"
           style={[styles.input, { color: textColor }]}
-          value={query}
+          value={focused ? query : selectedLabels}
           onBlur={handleBlur}
           onChangeText={handleChangeText}
           onFocus={handleFocus}
         />
 
-        {breed && !focused ? (
+        {hasSelection && !focused ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Clear breed"
+            accessibilityLabel="Clear health conditions"
             hitSlop={8}
             onPress={handleClear}
             style={({ pressed }) => [styles.trailingAction, { opacity: pressed ? 0.65 : 1 }]}>
@@ -191,7 +186,7 @@ export function BreedSearchField({
               style={styles.resultsScroll}
               contentContainerStyle={styles.resultsContent}>
               {filteredOptions.map((option, index) => {
-                const selected = breed === option.value;
+                const selected = healthConditions.includes(option.value);
                 const isLast = index === filteredOptions.length - 1;
 
                 return (
@@ -199,7 +194,7 @@ export function BreedSearchField({
                     key={option.value}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
-                    onPress={() => handleSelect(option.value, option.label)}
+                    onPress={() => handleToggle(option.value)}
                     style={({ pressed }) => [
                       styles.resultItem,
                       !isLast && {

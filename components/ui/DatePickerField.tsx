@@ -1,12 +1,14 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/Button';
+import { IOS_PICKER_HEIGHT, IOS_PICKER_WIDTH, IosPickerSheet } from '@/components/ui/IosPickerSheet';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { formatCheckInTitleDate, formatLocalDate, getTodayStart, parseLocalDate } from '@/utils/date';
+import { useTranslation } from '@/hooks/use-translation';
+import { formatCheckInTitleDate, formatFullTitleDate, formatLocalDate, getTodayStart, parseLocalDate } from '@/utils/date';
+import { getLocaleTag } from '@/utils/locale';
 
 type DatePickerFieldProps = {
   accessibilityLabel: string;
@@ -17,18 +19,27 @@ type DatePickerFieldProps = {
   /** Defaults to today. Pass `null` to allow any future date. */
   maximumDate?: Date | null;
   minimumDate?: Date | null;
+  /** `full` includes the year, e.g. "Saturday, 28 Jun 2026". */
+  displayFormat?: 'short' | 'full';
 };
 
 function getPickerDate(value: string): Date {
   return parseLocalDate(value) ?? getTodayStart();
 }
 
-function formatDisplayValue(value: string, placeholder: string): string {
+function formatDisplayValue(
+  value: string,
+  placeholder: string,
+  displayFormat: 'short' | 'full',
+  locale?: string
+): string {
   if (!value.trim()) {
     return placeholder;
   }
 
-  return formatCheckInTitleDate(value);
+  return displayFormat === 'full'
+    ? formatFullTitleDate(value, locale)
+    : formatCheckInTitleDate(value, locale);
 }
 
 export function DatePickerField({
@@ -39,7 +50,10 @@ export function DatePickerField({
   placeholder = 'Select date',
   maximumDate = getTodayStart(),
   minimumDate = null,
+  displayFormat = 'short',
 }: DatePickerFieldProps) {
+  const { language } = useTranslation();
+  const locale = getLocaleTag(language);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerDate, setPickerDate] = useState(() => getPickerDate(value));
 
@@ -50,7 +64,7 @@ export function DatePickerField({
   const backgroundColor = useThemeColor({}, 'background');
 
   const hasValue = value.trim().length > 0;
-  const displayValue = formatDisplayValue(value, placeholder);
+  const displayValue = formatDisplayValue(value, placeholder, displayFormat, locale);
 
   const openPicker = () => {
     if (disabled) {
@@ -127,38 +141,23 @@ export function DatePickerField({
       ) : null}
 
       {Platform.OS === 'ios' ? (
-        <Modal animationType="slide" transparent visible={showPicker} onRequestClose={closePicker}>
-          <Pressable style={styles.backdrop} onPress={closePicker}>
-            <Pressable
-              style={[styles.sheet, { backgroundColor: surfaceColor }]}
-              onPress={(event) => event.stopPropagation()}>
-              <View style={[styles.sheetHeader, { borderBottomColor: borderColor }]}>
-                <Pressable accessibilityRole="button" hitSlop={8} onPress={handleClear}>
-                  <ThemedText lightColor={textSecondaryColor} darkColor={textSecondaryColor}>
-                    Clear
-                  </ThemedText>
-                </Pressable>
-                <ThemedText type="defaultSemiBold">Select Date</ThemedText>
-                <Pressable accessibilityRole="button" hitSlop={8} onPress={handleIosDone}>
-                  <ThemedText type="defaultSemiBold">Done</ThemedText>
-                </Pressable>
-              </View>
-              <DateTimePicker
-                display="spinner"
-                maximumDate={maximumDate ?? undefined}
-                minimumDate={minimumDate ?? undefined}
-                mode="date"
-                themeVariant="dark"
-                value={pickerDate}
-                onChange={handleIosChange}
-                style={{ backgroundColor }}
-              />
-              <View style={styles.sheetFooter}>
-                <Button title="Done" onPress={handleIosDone} />
-              </View>
-            </Pressable>
-          </Pressable>
-        </Modal>
+        <IosPickerSheet
+          visible={showPicker}
+          title="Select Date"
+          leftAction={{ label: 'Clear', onPress: handleClear }}
+          onClose={closePicker}
+          onDone={handleIosDone}>
+          <DateTimePicker
+            display="spinner"
+            maximumDate={maximumDate ?? undefined}
+            minimumDate={minimumDate ?? undefined}
+            mode="date"
+            themeVariant="dark"
+            value={pickerDate}
+            onChange={handleIosChange}
+            style={{ width: IOS_PICKER_WIDTH, height: IOS_PICKER_HEIGHT, backgroundColor }}
+          />
+        </IosPickerSheet>
       ) : null}
     </>
   );
@@ -175,27 +174,5 @@ const styles = StyleSheet.create({
   },
   value: {
     ...Typography.body,
-  },
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  sheet: {
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    paddingBottom: Spacing.lg,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  sheetFooter: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
   },
 });

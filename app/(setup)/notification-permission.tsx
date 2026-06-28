@@ -28,7 +28,7 @@ export default function NotificationPermissionScreen() {
   const species = useSetupStore((state) => state.species);
   const breed = useSetupStore((state) => state.breed);
   const name = useSetupStore((state) => state.name);
-  const ageGroup = useSetupStore((state) => state.ageGroup);
+  const birthDate = useSetupStore((state) => state.birthDate);
   const healthConditions = useSetupStore((state) => state.healthConditions);
   const photoUri = useSetupStore((state) => state.photoUri);
   const photoUpload = useSetupStore((state) => state.photoUpload);
@@ -53,7 +53,7 @@ export default function NotificationPermissionScreen() {
 
   const completeSetup = useCallback(
     async (permission: NotificationPermissionStatus) => {
-      const draft = { species, breed, name, ageGroup, healthConditions, photoUri, photoUpload };
+      const draft = { species, breed, name, birthDate, healthConditions, photoUri, photoUpload };
       const draftError = validateSetupDraft(draft);
 
       if (draftError) {
@@ -83,7 +83,7 @@ export default function NotificationPermissionScreen() {
       }
     },
     [
-      ageGroup,
+      birthDate,
       breed,
       clearNotificationError,
       clearPetError,

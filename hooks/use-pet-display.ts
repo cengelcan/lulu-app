@@ -8,7 +8,7 @@ import type {
   PetSpayNeuterStatus,
   PetSpecies,
 } from '@/types/pet';
-import { formatCheckInTitleDate } from '@/utils/date';
+import { formatCheckInTitleDate, formatFullTitleDate } from '@/utils/date';
 import { getLocaleTag } from '@/utils/locale';
 
 export function usePetDisplay() {
@@ -75,7 +75,7 @@ export function usePetDisplay() {
         return t('pet.notSet');
       }
 
-      return formatCheckInTitleDate(trimmed, locale);
+      return formatFullTitleDate(trimmed, locale);
     },
     [locale, t]
   );

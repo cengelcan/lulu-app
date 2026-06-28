@@ -1,10 +1,17 @@
+import { Image } from 'expo-image';
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { SelectableOption } from '@/components/setup/selectable-option';
+import { HealthConditionsSearchField } from '@/components/setup/HealthConditionsSearchField';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing, Typography } from '@/constants/theme';
+import { DatePickerField } from '@/components/ui/DatePickerField';
+import { PET_SPECIES_ICONS } from '@/constants/pet-species';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import type { HealthCondition, PetAgeGroup } from '@/types/pet';
+import type { HealthCondition, PetSpecies } from '@/types/pet';
+import { getPetAgeParts } from '@/utils/pet-age';
+
+const AGE_HINT_ICON_SIZE = 24;
 
 type Option<T extends string> = {
   value: T;
@@ -12,29 +19,48 @@ type Option<T extends string> = {
 };
 
 type PetAgeHealthFormProps = {
-  ageLabel: string;
+  species: PetSpecies | null;
+  birthDateLabel: string;
+  birthDatePlaceholder: string;
+  birthDateAccessibilityLabel: string;
+  ageHint: string | null;
   healthLabel: string;
   healthOptionalHint: string;
-  ageGroup: PetAgeGroup | null;
+  healthPlaceholder: string;
+  healthNoResultsLabel: string;
+  healthAccessibilityLabel: string;
+  birthDate: string;
   healthConditions: HealthCondition[];
-  ageOptions: Option<PetAgeGroup>[];
   healthOptions: Option<HealthCondition>[];
-  onAgeGroupChange: (ageGroup: PetAgeGroup) => void;
+  onBirthDateChange: (birthDate: string) => void;
   onToggleHealthCondition: (condition: HealthCondition) => void;
+  onClearHealthConditions: () => void;
 };
 
 export function PetAgeHealthForm({
-  ageLabel,
+  species,
+  birthDateLabel,
+  birthDatePlaceholder,
+  birthDateAccessibilityLabel,
+  ageHint,
   healthLabel,
   healthOptionalHint,
-  ageGroup,
+  healthPlaceholder,
+  healthNoResultsLabel,
+  healthAccessibilityLabel,
+  birthDate,
   healthConditions,
-  ageOptions,
   healthOptions,
-  onAgeGroupChange,
+  onBirthDateChange,
   onToggleHealthCondition,
+  onClearHealthConditions,
 }: PetAgeHealthFormProps) {
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
+  const brandAccentBorder = useThemeColor({}, 'brandAccentBorder');
+
+  const hasBirthDate = useMemo(() => Boolean(getPetAgeParts(birthDate)), [birthDate]);
 
   return (
     <View style={styles.form}>
@@ -44,16 +70,42 @@ export function PetAgeHealthForm({
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
           style={styles.sectionLabel}>
-          {ageLabel}
+          {birthDateLabel}
         </ThemedText>
-        {ageOptions.map((option) => (
-          <SelectableOption
-            key={option.value}
-            label={option.label}
-            selected={ageGroup === option.value}
-            onPress={() => onAgeGroupChange(option.value)}
-          />
-        ))}
+        <DatePickerField
+          accessibilityLabel={birthDateAccessibilityLabel}
+          displayFormat="full"
+          placeholder={birthDatePlaceholder}
+          value={birthDate}
+          onChange={onBirthDateChange}
+        />
+        {hasBirthDate && ageHint ? (
+          <View
+            style={[
+              styles.ageHintCard,
+              {
+                backgroundColor: brandAccentSoft,
+                borderColor: brandAccentBorder,
+              },
+            ]}>
+            {species ? (
+              <View style={[styles.ageHintIconWrap, { backgroundColor: brandAccentSoft }]}>
+                <Image
+                  accessibilityIgnoresInvertColors
+                  contentFit="contain"
+                  source={PET_SPECIES_ICONS[species]}
+                  style={styles.ageHintIcon}
+                />
+              </View>
+            ) : null}
+            <ThemedText
+              lightColor={brandAccentColor}
+              darkColor={brandAccentColor}
+              style={styles.ageHintText}>
+              {ageHint}
+            </ThemedText>
+          </View>
+        ) : null}
       </View>
 
       <View style={styles.section}>
@@ -72,14 +124,15 @@ export function PetAgeHealthForm({
             {healthOptionalHint}
           </ThemedText>
         </View>
-        {healthOptions.map((option) => (
-          <SelectableOption
-            key={option.value}
-            label={option.label}
-            selected={healthConditions.includes(option.value)}
-            onPress={() => onToggleHealthCondition(option.value)}
-          />
-        ))}
+        <HealthConditionsSearchField
+          healthConditions={healthConditions}
+          healthOptions={healthOptions}
+          placeholder={healthPlaceholder}
+          noResultsLabel={healthNoResultsLabel}
+          accessibilityLabel={healthAccessibilityLabel}
+          onToggleHealthCondition={onToggleHealthCondition}
+          onClearHealthConditions={onClearHealthConditions}
+        />
       </View>
     </View>
   );
@@ -97,6 +150,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     letterSpacing: 0.4,
     textTransform: 'uppercase',
+  },
+  ageHintCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  ageHintIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ageHintIcon: {
+    width: AGE_HINT_ICON_SIZE,
+    height: AGE_HINT_ICON_SIZE,
+  },
+  ageHintText: {
+    ...Typography.body,
+    flex: 1,
+    lineHeight: 22,
   },
   healthHeader: {
     gap: 2,

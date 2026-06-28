@@ -7,7 +7,7 @@ import {
 } from '@/constants/check-in';
 import { getBreedLabel } from '@/constants/pet-breeds';
 import type { HealthCondition, PetAgeGroup, PetSex, PetSpayNeuterStatus, PetSpecies } from '@/types/pet';
-import { formatCheckInTitleDate } from '@/utils/date';
+import { formatFullTitleDate } from '@/utils/date';
 
 export const PET_FIELD_NOT_SET = 'Not set';
 
@@ -59,7 +59,7 @@ export function displayPetDate(date: string | null | undefined): string {
     return PET_FIELD_NOT_SET;
   }
 
-  return formatCheckInTitleDate(trimmed);
+  return formatFullTitleDate(trimmed);
 }
 
 export function displayHealthConditions(conditions: HealthCondition[]): string {

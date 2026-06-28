@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { BrandGradientFill } from '@/components/ui/BrandGradient';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 
@@ -32,6 +33,7 @@ export function OnboardingCtaButton({ title, onPress, disabled = false, style }:
         },
         style,
       ]}>
+      <BrandGradientFill />
       <Text
         allowFontScaling
         maxFontSizeMultiplier={Typography.button.maxFontSizeMultiplier}
@@ -49,7 +51,7 @@ const styles = StyleSheet.create({
   base: {
     minHeight: 56,
     borderRadius: Radius.pill,
-    backgroundColor: Palette.brandAccentDark,
+    overflow: 'hidden',
     paddingHorizontal: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',

@@ -8,13 +8,14 @@ import { CheckInNotesSection } from '@/components/check-in/CheckInNotesSection';
 import { CheckInProgressCard } from '@/components/check-in/CheckInProgressCard';
 import { DailyEssentialsCard } from '@/components/check-in/DailyEssentialsCard';
 import { ThemedText } from '@/components/themed-text';
+import { BrandGradientFill } from '@/components/ui/BrandGradient';
 import { HeaderIconButton } from '@/components/ui/HeaderIconButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES, CHECK_IN_NOTES_MAX_LENGTH } from '@/constants/check-in';
 import { CheckInTheme } from '@/constants/check-in-theme';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -430,7 +431,6 @@ export default function CheckInScreen() {
           style={({ pressed }) => [
             styles.saveButton,
             {
-              backgroundColor: CheckInTheme.accent,
               opacity:
                 !isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly
                   ? 0.45
@@ -439,8 +439,9 @@ export default function CheckInScreen() {
                     : 1,
             },
           ]}>
+          <BrandGradientFill />
           <View style={styles.saveIconCircle}>
-            <IconSymbol name="checkmark" size={16} color={CheckInTheme.accent} />
+            <IconSymbol name="checkmark" size={16} color={Palette.brandGradientEnd} />
           </View>
           <ThemedText
             lightColor={primaryTextColor}
@@ -491,6 +492,7 @@ const styles = StyleSheet.create({
   saveButton: {
     minHeight: 52,
     borderRadius: Radius.lg,
+    overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

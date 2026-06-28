@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 
+import { BrandGradientFill } from '@/components/ui/BrandGradient';
 import { Radius, Spacing, Typography, type ThemeColor } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -15,14 +16,15 @@ type ButtonProps = Omit<PressableProps, 'style'> & {
 const variantStyles: Record<
   ButtonVariant,
   {
-    background: ThemeColor;
+    background?: ThemeColor;
     text: ThemeColor;
     bordered?: boolean;
     transparent?: boolean;
+    gradient?: boolean;
   }
 > = {
   primary: {
-    background: 'brandAccent',
+    gradient: true,
     text: 'primaryText',
   },
   secondary: {
@@ -43,7 +45,7 @@ const variantStyles: Record<
 
 export function Button({ title, variant = 'primary', disabled, style, onPress, ...rest }: ButtonProps) {
   const tokens = variantStyles[variant];
-  const backgroundColor = useThemeColor({}, tokens.background);
+  const backgroundColor = useThemeColor({}, tokens.background ?? 'background');
   const textColor = useThemeColor({}, tokens.text);
   const borderColor = useThemeColor({}, 'border');
 
@@ -61,15 +63,21 @@ export function Button({ title, variant = 'primary', disabled, style, onPress, .
       onPress={handlePress}
       style={({ pressed }) => [
         styles.base,
+        tokens.gradient && styles.gradient,
         tokens.bordered && styles.bordered,
         {
-          backgroundColor: tokens.transparent ? 'transparent' : backgroundColor,
+          backgroundColor: tokens.gradient
+            ? 'transparent'
+            : tokens.transparent
+              ? 'transparent'
+              : backgroundColor,
           borderColor: tokens.bordered ? borderColor : undefined,
           opacity: disabled ? 0.45 : pressed ? 0.85 : 1,
         },
         style,
       ]}
       {...rest}>
+      {tokens.gradient ? <BrandGradientFill /> : null}
       <Text
         allowFontScaling
         maxFontSizeMultiplier={Typography.button.maxFontSizeMultiplier}
@@ -88,6 +96,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  gradient: {
+    overflow: 'hidden',
   },
   bordered: {
     borderWidth: 1,

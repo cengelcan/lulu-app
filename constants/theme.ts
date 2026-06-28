@@ -29,6 +29,8 @@ export const Palette = {
   brandAccent: '#A998D6',
   brandAccentLight: '#B8A8E8',
   brandAccentDark: '#7362A8',
+  brandGradientStart: '#A17EF5',
+  brandGradientEnd: '#625BEB',
   brandAccentSoft: 'rgba(169,152,214,0.12)',
   brandAccentBorder: 'rgba(169,152,214,0.35)',
   brandAccentGlow: 'rgba(169,152,214,0.25)',
@@ -39,6 +41,13 @@ export const Palette = {
   badgePink: '#ec4899',
   badgeViolet: '#8b5cf6',
   badgeEmerald: '#34d399',
+} as const;
+
+/** Horizontal brand CTA gradient — lighter lavender left, deeper indigo right. */
+export const BrandGradientTokens = {
+  colors: [Palette.brandGradientStart, Palette.brandGradientEnd] as const,
+  start: { x: 0, y: 0.5 },
+  end: { x: 1, y: 0.5 },
 } as const;
 
 export const Colors = {

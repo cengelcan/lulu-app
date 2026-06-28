@@ -142,7 +142,7 @@ export async function finalizeInitialModePet(
   await deps.setActivePet(pet.id);
 
   deps.resetDraft();
-  deps.router.dismissTo('/(tabs)/home');
+  deps.router.replace('/(setup)/setup-complete');
 
   return resolvedPermission;
 }

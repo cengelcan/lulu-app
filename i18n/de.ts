@@ -191,6 +191,9 @@ export const de: Translations = {
     },
     checkInPrefs: {
       title: 'Wann sollen wir dich erinnern?',
+      titlePrefix: 'Wann sollen wir dich ',
+      titleAccent: 'erinnern',
+      titleSuffix: '?',
       description:
         'Lege deine tägliche Check-In-Erinnerung fest — eine sanfte Erinnerung, den Zustand deines Haustiers zu protokollieren.',
       presetsTitle: 'Schnellauswahl',
@@ -202,15 +205,23 @@ export const de: Translations = {
     },
     notifications: {
       title: 'Verpasse keinen Check-In',
+      titlePrefix: 'Verpasse keinen ',
+      titleAccent: 'Check-In',
       description: 'Aktiviere Benachrichtigungen, damit wir dich zur gewählten Zeit erinnern können.',
       previewTitle: 'Täglicher Check-In',
-      previewBody: 'Wie geht es {{name}} heute?',
+      previewBody: 'Wie geht es {{name}} heute? 💜',
       previewTimeFallback: 'Täglich',
       benefitDaily: 'Eine sanfte Erinnerung zur gewählten Zeit',
       benefitSettings: 'Jederzeit in den Einstellungen ändern oder deaktivieren',
-      hint: 'Kein Spam — nur deine tägliche Check-In-Erinnerung.',
+      hint: 'Kein Spam — nur deine tägliche Check-In-Erinnerung. 💜',
       allow: 'Benachrichtigungen erlauben',
       maybeLater: 'Vielleicht später',
+    },
+    complete: {
+      title: 'Super! 🎉',
+      subtitle: 'Dein Profil ist fertig.',
+      checkInPrompt: 'Jetzt ist es Zeit für den ersten täglichen Check-In von {{name}}.',
+      startFirstCheckIn: 'Ersten Check-In starten',
     },
   },
   checkIn: {

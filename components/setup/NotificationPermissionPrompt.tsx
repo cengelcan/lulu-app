@@ -1,8 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
+import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 type NotificationPermissionPromptProps = {
@@ -17,29 +17,35 @@ type NotificationPermissionPromptProps = {
 };
 
 type BenefitRowProps = {
+  icon: IconSymbolName;
   label: string;
   brandAccentColor: string;
   brandAccentSoft: string;
-  textSecondaryColor: string;
+  textColor: string;
+  borderColor: string;
+  isLast?: boolean;
 };
 
 function BenefitRow({
+  icon,
   label,
   brandAccentColor,
   brandAccentSoft,
-  textSecondaryColor,
+  textColor,
+  borderColor,
+  isLast = false,
 }: BenefitRowProps) {
   return (
-    <View style={styles.benefitRow}>
+    <View style={[styles.benefitRow, { borderColor }, isLast && styles.benefitRowLast]}>
       <View style={[styles.benefitIcon, { backgroundColor: brandAccentSoft }]}>
-        <IconSymbol name="checkmark.circle" size={16} color={brandAccentColor} />
+        <IconSymbol name={icon} size={16} color={brandAccentColor} />
       </View>
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.benefitLabel}>
+      <ThemedText lightColor={textColor} darkColor={textColor} style={styles.benefitLabel}>
         {label}
       </ThemedText>
+      <View style={[styles.benefitCheck, { backgroundColor: brandAccentSoft }]}>
+        <IconSymbol name="checkmark.circle" size={18} color={brandAccentColor} />
+      </View>
     </View>
   );
 }
@@ -56,7 +62,6 @@ export function NotificationPermissionPrompt({
 }: NotificationPermissionPromptProps) {
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
-  const brandAccentBorder = useThemeColor({}, 'brandAccentBorder');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const surfaceElevatedColor = useThemeColor({}, 'surfaceElevated');
   const borderColor = useThemeColor({}, 'border');
@@ -65,75 +70,68 @@ export function NotificationPermissionPrompt({
 
   return (
     <View style={styles.container}>
-      <View style={styles.hero}>
-        <View
-          style={[
-            styles.iconHalo,
-            { backgroundColor: brandAccentSoft, borderColor: brandAccentBorder },
-          ]}>
-          <View style={[styles.iconCircle, { backgroundColor: brandAccentSoft }]}>
-            <IconSymbol name="bell.fill" size={32} color={brandAccentColor} />
-          </View>
-        </View>
-      </View>
-
-      <View
-        style={[
-          styles.previewCard,
-          {
-            backgroundColor: surfaceElevatedColor,
-            borderColor,
-          },
-        ]}>
+      <View style={[styles.previewCard, { borderColor }]}>
         <View style={styles.previewHeader}>
           <View style={styles.previewApp}>
             <View style={[styles.previewAppIcon, { backgroundColor: brandAccentSoft }]}>
               <IconSymbol name="pawprint.fill" size={14} color={brandAccentColor} />
             </View>
-            <ThemedText type="defaultSemiBold" style={styles.previewAppName}>
+            <ThemedText
+              lightColor={Palette.ink}
+              darkColor={Palette.ink}
+              style={styles.previewAppName}>
               {previewAppName}
             </ThemedText>
           </View>
           <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
+            lightColor={Palette.muted}
+            darkColor={Palette.muted}
             style={styles.previewTime}>
             {previewTimeLabel}
           </ThemedText>
         </View>
 
-        <ThemedText type="defaultSemiBold" style={styles.previewTitle}>
+        <ThemedText
+          lightColor={Palette.ink}
+          darkColor={Palette.ink}
+          style={styles.previewTitle}>
           {previewTitle}
         </ThemedText>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.previewBody}>
+        <ThemedText lightColor={Palette.body} darkColor={Palette.body} style={styles.previewBody}>
           {previewMessage}
         </ThemedText>
       </View>
 
-      <View style={styles.benefits}>
+      <View style={[styles.benefitsCard, { backgroundColor: surfaceElevatedColor, borderColor }]}>
         <BenefitRow
+          icon="bell.fill"
           label={benefitDaily}
           brandAccentColor={brandAccentColor}
           brandAccentSoft={brandAccentSoft}
-          textSecondaryColor={textSecondaryColor}
+          textColor={Palette.onDark}
+          borderColor={borderColor}
+          isLast={false}
         />
         <BenefitRow
+          icon="slider.horizontal.3"
           label={benefitSettings}
           brandAccentColor={brandAccentColor}
           brandAccentSoft={brandAccentSoft}
-          textSecondaryColor={textSecondaryColor}
+          textColor={Palette.onDark}
+          borderColor={borderColor}
+          isLast
         />
       </View>
 
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.hint}>
-        {hint}
-      </ThemedText>
+      <View style={styles.hintRow}>
+        <IconSymbol name="shield.fill" size={16} color={brandAccentColor} />
+        <ThemedText
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.hint}>
+          {hint}
+        </ThemedText>
+      </View>
     </View>
   );
 }
@@ -142,24 +140,11 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'stretch',
     gap: Spacing.lg,
-    paddingTop: Spacing.sm,
-  },
-  hero: {
-    alignItems: 'center',
-  },
-  iconHalo: {
-    borderRadius: Radius.full,
-    borderWidth: 1,
-    padding: Spacing.sm,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: Radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: Spacing.xs,
+    paddingBottom: Spacing.lg,
   },
   previewCard: {
+    backgroundColor: '#EBEBEB',
     borderRadius: Radius.xl,
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: Spacing.md,
@@ -187,31 +172,40 @@ const styles = StyleSheet.create({
   },
   previewAppName: {
     ...Typography.caption,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   previewTime: {
     ...Typography.caption,
+    fontWeight: '500',
   },
   previewTitle: {
     ...Typography.bodySemiBold,
     marginTop: Spacing.xxs,
+    color: Palette.ink,
   },
   previewBody: {
     ...Typography.body,
     lineHeight: 22,
   },
-  benefits: {
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.xs,
+  benefitsCard: {
+    borderRadius: Radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
   },
   benefitRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  benefitRowLast: {
+    borderBottomWidth: 0,
   },
   benefitIcon: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -221,10 +215,25 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 22,
   },
+  benefitCheck: {
+    width: 28,
+    height: 28,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.xs,
+  },
   hint: {
     ...Typography.body,
     textAlign: 'center',
     lineHeight: 22,
-    paddingHorizontal: Spacing.md,
+    flexShrink: 1,
   },
 });

@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { NotificationPermissionPrompt } from '@/components/setup/NotificationPermissionPrompt';
+import { NotificationIllustration } from '@/components/setup/NotificationIllustration';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +21,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
-import { formatReminderTime } from '@/utils/time';
+import { formatReminderTime12h } from '@/utils/time';
 import { translateValidationError } from '@/utils/translate-error';
 
 export default function NotificationPermissionScreen() {
@@ -30,7 +31,7 @@ export default function NotificationPermissionScreen() {
   const totalSteps = setupTotalSteps(mode);
   const { onBack } = useSetupScreenBack(6, mode);
   const primaryTextColor = useThemeColor({}, 'primaryText');
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
 
   const species = useSetupStore((state) => state.species);
   const breed = useSetupStore((state) => state.breed);
@@ -60,7 +61,7 @@ export default function NotificationPermissionScreen() {
   const error = translateValidationError(t, validationError) ?? petError ?? notificationError;
 
   const previewTimeLabel = useMemo(
-    () => (reminderTime ? formatReminderTime(reminderTime) : t('setup.notifications.previewTimeFallback')),
+    () => (reminderTime ? formatReminderTime12h(reminderTime) : t('setup.notifications.previewTimeFallback')),
     [reminderTime, t]
   );
 
@@ -118,7 +119,11 @@ export default function NotificationPermissionScreen() {
     <SetupScreen
       step={6}
       totalSteps={totalSteps}
-      title={t('setup.notifications.title')}
+      title=""
+      titlePrefix={t('setup.notifications.titlePrefix')}
+      titleAccent={t('setup.notifications.titleAccent')}
+      titleAccentVariant="gradient"
+      headerIllustration={<NotificationIllustration />}
       description={t('setup.notifications.description')}
       onBack={onBack}
       error={error}
@@ -147,8 +152,8 @@ export default function NotificationPermissionScreen() {
               { opacity: isLoading ? 0.5 : pressed ? 0.7 : 1 },
             ]}>
             <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
+              lightColor={brandAccentColor}
+              darkColor={brandAccentColor}
               style={styles.secondaryLabel}>
               {t('setup.notifications.maybeLater')}
             </ThemedText>
@@ -171,7 +176,7 @@ export default function NotificationPermissionScreen() {
 
 const styles = StyleSheet.create({
   footer: {
-    gap: Spacing.sm,
+    gap: Spacing.md,
     marginBottom: Spacing.md,
   },
   primaryButton: {

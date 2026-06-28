@@ -16,6 +16,7 @@ import { CHECK_IN_CATEGORIES, CHECK_IN_NOTES_MAX_LENGTH } from '@/constants/chec
 import { CheckInTheme } from '@/constants/check-in-theme';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Radius, Spacing, Typography, Palette } from '@/constants/theme';
+import { useAndroidBackHandler } from '@/hooks/use-android-back-handler';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -57,7 +58,10 @@ export default function CheckInScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { date: dateParam } = useLocalSearchParams<{ date?: string | string[] }>();
+  const { date: dateParam, fromSetup: fromSetupParam } = useLocalSearchParams<{
+    date?: string | string[];
+    fromSetup?: string | string[];
+  }>();
 
   const pet = usePetStore((state) => state.pet);
   const petIsLoading = usePetStore((state) => state.isLoading);
@@ -86,6 +90,13 @@ export default function CheckInScreen() {
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
+  const rawFromSetupParam = Array.isArray(fromSetupParam) ? fromSetupParam[0] : fromSetupParam;
+  const isFromSetup = rawFromSetupParam === '1' || rawFromSetupParam === 'true';
+
+  useAndroidBackHandler(
+    useCallback(() => isFromSetup, [isFromSetup])
+  );
+
   const selectedDate = useMemo(() => {
     if (rawDateParam !== undefined && rawDateParam !== '' && isValidLocalDateString(rawDateParam)) {
       return rawDateParam;
@@ -253,7 +264,11 @@ export default function CheckInScreen() {
         await createCheckIn(checkIn);
       }
 
-      router.replace('/check-in-success');
+      if (isFromSetup) {
+        router.dismissTo('/(tabs)/home');
+      } else {
+        router.replace('/check-in-success');
+      }
     } catch {
       // Store already sets error state.
     }
@@ -263,6 +278,7 @@ export default function CheckInScreen() {
     existingCheckIn,
     formValues,
     isFormComplete,
+    isFromSetup,
     isFutureDate,
     isNotesOverLimit,
     isReadOnly,
@@ -331,19 +347,21 @@ export default function CheckInScreen() {
       headerShadowVisible: false,
       headerTintColor: '#FFFFFF',
       headerBackVisible: false,
-      headerLeft: () => (
-        <HeaderIconButton
-          accessibilityLabel={t('common.back')}
-          borderColor={CheckInTheme.headerButtonBorder}
-          onPress={() => router.back()}>
-          <IconSymbol name="chevron.left" size={18} color="#FFFFFF" />
-        </HeaderIconButton>
-      ),
+      headerLeft: isFromSetup
+        ? undefined
+        : () => (
+            <HeaderIconButton
+              accessibilityLabel={t('common.back')}
+              borderColor={CheckInTheme.headerButtonBorder}
+              onPress={() => router.back()}>
+              <IconSymbol name="chevron.left" size={18} color="#FFFFFF" />
+            </HeaderIconButton>
+          ),
       headerRight,
       headerLeftContainerStyle: { paddingLeft: Spacing.md },
       headerRightContainerStyle: { paddingRight: Spacing.md },
     }),
-    [headerRight, router, t]
+    [headerRight, isFromSetup, router, t]
   );
 
   if (petIsLoading || !pet) {

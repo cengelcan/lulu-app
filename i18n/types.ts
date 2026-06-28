@@ -170,6 +170,9 @@ export type Translations = {
     healthConditions: { title: string; description: string; addPet: string };
     checkInPrefs: {
       title: string;
+      titlePrefix: string;
+      titleAccent: string;
+      titleSuffix: string;
       description: string;
       presetsTitle: string;
       morning: string;
@@ -180,6 +183,8 @@ export type Translations = {
     };
     notifications: {
       title: string;
+      titlePrefix: string;
+      titleAccent: string;
       description: string;
       previewTitle: string;
       previewBody: string;
@@ -189,6 +194,12 @@ export type Translations = {
       hint: string;
       allow: string;
       maybeLater: string;
+    };
+    complete: {
+      title: string;
+      subtitle: string;
+      checkInPrompt: string;
+      startFirstCheckIn: string;
     };
   };
   checkIn: {

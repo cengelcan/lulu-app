@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
 import { CheckInReminderPicker } from '@/components/setup/CheckInReminderPicker';
+import { CheckInPrefsIllustration } from '@/components/setup/CheckInPrefsIllustration';
 import { SetupScreen } from '@/components/setup/setup-screen';
 import { useTranslation } from '@/hooks/use-translation';
 import { setupTotalSteps } from '@/hooks/use-setup-mode';
@@ -57,11 +58,16 @@ export default function CheckInPrefsScreen() {
     <SetupScreen
       step={5}
       totalSteps={totalSteps}
-      title={t('setup.checkInPrefs.title')}
+      title=""
+      titlePrefix={t('setup.checkInPrefs.titlePrefix')}
+      titleAccent={t('setup.checkInPrefs.titleAccent')}
+      titleSuffix={t('setup.checkInPrefs.titleSuffix')}
+      headerIllustration={<CheckInPrefsIllustration />}
       description={t('setup.checkInPrefs.description')}
       onContinue={() => void handleContinue()}
       onBack={onBack}
       isLoading={isLoading}
+      buttonPill
       error={error ?? storeError}>
       <CheckInReminderPicker
         value={reminderTime}

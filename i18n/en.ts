@@ -189,6 +189,9 @@ export const en: Translations = {
     },
     checkInPrefs: {
       title: 'When should we remind you?',
+      titlePrefix: 'When should we ',
+      titleAccent: 'remind',
+      titleSuffix: ' you?',
       description:
         'Set your daily check-in reminder — one gentle nudge each day to log how your pet is doing.',
       presetsTitle: 'Quick picks',
@@ -200,15 +203,23 @@ export const en: Translations = {
     },
     notifications: {
       title: 'Never miss a check-in',
+      titlePrefix: 'Never miss a ',
+      titleAccent: 'check-in',
       description: 'Turn on notifications so we can remind you at the time you chose.',
       previewTitle: 'Daily check-in',
-      previewBody: 'How is {{name}} today?',
+      previewBody: 'How is {{name}} today? 💜',
       previewTimeFallback: 'Daily',
       benefitDaily: 'One gentle reminder at your chosen time',
       benefitSettings: 'Change or turn off anytime in Settings',
-      hint: 'No spam — just your daily check-in nudge.',
+      hint: 'No spam — just your daily check-in nudge. 💜',
       allow: 'Allow Notifications',
       maybeLater: 'Maybe Later',
+    },
+    complete: {
+      title: 'Great! 🎉',
+      subtitle: 'Your profile is complete.',
+      checkInPrompt: "Now it's time for {{name}}'s first daily check-in.",
+      startFirstCheckIn: 'Start First Check-In',
     },
   },
   checkIn: {

@@ -79,6 +79,11 @@ const MAPPING = {
   'clock.fill': 'schedule',
   'plus': 'add',
   'magnifyingglass': 'search',
+  'sun.max.fill': 'wb-sunny',
+  'moon.fill': 'dark-mode',
+  'cloud.sun.fill': 'wb-cloudy',
+  'shield.fill': 'shield',
+  'slider.horizontal.3': 'tune',
 } as IconMapping;
 
 /**

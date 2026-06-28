@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
 import { TimePickerField } from '@/components/ui/TimePickerField';
 import {
   CHECK_IN_REMINDER_PRESETS,
@@ -12,7 +12,7 @@ import {
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { ReminderTime } from '@/types/reminder';
-import { formatReminderTime } from '@/utils/time';
+import { formatReminderTime12h } from '@/utils/time';
 
 type CheckInReminderPickerProps = {
   value: ReminderTime;
@@ -25,6 +25,12 @@ type CheckInReminderPickerProps = {
   changeTimeLabel: string;
   hint: string;
   timeAccessibilityLabel: string;
+};
+
+const PRESET_ICONS: Record<CheckInReminderPresetId, IconSymbolName> = {
+  morning: 'sun.max.fill',
+  afternoon: 'cloud.sun.fill',
+  evening: 'moon.fill',
 };
 
 export function CheckInReminderPicker({
@@ -41,7 +47,10 @@ export function CheckInReminderPicker({
 }: CheckInReminderPickerProps) {
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
+  const brandAccentGlow = useThemeColor({}, 'brandAccentGlow');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const surfaceElevatedColor = useThemeColor({}, 'surfaceElevated');
+  const borderColor = useThemeColor({}, 'border');
 
   const presetLabels: Record<CheckInReminderPresetId, string> = {
     morning: morningLabel,
@@ -74,7 +83,7 @@ export function CheckInReminderPicker({
         accessibilityLabel={timeAccessibilityLabel}
         value={value}
         disabled={disabled}
-        variant="hero"
+        variant="dial"
         changeTimeLabel={changeTimeLabel}
         onChange={onChange}
       />
@@ -97,17 +106,27 @@ export function CheckInReminderPicker({
                 key={preset.id}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: isSelected, disabled }}
-                accessibilityLabel={`${label}, ${formatReminderTime(preset.time)}`}
+                accessibilityLabel={`${label}, ${formatReminderTime12h(preset.time)}`}
                 disabled={disabled}
                 onPress={() => handlePresetSelect(preset.id)}
                 style={({ pressed }) => [
-                  styles.presetChip,
+                  styles.presetCard,
                   {
-                    backgroundColor: isSelected ? brandAccentSoft : 'transparent',
-                    borderColor: isSelected ? brandAccentColor : textSecondaryColor,
-                    opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+                    backgroundColor: isSelected ? brandAccentSoft : surfaceElevatedColor,
+                    borderColor: isSelected ? brandAccentColor : borderColor,
+                    opacity: disabled ? 0.5 : pressed ? 0.88 : 1,
+                    shadowColor: isSelected ? brandAccentGlow : 'transparent',
+                    shadowOpacity: isSelected ? 0.9 : 0,
+                    shadowRadius: isSelected ? 12 : 0,
+                    shadowOffset: { width: 0, height: 0 },
+                    elevation: isSelected ? 4 : 0,
                   },
                 ]}>
+                <IconSymbol
+                  name={PRESET_ICONS[preset.id]}
+                  size={18}
+                  color={isSelected ? brandAccentColor : textSecondaryColor}
+                />
                 <ThemedText
                   type="defaultSemiBold"
                   lightColor={isSelected ? brandAccentColor : undefined}
@@ -119,7 +138,7 @@ export function CheckInReminderPicker({
                   lightColor={textSecondaryColor}
                   darkColor={textSecondaryColor}
                   style={styles.presetTime}>
-                  {formatReminderTime(preset.time)}
+                  {formatReminderTime12h(preset.time)}
                 </ThemedText>
               </Pressable>
             );
@@ -127,12 +146,15 @@ export function CheckInReminderPicker({
         </View>
       </View>
 
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.hint}>
-        {hint}
-      </ThemedText>
+      <View style={[styles.hintBanner, { backgroundColor: surfaceElevatedColor, borderColor }]}>
+        <IconSymbol name="sparkles" size={16} color={brandAccentColor} />
+        <ThemedText
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.hint}>
+          {hint}
+        </ThemedText>
+      </View>
     </View>
   );
 }
@@ -141,7 +163,8 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'stretch',
     gap: Spacing.lg,
-    paddingTop: Spacing.sm,
+    paddingTop: Spacing.xs,
+    paddingBottom: Spacing.md,
   },
   presetsSection: {
     gap: Spacing.sm,
@@ -149,23 +172,24 @@ const styles = StyleSheet.create({
   presetsTitle: {
     ...Typography.caption,
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 0.6,
     paddingHorizontal: Spacing.xs,
+    fontWeight: '600',
   },
   presets: {
     flexDirection: 'row',
     gap: Spacing.sm,
   },
-  presetChip: {
+  presetCard: {
     flex: 1,
-    minHeight: 72,
+    minHeight: 96,
     borderRadius: Radius.lg,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
+    gap: Spacing.xs,
   },
   presetLabel: {
     ...Typography.caption,
@@ -176,10 +200,18 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     textAlign: 'center',
   },
+  hintBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
   hint: {
     ...Typography.body,
-    textAlign: 'center',
+    flex: 1,
     lineHeight: 22,
-    paddingHorizontal: Spacing.md,
   },
 });

@@ -19,6 +19,7 @@ export const de: Translations = {
     time: 'Uhrzeit',
     today: 'Heute',
     tomorrow: 'Morgen',
+    back: 'Zurück',
   },
   tabs: {
     home: 'Start',
@@ -150,7 +151,7 @@ export const de: Translations = {
     futureDateError: 'Check-Ins sind nur für heute oder vergangene Tage möglich.',
     deceasedReadOnly: 'Check-ins sind für ein als verstorben markiertes Tier deaktiviert.',
     progressCard: {
-      completed: 'Alle Gesundheitschecks abgeschlossen!',
+      completed: 'Alle Gesundheitschecks abgeschlossen! 🎉',
       completedSubtitle: 'Alles sieht normal aus.',
       completedLabel: 'abgeschlossen',
       inProgress: '{{count}}/{{total}} abgeschlossen',

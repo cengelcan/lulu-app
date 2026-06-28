@@ -21,6 +21,7 @@ export type Translations = {
     time: string;
     today: string;
     tomorrow: string;
+    back: string;
   };
   tabs: {
     home: string;

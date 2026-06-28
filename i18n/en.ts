@@ -19,6 +19,7 @@ export const en: Translations = {
     time: 'Time',
     today: 'Today',
     tomorrow: 'Tomorrow',
+    back: 'Back',
   },
   tabs: {
     home: 'Home',
@@ -150,7 +151,7 @@ export const en: Translations = {
     futureDateError: 'You can only add check-ins for today or past days.',
     deceasedReadOnly: 'Check-ins are off for a pet marked as deceased.',
     progressCard: {
-      completed: 'All health checks completed!',
+      completed: 'All health checks completed! 🎉',
       completedSubtitle: 'Everything looks normal.',
       completedLabel: 'completed',
       inProgress: '{{count}}/{{total}} completed',

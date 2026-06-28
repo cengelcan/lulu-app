@@ -8,9 +8,11 @@ import { CheckInNotesSection } from '@/components/check-in/CheckInNotesSection';
 import { CheckInProgressCard } from '@/components/check-in/CheckInProgressCard';
 import { DailyEssentialsCard } from '@/components/check-in/DailyEssentialsCard';
 import { ThemedText } from '@/components/themed-text';
+import { HeaderIconButton } from '@/components/ui/HeaderIconButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES, CHECK_IN_NOTES_MAX_LENGTH } from '@/constants/check-in';
+import { CheckInTheme } from '@/constants/check-in-theme';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -79,10 +81,8 @@ export default function CheckInScreen() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const primaryTextColor = useThemeColor({}, 'primaryText');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const backgroundColor = useThemeColor({}, 'background');
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
   const selectedDate = useMemo(() => {
@@ -311,16 +311,38 @@ export default function CheckInScreen() {
 
   const headerRight = useCallback(
     () => (
-      <Pressable
-        accessibilityRole="button"
+      <HeaderIconButton
         accessibilityLabel={t('checkIn.title')}
-        hitSlop={8}
-        onPress={() => setDatePickerVisible(true)}
-        style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
-        <IconSymbol name="calendar" size={22} color={brandAccentColor} />
-      </Pressable>
+        borderColor={CheckInTheme.headerButtonBorder}
+        onPress={() => setDatePickerVisible(true)}>
+        <IconSymbol name="calendar.badge.checkmark" size={18} color="#FFFFFF" />
+      </HeaderIconButton>
     ),
-    [brandAccentColor, t]
+    [t]
+  );
+
+  const checkInHeaderOptions = useMemo(
+    () => ({
+      ...STACK_BACK_ONLY_OPTIONS,
+      headerShown: true as const,
+      title: t('checkIn.title'),
+      headerStyle: { backgroundColor: CheckInTheme.background },
+      headerShadowVisible: false,
+      headerTintColor: '#FFFFFF',
+      headerBackVisible: false,
+      headerLeft: () => (
+        <HeaderIconButton
+          accessibilityLabel={t('common.back')}
+          borderColor={CheckInTheme.headerButtonBorder}
+          onPress={() => router.back()}>
+          <IconSymbol name="chevron.left" size={18} color="#FFFFFF" />
+        </HeaderIconButton>
+      ),
+      headerRight,
+      headerLeftContainerStyle: { paddingLeft: Spacing.md },
+      headerRightContainerStyle: { paddingRight: Spacing.md },
+    }),
+    [headerRight, router, t]
   );
 
   if (petIsLoading || !pet) {
@@ -328,12 +350,13 @@ export default function CheckInScreen() {
       <>
         <Stack.Screen
           options={{
-            ...STACK_BACK_ONLY_OPTIONS,
-            headerShown: true,
-            title: t('checkIn.title'),
+            ...checkInHeaderOptions,
           }}
         />
-        <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
+        <ScreenContainer
+          edges={['bottom']}
+          contentStyle={styles.centered}
+          style={{ backgroundColor: CheckInTheme.background }}>
           <ActivityIndicator color={primaryColor} size="large" />
         </ScreenContainer>
       </>
@@ -342,15 +365,12 @@ export default function CheckInScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          ...STACK_BACK_ONLY_OPTIONS,
-          headerShown: true,
-          title: t('checkIn.title'),
-          headerRight,
-        }}
-      />
-      <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
+      <Stack.Screen options={checkInHeaderOptions} />
+      <ScreenContainer
+        scrollable
+        edges={['bottom']}
+        contentStyle={styles.content}
+        style={{ backgroundColor: CheckInTheme.background }}>
         <View style={[styles.body, { paddingBottom: insets.bottom + 88 }]}>
           <CheckInHeader
             petName={pet.name}
@@ -400,7 +420,7 @@ export default function CheckInScreen() {
           styles.footer,
           {
             paddingBottom: Math.max(insets.bottom, Spacing.md),
-            backgroundColor,
+            backgroundColor: CheckInTheme.background,
           },
         ]}>
         <Pressable
@@ -410,7 +430,7 @@ export default function CheckInScreen() {
           style={({ pressed }) => [
             styles.saveButton,
             {
-              backgroundColor: brandAccentColor,
+              backgroundColor: CheckInTheme.accent,
               opacity:
                 !isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly
                   ? 0.45
@@ -420,7 +440,7 @@ export default function CheckInScreen() {
             },
           ]}>
           <View style={styles.saveIconCircle}>
-            <IconSymbol name="checkmark" size={16} color={brandAccentColor} />
+            <IconSymbol name="checkmark" size={16} color={CheckInTheme.accent} />
           </View>
           <ThemedText
             lightColor={primaryTextColor}
@@ -447,8 +467,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   body: {
-    gap: Spacing.xl,
-    paddingTop: Spacing.sm,
+    gap: Spacing.lg,
+    paddingTop: Spacing.xs,
   },
   centered: {
     flex: 1,

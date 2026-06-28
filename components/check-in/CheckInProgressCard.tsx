@@ -1,8 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { CheckInTheme } from '@/constants/check-in-theme';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -75,9 +75,6 @@ export function CheckInProgressCard({
   totalCount,
 }: CheckInProgressCardProps) {
   const { t } = useTranslation();
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
-  const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
-  const borderColor = useThemeColor({}, 'border');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const progress = totalCount > 0 ? completedCount / totalCount : 0;
@@ -99,58 +96,59 @@ export function CheckInProgressCard({
     : t('checkIn.progressCard.inProgressSubtitle');
 
   return (
-    <Card style={styles.card}>
+    <View style={styles.card}>
       <View style={styles.decorIcon}>
-        <IconSymbol name="pawprint.fill" size={80} color={brandAccentSoft} />
+        <IconSymbol name="pawprint.fill" size={80} color={CheckInTheme.accent} />
       </View>
 
       <View style={styles.row}>
         <View style={styles.ringContainer}>
-          <ProgressRing progress={progress} accentColor={brandAccentColor} trackColor={borderColor} />
+          <ProgressRing
+            progress={progress}
+            accentColor={CheckInTheme.accent}
+            trackColor="rgba(255,255,255,0.08)"
+          />
           <View style={styles.ringLabel}>
             <ThemedText type="defaultSemiBold" style={styles.ringCount}>
               {completedCount}/{totalCount}
             </ThemedText>
-            <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
-              style={styles.ringSubtext}>
+            <ThemedText style={styles.ringSubtext}>
               {t('checkIn.progressCard.completedLabel')}
             </ThemedText>
           </View>
         </View>
 
         <View style={styles.textBlock}>
-          <ThemedText type="defaultSemiBold" style={styles.headline}>
+          <ThemedText type="defaultSemiBold" style={styles.headline} numberOfLines={2}>
             {headline}
           </ThemedText>
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
-            style={styles.subtitle}>
+            style={styles.subtitle}
+            numberOfLines={2}>
             {subtitle}
           </ThemedText>
         </View>
       </View>
 
-      <View style={styles.barTrack}>
-        <View
-          style={[
-            styles.barFill,
-            {
-              width: `${percent}%`,
-              backgroundColor: brandAccentColor,
-            },
-          ]}
-        />
+      <View style={styles.barRow}>
+        <View style={styles.barTrack}>
+          <View
+            style={[
+              styles.barFill,
+              {
+                width: `${percent}%`,
+                backgroundColor: CheckInTheme.accent,
+              },
+            ]}
+          />
+        </View>
+        <ThemedText style={styles.percentLabel}>
+          {t('checkIn.progressCard.percentComplete', { percent })}
+        </ThemedText>
       </View>
-      <ThemedText
-        lightColor={textSecondaryColor}
-        darkColor={textSecondaryColor}
-        style={styles.percentLabel}>
-        {t('checkIn.progressCard.percentComplete', { percent })}
-      </ThemedText>
-    </Card>
+    </View>
   );
 }
 
@@ -158,17 +156,20 @@ const styles = StyleSheet.create({
   card: {
     overflow: 'hidden',
     gap: Spacing.md,
+    backgroundColor: CheckInTheme.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
   },
   decorIcon: {
     position: 'absolute',
-    right: -8,
-    bottom: -8,
-    opacity: 0.35,
+    right: 4,
+    top: '18%',
+    opacity: 0.12,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
+    gap: Spacing.sm,
   },
   ringContainer: {
     width: RING_SIZE,
@@ -194,25 +195,36 @@ const styles = StyleSheet.create({
     gap: 0,
   },
   ringCount: {
-    fontSize: 14,
+    fontSize: 15,
     lineHeight: 18,
   },
   ringSubtext: {
     ...Typography.caption,
-    fontSize: 10,
+    fontSize: 9,
+    lineHeight: 11,
+    color: '#FFFFFF',
+    opacity: 0.85,
   },
   textBlock: {
     flex: 1,
-    gap: Spacing.xxs,
+    gap: 2,
+    minWidth: 0,
   },
   headline: {
-    ...Typography.subtitle,
+    ...Typography.titleSmall,
   },
   subtitle: {
-    ...Typography.body,
+    ...Typography.caption,
+    fontWeight: '400',
+  },
+  barRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   barTrack: {
-    height: 4,
+    flex: 1,
+    height: 6,
     borderRadius: Radius.full,
     backgroundColor: 'rgba(255,255,255,0.08)',
     overflow: 'hidden',
@@ -223,6 +235,8 @@ const styles = StyleSheet.create({
   },
   percentLabel: {
     ...Typography.caption,
+    color: '#FFFFFF',
+    minWidth: 36,
     textAlign: 'right',
   },
 });

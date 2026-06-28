@@ -6,6 +6,7 @@ import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { CheckInTheme } from '@/constants/check-in-theme';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -120,37 +121,37 @@ export function CheckInHeader({
   onOpenDatePicker,
 }: CheckInHeaderProps) {
   const { language } = useTranslation();
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
-  const backgroundColor = useThemeColor({}, 'background');
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const locale = getLocaleTag(language);
   const formattedDate = formatCheckInTitleDate(selectedDate, locale);
 
   return (
     <View style={styles.container}>
       <View style={styles.avatarWrap}>
-        <PetAvatar photoUri={petPhotoUri} size={72} />
-        <View style={[styles.heartBadge, { backgroundColor: brandAccentColor, borderColor: backgroundColor }]}>
+        <PetAvatar accentBorder accentColor={CheckInTheme.accent} photoUri={petPhotoUri} size={72} />
+        <View style={[styles.heartBadge, { backgroundColor: CheckInTheme.accent, borderColor: CheckInTheme.background }]}>
           <IconSymbol name="heart.fill" size={12} color="#FFFFFF" />
         </View>
       </View>
 
       <View style={styles.textBlock}>
-        <ThemedText type="title" style={styles.title}>
-          {screenTitle}
-        </ThemedText>
+        <View style={styles.titleRow}>
+          <ThemedText type="defaultSemiBold" style={styles.title}>
+            {screenTitle}
+          </ThemedText>
+          <IconSymbol name="pawprint.fill" size={14} color={CheckInTheme.accent} />
+        </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${petName}, ${formattedDate}`}
           onPress={onOpenDatePicker}
           style={({ pressed }) => [styles.dateRow, { opacity: pressed ? 0.7 : 1 }]}>
           <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
+            lightColor={CheckInTheme.textMuted}
+            darkColor={CheckInTheme.textMuted}
             style={styles.dateText}>
             {formattedDate}
           </ThemedText>
-          <IconSymbol name="chevron.down" size={16} color={textSecondaryColor} />
+          <IconSymbol name="chevron.down" size={14} color={CheckInTheme.textMuted} />
         </Pressable>
       </View>
     </View>
@@ -159,9 +160,10 @@ export function CheckInHeader({
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    paddingTop: Spacing.sm,
+    paddingTop: Spacing.xs,
   },
   avatarWrap: {
     position: 'relative',
@@ -178,11 +180,18 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   textBlock: {
+    flex: 1,
+    gap: Spacing.xxs,
+  },
+  titleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    flexWrap: 'wrap',
+    gap: Spacing.xxs,
   },
   title: {
-    textAlign: 'center',
+    ...Typography.subtitle,
+    flexShrink: 1,
   },
   dateRow: {
     flexDirection: 'row',

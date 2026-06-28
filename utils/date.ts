@@ -85,11 +85,11 @@ export function formatCheckInTitleDate(dateString: string, locale?: string): str
     return dateString;
   }
 
-  return parsed.toLocaleDateString(locale, {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  });
+  const weekday = parsed.toLocaleDateString(locale, { weekday: 'long' });
+  const day = parsed.getDate();
+  const month = parsed.toLocaleDateString(locale, { month: 'short' });
+
+  return `${weekday}, ${day} ${month}`;
 }
 
 export function formatMemorialDate(dateString: string, locale = 'en-US'): string {

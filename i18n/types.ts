@@ -42,6 +42,15 @@ export type Translations = {
     languageEnglish: string;
     languageGerman: string;
   };
+  welcome: {
+    appName: string;
+    tagline: string;
+    footerLine1: string;
+    footerLine2Before: string;
+    footerLine2Accent: string;
+    footerLine2After: string;
+    startButton: string;
+  };
   onboarding: {
     intro1: {
       title: string;

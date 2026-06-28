@@ -36,9 +36,8 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-screen-bg.png",
-          "resizeMode": "cover",
-          "enableFullScreenImage_legacy": true,
+          "image": "./assets/images/lulu-logo.png",
+          "resizeMode": "contain",
           "backgroundColor": "#000000",
           "dark": {
             "backgroundColor": "#000000"

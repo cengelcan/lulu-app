@@ -40,6 +40,15 @@ export const de: Translations = {
     languageEnglish: 'English',
     languageGerman: 'Deutsch',
   },
+  welcome: {
+    appName: 'Lulu',
+    tagline: 'Pet Health Journal',
+    footerLine1: 'Remember every symptom.',
+    footerLine2Before: 'Erkläre ',
+    footerLine2Accent: 'jeden',
+    footerLine2After: ' Tierarztbesuch.',
+    startButton: "Los geht's",
+  },
   onboarding: {
     intro1: {
       title: 'Jede kleine Veränderung',

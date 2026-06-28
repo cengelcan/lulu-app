@@ -1,5 +1,5 @@
-import { type Href, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -25,6 +25,7 @@ async function resolvePostAuthRoute(): Promise<Href> {
 
 export default function AuthScreen() {
   const router = useRouter();
+  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
   const { t } = useTranslation();
 
   const signInWithEmail = useUserStore((state) => state.signInWithEmail);
@@ -36,6 +37,12 @@ export default function AuthScreen() {
   const [password, setPassword] = useState('');
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (modeParam === 'signUp') {
+      setMode('signUp');
+    }
+  }, [modeParam]);
 
   const textColor = useThemeColor({}, 'text');
   const borderColor = useThemeColor({}, 'border');

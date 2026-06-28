@@ -21,7 +21,7 @@ export default function Onboarding4Screen() {
       return;
     }
 
-    router.replace('/(auth)');
+    router.replace({ pathname: '/(auth)', params: { mode: 'signUp' } });
   }, [clearError, completeOnboarding, router]);
 
   return (

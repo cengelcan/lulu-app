@@ -18,7 +18,7 @@ function resolveBootstrapRoute(
   hasAnyPet: boolean
 ): Href {
   if (!hasCompletedOnboarding) {
-    return '/(onboarding)/intro-1';
+    return '/welcome';
   }
 
   if (!isAuthenticated) {

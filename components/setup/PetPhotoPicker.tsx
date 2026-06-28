@@ -5,8 +5,12 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import type { PetSpecies } from '@/types/pet';
+
+const PHOTO_PICKER_AVATAR_SIZE = 168;
 
 type PetPhotoPickerProps = {
+  species: PetSpecies | null;
   photoUri: string | null;
   addPhotoLabel: string;
   changePhotoLabel: string;
@@ -16,6 +20,7 @@ type PetPhotoPickerProps = {
 };
 
 export function PetPhotoPicker({
+  species,
   photoUri,
   addPhotoLabel,
   changePhotoLabel,
@@ -40,7 +45,12 @@ export function PetPhotoPicker({
             borderWidth: photoUri ? 2 : StyleSheet.hairlineWidth,
           },
         ]}>
-        <PetAvatar photoUri={photoUri} size={120} accentBorder={Boolean(photoUri)} />
+        <PetAvatar
+          photoUri={photoUri}
+          species={photoUri ? null : species}
+          size={PHOTO_PICKER_AVATAR_SIZE}
+          accentBorder={Boolean(photoUri)}
+        />
       </View>
 
       <ThemedText

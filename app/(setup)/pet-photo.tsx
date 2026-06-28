@@ -172,6 +172,7 @@ export default function PetPhotoScreen() {
       isLoading={mode === 'add' ? petIsLoading : false}
       error={error}>
       <PetPhotoPicker
+        species={species}
         photoUri={photoUri}
         addPhotoLabel={t('setup.petPhoto.addPhoto')}
         changePhotoLabel={t('pet.changePhoto')}

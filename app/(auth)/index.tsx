@@ -1,11 +1,15 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AuthInput } from '@/components/auth/AuthInput';
+import { SocialAuthSection } from '@/components/auth/SocialAuthSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { AuthError, type AuthErrorCode } from '@/services/auth';
@@ -41,6 +45,7 @@ export default function AuthScreen() {
   const [mode, setMode] = useState<AuthMode>(() => resolveAuthMode(modeParam));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,12 +53,9 @@ export default function AuthScreen() {
     setMode(resolveAuthMode(modeParam));
   }, [modeParam]);
 
-  const textColor = useThemeColor({}, 'text');
-  const borderColor = useThemeColor({}, 'border');
-  const surfaceColor = useThemeColor({}, 'surface');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const alertColor = useThemeColor({}, 'alert');
-  const primaryColor = useThemeColor({}, 'primary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
 
   const isSignUp = mode === 'signUp';
 
@@ -80,6 +82,16 @@ export default function AuthScreen() {
       return;
     }
 
+    if (isSignUp && !confirmPassword) {
+      setErrorKey('auth.errors.confirmPasswordRequired');
+      return;
+    }
+
+    if (isSignUp && password !== confirmPassword) {
+      setErrorKey('auth.errors.passwordMismatch');
+      return;
+    }
+
     setErrorKey(null);
     setIsSubmitting(true);
 
@@ -91,6 +103,7 @@ export default function AuthScreen() {
           Alert.alert(t('auth.confirmEmailTitle'), t('auth.confirmEmailMessage'));
           setMode('signIn');
           setPassword('');
+          setConfirmPassword('');
           return;
         }
       } else {
@@ -105,106 +118,169 @@ export default function AuthScreen() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [email, isSignUp, loadPets, password, router, signInWithEmail, signUpWithEmail, t]);
+  }, [
+    confirmPassword,
+    email,
+    isSignUp,
+    loadPets,
+    password,
+    router,
+    signInWithEmail,
+    signUpWithEmail,
+    t,
+  ]);
 
   const toggleMode = useCallback(() => {
     setMode((current) => (current === 'signIn' ? 'signUp' : 'signIn'));
     setErrorKey(null);
+    setConfirmPassword('');
   }, []);
 
   return (
-    <ScreenContainer scrollable contentStyle={styles.content}>
-      <View style={styles.header}>
-        <ThemedText accessibilityRole="header" type="title">
-          {isSignUp ? t('auth.titleSignUp') : t('auth.title')}
-        </ThemedText>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.subtitle}>
-          {isSignUp ? t('auth.subtitleSignUp') : t('auth.subtitle')}
-        </ThemedText>
-      </View>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#0a0a12', '#101010', '#14101c']}
+        locations={[0, 0.55, 1]}
+        style={StyleSheet.absoluteFill}
+      />
 
-      <View style={styles.form}>
-        <View style={styles.field}>
-          <ThemedText style={styles.label}>{t('auth.emailLabel')}</ThemedText>
-          <TextInput
-            accessibilityLabel={t('auth.emailLabel')}
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect={false}
-            inputMode="email"
-            keyboardType="email-address"
-            placeholder={t('auth.emailPlaceholder')}
-            placeholderTextColor={textSecondaryColor}
-            returnKeyType="next"
-            style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
-            value={email}
-            onChangeText={(value) => {
-              setErrorKey(null);
-              setEmail(value);
-            }}
-          />
-        </View>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <View style={styles.titleRow}>
+              <ThemedText accessibilityRole="header" type="title">
+                {isSignUp ? t('auth.titleSignUp') : t('auth.title')}
+              </ThemedText>
+              <IconSymbol name="pawprint.fill" size={24} color={brandAccentColor} />
+            </View>
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.subtitle}>
+              {isSignUp ? t('auth.subtitleSignUp') : t('auth.subtitle')}
+            </ThemedText>
+          </View>
 
-        <View style={styles.field}>
-          <ThemedText style={styles.label}>{t('auth.passwordLabel')}</ThemedText>
-          <TextInput
-            accessibilityLabel={t('auth.passwordLabel')}
-            autoCapitalize="none"
-            autoComplete={isSignUp ? 'new-password' : 'current-password'}
-            autoCorrect={false}
-            secureTextEntry
-            placeholder={t('auth.passwordPlaceholder')}
-            placeholderTextColor={textSecondaryColor}
-            returnKeyType="done"
-            style={[styles.input, { color: textColor, backgroundColor: surfaceColor, borderColor }]}
-            value={password}
-            onChangeText={(value) => {
-              setErrorKey(null);
-              setPassword(value);
-            }}
-            onSubmitEditing={() => void handleSubmit()}
-          />
-        </View>
+          <View style={styles.form}>
+            <AuthInput
+              accessibilityLabel={t('auth.emailLabel')}
+              autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect={false}
+              icon="envelope.fill"
+              inputMode="email"
+              keyboardType="email-address"
+              placeholder={t('auth.emailPlaceholder')}
+              returnKeyType="next"
+              value={email}
+              onChangeText={(value) => {
+                setErrorKey(null);
+                setEmail(value);
+              }}
+            />
 
-        {errorKey ? (
-          <ThemedText lightColor={alertColor} darkColor={alertColor} style={styles.error}>
-            {t(errorKey)}
-          </ThemedText>
-        ) : null}
+            <AuthInput
+              accessibilityLabel={t('auth.passwordLabel')}
+              autoCapitalize="none"
+              autoComplete={isSignUp ? 'new-password' : 'current-password'}
+              autoCorrect={false}
+              icon="lock.fill"
+              placeholder={t('auth.passwordPlaceholder')}
+              returnKeyType={isSignUp ? 'next' : 'done'}
+              secureTextEntry
+              value={password}
+              onChangeText={(value) => {
+                setErrorKey(null);
+                setPassword(value);
+              }}
+              onSubmitEditing={isSignUp ? undefined : () => void handleSubmit()}
+            />
 
-        <Button
-          title={isSignUp ? t('auth.signUpButton') : t('auth.signInButton')}
-          accessibilityLabel={isSignUp ? t('auth.signUpButton') : t('auth.signInButton')}
-          onPress={() => void handleSubmit()}
-          disabled={isSubmitting}
-          style={styles.submit}
-        />
-      </View>
+            {isSignUp ? (
+              <AuthInput
+                accessibilityLabel={t('auth.confirmPasswordPlaceholder')}
+                autoCapitalize="none"
+                autoComplete="new-password"
+                autoCorrect={false}
+                icon="lock.fill"
+                placeholder={t('auth.confirmPasswordPlaceholder')}
+                returnKeyType="done"
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={(value) => {
+                  setErrorKey(null);
+                  setConfirmPassword(value);
+                }}
+                onSubmitEditing={() => void handleSubmit()}
+              />
+            ) : (
+              <Pressable accessibilityRole="button" style={styles.forgotPassword}>
+                <Text allowFontScaling style={[styles.forgotPasswordText, { color: brandAccentColor }]}>
+                  {t('auth.forgotPassword')}
+                </Text>
+              </Pressable>
+            )}
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={toggleMode}
-        disabled={isSubmitting}
-        style={styles.toggle}>
-        <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.toggleText}>
-          {isSignUp ? t('auth.toggleToSignIn') : t('auth.toggleToSignUp')}
-        </ThemedText>
-      </Pressable>
-    </ScreenContainer>
+            {errorKey ? (
+              <ThemedText lightColor={alertColor} darkColor={alertColor} style={styles.error}>
+                {t(errorKey)}
+              </ThemedText>
+            ) : null}
+
+            <Button
+              title={isSignUp ? t('auth.signUpButton') : t('auth.signInButton')}
+              accessibilityLabel={isSignUp ? t('auth.signUpButton') : t('auth.signInButton')}
+              onPress={() => void handleSubmit()}
+              disabled={isSubmitting}
+              style={styles.submit}
+            />
+          </View>
+
+          <SocialAuthSection />
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={toggleMode}
+            disabled={isSubmitting}
+            style={styles.toggle}>
+            <Text allowFontScaling style={[styles.togglePrefix, { color: Palette.onDark }]}>
+              {isSignUp ? t('auth.toggleToSignInPrefix') : t('auth.toggleToSignUpPrefix')}
+              <Text style={{ color: brandAccentColor, fontWeight: '600' }}>
+                {isSignUp ? t('auth.toggleToSignInLink') : t('auth.toggleToSignUpLink')}
+              </Text>
+            </Text>
+          </Pressable>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
+  root: {
+    flex: 1,
+    backgroundColor: Palette.surfaceDark,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
     gap: Spacing.xl,
+    justifyContent: 'center',
   },
   header: {
     gap: Spacing.sm,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
   subtitle: {
     ...Typography.body,
@@ -212,31 +288,27 @@ const styles = StyleSheet.create({
   form: {
     gap: Spacing.md,
   },
-  field: {
-    gap: Spacing.xs,
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginTop: -Spacing.xs,
   },
-  label: {
-    ...Typography.caption,
-  },
-  input: {
+  forgotPasswordText: {
     ...Typography.body,
-    borderWidth: 1,
-    borderRadius: Radius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    minHeight: 52,
   },
   error: {
     ...Typography.caption,
   },
   submit: {
-    marginTop: Spacing.sm,
+    marginTop: Spacing.xs,
+    borderRadius: Radius.pill,
+    minHeight: 52,
   },
   toggle: {
     alignItems: 'center',
     paddingVertical: Spacing.sm,
   },
-  toggleText: {
-    ...Typography.bodySemiBold,
+  togglePrefix: {
+    ...Typography.body,
+    textAlign: 'center',
   },
 });

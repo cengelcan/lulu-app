@@ -86,10 +86,17 @@ export type Translations = {
     emailPlaceholder: string;
     passwordLabel: string;
     passwordPlaceholder: string;
+    confirmPasswordPlaceholder: string;
+    forgotPassword: string;
+    orDivider: string;
+    continueWithGoogle: string;
+    continueWithApple: string;
     signInButton: string;
     signUpButton: string;
-    toggleToSignUp: string;
-    toggleToSignIn: string;
+    toggleToSignUpPrefix: string;
+    toggleToSignUpLink: string;
+    toggleToSignInPrefix: string;
+    toggleToSignInLink: string;
     confirmEmailTitle: string;
     confirmEmailMessage: string;
     errors: {
@@ -97,6 +104,8 @@ export type Translations = {
       emailInvalid: string;
       passwordRequired: string;
       passwordTooShort: string;
+      confirmPasswordRequired: string;
+      passwordMismatch: string;
       invalid_credentials: string;
       email_taken: string;
       weak_password: string;

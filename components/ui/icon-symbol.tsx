@@ -23,6 +23,8 @@ const MAPPING = {
   'doc.text.fill': 'description',
   'pills.fill': 'medication',
   'lock.fill': 'lock',
+  'envelope.fill': 'mail',
+  'eye.fill': 'visibility',
   'pawprint.fill': 'pets',
   'checkmark': 'check',
   'checkmark.circle': 'check-circle',

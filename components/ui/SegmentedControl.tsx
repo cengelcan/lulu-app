@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BrandGradientFill } from '@/components/ui/BrandGradient';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -22,7 +23,6 @@ export function SegmentedControl<T extends string>({
 }: SegmentedControlProps<T>) {
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const primaryTextColor = useThemeColor({}, 'primaryText');
   const textColor = useThemeColor({}, 'text');
 
@@ -53,9 +53,11 @@ export function SegmentedControl<T extends string>({
             onPress={() => handleSelect(option.value)}
             style={({ pressed }) => [
               styles.segment,
-              isSelected && { backgroundColor: brandAccentColor },
+              isSelected && styles.segmentSelected,
               pressed && !isSelected && styles.segmentPressed,
+              pressed && isSelected && styles.segmentSelectedPressed,
             ]}>
+            {isSelected ? <BrandGradientFill /> : null}
             <Text
               allowFontScaling
               maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
@@ -89,6 +91,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
+  },
+  segmentSelected: {
+    overflow: 'hidden',
+  },
+  segmentSelectedPressed: {
+    opacity: 0.85,
   },
   segmentPressed: {
     opacity: 0.7,

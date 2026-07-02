@@ -1,5 +1,4 @@
 import type { Appetite, CheckIn, Energy, Mood, Pee, Poop, WaterIntake } from '@/types/check-in';
-import type { PetRecord } from '@/types/pet-record';
 import { addDays } from '@/services/notifications/date';
 import { formatLocalDate } from '@/utils/date';
 
@@ -31,10 +30,9 @@ const MOOD_SCORES: Record<Mood, number> = {
 
 export type CheckInTrendKind = 'appetite' | 'waterIntake' | 'energy' | 'mood' | 'poop' | 'pee';
 
-export type TrendMetricKind = 'weight' | CheckInTrendKind;
+export type TrendMetricKind = CheckInTrendKind;
 
 export const DASHBOARD_TREND_ORDER: TrendMetricKind[] = [
-  'weight',
   'appetite',
   'waterIntake',
   'energy',
@@ -126,26 +124,6 @@ function buildCheckInChartDays(
   });
 }
 
-function buildWeightChartDays(records: PetRecord[], dayKeys: string[]): TrendChartDay[] {
-  const weightByDate = new Map<string, number>();
-
-  for (const record of records) {
-    if (record.type === 'weight' && record.metadata.value > 0) {
-      weightByDate.set(record.date, record.metadata.value);
-    }
-  }
-
-  return dayKeys.map((date) => {
-    const value = weightByDate.get(date) ?? null;
-
-    return {
-      date,
-      value,
-      status: value === null ? 'no_data' : 'normal',
-    };
-  });
-}
-
 function buildLineMetric(
   kind: Exclude<TrendMetricKind, 'poop' | 'pee'>,
   chartDays: TrendChartDay[]
@@ -196,13 +174,11 @@ export function normalizeTrendChartPoints(chartDays: TrendChartDay[]): (number |
 
 export function buildDashboardTrends(
   checkIns: CheckIn[],
-  records: PetRecord[],
   referenceDate: Date = new Date()
 ): DashboardTrends {
   const dayKeys = buildRollingDayKeys(referenceDate, TREND_CHART_DAYS);
 
   const metricsByKind: Record<TrendMetricKind, TrendMetric> = {
-    weight: buildLineMetric('weight', buildWeightChartDays(records, dayKeys)),
     appetite: buildLineMetric(
       'appetite',
       buildCheckInChartDays(checkIns, dayKeys, (checkIn) => APPETITE_SCORES[checkIn.appetite])

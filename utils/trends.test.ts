@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import type { CheckIn } from '@/types/check-in';
-import type { PetRecord } from '@/types/pet-record';
 import {
   buildDashboardTrends,
   DASHBOARD_TREND_ORDER,
@@ -28,33 +27,19 @@ function createCheckIn(overrides: Partial<CheckIn> & Pick<CheckIn, 'date'>): Che
   };
 }
 
-function createWeightRecord(date: string, value: number): PetRecord {
-  return {
-    id: `weight-${date}`,
-    petId: 'pet-1',
-    type: 'weight',
-    date,
-    metadata: { value, unit: 'kg' },
-    notes: null,
-    createdAt: `${date}T10:00:00.000Z`,
-    updatedAt: `${date}T10:00:00.000Z`,
-  };
-}
-
 function getMetric(trends: ReturnType<typeof buildDashboardTrends>, kind: (typeof DASHBOARD_TREND_ORDER)[number]) {
   return trends.metrics.find((metric) => metric.kind === kind);
 }
 
 describe('buildDashboardTrends', () => {
   it('returns all trend metrics with seven-day charts even when there is no data', () => {
-    const trends = buildDashboardTrends([], [], REFERENCE_DATE);
+    const trends = buildDashboardTrends([], REFERENCE_DATE);
 
     assert.deepEqual(
       trends.metrics.map((metric) => metric.kind),
       DASHBOARD_TREND_ORDER
     );
-    assert.equal(getMetric(trends, 'weight')?.chartDays.length, TREND_CHART_DAYS);
-    assert.equal(getMetric(trends, 'weight')?.hasData, false);
+    assert.equal(getMetric(trends, 'appetite')?.chartDays.length, TREND_CHART_DAYS);
     assert.equal(getMetric(trends, 'appetite')?.hasData, false);
   });
 
@@ -65,7 +50,7 @@ describe('buildDashboardTrends', () => {
       createCheckIn({ date: '2026-06-23', appetite: 'more', energy: 'high' }),
     ];
 
-    const trends = buildDashboardTrends(checkIns, [], REFERENCE_DATE);
+    const trends = buildDashboardTrends(checkIns, REFERENCE_DATE);
     const appetite = getMetric(trends, 'appetite');
     const energy = getMetric(trends, 'energy');
 
@@ -91,7 +76,7 @@ describe('buildDashboardTrends', () => {
       }),
     ];
 
-    const trends = buildDashboardTrends(checkIns, [], REFERENCE_DATE);
+    const trends = buildDashboardTrends(checkIns, REFERENCE_DATE);
 
     assert.equal(getMetric(trends, 'poop')?.displayMode, 'status');
     assert.equal(getMetric(trends, 'pee')?.displayMode, 'status');
@@ -99,21 +84,6 @@ describe('buildDashboardTrends', () => {
     assert.equal(getMetric(trends, 'poop')?.chartDays.at(-1)?.status, 'not_observed');
     assert.equal(getMetric(trends, 'pee')?.chartDays.at(-2)?.status, 'attention');
     assert.equal(getMetric(trends, 'pee')?.chartDays.at(-1)?.status, 'normal');
-  });
-
-  it('places weight values on the days they were recorded', () => {
-    const records = [
-      createWeightRecord('2026-06-20', 4.2),
-      createWeightRecord('2026-06-23', 4.6),
-    ];
-
-    const trends = buildDashboardTrends([], records, REFERENCE_DATE);
-    const weight = getMetric(trends, 'weight');
-
-    assert.equal(weight?.hasData, true);
-    assert.equal(weight?.chartDays.at(-4)?.value, 4.2);
-    assert.equal(weight?.chartDays.at(-1)?.value, 4.6);
-    assert.equal(weight?.chartDays.at(-2)?.value, null);
   });
 });
 

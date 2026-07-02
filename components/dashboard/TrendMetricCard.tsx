@@ -12,7 +12,6 @@ import type { TrendMetric } from '@/utils/trends';
 
 type TrendMetricConfig = {
   titleKey:
-    | 'dashboard.trendsWeight'
     | 'dashboard.trendsAppetite'
     | 'dashboard.trendsWaterIntake'
     | 'dashboard.trendsEnergy'
@@ -24,11 +23,6 @@ type TrendMetricConfig = {
 };
 
 const TREND_METRIC_CONFIG: Record<TrendMetric['kind'], TrendMetricConfig> = {
-  weight: {
-    titleKey: 'dashboard.trendsWeight',
-    icon: 'scalemass.fill',
-    accentColor: Palette.badgeViolet,
-  },
   appetite: {
     titleKey: 'dashboard.trendsAppetite',
     icon: 'fork.knife.circle',
@@ -91,7 +85,6 @@ export function TrendMetricCard({ metric }: TrendMetricCardProps) {
         <TrendMiniSparkline
           chartDays={metric.chartDays}
           accentColor={config.accentColor}
-          useStatusColors={metric.kind !== 'weight'}
           height={68}
         />
       )}

@@ -409,6 +409,8 @@ export const de: Translations = {
     trendsNormal: 'Unauffällig',
     trendsNoData: 'Noch keine Daten',
     trendsLatestRecord: 'Letzter Eintrag',
+    weightSubtitle: 'Gewichtsverlauf verfolgen',
+    weightAddData: 'Gewicht eintragen',
     setupGuide: {
       title: 'Starte mit {{name}}',
       hide: 'Ausblenden',

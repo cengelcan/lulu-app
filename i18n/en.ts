@@ -402,6 +402,8 @@ export const en: Translations = {
     trendsNormal: 'Normal',
     trendsNoData: 'No data yet',
     trendsLatestRecord: 'Latest record',
+    weightSubtitle: 'Track weight over time',
+    weightAddData: 'Log weight',
     setupGuide: {
       title: 'Start tracking {{name}}',
       hide: 'Hide',

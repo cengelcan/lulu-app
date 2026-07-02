@@ -11,6 +11,7 @@ import { GreetingHeader } from '@/components/dashboard/GreetingHeader';
 import { PetProfileCard } from '@/components/dashboard/PetProfileCard';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
 import { TrendsSection } from '@/components/dashboard/TrendsSection';
+import { WeightSection } from '@/components/dashboard/WeightSection';
 import { OverdueRemindersSection } from '@/components/dashboard/OverdueRemindersSection';
 import { UpcomingRemindersSection } from '@/components/dashboard/UpcomingRemindersSection';
 import { ThemedText } from '@/components/themed-text';
@@ -66,7 +67,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     () => checkIns.find((checkIn) => checkIn.date === todayDateString) ?? null,
     [checkIns, todayDateString]
   );
-  const trends = useMemo(() => buildDashboardTrends(checkIns, records), [checkIns, records]);
+  const trends = useMemo(() => buildDashboardTrends(checkIns), [checkIns]);
 
   const ownerName = useMemo(() => {
     const userName = displayName?.trim();
@@ -216,6 +217,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
           </View>
 
           {!isDeceased ? <TrendsSection trends={trends} /> : null}
+          {!isDeceased ? <WeightSection records={records} /> : null}
 
           {!isDeceased ? <OverdueRemindersSection reminders={reminders} /> : null}
           {!isDeceased ? <UpcomingRemindersSection reminders={reminders} /> : null}

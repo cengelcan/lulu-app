@@ -746,6 +746,8 @@ export type Translations = {
     deletePetA11y: string;
     deletePetTitle: string;
     deletePetMessage: string;
+    deletePetConfirmNameLabel: string;
+    deletePetConfirmNamePlaceholder: string;
     markDeceased: string;
     markDeceasedA11y: string;
     markDeceasedTitle: string;

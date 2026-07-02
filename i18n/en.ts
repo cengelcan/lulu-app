@@ -818,7 +818,9 @@ export const en: Translations = {
     deletePetA11y: 'Delete pet',
     deletePetTitle: 'Delete {{name}}?',
     deletePetMessage:
-      'This permanently removes {{name}} along with all check-ins and records. This cannot be undone.',
+      'This permanently removes {{name}} and all related data, including check-ins, health records, and reminders. This cannot be undone.',
+    deletePetConfirmNameLabel: 'Type "{{name}}" to confirm',
+    deletePetConfirmNamePlaceholder: 'Pet name',
     markDeceased: 'Mark as Deceased',
     markDeceasedA11y: 'Mark pet as deceased',
     markDeceasedTitle: 'Mark {{name}} as deceased?',

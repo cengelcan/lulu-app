@@ -827,7 +827,9 @@ export const de: Translations = {
     deletePetA11y: 'Haustier löschen',
     deletePetTitle: '{{name}} löschen?',
     deletePetMessage:
-      'Dadurch werden {{name}} sowie alle Check-ins und Einträge dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.',
+      'Dadurch werden {{name}} und alle zugehörigen Daten, einschließlich Check-ins, Gesundheitseinträge und Erinnerungen, dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.',
+    deletePetConfirmNameLabel: 'Gib "{{name}}" ein, um zu bestätigen',
+    deletePetConfirmNamePlaceholder: 'Name des Haustiers',
     markDeceased: 'Als verstorben markieren',
     markDeceasedA11y: 'Haustier als verstorben markieren',
     markDeceasedTitle: '{{name}} als verstorben markieren?',

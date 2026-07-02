@@ -1,12 +1,13 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ProfileDetailRow } from '@/components/pet/ProfileDetailRow';
 import { ThemedText } from '@/components/themed-text';
+import { HeaderTextButton } from '@/components/ui/HeaderTextButton';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -67,6 +68,29 @@ export default function PetProfileScreen() {
     router.push(`/edit-pet?id=${pet.id}`);
   }, [pet, router]);
 
+  const headerRight = useCallback(
+    () => (
+      <HeaderTextButton
+        accessibilityLabel={t('pet.editProfileA11y')}
+        color={primaryColor}
+        label={t('pet.editProfile')}
+        onPress={handleEditProfile}
+      />
+    ),
+    [handleEditProfile, primaryColor, t]
+  );
+
+  const screenOptions = useMemo(
+    () => ({
+      ...STACK_BACK_ONLY_OPTIONS,
+      headerShown: true as const,
+      title: pet?.name ?? t('pet.profileTitle'),
+      headerRight,
+      headerRightContainerStyle: { paddingRight: Spacing.md },
+    }),
+    [headerRight, pet?.name, t]
+  );
+
   if (isLoading && !pet) {
     return (
       <>
@@ -90,25 +114,7 @@ export default function PetProfileScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          ...STACK_BACK_ONLY_OPTIONS,
-          headerShown: true,
-          title: pet.name,
-          headerRight: () => (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('pet.editProfileA11y')}
-              hitSlop={8}
-              onPress={handleEditProfile}
-              style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1, paddingHorizontal: Spacing.sm }]}>
-              <ThemedText lightColor={primaryColor} darkColor={primaryColor} type="defaultSemiBold">
-                {t('pet.editProfile')}
-              </ThemedText>
-            </Pressable>
-          ),
-        }}
-      />
+      <Stack.Screen options={screenOptions} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         <View style={styles.body}>
           <View style={styles.header}>

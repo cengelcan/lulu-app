@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import { DeletePetConfirmModal } from '@/components/pet/DeletePetConfirmModal';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { PetSpeciesSelector } from '@/components/setup/PetSpeciesSelector';
@@ -19,6 +20,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { DatePickerField } from '@/components/ui/DatePickerField';
+import { HeaderTextButton } from '@/components/ui/HeaderTextButton';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
   HEALTH_CONDITION_OPTIONS,
@@ -33,6 +35,7 @@ import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import {
+  useSetupStore,
   validateAgeGroup,
   validateOptionalColor,
   validateOptionalMicrochipId,
@@ -150,6 +153,7 @@ export default function EditPetScreen() {
   const [isPickingPhoto, setIsPickingPhoto] = useState(false);
   const [canLeave, setCanLeave] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -185,6 +189,21 @@ export default function EditPetScreen() {
       }, 700);
     },
     [runPendingNav]
+  );
+
+  const beginSetup = useSetupStore((state) => state.beginSetup);
+
+  const navigateAfterPetDelete = useCallback(
+    (isOnlyPet: boolean) => {
+      if (isOnlyPet) {
+        beginSetup('initial');
+        router.replace('/(setup)/pet-type');
+        return;
+      }
+
+      router.dismissTo('/(tabs)/home');
+    },
+    [beginSetup, router]
   );
 
   const navigateToMyPets = useCallback(() => {
@@ -246,10 +265,16 @@ export default function EditPetScreen() {
   }, [loadPet, loadPetById, petId]);
 
   useEffect(() => {
-    if (!petIsLoading && !pet && !isDeleting && !isUpdatingStatus) {
+    if (
+      !petIsLoading &&
+      !pet &&
+      !isDeleting &&
+      !isUpdatingStatus &&
+      !isDeleteModalVisible
+    ) {
       router.dismissTo('/(tabs)/home');
     }
-  }, [pet, petIsLoading, router, isDeleting, isUpdatingStatus]);
+  }, [pet, petIsLoading, router, isDeleting, isUpdatingStatus, isDeleteModalVisible]);
 
   useEffect(() => {
     if (!pet) {
@@ -433,22 +458,52 @@ export default function EditPetScreen() {
     updatePet,
   ]);
 
-  const handleConfirmDelete = useCallback(async () => {
+  const handleOpenDeleteModal = useCallback(() => {
     if (!pet) {
       return;
     }
 
+    setDeleteTarget({ id: pet.id, name: pet.name });
+    setIsDeleteModalVisible(true);
+  }, [pet]);
+
+  const handleCloseDeleteModal = useCallback(() => {
+    if (isDeleting) {
+      return;
+    }
+
+    setIsDeleteModalVisible(false);
+    setDeleteTarget(null);
+  }, [isDeleting]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pet || !deleteTarget || pet.id !== deleteTarget.id) {
+      return;
+    }
+
+    const isOnlyPet = pets.length === 1;
     setIsDeleting(true);
 
     try {
       await deletePet(pet.id);
-      leaveAfterModalClose(navigateToMyPets);
+      leaveAfterModalClose(() => {
+        setDeleteTarget(null);
+        setIsDeleting(false);
+        navigateAfterPetDelete(isOnlyPet);
+      });
       setIsDeleteModalVisible(false);
     } catch {
       // Store already sets error state; keep the user on the screen to retry.
       setIsDeleting(false);
     }
-  }, [deletePet, leaveAfterModalClose, navigateToMyPets, pet]);
+  }, [
+    deletePet,
+    deleteTarget,
+    leaveAfterModalClose,
+    navigateAfterPetDelete,
+    pet,
+    pets.length,
+  ]);
 
   const handleConfirmStatusChange = useCallback(async () => {
     if (!pet) {
@@ -471,55 +526,57 @@ export default function EditPetScreen() {
   const errorMessage = translateError(t, validationError ?? petError);
   const canSave = isDirty && !isSaving;
 
-  const showFullScreenLoader =
-    (!pet && !isUpdatingStatus && !isDeleting) ||
-    (petIsLoading && !isUpdatingStatus && !isDeleting);
+  const headerRight = useCallback(
+    () => (
+      <HeaderTextButton
+        accessibilityLabel={t('pet.saveA11y')}
+        color={primaryColor}
+        disabled={!canSave}
+        label={t('common.save')}
+        onPress={() => void handleSave()}
+      />
+    ),
+    [canSave, handleSave, primaryColor, t]
+  );
+
+  const screenOptions = useMemo(
+    () => ({
+      ...STACK_BACK_ONLY_OPTIONS,
+      headerShown: true as const,
+      title: t('pet.editTitle'),
+      headerBackButtonMenuEnabled: false,
+      headerRight,
+      headerRightContainerStyle: { paddingRight: Spacing.md },
+    }),
+    [headerRight, t]
+  );
+
+  const showFullScreenLoader = !pet && !isUpdatingStatus;
 
   if (showFullScreenLoader) {
     return (
       <>
-        <Stack.Screen
-          options={{
-            ...STACK_BACK_ONLY_OPTIONS,
-            headerShown: true,
-            title: t('pet.editTitle'),
-          }}
-        />
+        <Stack.Screen options={screenOptions} />
         <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
           <ActivityIndicator color={primaryColor} size="large" />
         </ScreenContainer>
+        {deleteTarget ? (
+          <DeletePetConfirmModal
+            visible={isDeleteModalVisible}
+            petName={deleteTarget.name}
+            isLoading={isDeleting}
+            onConfirm={() => void handleConfirmDelete()}
+            onDismiss={runPendingNav}
+            onCancel={handleCloseDeleteModal}
+          />
+        ) : null}
       </>
     );
   }
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          ...STACK_BACK_ONLY_OPTIONS,
-          headerShown: true,
-          title: t('pet.editTitle'),
-          headerBackButtonMenuEnabled: false,
-          headerRight: () => (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('pet.saveA11y')}
-              disabled={!canSave}
-              hitSlop={8}
-              onPress={() => void handleSave()}
-              style={({ pressed }) => [
-                {
-                  opacity: !canSave ? 0.4 : pressed ? 0.6 : 1,
-                  paddingHorizontal: Spacing.sm,
-                },
-              ]}>
-              <ThemedText lightColor={primaryColor} darkColor={primaryColor} type="defaultSemiBold">
-                {t('common.save')}
-              </ThemedText>
-            </Pressable>
-          ),
-        }}
-      />
+      <Stack.Screen options={screenOptions} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         <View style={styles.body}>
           <GroupedSection title={t('pet.sections.profilePhoto')}>
@@ -784,7 +841,7 @@ export default function EditPetScreen() {
             title={t('pet.deletePet')}
             variant="destructive"
             disabled={isSaving || isDeleting || isUpdatingStatus}
-            onPress={() => setIsDeleteModalVisible(true)}
+            onPress={handleOpenDeleteModal}
             style={styles.deleteButton}
           />
         </View>
@@ -799,22 +856,16 @@ export default function EditPetScreen() {
         ) : null}
       </ScreenContainer>
 
-      <ConfirmModal
-        visible={isDeleteModalVisible}
-        title={t('pet.deletePetTitle', { name: pet.name })}
-        message={t('pet.deletePetMessage', { name: pet.name })}
-        confirmLabel={t('common.delete')}
-        cancelLabel={t('common.cancel')}
-        destructive
-        isLoading={isDeleting}
-        onConfirm={() => void handleConfirmDelete()}
-        onDismiss={runPendingNav}
-        onCancel={() => {
-          if (!isDeleting) {
-            setIsDeleteModalVisible(false);
-          }
-        }}
-      />
+      {deleteTarget ? (
+        <DeletePetConfirmModal
+          visible={isDeleteModalVisible}
+          petName={deleteTarget.name}
+          isLoading={isDeleting}
+          onConfirm={() => void handleConfirmDelete()}
+          onDismiss={runPendingNav}
+          onCancel={handleCloseDeleteModal}
+        />
+      ) : null}
 
       <ConfirmModal
         visible={isStatusModalVisible}

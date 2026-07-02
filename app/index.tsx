@@ -1,7 +1,7 @@
-import { Image } from 'expo-image';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LuluLogo } from '@/components/LuluLogo';
 import { Button } from '@/components/ui/Button';
 import { Palette, Spacing, Typography } from '@/constants/theme';
 import { useBootstrap } from '@/hooks/use-bootstrap';
@@ -9,7 +9,6 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { translateError } from '@/utils/translate-error';
 
-const LULU_LOGO = require('@/assets/images/lulu-logo.png');
 const LOGO_SIZE = 200;
 
 export default function SplashScreen() {
@@ -25,11 +24,10 @@ export default function SplashScreen() {
     <View style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
-          <Image
+          <LuluLogo
             accessibilityLabel={t('welcome.appName')}
-            source={LULU_LOGO}
+            size={LOGO_SIZE}
             style={styles.logo}
-            contentFit="contain"
           />
 
           {isLoading ? (

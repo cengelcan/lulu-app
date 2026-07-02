@@ -3,13 +3,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LuluLogo } from '@/components/LuluLogo';
 import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts, Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 const WELCOME_BG = require('@/assets/images/welcome-bg.png');
-const LULU_LOGO = require('@/assets/images/lulu-logo-transparent.png');
 const LOGO_SIZE = 259;
 
 type WelcomeScreenProps = {
@@ -63,12 +63,7 @@ export function WelcomeScreen({
 
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <View style={styles.header}>
-          <Image
-            accessibilityLabel={appName}
-            source={LULU_LOGO}
-            style={styles.logo}
-            contentFit="contain"
-          />
+          <LuluLogo accessibilityLabel={appName} size={LOGO_SIZE} style={styles.logo} />
 
           <Text allowFontScaling style={styles.appName}>
             {appName}

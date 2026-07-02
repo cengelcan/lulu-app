@@ -1,6 +1,8 @@
 import type { PetRecord, WeightUnit } from '@/types/pet-record';
+import { formatLocalDate } from '@/utils/date';
 
 export const WEIGHT_CHART_MAX_POINTS = 12;
+export const WEIGHT_CHANGE_PERIOD_DAYS = 30;
 
 export type WeightChartPoint = {
   date: string;
@@ -15,6 +17,19 @@ export type WeightChartData = {
   unit: WeightUnit | null;
   minValue: number | null;
   maxValue: number | null;
+};
+
+export type WeightChartAxisTicks = {
+  min: number;
+  mid: number;
+  max: number;
+};
+
+export type WeightChartChange = {
+  valueDelta: number;
+  percentDelta: number | null;
+  baselineDate: string;
+  baselineValue: number;
 };
 
 type WeightRecord = Extract<PetRecord, { type: 'weight' }>;
@@ -75,15 +90,95 @@ export function buildWeightChartData(
   };
 }
 
+function getPaddedWeightRange(minValue: number, maxValue: number): {
+  min: number;
+  max: number;
+} {
+  const range = maxValue - minValue;
+  const padding = range > 0 ? range * 0.12 : 0.5;
+
+  return {
+    min: minValue - padding,
+    max: maxValue + padding,
+  };
+}
+
+export function getWeightChartAxisTicks(
+  minValue: number,
+  maxValue: number
+): WeightChartAxisTicks {
+  const { min, max } = getPaddedWeightRange(minValue, maxValue);
+
+  return {
+    min,
+    mid: (min + max) / 2,
+    max,
+  };
+}
+
+export function getWeightChartChange(
+  points: WeightChartPoint[],
+  referenceDate: Date = new Date(),
+  periodDays: number = WEIGHT_CHANGE_PERIOD_DAYS
+): WeightChartChange | null {
+  if (points.length < 2) {
+    return null;
+  }
+
+  const latest = points.at(-1);
+  if (!latest) {
+    return null;
+  }
+
+  const priorPoints = points.slice(0, -1);
+  const today = new Date(referenceDate);
+  today.setHours(0, 0, 0, 0);
+
+  const cutoff = new Date(today);
+  cutoff.setDate(cutoff.getDate() - periodDays);
+  const cutoffKey = formatLocalDate(cutoff);
+
+  const beforeCutoff = priorPoints.filter((point) => point.date <= cutoffKey);
+  const baseline = beforeCutoff.at(-1) ?? priorPoints[0];
+
+  if (!baseline || baseline.date === latest.date) {
+    return null;
+  }
+
+  const valueDelta = latest.value - baseline.value;
+  const percentDelta = baseline.value > 0 ? (valueDelta / baseline.value) * 100 : null;
+
+  return {
+    valueDelta,
+    percentDelta,
+    baselineDate: baseline.date,
+    baselineValue: baseline.value,
+  };
+}
+
+export function formatWeightDelta(value: number, locale: string): string {
+  const formatted = Math.abs(value).toLocaleString(locale, {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: Number.isInteger(Math.abs(value)) ? 0 : 1,
+  });
+
+  if (value > 0) {
+    return `+${formatted}`;
+  }
+
+  if (value < 0) {
+    return `-${formatted}`;
+  }
+
+  return formatted;
+}
+
 export function normalizeWeightChartValues(
   values: number[],
   minValue: number,
   maxValue: number
 ): number[] {
-  const range = maxValue - minValue;
-  const padding = range > 0 ? range * 0.12 : 0.5;
-  const paddedMin = minValue - padding;
-  const paddedMax = maxValue + padding;
+  const { min: paddedMin, max: paddedMax } = getPaddedWeightRange(minValue, maxValue);
   const paddedRange = paddedMax - paddedMin;
 
   if (paddedRange <= 0) {

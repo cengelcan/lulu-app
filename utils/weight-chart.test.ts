@@ -4,6 +4,9 @@ import { describe, it } from 'node:test';
 import type { PetRecord } from '@/types/pet-record';
 import {
   buildWeightChartData,
+  formatWeightDelta,
+  getWeightChartAxisTicks,
+  getWeightChartChange,
   normalizeWeightChartValues,
   WEIGHT_CHART_MAX_POINTS,
 } from '@/utils/weight-chart';
@@ -70,5 +73,48 @@ describe('normalizeWeightChartValues', () => {
     assert.ok(normalized[0]! > 0);
     assert.ok(normalized[2]! < 1);
     assert.equal(normalized[1], 0.5);
+  });
+});
+
+describe('getWeightChartAxisTicks', () => {
+  it('returns padded min, mid, and max values', () => {
+    const ticks = getWeightChartAxisTicks(4.4, 4.8);
+
+    assert.ok(ticks.min < 4.4);
+    assert.ok(ticks.max > 4.8);
+    assert.equal(ticks.mid, (ticks.min + ticks.max) / 2);
+  });
+});
+
+describe('getWeightChartChange', () => {
+  it('returns null when there is only one point', () => {
+    const change = getWeightChartChange(
+      [{ date: '2026-06-20', value: 4.8, unit: 'kg' }],
+      new Date('2026-06-20')
+    );
+
+    assert.equal(change, null);
+  });
+
+  it('compares the latest point to the baseline within the period', () => {
+    const change = getWeightChartChange(
+      [
+        { date: '2026-05-20', value: 4.6, unit: 'kg' },
+        { date: '2026-06-20', value: 4.8, unit: 'kg' },
+      ],
+      new Date('2026-06-20')
+    );
+
+    assert.ok(change);
+    assert.ok(Math.abs(change.valueDelta - 0.2) < 0.0001);
+    assert.equal(change.baselineDate, '2026-05-20');
+  });
+});
+
+describe('formatWeightDelta', () => {
+  it('formats positive and negative deltas with signs', () => {
+    assert.equal(formatWeightDelta(0.2, 'en-US'), '+0.2');
+    assert.equal(formatWeightDelta(-0.3, 'en-US'), '-0.3');
+    assert.equal(formatWeightDelta(0, 'en-US'), '0');
   });
 });

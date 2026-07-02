@@ -417,6 +417,13 @@ export const de: Translations = {
     weightEmptyDescription:
       'Trage das Gewicht deines Tieres ein, um Veränderungen über die Zeit zu verfolgen und Trends früh zu erkennen.',
     weightAddData: 'Gewicht eintragen',
+    weightCurrent: 'Aktuell',
+    weightLastLog: 'Letzter Eintrag',
+    weightChangePeriod: 'Änderung ({{days}} Tage)',
+    weightChangeValue: '{{delta}} (↑ {{percent}}%)',
+    weightChangeValueNoPercent: '{{delta}}',
+    weightTrendPeriod: 'diesen Monat',
+    weightLastLogYesterday: 'Gestern',
     setupGuide: {
       title: 'Starte mit {{name}}',
       hide: 'Ausblenden',

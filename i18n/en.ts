@@ -410,6 +410,13 @@ export const en: Translations = {
     weightEmptyDescription:
       "Log your pet's weight to follow changes over time and spot trends early.",
     weightAddData: 'Log weight',
+    weightCurrent: 'Current',
+    weightLastLog: 'Last log',
+    weightChangePeriod: 'Change ({{days}} days)',
+    weightChangeValue: '{{delta}} (↑ {{percent}}%)',
+    weightChangeValueNoPercent: '{{delta}}',
+    weightTrendPeriod: 'this month',
+    weightLastLogYesterday: 'Yesterday',
     setupGuide: {
       title: 'Start tracking {{name}}',
       hide: 'Hide',

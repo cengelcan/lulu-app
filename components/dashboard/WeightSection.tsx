@@ -45,31 +45,35 @@ export function WeightSection({ records }: WeightSectionProps) {
   return (
     <Card style={styles.container}>
       <View style={styles.header}>
-        <IconSymbol name="scalemass.fill" size={18} color={WEIGHT_ACCENT} />
-        <ThemedText
-          lightColor={titleColor}
-          darkColor={titleColor}
-          style={styles.title}
-          numberOfLines={1}>
-          {t('dashboard.trendsWeight')}
-        </ThemedText>
-        {!latestLabel ? (
+        <View style={styles.headerLeft}>
+          <IconSymbol name="scalemass.fill" size={18} color={WEIGHT_ACCENT} />
+          <View style={styles.headerTitles}>
+            <ThemedText
+              lightColor={titleColor}
+              darkColor={titleColor}
+              style={styles.title}
+              numberOfLines={1}>
+              {t('dashboard.trendsWeight')}
+            </ThemedText>
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.subtitle}
+              numberOfLines={1}>
+              {t('dashboard.weightSubtitle')}
+            </ThemedText>
+          </View>
+        </View>
+
+        {latestLabel ? (
           <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.subtitle}
-            numberOfLines={1}>
-            {t('dashboard.weightSubtitle')}
-          </ThemedText>
-        ) : (
-          <ThemedText
-            lightColor={WEIGHT_ACCENT}
-            darkColor={WEIGHT_ACCENT}
+            lightColor={titleColor}
+            darkColor={titleColor}
             style={styles.latestValue}
             numberOfLines={1}>
             {latestLabel}
           </ThemedText>
-        )}
+        ) : null}
       </View>
 
       <WeightChart data={chartData} onAddPress={handleAddWeight} />
@@ -83,28 +87,35 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: Spacing.xs,
+    flex: 1,
+  },
+  headerTitles: {
+    flex: 1,
+    gap: 2,
   },
   title: {
     ...Typography.bodySemiBold,
     fontSize: 16,
     fontWeight: '600',
-    flexShrink: 0,
-  },
-  latestValue: {
-    ...Typography.bodySemiBold,
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '700',
-    flex: 1,
-    textAlign: 'right',
   },
   subtitle: {
     ...Typography.caption,
-    fontSize: 13,
+    fontSize: 12,
     lineHeight: 16,
-    flex: 1,
-    textAlign: 'right',
+  },
+  latestValue: {
+    ...Typography.bodySemiBold,
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: '700',
+    flexShrink: 0,
   },
 });

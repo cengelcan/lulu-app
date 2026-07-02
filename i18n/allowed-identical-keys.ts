@@ -38,6 +38,8 @@ export const ALLOWED_IDENTICAL_KEYS = new Set<string>([
   'checkIn.progressCard.percentComplete',
   'records.summary.weightValue',
   'reports.petCard.weightRecorded',
+  'dashboard.weightChangeValue',
+  'dashboard.weightChangeValueNoPercent',
   'reports.review.generatedOn',
 
   // Identical in German (loanwords / shared vocabulary)

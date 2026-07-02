@@ -340,6 +340,13 @@ export type Translations = {
     weightEmptyTitle: string;
     weightEmptyDescription: string;
     weightAddData: string;
+    weightCurrent: string;
+    weightLastLog: string;
+    weightChangePeriod: string;
+    weightChangeValue: string;
+    weightChangeValueNoPercent: string;
+    weightTrendPeriod: string;
+    weightLastLogYesterday: string;
     setupGuide: {
       title: string;
       hide: string;

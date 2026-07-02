@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
+import { WeightEmptyIllustration, WeightScaleIcon } from '@/components/dashboard/WeightEmptyIllustration';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
@@ -111,6 +112,7 @@ export function WeightChart({
 }: WeightChartProps) {
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
+  const titleColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
   const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
@@ -140,13 +142,38 @@ export function WeightChart({
 
   if (!data.hasData) {
     return (
-      <View style={[styles.emptyContainer, { height, borderColor, backgroundColor: surfaceSoftColor }]}>
-        <Button
-          title={t('dashboard.weightAddData')}
-          variant="secondary"
-          onPress={onAddPress}
-          style={styles.emptyButton}
-        />
+      <View
+        style={[
+          styles.emptyContainer,
+          { borderColor, backgroundColor: surfaceSoftColor },
+        ]}>
+        <View style={styles.emptyContent}>
+          <WeightEmptyIllustration
+            accentColor={accentColor}
+            borderColor={borderColor}
+          />
+          <View style={styles.emptyTextBlock}>
+            <ThemedText
+              lightColor={titleColor}
+              darkColor={titleColor}
+              style={styles.emptyTitle}>
+              {t('dashboard.weightEmptyTitle')}
+            </ThemedText>
+            <ThemedText
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.emptyDescription}>
+              {t('dashboard.weightEmptyDescription')}
+            </ThemedText>
+            <Button
+              title={t('dashboard.weightAddData')}
+              variant="primary"
+              onPress={onAddPress}
+              leadingIcon={<WeightScaleIcon size={16} color={Palette.onDark} />}
+              style={styles.emptyButton}
+            />
+          </View>
+        </View>
       </View>
     );
   }
@@ -303,11 +330,33 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: Radius.md,
     borderWidth: StyleSheet.hairlineWidth,
+    padding: Spacing.md,
+  },
+  emptyContent: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.md,
+    gap: Spacing.md,
+  },
+  emptyTextBlock: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  emptyTitle: {
+    ...Typography.bodySemiBold,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '600',
+  },
+  emptyDescription: {
+    ...Typography.caption,
+    fontSize: 13,
+    lineHeight: 18,
   },
   emptyButton: {
-    minWidth: 148,
+    alignSelf: 'flex-start',
+    minHeight: 40,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginTop: Spacing.xxs,
   },
 });

@@ -45,31 +45,29 @@ export function WeightSection({ records }: WeightSectionProps) {
   return (
     <Card style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <IconSymbol name="scalemass.fill" size={18} color={WEIGHT_ACCENT} />
-          <ThemedText
-            lightColor={titleColor}
-            darkColor={titleColor}
-            style={styles.title}
-            numberOfLines={1}>
-            {t('dashboard.trendsWeight')}
-          </ThemedText>
-        </View>
-        {latestLabel ? (
-          <ThemedText
-            lightColor={WEIGHT_ACCENT}
-            darkColor={WEIGHT_ACCENT}
-            style={styles.latestValue}
-            numberOfLines={1}>
-            {latestLabel}
-          </ThemedText>
-        ) : (
+        <IconSymbol name="scalemass.fill" size={18} color={WEIGHT_ACCENT} />
+        <ThemedText
+          lightColor={titleColor}
+          darkColor={titleColor}
+          style={styles.title}
+          numberOfLines={1}>
+          {t('dashboard.trendsWeight')}
+        </ThemedText>
+        {!latestLabel ? (
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
             style={styles.subtitle}
             numberOfLines={1}>
             {t('dashboard.weightSubtitle')}
+          </ThemedText>
+        ) : (
+          <ThemedText
+            lightColor={WEIGHT_ACCENT}
+            darkColor={WEIGHT_ACCENT}
+            style={styles.latestValue}
+            numberOfLines={1}>
+            {latestLabel}
           </ThemedText>
         )}
       </View>
@@ -85,33 +83,28 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    gap: Spacing.sm,
-  },
-  titleRow: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    flexShrink: 1,
   },
   title: {
     ...Typography.bodySemiBold,
     fontSize: 16,
     fontWeight: '600',
+    flexShrink: 0,
   },
   latestValue: {
     ...Typography.bodySemiBold,
     fontSize: 15,
     lineHeight: 20,
     fontWeight: '700',
-    flexShrink: 0,
+    flex: 1,
+    textAlign: 'right',
   },
   subtitle: {
     ...Typography.caption,
     fontSize: 13,
     lineHeight: 16,
-    flexShrink: 1,
+    flex: 1,
     textAlign: 'right',
   },
 });

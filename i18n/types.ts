@@ -335,6 +335,8 @@ export type Translations = {
     trendsNoData: string;
     trendsLatestRecord: string;
     weightSubtitle: string;
+    weightEmptyTitle: string;
+    weightEmptyDescription: string;
     weightAddData: string;
     setupGuide: {
       title: string;

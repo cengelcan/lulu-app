@@ -403,6 +403,9 @@ export const en: Translations = {
     trendsNoData: 'No data yet',
     trendsLatestRecord: 'Latest record',
     weightSubtitle: 'Track weight over time',
+    weightEmptyTitle: 'No weight logs yet',
+    weightEmptyDescription:
+      "Log your pet's weight to follow changes over time and spot trends early.",
     weightAddData: 'Log weight',
     setupGuide: {
       title: 'Start tracking {{name}}',

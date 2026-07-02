@@ -410,6 +410,9 @@ export const de: Translations = {
     trendsNoData: 'Noch keine Daten',
     trendsLatestRecord: 'Letzter Eintrag',
     weightSubtitle: 'Gewichtsverlauf verfolgen',
+    weightEmptyTitle: 'Noch keine Gewichtseinträge',
+    weightEmptyDescription:
+      'Trage das Gewicht deines Tieres ein, um Veränderungen über die Zeit zu verfolgen und Trends früh zu erkennen.',
     weightAddData: 'Gewicht eintragen',
     setupGuide: {
       title: 'Starte mit {{name}}',

@@ -70,6 +70,7 @@ const MAPPING = {
   'syringe.fill': 'vaccines',
   'ant.fill': 'pest-control',
   'scalemass.fill': 'monitor-weight',
+  'scalemass': 'monitor-weight',
   'ellipsis.circle.fill': 'more-horiz',
   'staroflife.fill': 'medical-services',
   'crown.fill': 'workspace-premium',

@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ComingSoonModal } from '@/components/ui/ComingSoonModal';
+import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
@@ -139,7 +139,7 @@ export function LuluPlusCard() {
         </Pressable>
       </LinearGradient>
 
-      <ComingSoonModal visible={isModalVisible} onDismiss={() => setIsModalVisible(false)} />
+      <LuluPlusPaywall visible={isModalVisible} onDismiss={() => setIsModalVisible(false)} />
     </>
   );
 }

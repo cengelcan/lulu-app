@@ -182,3 +182,30 @@ export async function setActivePetId(petId: string): Promise<void> {
 export async function removeActivePetId(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.activePetId);
 }
+
+type PetSetupGuideDismissedMap = Record<string, true>;
+
+async function getPetSetupGuideDismissedMap(): Promise<PetSetupGuideDismissedMap> {
+  const value = await AsyncStorage.getItem(StorageKeys.petSetupGuideDismissed);
+  if (!value) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(value) as PetSetupGuideDismissedMap;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function isPetSetupGuideDismissed(petId: string): Promise<boolean> {
+  const dismissedMap = await getPetSetupGuideDismissedMap();
+  return dismissedMap[petId] === true;
+}
+
+export async function dismissPetSetupGuide(petId: string): Promise<void> {
+  const dismissedMap = await getPetSetupGuideDismissedMap();
+  dismissedMap[petId] = true;
+  await AsyncStorage.setItem(StorageKeys.petSetupGuideDismissed, JSON.stringify(dismissedMap));
+}

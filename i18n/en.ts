@@ -398,6 +398,20 @@ export const en: Translations = {
     trendsNoData: 'No data yet',
     trendsComparedToLast30Days: 'vs last 30 days',
     trendsLatestRecord: 'Latest record',
+    setupGuide: {
+      title: 'Start tracking {{name}}',
+      hide: 'Hide',
+      hideA11y: 'Hide setup guide',
+      progress: '{{percent}}% complete',
+      hint: 'Complete these steps to fill your home screen with useful insights.',
+      tasks: {
+        photo: 'Add a profile photo',
+        checkIn: "Complete today's check-in",
+        weight: 'Log current weight',
+        record: 'Add a health record',
+        color: 'Add coat color',
+      },
+    },
   },
   reports: {
     title: 'Reports',

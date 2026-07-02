@@ -10,6 +10,7 @@ export const StorageKeys = {
   activePetId: '@pet_health_journal/active_pet_id',
   userProfile: '@pet_health_journal/user_profile',
   lastStoreReviewPromptAt: '@pet_health_journal/last_store_review_prompt_at',
+  petSetupGuideDismissed: '@pet_health_journal/pet_setup_guide_dismissed',
 } as const;
 
 export type StorageKey = (typeof StorageKeys)[keyof typeof StorageKeys];

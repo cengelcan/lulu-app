@@ -5,6 +5,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
 import { DailyCheckInProgress } from '@/components/dashboard/DailyCheckInProgress';
+import { PetSetupGuideCard } from '@/components/dashboard/PetSetupGuideCard';
 import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionHeader';
 import { GreetingHeader } from '@/components/dashboard/GreetingHeader';
 import { PetProfileCard } from '@/components/dashboard/PetProfileCard';
@@ -189,6 +190,14 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
           ) : (
             <DailyCheckInProgress />
           )}
+
+          {!isDeceased ? (
+            <PetSetupGuideCard
+              pet={pet}
+              hasTodayCheckIn={todayCheckIn !== null}
+              records={records}
+            />
+          ) : null}
 
           <View style={styles.quickActionsSection}>
             <DashboardSectionHeader title={t('dashboard.quickActions')} icon="bolt.fill" />

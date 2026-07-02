@@ -405,6 +405,20 @@ export const de: Translations = {
     trendsNoData: 'Noch keine Daten',
     trendsComparedToLast30Days: 'vs. letzte 30 Tage',
     trendsLatestRecord: 'Letzter Eintrag',
+    setupGuide: {
+      title: 'Starte mit {{name}}',
+      hide: 'Ausblenden',
+      hideA11y: 'Einrichtungsleitfaden ausblenden',
+      progress: '{{percent}} % abgeschlossen',
+      hint: 'Schließe diese Schritte ab, damit dein Startbildschirm nützliche Einblicke zeigt.',
+      tasks: {
+        photo: 'Profilfoto hinzufügen',
+        checkIn: 'Heutigen Check-In abschließen',
+        weight: 'Aktuelles Gewicht eintragen',
+        record: 'Gesundheitseintrag hinzufügen',
+        color: 'Fellfarbe hinzufügen',
+      },
+    },
   },
   reports: {
     title: 'Berichte',

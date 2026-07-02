@@ -330,6 +330,20 @@ export type Translations = {
     trendsNoData: string;
     trendsComparedToLast30Days: string;
     trendsLatestRecord: string;
+    setupGuide: {
+      title: string;
+      hide: string;
+      hideA11y: string;
+      progress: string;
+      hint: string;
+      tasks: {
+        photo: string;
+        checkIn: string;
+        weight: string;
+        record: string;
+        color: string;
+      };
+    };
   };
   reports: {
     title: string;

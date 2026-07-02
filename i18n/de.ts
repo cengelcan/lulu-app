@@ -408,6 +408,9 @@ export const de: Translations = {
     trendsPee: 'Urin',
     trendsNormal: 'Unauffällig',
     trendsNoData: 'Noch keine Daten',
+    trendsEmptyTitle: 'Noch keine Verlaufsdaten',
+    trendsEmptyDescription:
+      'Verläufe erscheinen hier, sobald du mehr tägliche Check-ins abgeschlossen hast.',
     trendsLatestRecord: 'Letzter Eintrag',
     weightSubtitle: 'Gewichtsverlauf verfolgen',
     weightEmptyTitle: 'Noch keine Gewichtseinträge',

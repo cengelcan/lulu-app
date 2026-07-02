@@ -333,6 +333,8 @@ export type Translations = {
     trendsPee: string;
     trendsNormal: string;
     trendsNoData: string;
+    trendsEmptyTitle: string;
+    trendsEmptyDescription: string;
     trendsLatestRecord: string;
     weightSubtitle: string;
     weightEmptyTitle: string;

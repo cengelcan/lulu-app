@@ -3,28 +3,60 @@ import { formatLocalDate, getCurrentWeekDays } from '@/utils/date';
 
 export const TREND_CHART_DAYS = 7;
 
-const APPETITE_SCORES: Record<Appetite, number> = {
-  less: 40,
-  normal: 100,
-  more: 90,
+const APPETITE_POSITIONS: Record<Appetite, number> = {
+  less: 0,
+  normal: 0.5,
+  more: 1,
 };
 
-const ENERGY_SCORES: Record<Energy, number> = {
-  low: 30,
-  normal: 100,
-  high: 85,
+const ENERGY_POSITIONS: Record<Energy, number> = {
+  low: 0,
+  normal: 0.5,
+  high: 1,
 };
 
-const WATER_INTAKE_SCORES: Record<WaterIntake, number> = {
-  less: 40,
-  normal: 100,
-  more: 90,
+const WATER_INTAKE_POSITIONS: Record<WaterIntake, number> = {
+  less: 0,
+  normal: 0.5,
+  more: 1,
 };
 
-const MOOD_SCORES: Record<Mood, number> = {
-  low: 30,
-  normal: 100,
-  high: 85,
+const MOOD_POSITIONS: Record<Mood, number> = {
+  low: 0,
+  normal: 0.5,
+  high: 1,
+};
+
+export type TrendLineMetricKind = Exclude<TrendMetricKind, 'poop' | 'pee'>;
+
+export const TREND_AXIS_LABEL_KEYS: Record<
+  TrendLineMetricKind,
+  {
+    top: `checkIn.options.${TrendLineMetricKind}.${string}`;
+    middle: `checkIn.options.${TrendLineMetricKind}.${string}`;
+    bottom: `checkIn.options.${TrendLineMetricKind}.${string}`;
+  }
+> = {
+  appetite: {
+    top: 'checkIn.options.appetite.more',
+    middle: 'checkIn.options.appetite.normal',
+    bottom: 'checkIn.options.appetite.less',
+  },
+  waterIntake: {
+    top: 'checkIn.options.waterIntake.more',
+    middle: 'checkIn.options.waterIntake.normal',
+    bottom: 'checkIn.options.waterIntake.less',
+  },
+  energy: {
+    top: 'checkIn.options.energy.high',
+    middle: 'checkIn.options.energy.normal',
+    bottom: 'checkIn.options.energy.low',
+  },
+  mood: {
+    top: 'checkIn.options.mood.high',
+    middle: 'checkIn.options.mood.normal',
+    bottom: 'checkIn.options.mood.low',
+  },
 };
 
 export type CheckInTrendKind = 'appetite' | 'waterIntake' | 'energy' | 'mood' | 'poop' | 'pee';
@@ -61,8 +93,8 @@ export type DashboardTrends = {
   metrics: TrendMetric[];
 };
 
-function getScoreStatus(score: number): TrendDailyStatus {
-  if (score >= 70) {
+function getScoreStatus(position: number): TrendDailyStatus {
+  if (position >= 0.5) {
     return 'normal';
   }
 
@@ -136,30 +168,8 @@ function buildStatusMetric(kind: 'poop' | 'pee', chartDays: TrendChartDay[]): Tr
 }
 
 
-export function normalizeTrendChartPoints(chartDays: TrendChartDay[]): (number | null)[] {
-  const values = chartDays
-    .map((day) => day.value)
-    .filter((value): value is number => value !== null);
-
-  if (values.length === 0) {
-    return chartDays.map(() => null);
-  }
-
-  if (values.length === 1) {
-    return chartDays.map((day) => (day.value === null ? null : 0.5));
-  }
-
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min;
-
-  if (range === 0) {
-    return chartDays.map((day) => (day.value === null ? null : 0.5));
-  }
-
-  return chartDays.map((day) =>
-    day.value === null ? null : (day.value - min) / range
-  );
+export function getTrendChartPositions(chartDays: TrendChartDay[]): (number | null)[] {
+  return chartDays.map((day) => day.value);
 }
 
 export function buildDashboardTrends(
@@ -171,19 +181,19 @@ export function buildDashboardTrends(
   const metricsByKind: Record<TrendMetricKind, TrendMetric> = {
     appetite: buildLineMetric(
       'appetite',
-      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => APPETITE_SCORES[checkIn.appetite])
+      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => APPETITE_POSITIONS[checkIn.appetite])
     ),
     waterIntake: buildLineMetric(
       'waterIntake',
-      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => WATER_INTAKE_SCORES[checkIn.waterIntake])
+      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => WATER_INTAKE_POSITIONS[checkIn.waterIntake])
     ),
     energy: buildLineMetric(
       'energy',
-      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => ENERGY_SCORES[checkIn.energy])
+      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => ENERGY_POSITIONS[checkIn.energy])
     ),
     mood: buildLineMetric(
       'mood',
-      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => MOOD_SCORES[checkIn.mood])
+      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => MOOD_POSITIONS[checkIn.mood])
     ),
     poop: buildStatusMetric(
       'poop',

@@ -5,7 +5,7 @@ import type { CheckIn } from '@/types/check-in';
 import {
   buildDashboardTrends,
   DASHBOARD_TREND_ORDER,
-  normalizeTrendChartPoints,
+  getTrendChartPositions,
   TREND_CHART_DAYS,
 } from '@/utils/trends';
 
@@ -56,8 +56,8 @@ describe('buildDashboardTrends', () => {
 
     assert.equal(appetite?.chartDays[0]?.date, '2026-06-22');
     assert.equal(appetite?.chartDays.at(-1)?.date, '2026-06-28');
-    assert.equal(appetite?.chartDays[0]?.value, 40);
-    assert.equal(appetite?.chartDays[1]?.value, 90);
+    assert.equal(appetite?.chartDays[0]?.value, 0);
+    assert.equal(appetite?.chartDays[1]?.value, 1);
     assert.equal(appetite?.chartDays[2]?.status, 'no_data');
     assert.equal(energy?.chartDays[1]?.status, 'normal');
     assert.equal(energy?.chartDays[0]?.status, 'attention');
@@ -88,18 +88,18 @@ describe('buildDashboardTrends', () => {
   });
 });
 
-describe('normalizeTrendChartPoints', () => {
-  it('returns null slots for missing days and normalizes available values', () => {
-    const points = normalizeTrendChartPoints([
+describe('getTrendChartPositions', () => {
+  it('returns fixed chart positions for each day', () => {
+    const positions = getTrendChartPositions([
       { date: '2026-06-17', value: null, status: 'no_data' },
-      { date: '2026-06-18', value: 40, status: 'attention' },
+      { date: '2026-06-18', value: 0, status: 'attention' },
       { date: '2026-06-19', value: null, status: 'no_data' },
-      { date: '2026-06-20', value: 100, status: 'normal' },
+      { date: '2026-06-20', value: 1, status: 'normal' },
       { date: '2026-06-21', value: null, status: 'no_data' },
-      { date: '2026-06-22', value: 70, status: 'normal' },
+      { date: '2026-06-22', value: 0.5, status: 'normal' },
       { date: '2026-06-23', value: null, status: 'no_data' },
     ]);
 
-    assert.deepEqual(points, [null, 0, null, 1, null, 0.5, null]);
+    assert.deepEqual(positions, [null, 0, null, 1, null, 0.5, null]);
   });
 });

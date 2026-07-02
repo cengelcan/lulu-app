@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
-import { TrendMiniSparkline } from '@/components/dashboard/TrendMiniSparkline';
+import { TrendLineChart } from '@/components/dashboard/TrendLineChart';
+import { TrendMetricEmptyState } from '@/components/dashboard/TrendMetricEmptyState';
 import { TrendStatusDayRow } from '@/components/dashboard/TrendStatusDayRow';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -8,7 +9,8 @@ import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import type { IconSymbolName } from '@/components/ui/icon-symbol';
-import type { TrendMetric } from '@/utils/trends';
+import type { TrendMetric, TrendLineMetricKind } from '@/utils/trends';
+import { TREND_AXIS_LABEL_KEYS } from '@/utils/trends';
 
 type TrendMetricConfig = {
   titleKey:
@@ -79,13 +81,22 @@ export function TrendMetricCard({ metric }: TrendMetricCardProps) {
         </ThemedText>
       </View>
 
-      {metric.displayMode === 'status' ? (
-        <TrendStatusDayRow chartDays={metric.chartDays} />
-      ) : (
-        <TrendMiniSparkline
+      {!metric.hasData ? (
+        <TrendMetricEmptyState
           chartDays={metric.chartDays}
           accentColor={config.accentColor}
-          height={68}
+        />
+      ) : metric.displayMode === 'status' ? (
+        <TrendStatusDayRow chartDays={metric.chartDays} />
+      ) : (
+        <TrendLineChart
+          chartDays={metric.chartDays}
+          accentColor={config.accentColor}
+          axisLabels={{
+            top: t(TREND_AXIS_LABEL_KEYS[metric.kind as TrendLineMetricKind].top),
+            middle: t(TREND_AXIS_LABEL_KEYS[metric.kind as TrendLineMetricKind].middle),
+            bottom: t(TREND_AXIS_LABEL_KEYS[metric.kind as TrendLineMetricKind].bottom),
+          }}
         />
       )}
     </View>
@@ -99,7 +110,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     gap: Spacing.sm,
-    minHeight: 164,
+    minHeight: 180,
     justifyContent: 'space-between',
   },
   titleRow: {

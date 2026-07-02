@@ -401,6 +401,9 @@ export const en: Translations = {
     trendsPee: 'Pee',
     trendsNormal: 'Normal',
     trendsNoData: 'No data yet',
+    trendsEmptyTitle: 'No trend data yet',
+    trendsEmptyDescription:
+      "Trends will appear here once you've completed more daily check-ins.",
     trendsLatestRecord: 'Latest record',
     weightSubtitle: 'Track weight over time',
     weightEmptyTitle: 'No weight logs yet',

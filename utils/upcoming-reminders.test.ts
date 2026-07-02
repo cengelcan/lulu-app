@@ -78,6 +78,21 @@ describe('buildUpcomingReminders', () => {
     assert.equal(items[1]?.dueDate, '2026-06-25');
   });
 
+  it('returns all upcoming pending reminders when withinDays is omitted', () => {
+    const reminders = [
+      createReminder({ id: 'soon', type: 'vaccine', dueDate: '2026-06-24' }),
+      createReminder({ id: 'far', type: 'custom', dueDate: '2026-08-01' }),
+    ];
+
+    const items = buildUpcomingReminders(reminders, 'en-US', t, {
+      referenceDate: REFERENCE_DATE,
+    });
+
+    assert.equal(items.length, 2);
+    assert.equal(items[0]?.dueDate, '2026-06-24');
+    assert.equal(items[1]?.dueDate, '2026-08-01');
+  });
+
   it('ignores completed reminders', () => {
     const reminders = [
       createReminder({

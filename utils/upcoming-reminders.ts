@@ -135,13 +135,17 @@ export function buildUpcomingReminders(
   today.setHours(0, 0, 0, 0);
   const todayKey = formatLocalDate(today);
   const tomorrowKey = formatLocalDate(addDays(today, 1));
-  const withinDays = options?.withinDays ?? 7;
-  const endKey = formatLocalDate(addDays(today, withinDays));
+  const withinDays = options?.withinDays;
   const limit = options?.limit;
 
-  const candidates = listUpcomingPendingReminders(reminders, today).filter((reminder) =>
-    isWithinDateRange(reminder.dueDate, todayKey, endKey)
-  );
+  const candidates = listUpcomingPendingReminders(reminders, today).filter((reminder) => {
+    if (withinDays === undefined) {
+      return true;
+    }
+
+    const endKey = formatLocalDate(addDays(today, withinDays));
+    return isWithinDateRange(reminder.dueDate, todayKey, endKey);
+  });
 
   const items: UpcomingReminderItem[] = [];
 

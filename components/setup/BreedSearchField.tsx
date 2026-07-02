@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 
 type BreedSearchFieldProps = {
   breed: string | null;
@@ -31,6 +32,7 @@ export function BreedSearchField({
   accessibilityLabel,
   onBreedChange,
 }: BreedSearchFieldProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -162,7 +164,7 @@ export function BreedSearchField({
         {breed && !focused ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Clear breed"
+            accessibilityLabel={t('setup.petNameBreed.breedClearA11y')}
             hitSlop={8}
             onPress={handleClear}
             style={({ pressed }) => [styles.trailingAction, { opacity: pressed ? 0.65 : 1 }]}>
@@ -171,7 +173,7 @@ export function BreedSearchField({
         ) : showResults ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close list"
+            accessibilityLabel={t('setup.petNameBreed.breedCloseListA11y')}
             hitSlop={8}
             onPress={handleClose}
             style={({ pressed }) => [styles.trailingAction, { opacity: pressed ? 0.65 : 1 }]}>

@@ -104,7 +104,7 @@ export function UserCard() {
 
       <View style={styles.identity}>
         <Pressable
-          accessibilityHint="Opens photo picker"
+          accessibilityHint={t('profile.openPhotoPickerHintA11y')}
           accessibilityLabel={t('profile.changePhotoA11y')}
           accessibilityRole="button"
           disabled={isPickingPhoto}
@@ -121,7 +121,7 @@ export function UserCard() {
         </Pressable>
 
         <Pressable
-          accessibilityHint="Opens name editor"
+          accessibilityHint={t('profile.openNameEditorHintA11y')}
           accessibilityLabel={displayName ? `${t('profile.editNameA11y')}, ${displayName}` : t('profile.addYourName')}
           accessibilityRole="button"
           onPress={handleEditNamePress}

@@ -26,7 +26,7 @@ export default function SplashScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
           <Image
-            accessibilityLabel="Lulu"
+            accessibilityLabel={t('welcome.appName')}
             source={LULU_LOGO}
             style={styles.logo}
             contentFit="contain"

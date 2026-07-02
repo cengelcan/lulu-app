@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 
 const LULU_LOGO = require('@/assets/images/lulu-logo-transparent.png');
 const LOGO_SIZE = 132;
@@ -15,13 +16,14 @@ type AuthBrandingHeaderProps = {
 };
 
 export function AuthBrandingHeader({ title, subtitle }: AuthBrandingHeaderProps) {
+  const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
 
   return (
     <View style={styles.container}>
       <Image
-        accessibilityLabel="Lulu"
+        accessibilityLabel={t('welcome.appName')}
         source={LULU_LOGO}
         style={styles.logo}
         contentFit="contain"

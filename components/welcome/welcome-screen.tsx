@@ -64,7 +64,7 @@ export function WelcomeScreen({
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <Image
-            accessibilityLabel="Lulu"
+            accessibilityLabel={appName}
             source={LULU_LOGO}
             style={styles.logo}
             contentFit="contain"

@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { PET_SPECIES_ICON_PORTRAIT_CROP, PET_SPECIES_ICONS } from '@/constants/pet-species';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import type { PetSpecies } from '@/types/pet';
 
 type PetAvatarProps = {
@@ -21,6 +22,7 @@ export function PetAvatar({
   accentBorder = false,
   accentColor,
 }: PetAvatarProps) {
+  const { t } = useTranslation();
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
@@ -51,7 +53,7 @@ export function PetAvatar({
   if (photoUri) {
     return (
       <Image
-        accessibilityLabel="Pet photo"
+        accessibilityLabel={t('pet.photoA11y')}
         contentFit="cover"
         source={{ uri: photoUri }}
         style={[styles.avatar, avatarStyle, { borderWidth: resolvedBorderWidth }]}
@@ -64,7 +66,7 @@ export function PetAvatar({
 
   return (
     <View
-      accessibilityLabel="Pet photo placeholder"
+      accessibilityLabel={t('pet.photoPlaceholderA11y')}
       style={[
         styles.placeholder,
         avatarStyle,

@@ -141,6 +141,8 @@ export type Translations = {
       breedPlaceholder: string;
       breedNoResults: string;
       namePlaceholder: string;
+      breedClearA11y: string;
+      breedCloseListA11y: string;
     };
     petAgeHealth: {
       title: string;
@@ -153,6 +155,8 @@ export type Translations = {
       healthPlaceholder: string;
       healthNoResults: string;
       healthAccessibilityLabel: string;
+      healthClearA11y: string;
+      healthCloseListA11y: string;
       ageHintFallbackName: string;
       ageHintNewborn: string;
       ageHintOneMonth: string;
@@ -642,6 +646,10 @@ export type Translations = {
     openSettingsA11y: string;
     changePhotoA11y: string;
     editNameA11y: string;
+    photoA11y: string;
+    photoPlaceholderA11y: string;
+    openPhotoPickerHintA11y: string;
+    openNameEditorHintA11y: string;
     photoAccessTitle: string;
     photoAccessMessage: string;
     couldNotSavePhoto: string;
@@ -681,6 +689,8 @@ export type Translations = {
     notSet: string;
     none: string;
     profileTitle: string;
+    photoA11y: string;
+    photoPlaceholderA11y: string;
     editProfile: string;
     editProfileA11y: string;
     editTitle: string;

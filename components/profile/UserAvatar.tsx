@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 
 const BADGE_SIZE = 28;
 
@@ -14,6 +15,7 @@ type UserAvatarProps = {
 };
 
 export function UserAvatar({ photoUri, size = 88, showEditBadge = false }: UserAvatarProps) {
+  const { t } = useTranslation();
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
   const iconColor = useThemeColor({}, 'icon');
@@ -29,14 +31,14 @@ export function UserAvatar({ photoUri, size = 88, showEditBadge = false }: UserA
 
   const avatarContent = photoUri ? (
     <Image
-      accessibilityLabel="Profile photo"
+      accessibilityLabel={t('profile.photoA11y')}
       contentFit="cover"
       source={{ uri: photoUri }}
       style={[styles.avatar, avatarStyle]}
     />
   ) : (
     <View
-      accessibilityLabel="Profile photo placeholder"
+      accessibilityLabel={t('profile.photoPlaceholderA11y')}
       style={[
         styles.placeholder,
         avatarStyle,

@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import type { HealthCondition } from '@/types/pet';
 
 type HealthConditionsSearchFieldProps = {
@@ -34,6 +35,7 @@ export function HealthConditionsSearchField({
   onToggleHealthCondition,
   onClearHealthConditions,
 }: HealthConditionsSearchFieldProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -157,7 +159,7 @@ export function HealthConditionsSearchField({
         {hasSelection && !focused ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Clear health conditions"
+            accessibilityLabel={t('setup.petAgeHealth.healthClearA11y')}
             hitSlop={8}
             onPress={handleClear}
             style={({ pressed }) => [styles.trailingAction, { opacity: pressed ? 0.65 : 1 }]}>
@@ -166,7 +168,7 @@ export function HealthConditionsSearchField({
         ) : showResults ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close list"
+            accessibilityLabel={t('setup.petAgeHealth.healthCloseListA11y')}
             hitSlop={8}
             onPress={handleClose}
             style={({ pressed }) => [styles.trailingAction, { opacity: pressed ? 0.65 : 1 }]}>

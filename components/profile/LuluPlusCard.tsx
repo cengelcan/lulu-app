@@ -139,7 +139,13 @@ export function LuluPlusCard() {
         </Pressable>
       </LinearGradient>
 
-      <LuluPlusPaywall visible={isModalVisible} onDismiss={() => setIsModalVisible(false)} />
+      {isModalVisible ? (
+        <LuluPlusPaywall
+          key={language}
+          visible
+          onDismiss={() => setIsModalVisible(false)}
+        />
+      ) : null}
     </>
   );
 }

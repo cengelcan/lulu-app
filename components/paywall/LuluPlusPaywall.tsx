@@ -267,7 +267,7 @@ function BenefitCard({
 }
 
 export function LuluPlusPaywall({ visible, onDismiss }: LuluPlusPaywallProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const insets = useSafeAreaInsets();
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
@@ -313,7 +313,11 @@ export function LuluPlusPaywall({ visible, onDismiss }: LuluPlusPaywallProps) {
   };
 
   return (
-    <Modal animationType="slide" visible={visible} onRequestClose={handleDismiss}>
+    <Modal
+      key={language}
+      animationType="slide"
+      visible={visible}
+      onRequestClose={handleDismiss}>
       <SafeAreaView style={[styles.screen, { backgroundColor }]} edges={['top']}>
         <View style={styles.topBar}>
           <View style={styles.topBarSpacer} />

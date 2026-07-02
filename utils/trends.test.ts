@@ -43,7 +43,7 @@ describe('buildDashboardTrends', () => {
     assert.equal(getMetric(trends, 'appetite')?.hasData, false);
   });
 
-  it('builds rolling seven-day check-in charts ending on the reference date', () => {
+  it('builds calendar-week check-in charts aligned with daily check-in', () => {
     const checkIns = [
       createCheckIn({ date: '2026-06-20', appetite: 'normal', energy: 'normal' }),
       createCheckIn({ date: '2026-06-22', appetite: 'less', energy: 'low' }),
@@ -54,12 +54,13 @@ describe('buildDashboardTrends', () => {
     const appetite = getMetric(trends, 'appetite');
     const energy = getMetric(trends, 'energy');
 
-    assert.equal(appetite?.chartDays.at(-1)?.date, '2026-06-23');
-    assert.equal(appetite?.chartDays.at(-1)?.value, 90);
-    assert.equal(appetite?.chartDays.at(-4)?.value, 100);
-    assert.equal(appetite?.chartDays[0]?.status, 'no_data');
-    assert.equal(energy?.chartDays.at(-1)?.status, 'normal');
-    assert.equal(energy?.chartDays.at(-2)?.status, 'attention');
+    assert.equal(appetite?.chartDays[0]?.date, '2026-06-22');
+    assert.equal(appetite?.chartDays.at(-1)?.date, '2026-06-28');
+    assert.equal(appetite?.chartDays[0]?.value, 40);
+    assert.equal(appetite?.chartDays[1]?.value, 90);
+    assert.equal(appetite?.chartDays[2]?.status, 'no_data');
+    assert.equal(energy?.chartDays[1]?.status, 'normal');
+    assert.equal(energy?.chartDays[0]?.status, 'attention');
   });
 
   it('maps poop and pee to daily status rows', () => {
@@ -80,10 +81,10 @@ describe('buildDashboardTrends', () => {
 
     assert.equal(getMetric(trends, 'poop')?.displayMode, 'status');
     assert.equal(getMetric(trends, 'pee')?.displayMode, 'status');
-    assert.equal(getMetric(trends, 'poop')?.chartDays.at(-2)?.status, 'normal');
-    assert.equal(getMetric(trends, 'poop')?.chartDays.at(-1)?.status, 'not_observed');
-    assert.equal(getMetric(trends, 'pee')?.chartDays.at(-2)?.status, 'attention');
-    assert.equal(getMetric(trends, 'pee')?.chartDays.at(-1)?.status, 'normal');
+    assert.equal(getMetric(trends, 'poop')?.chartDays[0]?.status, 'normal');
+    assert.equal(getMetric(trends, 'poop')?.chartDays[1]?.status, 'not_observed');
+    assert.equal(getMetric(trends, 'pee')?.chartDays[0]?.status, 'attention');
+    assert.equal(getMetric(trends, 'pee')?.chartDays[1]?.status, 'normal');
   });
 });
 

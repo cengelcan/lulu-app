@@ -1,6 +1,5 @@
 import type { Appetite, CheckIn, Energy, Mood, Pee, Poop, WaterIntake } from '@/types/check-in';
-import { addDays } from '@/services/notifications/date';
-import { formatLocalDate } from '@/utils/date';
+import { formatLocalDate, getCurrentWeekDays } from '@/utils/date';
 
 export const TREND_CHART_DAYS = 7;
 
@@ -61,15 +60,6 @@ export type TrendMetric = {
 export type DashboardTrends = {
   metrics: TrendMetric[];
 };
-
-function buildRollingDayKeys(referenceDate: Date, count: number): string[] {
-  const today = new Date(referenceDate);
-  today.setHours(0, 0, 0, 0);
-
-  return Array.from({ length: count }, (_, index) =>
-    formatLocalDate(addDays(today, -(count - 1 - index)))
-  );
-}
 
 function getScoreStatus(score: number): TrendDailyStatus {
   if (score >= 70) {
@@ -176,7 +166,7 @@ export function buildDashboardTrends(
   checkIns: CheckIn[],
   referenceDate: Date = new Date()
 ): DashboardTrends {
-  const dayKeys = buildRollingDayKeys(referenceDate, TREND_CHART_DAYS);
+  const dayKeys = getCurrentWeekDays(referenceDate).map(formatLocalDate);
 
   const metricsByKind: Record<TrendMetricKind, TrendMetric> = {
     appetite: buildLineMetric(

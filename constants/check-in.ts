@@ -70,7 +70,6 @@ export const CHECK_IN_CATEGORIES: {
   translationKey: string;
   optionsTranslationKey: string;
   statusTranslationKey: string;
-  controlType: 'segmented' | 'slider';
 }[] = [
   {
     key: 'appetite',
@@ -79,7 +78,6 @@ export const CHECK_IN_CATEGORIES: {
     translationKey: 'checkIn.categories.appetite',
     optionsTranslationKey: 'checkIn.options.appetite',
     statusTranslationKey: 'checkIn.status.appetite',
-    controlType: 'segmented',
   },
   {
     key: 'waterIntake',
@@ -88,7 +86,6 @@ export const CHECK_IN_CATEGORIES: {
     translationKey: 'checkIn.categories.waterIntake',
     optionsTranslationKey: 'checkIn.options.waterIntake',
     statusTranslationKey: 'checkIn.status.waterIntake',
-    controlType: 'segmented',
   },
   {
     key: 'poop',
@@ -97,7 +94,6 @@ export const CHECK_IN_CATEGORIES: {
     translationKey: 'checkIn.categories.poop',
     optionsTranslationKey: 'checkIn.options.poop',
     statusTranslationKey: 'checkIn.status.poop',
-    controlType: 'segmented',
   },
   {
     key: 'pee',
@@ -106,7 +102,6 @@ export const CHECK_IN_CATEGORIES: {
     translationKey: 'checkIn.categories.pee',
     optionsTranslationKey: 'checkIn.options.pee',
     statusTranslationKey: 'checkIn.status.pee',
-    controlType: 'segmented',
   },
   {
     key: 'energy',
@@ -115,7 +110,6 @@ export const CHECK_IN_CATEGORIES: {
     translationKey: 'checkIn.categories.energy',
     optionsTranslationKey: 'checkIn.options.energy',
     statusTranslationKey: 'checkIn.status.energy',
-    controlType: 'slider',
   },
   {
     key: 'mood',
@@ -124,7 +118,6 @@ export const CHECK_IN_CATEGORIES: {
     translationKey: 'checkIn.categories.mood',
     optionsTranslationKey: 'checkIn.options.mood',
     statusTranslationKey: 'checkIn.status.mood',
-    controlType: 'slider',
   },
 ];
 

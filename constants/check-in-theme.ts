@@ -13,9 +13,24 @@ export const CheckInTheme = {
   toneAbnormalBg: 'rgba(248, 113, 113, 0.22)',
   toneNeutral: '#A1A1AA',
   toneNeutralBg: 'rgba(255,255,255,0.10)',
+  toneBrand: '#C4B5FD',
+  toneBrandBg: 'rgba(169, 152, 214, 0.28)',
+  toneAmber: '#FCD34D',
+  toneAmberBg: 'rgba(252, 211, 77, 0.20)',
+  toneOrange: '#FDBA74',
+  toneOrangeBg: 'rgba(253, 186, 116, 0.24)',
+  toneMint: '#6EE7B8',
+  toneMintBg: 'rgba(110, 231, 184, 0.24)',
 } as const;
 
-export type CheckInOptionTone = 'normal' | 'abnormal' | 'neutral';
+export type CheckInOptionTone =
+  | 'normal'
+  | 'abnormal'
+  | 'neutral'
+  | 'brand'
+  | 'amber'
+  | 'orange'
+  | 'mint';
 
 export function getCheckInToneColors(tone: CheckInOptionTone) {
   switch (tone) {
@@ -25,5 +40,13 @@ export function getCheckInToneColors(tone: CheckInOptionTone) {
       return { foreground: CheckInTheme.toneAbnormal, background: CheckInTheme.toneAbnormalBg };
     case 'neutral':
       return { foreground: CheckInTheme.toneNeutral, background: CheckInTheme.toneNeutralBg };
+    case 'brand':
+      return { foreground: CheckInTheme.toneBrand, background: CheckInTheme.toneBrandBg };
+    case 'amber':
+      return { foreground: CheckInTheme.toneAmber, background: CheckInTheme.toneAmberBg };
+    case 'orange':
+      return { foreground: CheckInTheme.toneOrange, background: CheckInTheme.toneOrangeBg };
+    case 'mint':
+      return { foreground: CheckInTheme.toneMint, background: CheckInTheme.toneMintBg };
   }
 }

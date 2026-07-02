@@ -302,9 +302,9 @@ export const de: Translations = {
         high: 'Aktiver als üblich',
       },
       mood: {
-        low: 'Wirkt unruhig',
-        normal: 'Ruhig und zufrieden',
-        high: 'Verspielt und munter',
+        low: 'Unruhig',
+        normal: 'Normal',
+        high: 'Fröhlich',
       },
     },
     options: {
@@ -324,9 +324,9 @@ export const de: Translations = {
         high: 'Hoch',
       },
       mood: {
-        low: 'Niedrig',
+        low: 'Unruhig',
         normal: 'Normal',
-        high: 'Hoch',
+        high: 'Fröhlich',
       },
       pee: {
         not_observed: 'Nicht beobachtet',

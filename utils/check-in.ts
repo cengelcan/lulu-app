@@ -11,6 +11,32 @@ export function getCheckInOptionTone(category: CheckInCategory, value: string): 
     return 'neutral';
   }
 
+  if (category === 'energy') {
+    switch (value) {
+      case 'low':
+        return 'amber';
+      case 'normal':
+        return 'brand';
+      case 'high':
+        return 'orange';
+      default:
+        return 'neutral';
+    }
+  }
+
+  if (category === 'mood') {
+    switch (value) {
+      case 'low':
+        return 'amber';
+      case 'normal':
+        return 'brand';
+      case 'high':
+        return 'mint';
+      default:
+        return 'neutral';
+    }
+  }
+
   if (value === CHECK_IN_NORMAL_VALUES[category]) {
     return 'normal';
   }

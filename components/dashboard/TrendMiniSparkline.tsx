@@ -14,7 +14,7 @@ import {
   type TrendDailyStatus,
 } from '@/utils/trends';
 
-const DOT_SIZE = 5;
+const DOT_SIZE = 6;
 const LINE_WIDTH = 2;
 const CHART_PADDING = 2;
 
@@ -120,7 +120,7 @@ export function TrendMiniSparkline({
   chartDays,
   accentColor,
   useStatusColors = true,
-  height = 34,
+  height = 44,
 }: TrendMiniSparklineProps) {
   const { language } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');

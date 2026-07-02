@@ -296,9 +296,9 @@ export const en: Translations = {
         high: 'Higher activity',
       },
       mood: {
-        low: 'Seems unsettled',
-        normal: 'Calm and happy',
-        high: 'Playful and upbeat',
+        low: 'Unsettled',
+        normal: 'Normal',
+        high: 'Happy',
       },
     },
     options: {
@@ -318,9 +318,9 @@ export const en: Translations = {
         high: 'High',
       },
       mood: {
-        low: 'Low',
+        low: 'Unsettled',
         normal: 'Normal',
-        high: 'High',
+        high: 'Happy',
       },
       pee: {
         not_observed: 'Not observed',

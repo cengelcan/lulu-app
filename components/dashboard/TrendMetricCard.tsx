@@ -75,7 +75,7 @@ export function TrendMetricCard({ metric }: TrendMetricCardProps) {
   return (
     <View style={[styles.card, { backgroundColor: surfaceElevatedColor, borderColor }]}>
       <View style={styles.titleRow}>
-        <IconSymbol name={config.icon} size={16} color={config.accentColor} />
+        <IconSymbol name={config.icon} size={20} color={config.accentColor} />
         <ThemedText
           lightColor={titleColor}
           darkColor={titleColor}
@@ -92,7 +92,7 @@ export function TrendMetricCard({ metric }: TrendMetricCardProps) {
           chartDays={metric.chartDays}
           accentColor={config.accentColor}
           useStatusColors={metric.kind !== 'weight'}
-          height={48}
+          height={68}
         />
       )}
     </View>
@@ -104,9 +104,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     gap: Spacing.sm,
-    minHeight: 120,
+    minHeight: 164,
     justifyContent: 'space-between',
   },
   titleRow: {

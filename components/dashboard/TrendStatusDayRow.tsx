@@ -43,19 +43,22 @@ export function TrendStatusDayRow({ chartDays }: TrendStatusDayRowProps) {
         {chartDays.map((day) => {
           if (day.status === 'no_data') {
             return (
-              <View key={day.date} style={[styles.emptySlot, { borderColor }]} />
+              <View key={day.date} style={styles.iconSlot}>
+                <View style={[styles.emptySlot, { borderColor }]} />
+              </View>
             );
           }
 
           const config = STATUS_CONFIG[day.status];
 
           return (
-            <IconSymbol
-              key={day.date}
-              name={config.icon}
-              size={14}
-              color={config.color}
-            />
+            <View key={day.date} style={styles.iconSlot}>
+              <IconSymbol
+                name={config.icon}
+                size={24}
+                color={config.color}
+              />
+            </View>
           );
         })}
       </View>
@@ -83,13 +86,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    minHeight: 48,
+    minHeight: 80,
     paddingHorizontal: 2,
   },
+  iconSlot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptySlot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     opacity: 0.35,
   },

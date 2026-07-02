@@ -12,7 +12,7 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePetStore } from '@/stores/pet.store';
-import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
+import { STACK_BACK_ONLY_OPTIONS, HEADER_ACTION_CONTAINER_STYLE } from '@/constants/navigation';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
 
@@ -86,7 +86,7 @@ export default function PetProfileScreen() {
       headerShown: true as const,
       title: pet?.name ?? t('pet.profileTitle'),
       headerRight,
-      headerRightContainerStyle: { paddingRight: Spacing.md },
+      headerRightContainerStyle: HEADER_ACTION_CONTAINER_STYLE,
     }),
     [headerRight, pet?.name, t]
   );

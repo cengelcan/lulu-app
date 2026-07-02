@@ -29,7 +29,7 @@ import {
   PET_SPAY_NEUTER_STATUS_OPTIONS,
 } from '@/constants/check-in';
 import { getBreedOptionsForSpecies, isBreedValidForSpecies } from '@/constants/pet-breeds';
-import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
+import { HEADER_ACTION_CONTAINER_STYLE, STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -546,7 +546,7 @@ export default function EditPetScreen() {
       title: t('pet.editTitle'),
       headerBackButtonMenuEnabled: false,
       headerRight,
-      headerRightContainerStyle: { paddingRight: Spacing.md },
+      headerRightContainerStyle: HEADER_ACTION_CONTAINER_STYLE,
     }),
     [headerRight, t]
   );

@@ -1,7 +1,12 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { HeaderButton } from '@react-navigation/elements';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+
+const IOS_HEADER_ACTION_HEIGHT = 36;
+const IOS_HEADER_TEXT_MIN_WIDTH = 44;
+const IOS_HEADER_TEXT_CHAR_WIDTH = 8.5;
+const IOS_HEADER_TEXT_HORIZONTAL_PADDING = 16;
 
 type HeaderTextButtonProps = {
   accessibilityLabel: string;
@@ -11,6 +16,13 @@ type HeaderTextButtonProps = {
   onPress: () => void;
 };
 
+function getIosHeaderTextButtonWidth(label: string): number {
+  return Math.max(
+    IOS_HEADER_TEXT_MIN_WIDTH,
+    Math.ceil(label.length * IOS_HEADER_TEXT_CHAR_WIDTH) + IOS_HEADER_TEXT_HORIZONTAL_PADDING
+  );
+}
+
 export function HeaderTextButton({
   accessibilityLabel,
   color,
@@ -18,29 +30,34 @@ export function HeaderTextButton({
   label,
   onPress,
 }: HeaderTextButtonProps) {
+  const iosDimensions =
+    Platform.OS === 'ios'
+      ? {
+          width: getIosHeaderTextButtonWidth(label),
+          height: IOS_HEADER_ACTION_HEIGHT,
+        }
+      : null;
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      disabled={disabled}
-      hitSlop={8}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.button,
-        { opacity: disabled ? 0.4 : pressed ? 0.6 : 1 },
-      ]}>
-      <ThemedText lightColor={color} darkColor={color} type="defaultSemiBold" numberOfLines={1}>
-        {label}
-      </ThemedText>
-    </Pressable>
+    <View style={[styles.slot, iosDimensions]}>
+      <HeaderButton
+        accessibilityLabel={accessibilityLabel}
+        disabled={disabled}
+        onPress={onPress}>
+        <ThemedText lightColor={color} darkColor={color} type="defaultSemiBold" numberOfLines={1}>
+          {label}
+        </ThemedText>
+      </HeaderButton>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  slot: {
     alignSelf: 'flex-end',
+    flexGrow: 0,
+    flexShrink: 0,
     justifyContent: 'center',
-    minHeight: 36,
-    paddingHorizontal: Spacing.sm,
+    alignItems: 'center',
   },
 });

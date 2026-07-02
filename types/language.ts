@@ -1,5 +1,3 @@
-import { resolveDeviceLanguage } from '@/utils/device-language';
-
 export type ResolvedLanguage = 'en' | 'de';
 
 /** Stored user preference — `system` follows the device locale. */
@@ -24,13 +22,3 @@ export const APP_LANGUAGE_LABELS: Record<ResolvedLanguage, string> = {
   en: 'English',
   de: 'Deutsch',
 };
-
-export function resolveLanguagePreference(
-  preference: AppLanguagePreference
-): ResolvedLanguage {
-  if (preference === 'system') {
-    return resolveDeviceLanguage();
-  }
-
-  return preference;
-}

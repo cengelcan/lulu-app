@@ -2,10 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { StorageKeys } from '@/constants/storage-keys';
 import type { AppLanguagePreference, ResolvedLanguage } from '@/types/language';
-import {
-  DEFAULT_APP_LANGUAGE_PREFERENCE,
-  resolveLanguagePreference,
-} from '@/types/language';
+import { DEFAULT_APP_LANGUAGE_PREFERENCE } from '@/types/language';
+import { resolveLanguagePreference } from '@/utils/resolve-language-preference';
 import type { ReminderTime } from '@/types/reminder';
 import { DEFAULT_REMINDER_TIME } from '@/types/reminder';
 import { isValidReminderTime } from '@/utils/time';

@@ -289,21 +289,29 @@ reports.appStoreBadgeLine2
 
 ### Tasks
 
-- [ ] Add `*A11y` keys for:
-  - [ ] `components/pet/PetAvatar.tsx`
-  - [ ] `components/profile/UserAvatar.tsx`
-  - [ ] `components/setup/BreedSearchField.tsx`
-  - [ ] `components/setup/HealthConditionsSearchField.tsx`
-  - [ ] `components/profile/UserCard.tsx`
-  - [ ] `components/welcome/welcome-screen.tsx` / `app/index.tsx` — logo label (`welcome.appName` or `common.appNameA11y`)
+- [x] Add `*A11y` keys for:
+  - [x] `components/pet/PetAvatar.tsx`
+  - [x] `components/profile/UserAvatar.tsx`
+  - [x] `components/setup/BreedSearchField.tsx`
+  - [x] `components/setup/HealthConditionsSearchField.tsx`
+  - [x] `components/profile/UserCard.tsx`
+  - [x] `components/welcome/welcome-screen.tsx` / `app/index.tsx` — logo label (`welcome.appName` or `common.appNameA11y`)
+  - [x] `components/auth/AuthBrandingHeader.tsx` — logo label (`welcome.appName`)
 
 ### Acceptance criteria
 
-- VoiceOver reads German labels when app language is DE
+- [x] VoiceOver reads German labels when app language is DE
 
 ---
 
 ## Phase 7 — QA & release sign-off
+
+### Automated verification (CI / local)
+
+- [x] `npm run i18n:check` — EN/DE key parity, no unexpected identical strings
+- [x] `npm run i18n:check:strict` — same, fails CI on allowlist drift
+- [x] `npm test` — parity, device-language fallback, language preference, notification copy, translateError
+- [x] No hardcoded `accessibilityLabel` / `accessibilityHint` English literals in `app/` or `components/`
 
 ### Manual iOS test checklist
 
@@ -398,3 +406,5 @@ reports.appStoreBadgeLine2
 | 2026-07-02 | 3 | Store error keys + translateError; splash and error screens localized |
 | 2026-07-02 | 4 | PDF HTML lang/title, share sheet, App Store badge, QR alt localized |
 | 2026-07-02 | 5 | Android notification channels, profile share message, setup preview fallback |
+| 2026-07-02 | 6 | Avatar/setup/profile a11y labels; logo labels on welcome, splash, auth |
+| 2026-07-02 | 7 | Automated sign-off tests; manual device checklist pending |

@@ -13,8 +13,8 @@ import { ensureAndroidNotificationChannels } from '@/services/notifications/perm
 import type { AppLanguagePreference, ResolvedLanguage } from '@/types/language';
 import {
   DEFAULT_APP_LANGUAGE_PREFERENCE,
-  resolveLanguagePreference,
 } from '@/types/language';
+import { resolveLanguagePreference } from '@/utils/resolve-language-preference';
 
 type LanguageState = {
   languagePreference: AppLanguagePreference;

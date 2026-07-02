@@ -23,7 +23,8 @@ import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
-import { DEFAULT_APP_LANGUAGE_PREFERENCE, resolveLanguagePreference } from '@/types/language';
+import { DEFAULT_APP_LANGUAGE_PREFERENCE } from '@/types/language';
+import { resolveLanguagePreference } from '@/utils/resolve-language-preference';
 
 export async function deleteAllLocalData(): Promise<void> {
   await cancelCheckInReminder();

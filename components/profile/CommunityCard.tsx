@@ -3,7 +3,7 @@ import * as StoreReview from 'expo-store-review';
 
 import { ProfileListRow } from '@/components/profile/ProfileListRow';
 import { Card } from '@/components/ui/Card';
-import { APP_STORE_REVIEW_URL, INSTAGRAM_URL, SHARE_MESSAGE, SHARE_URL } from '@/constants/social';
+import { APP_STORE_REVIEW_URL, INSTAGRAM_URL, SHARE_URL } from '@/constants/social';
 import { useTranslation } from '@/hooks/use-translation';
 import {
   getLastStoreReviewPromptAt,
@@ -44,7 +44,7 @@ export function CommunityCard() {
 
   const handleShare = async () => {
     await Share.share({
-      message: `${SHARE_MESSAGE} ${SHARE_URL}`,
+      message: `${t('profile.shareMessage')} ${SHARE_URL}`,
       url: SHARE_URL,
     });
   };

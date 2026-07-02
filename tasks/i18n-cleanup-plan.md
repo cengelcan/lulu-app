@@ -44,7 +44,7 @@ This plan is derived from the i18n audit (2026-07-02). Work in the order below �
 | 2 | iOS picker & modal chrome | Frequent untranslated UI in setup/edit/check-in | ✅ |
 | 3 | Store & bootstrap errors | Error paths always English | ✅ |
 | 4 | PDF shell & export UX | Vet-facing exports partially English | ✅ |
-| 5 | Notifications & sharing gaps | Android channels, share message | ⬜ |
+| 5 | Notifications & sharing gaps | Android channels, share message | ✅ |
 | 6 | Accessibility labels | VoiceOver gaps | ⬜ |
 | 7 | QA & release sign-off | Regressions slip through | ⬜ |
 
@@ -267,13 +267,13 @@ reports.appStoreBadgeLine2
 
 ### Tasks
 
-- [ ] `services/notifications/permissions.ts` — localize Android channel names
-  - [ ] `notifications.channelCheckIn`
-  - [ ] `notifications.channelPetReminders`
-  - [ ] Re-call `ensureAndroidNotificationChannels()` on language change (Android only)
-- [ ] `constants/social.ts` — move `SHARE_MESSAGE` to `profile.shareMessage` in catalogs
-- [ ] `components/profile/CommunityCard.tsx` — use `t('profile.shareMessage')`
-- [ ] `components/setup/NotificationPermissionPrompt.tsx` — replace `'your pet'` with `t('setup.notifications.previewNameFallback')` or `setup.petAgeHealth.ageHintFallbackName`
+- [x] `services/notifications/permissions.ts` — localize Android channel names
+  - [x] `notifications.channelCheckIn`
+  - [x] `notifications.channelPetReminders`
+  - [x] Re-call `ensureAndroidNotificationChannels()` on language change (Android only)
+- [x] `constants/social.ts` — move `SHARE_MESSAGE` to `profile.shareMessage` in catalogs
+- [x] `components/profile/CommunityCard.tsx` — use `t('profile.shareMessage')`
+- [x] `components/setup/NotificationPermissionPrompt.tsx` — replace `'your pet'` with `t('setup.notifications.previewNameFallback')` or `setup.petAgeHealth.ageHintFallbackName`
 
 ### Acceptance criteria
 
@@ -397,3 +397,4 @@ reports.appStoreBadgeLine2
 | 2026-07-02 | 2 | iOS picker/modal chrome localized via common.* keys |
 | 2026-07-02 | 3 | Store error keys + translateError; splash and error screens localized |
 | 2026-07-02 | 4 | PDF HTML lang/title, share sheet, App Store badge, QR alt localized |
+| 2026-07-02 | 5 | Android notification channels, profile share message, setup preview fallback |

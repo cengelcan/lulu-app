@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
 
 import {
   getAppLanguagePreference,
@@ -8,6 +9,7 @@ import {
   syncCheckInReminderSchedule,
   syncPetReminderNotificationSchedule,
 } from '@/services/notifications';
+import { ensureAndroidNotificationChannels } from '@/services/notifications/permissions';
 import type { AppLanguagePreference, ResolvedLanguage } from '@/types/language';
 import {
   DEFAULT_APP_LANGUAGE_PREFERENCE,
@@ -37,21 +39,33 @@ export const useLanguageStore = create<LanguageState>((set) => ({
         resolvedLanguage: resolveLanguagePreference(languagePreference),
         isLoading: false,
       });
+      if (Platform.OS === 'android') {
+        void ensureAndroidNotificationChannels(resolveLanguagePreference(languagePreference));
+      }
     } catch {
       set({
         languagePreference: DEFAULT_APP_LANGUAGE_PREFERENCE,
         resolvedLanguage: resolveLanguagePreference(DEFAULT_APP_LANGUAGE_PREFERENCE),
         isLoading: false,
       });
+      if (Platform.OS === 'android') {
+        void ensureAndroidNotificationChannels(
+          resolveLanguagePreference(DEFAULT_APP_LANGUAGE_PREFERENCE)
+        );
+      }
     }
   },
 
   saveLanguage: async (languagePreference) => {
+    const resolvedLanguage = resolveLanguagePreference(languagePreference);
     await setAppLanguagePreference(languagePreference);
     set({
       languagePreference,
-      resolvedLanguage: resolveLanguagePreference(languagePreference),
+      resolvedLanguage,
     });
+    if (Platform.OS === 'android') {
+      void ensureAndroidNotificationChannels(resolvedLanguage);
+    }
     void syncCheckInReminderSchedule();
     void syncPetReminderNotificationSchedule();
   },

@@ -194,6 +194,7 @@ export type Translations = {
       previewTitle: string;
       previewBody: string;
       previewTimeFallback: string;
+      previewNameFallback: string;
       benefitDaily: string;
       benefitSettings: string;
       hint: string;
@@ -620,6 +621,8 @@ export type Translations = {
     reminderTitle: string;
     reminderBody: string;
     petReminderBody: string;
+    channelCheckIn: string;
+    channelPetReminders: string;
   };
   myPets: {
     noPetsTitle: string;
@@ -657,6 +660,7 @@ export type Translations = {
     upgradeA11y: string;
     rateLulu: string;
     shareLulu: string;
+    shareMessage: string;
     followInstagram: string;
     privacyPolicy: string;
     terms: string;

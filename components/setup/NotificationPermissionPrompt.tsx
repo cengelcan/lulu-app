@@ -9,6 +9,7 @@ type NotificationPermissionPromptProps = {
   petName: string;
   previewTitle: string;
   previewBody: string;
+  previewNameFallback: string;
   previewAppName: string;
   previewTimeLabel: string;
   benefitDaily: string;
@@ -54,6 +55,7 @@ export function NotificationPermissionPrompt({
   petName,
   previewTitle,
   previewBody,
+  previewNameFallback,
   previewAppName,
   previewTimeLabel,
   benefitDaily,
@@ -66,7 +68,7 @@ export function NotificationPermissionPrompt({
   const surfaceElevatedColor = useThemeColor({}, 'surfaceElevated');
   const borderColor = useThemeColor({}, 'border');
 
-  const previewMessage = previewBody.replace('{{name}}', petName.trim() || 'your pet');
+  const previewMessage = previewBody.replace('{{name}}', petName.trim() || previewNameFallback);
 
   return (
     <View style={styles.container}>

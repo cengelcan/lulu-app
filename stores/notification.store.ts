@@ -17,6 +17,7 @@ import {
   setPetReminderNotificationsEnabled,
   type NotificationPermissionStatus,
 } from '@/storage/prefs.storage';
+import { useLanguageStore } from '@/stores/language.store';
 import type { ReminderTime } from '@/types/reminder';
 import { getStoreErrorKey } from '@/utils/store-error';
 
@@ -82,7 +83,9 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       let resolvedPermission = permission;
 
       if (permission === 'allowed') {
-        const osGranted = await requestNotificationPermission();
+        const osGranted = await requestNotificationPermission(
+          useLanguageStore.getState().resolvedLanguage
+        );
         resolvedPermission = resolveStoredNotificationPermission(permission, osGranted);
       } else {
         await cancelCheckInReminder();
@@ -108,7 +111,9 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       let resolvedEnabled = enabled;
 
       if (enabled) {
-        const osGranted = await requestNotificationPermission();
+        const osGranted = await requestNotificationPermission(
+          useLanguageStore.getState().resolvedLanguage
+        );
         if (!osGranted) {
           resolvedEnabled = false;
         }

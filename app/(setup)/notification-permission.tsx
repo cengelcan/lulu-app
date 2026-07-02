@@ -165,6 +165,7 @@ export default function NotificationPermissionScreen() {
         previewAppName={t('welcome.appName')}
         previewTitle={t('setup.notifications.previewTitle')}
         previewBody={t('setup.notifications.previewBody')}
+        previewNameFallback={t('setup.notifications.previewNameFallback')}
         previewTimeLabel={previewTimeLabel}
         benefitDaily={t('setup.notifications.benefitDaily')}
         benefitSettings={t('setup.notifications.benefitSettings')}

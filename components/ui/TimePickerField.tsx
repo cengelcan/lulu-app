@@ -8,6 +8,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { IOS_PICKER_HEIGHT, IOS_PICKER_WIDTH, IosPickerSheet } from '@/components/ui/IosPickerSheet';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 import type { ReminderTime } from '@/types/reminder';
 import {
   formatReminderTime,
@@ -43,6 +44,7 @@ export function TimePickerField({
   changeTimeLabel,
   isLast = false,
 }: TimePickerFieldProps) {
+  const { t } = useTranslation();
   const [showPicker, setShowPicker] = useState(false);
   const [pickerDate, setPickerDate] = useState(() => reminderTimeToDate(value));
 
@@ -260,7 +262,7 @@ export function TimePickerField({
       {Platform.OS === 'ios' ? (
         <IosPickerSheet
           visible={showPicker}
-          title="Select Time"
+          title={t('common.selectTime')}
           onClose={closePicker}
           onDone={handleIosDone}>
           <DateTimePicker

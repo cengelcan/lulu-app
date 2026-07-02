@@ -28,6 +28,7 @@ export function CheckInDatePicker({
   visible,
   onClose,
 }: CheckInDatePickerProps) {
+  const { t } = useTranslation();
   const [pickerDate, setPickerDate] = useState(() => parseLocalDate(selectedDate) ?? getTodayStart());
 
   const backgroundColor = useThemeColor({}, 'background');
@@ -66,8 +67,8 @@ export function CheckInDatePicker({
   return (
     <IosPickerSheet
       visible={visible}
-      title="Select Date"
-      leftAction={{ label: 'Cancel', onPress: onClose }}
+      title={t('common.selectDate')}
+      leftAction={{ label: t('common.cancel'), onPress: onClose }}
       onClose={onClose}
       onDone={handleIosDone}>
       <DateTimePicker

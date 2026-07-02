@@ -44,7 +44,7 @@ export function EditNameModal({
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onCancel}>
       <Pressable
-        accessibilityLabel="Dismiss dialog"
+        accessibilityLabel={t('common.dismissDialog')}
         accessibilityRole="button"
         style={styles.backdrop}
         onPress={onCancel}>

@@ -20,6 +20,11 @@ export const de: Translations = {
     today: 'Heute',
     tomorrow: 'Morgen',
     back: 'Zurück',
+    selectDate: 'Datum wählen',
+    selectTime: 'Uhrzeit wählen',
+    done: 'Fertig',
+    clear: 'Leeren',
+    dismissDialog: 'Dialog schließen',
   },
   tabs: {
     home: 'Start',

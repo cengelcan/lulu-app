@@ -47,12 +47,12 @@ export function DatePickerField({
   value,
   onChange,
   disabled = false,
-  placeholder = 'Select date',
+  placeholder,
   maximumDate = getTodayStart(),
   minimumDate = null,
   displayFormat = 'short',
 }: DatePickerFieldProps) {
-  const { language } = useTranslation();
+  const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerDate, setPickerDate] = useState(() => getPickerDate(value));
@@ -64,7 +64,8 @@ export function DatePickerField({
   const backgroundColor = useThemeColor({}, 'background');
 
   const hasValue = value.trim().length > 0;
-  const displayValue = formatDisplayValue(value, placeholder, displayFormat, locale);
+  const resolvedPlaceholder = placeholder ?? t('common.selectDate');
+  const displayValue = formatDisplayValue(value, resolvedPlaceholder, displayFormat, locale);
 
   const openPicker = () => {
     if (disabled) {
@@ -143,8 +144,8 @@ export function DatePickerField({
       {Platform.OS === 'ios' ? (
         <IosPickerSheet
           visible={showPicker}
-          title="Select Date"
-          leftAction={{ label: 'Clear', onPress: handleClear }}
+          title={t('common.selectDate')}
+          leftAction={{ label: t('common.clear'), onPress: handleClear }}
           onClose={closePicker}
           onDone={handleIosDone}>
           <DateTimePicker

@@ -3,6 +3,7 @@ import { Dimensions, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const HEADER_ACTION_WIDTH = 72;
@@ -19,6 +20,7 @@ type IosPickerSheetProps = {
   };
   onDone: () => void;
   onClose: () => void;
+  doneLabel?: string;
   children: React.ReactNode;
 };
 
@@ -28,8 +30,10 @@ export function IosPickerSheet({
   leftAction,
   onDone,
   onClose,
+  doneLabel,
   children,
 }: IosPickerSheetProps) {
+  const { t } = useTranslation();
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -69,7 +73,7 @@ export function IosPickerSheet({
               onPress={onDone}
               style={styles.headerAction}>
               <ThemedText type="defaultSemiBold" style={styles.headerActionTextRight} numberOfLines={1}>
-                Done
+                {doneLabel ?? t('common.done')}
               </ThemedText>
             </Pressable>
           </View>

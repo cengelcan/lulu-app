@@ -41,7 +41,7 @@ This plan is derived from the i18n audit (2026-07-02). Work in the order below �
 |-------|-------|-----------------|--------|
 | 0 | Tooling & CI guardrails | Key drift when adding languages | ✅ |
 | 1 | Complete German catalog | German users see English across core flows | ✅ |
-| 2 | iOS picker & modal chrome | Frequent untranslated UI in setup/edit/check-in | ⬜ |
+| 2 | iOS picker & modal chrome | Frequent untranslated UI in setup/edit/check-in | ✅ |
 | 3 | Store & bootstrap errors | Error paths always English | ⬜ |
 | 4 | PDF shell & export UX | Vet-facing exports partially English | ⬜ |
 | 5 | Notifications & sharing gaps | Android channels, share message | ⬜ |
@@ -136,13 +136,13 @@ common.dismissDialog
 
 ### Tasks
 
-- [ ] Add keys to `i18n/en.ts`, `i18n/de.ts`, `i18n/types.ts`
-- [ ] `components/ui/IosPickerSheet.tsx` — replace hardcoded `"Done"` with prop or `t('common.done')`
-- [ ] `components/ui/DatePickerField.tsx` — `title`, `leftAction.label`, default `placeholder`
-- [ ] `components/ui/TimePickerField.tsx` — `title`
-- [ ] `components/check-in/CheckInHeader.tsx` — `title`, `leftAction.label` (`Cancel` → `common.cancel`)
-- [ ] `components/ui/ConfirmModal.tsx` — default `cancelLabel` → require prop or use `t('common.cancel')`; `accessibilityLabel`
-- [ ] `components/profile/EditNameModal.tsx` — `accessibilityLabel="Dismiss dialog"`
+- [x] Add keys to `i18n/en.ts`, `i18n/de.ts`, `i18n/types.ts`
+- [x] `components/ui/IosPickerSheet.tsx` — replace hardcoded `"Done"` with prop or `t('common.done')`
+- [x] `components/ui/DatePickerField.tsx` — `title`, `leftAction.label`, default `placeholder`
+- [x] `components/ui/TimePickerField.tsx` — `title`
+- [x] `components/check-in/CheckInHeader.tsx` — `title`, `leftAction.label` (`Cancel` → `common.cancel`)
+- [x] `components/ui/ConfirmModal.tsx` — default `cancelLabel` → require prop or use `t('common.cancel')`; `accessibilityLabel`
+- [x] `components/profile/EditNameModal.tsx` — `accessibilityLabel="Dismiss dialog"`
 
 ### Acceptance criteria
 
@@ -394,3 +394,4 @@ reports.appStoreBadgeLine2
 | 2026-07-02 | 0 | Parity checker, allowlist, `i18n:check` scripts, CI workflow |
 | 2026-07-02 | 1a | German translations for dashboard, pet, checkInSuccess, welcome, onboarding, profile |
 | 2026-07-02 | 1b | Remaining DE catalog gaps; allowlist for product terms, templates, loanwords |
+| 2026-07-02 | 2 | iOS picker/modal chrome localized via common.* keys |

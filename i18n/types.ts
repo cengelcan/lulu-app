@@ -22,6 +22,11 @@ export type Translations = {
     today: string;
     tomorrow: string;
     back: string;
+    selectDate: string;
+    selectTime: string;
+    done: string;
+    clear: string;
+    dismissDialog: string;
   };
   tabs: {
     home: string;

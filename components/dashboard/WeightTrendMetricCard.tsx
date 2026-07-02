@@ -66,8 +66,7 @@ export function WeightTrendMetricCard({ metric }: WeightTrendMetricCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
-    minWidth: 0,
+    width: '100%',
     borderRadius: Radius.lg,
     borderWidth: StyleSheet.hairlineWidth,
     padding: Spacing.sm,

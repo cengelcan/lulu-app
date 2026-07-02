@@ -11,7 +11,13 @@ import type { TrendMetric } from '@/utils/trends';
 
 type ScoreTrendMetricCardProps = {
   metric: TrendMetric;
-  titleKey: 'dashboard.trendsAppetite' | 'dashboard.trendsEnergy';
+  titleKey:
+    | 'dashboard.trendsAppetite'
+    | 'dashboard.trendsWaterIntake'
+    | 'dashboard.trendsEnergy'
+    | 'dashboard.trendsMood'
+    | 'dashboard.trendsPoop'
+    | 'dashboard.trendsPee';
   icon: IconSymbolName;
   accentColor: string;
   chart: ReactNode;
@@ -56,15 +62,13 @@ export function ScoreTrendMetricCard({
         numberOfLines={1}>
         {metric.valueLabel ?? '—'}
       </ThemedText>
-      {metric.hasData ? (
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.subtitle}
-          numberOfLines={1}>
-          {statusLabel}
-        </ThemedText>
-      ) : null}
+      <ThemedText
+        lightColor={textSecondaryColor}
+        darkColor={textSecondaryColor}
+        style={styles.subtitle}
+        numberOfLines={1}>
+        {statusLabel}
+      </ThemedText>
       {chart}
     </View>
   );
@@ -72,8 +76,7 @@ export function ScoreTrendMetricCard({
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
-    minWidth: 0,
+    width: '100%',
     borderRadius: Radius.lg,
     borderWidth: StyleSheet.hairlineWidth,
     padding: Spacing.sm,

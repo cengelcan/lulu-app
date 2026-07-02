@@ -1,9 +1,9 @@
-import type { Appetite, CheckIn, Energy } from '@/types/check-in';
-import type { PetRecord, WeightMetadata } from '@/types/pet-record';
+import type { Appetite, CheckIn, Energy, Mood, Pee, Poop, WaterIntake } from '@/types/check-in';
+import type { PetRecord } from '@/types/pet-record';
 import { addDays } from '@/services/notifications/date';
 import { formatLocalDate } from '@/utils/date';
 
-export const TREND_WINDOW_DAYS = 30;
+export const TREND_CHART_DAYS = 7;
 
 const APPETITE_SCORES: Record<Appetite, number> = {
   less: 40,
@@ -17,51 +17,63 @@ const ENERGY_SCORES: Record<Energy, number> = {
   high: 85,
 };
 
-export type TrendMetricKind = 'weight' | 'appetite' | 'energy';
+const WATER_INTAKE_SCORES: Record<WaterIntake, number> = {
+  less: 40,
+  normal: 100,
+  more: 90,
+};
 
-export type TrendStatus = 'normal' | 'attention' | 'no_data';
+const MOOD_SCORES: Record<Mood, number> = {
+  low: 30,
+  normal: 100,
+  high: 85,
+};
+
+export type CheckInTrendKind = 'appetite' | 'waterIntake' | 'energy' | 'mood' | 'poop' | 'pee';
+
+export type TrendMetricKind = 'weight' | CheckInTrendKind;
+
+export const DASHBOARD_TREND_ORDER: TrendMetricKind[] = [
+  'weight',
+  'appetite',
+  'waterIntake',
+  'energy',
+  'mood',
+  'poop',
+  'pee',
+];
+
+export type TrendDailyStatus = 'normal' | 'attention' | 'not_observed' | 'no_data';
+
+export type TrendMetricDisplayMode = 'line' | 'status';
+
+export type TrendChartDay = {
+  date: string;
+  value: number | null;
+  status: TrendDailyStatus;
+};
 
 export type TrendMetric = {
   kind: TrendMetricKind;
-  valueLabel: string | null;
-  status: TrendStatus;
-  subtitleMode: 'delta' | 'latest' | 'score' | 'none';
-  sparklinePoints: number[];
+  displayMode: TrendMetricDisplayMode;
+  chartDays: TrendChartDay[];
   hasData: boolean;
 };
 
 export type DashboardTrends = {
-  weight: TrendMetric;
-  appetite: TrendMetric;
-  energy: TrendMetric;
-  hasAnyData: boolean;
+  metrics: TrendMetric[];
 };
 
-function isWithinTrendWindow(dateString: string, windowStartKey: string, todayKey: string): boolean {
-  return dateString >= windowStartKey && dateString <= todayKey;
+function buildRollingDayKeys(referenceDate: Date, count: number): string[] {
+  const today = new Date(referenceDate);
+  today.setHours(0, 0, 0, 0);
+
+  return Array.from({ length: count }, (_, index) =>
+    formatLocalDate(addDays(today, -(count - 1 - index)))
+  );
 }
 
-function normalizeSparklinePoints(values: number[]): number[] {
-  if (values.length === 0) {
-    return [];
-  }
-
-  if (values.length === 1) {
-    return [0.5];
-  }
-
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min;
-
-  if (range === 0) {
-    return values.map(() => 0.5);
-  }
-
-  return values.map((value) => (value - min) / range);
-}
-
-function getScoreStatus(score: number): TrendStatus {
+function getScoreStatus(score: number): TrendDailyStatus {
   if (score >= 70) {
     return 'normal';
   }
@@ -69,120 +81,117 @@ function getScoreStatus(score: number): TrendStatus {
   return 'attention';
 }
 
-function formatSignedDelta(delta: number, unit: string): string {
-  const rounded = Math.round(delta * 10) / 10;
-  const prefix = rounded > 0 ? '+' : '';
-  return `${prefix}${rounded} ${unit}`;
+function mapEliminationStatus(value: Poop | Pee): TrendDailyStatus {
+  switch (value) {
+    case 'normal':
+      return 'normal';
+    case 'not_normal':
+      return 'attention';
+    case 'not_observed':
+      return 'not_observed';
+  }
 }
 
-function formatWeightValue(value: number, unit: WeightMetadata['unit']): string {
-  const rounded = Math.round(value * 10) / 10;
-  return `${rounded} ${unit}`;
-}
-
-function buildCheckInSeries(
-  checkIns: CheckIn[],
-  windowStartKey: string,
-  todayKey: string,
-  scoreFor: (checkIn: CheckIn) => number
-): number[] {
+function buildCheckInByDate(checkIns: CheckIn[]): Map<string, CheckIn> {
   const byDate = new Map<string, CheckIn>();
 
   for (const checkIn of checkIns) {
-    if (!isWithinTrendWindow(checkIn.date, windowStartKey, todayKey)) {
-      continue;
-    }
-
     const existing = byDate.get(checkIn.date);
     if (!existing || existing.createdAt < checkIn.createdAt) {
       byDate.set(checkIn.date, checkIn);
     }
   }
 
-  return [...byDate.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([, checkIn]) => scoreFor(checkIn));
+  return byDate;
 }
 
-function buildScoreMetric(
-  kind: 'appetite' | 'energy',
-  scores: number[]
-): TrendMetric {
-  if (scores.length === 0) {
-    return {
-      kind,
-      valueLabel: null,
-      status: 'no_data',
-      subtitleMode: 'none',
-      sparklinePoints: [],
-      hasData: false,
-    };
+function buildCheckInChartDays(
+  checkIns: CheckIn[],
+  dayKeys: string[],
+  scoreFor: (checkIn: CheckIn) => number,
+  statusFor?: (checkIn: CheckIn) => TrendDailyStatus
+): TrendChartDay[] {
+  const byDate = buildCheckInByDate(checkIns);
+
+  return dayKeys.map((date) => {
+    const checkIn = byDate.get(date);
+    if (!checkIn) {
+      return { date, value: null, status: 'no_data' };
+    }
+
+    const value = scoreFor(checkIn);
+    const status = statusFor ? statusFor(checkIn) : getScoreStatus(value);
+
+    return { date, value, status };
+  });
+}
+
+function buildWeightChartDays(records: PetRecord[], dayKeys: string[]): TrendChartDay[] {
+  const weightByDate = new Map<string, number>();
+
+  for (const record of records) {
+    if (record.type === 'weight' && record.metadata.value > 0) {
+      weightByDate.set(record.date, record.metadata.value);
+    }
   }
 
-  const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-  const roundedAverage = Math.round(average);
+  return dayKeys.map((date) => {
+    const value = weightByDate.get(date) ?? null;
 
+    return {
+      date,
+      value,
+      status: value === null ? 'no_data' : 'normal',
+    };
+  });
+}
+
+function buildLineMetric(
+  kind: Exclude<TrendMetricKind, 'poop' | 'pee'>,
+  chartDays: TrendChartDay[]
+): TrendMetric {
   return {
     kind,
-    valueLabel: `%${roundedAverage}`,
-    status: getScoreStatus(roundedAverage),
-    subtitleMode: 'score',
-    sparklinePoints: normalizeSparklinePoints(scores),
-    hasData: true,
+    displayMode: 'line',
+    chartDays,
+    hasData: chartDays.some((day) => day.value !== null),
   };
 }
 
-function buildWeightMetric(
-  records: PetRecord[],
-  windowStartKey: string,
-  todayKey: string
-): TrendMetric {
-  const weightRecords = records
-    .filter(
-      (record): record is Extract<PetRecord, { type: 'weight' }> =>
-        record.type === 'weight' &&
-        record.metadata.value > 0 &&
-        isWithinTrendWindow(record.date, windowStartKey, todayKey)
-    )
-    .sort((left, right) => left.date.localeCompare(right.date));
-
-  if (weightRecords.length === 0) {
-    return {
-      kind: 'weight',
-      valueLabel: null,
-      status: 'no_data',
-      subtitleMode: 'none',
-      sparklinePoints: [],
-      hasData: false,
-    };
-  }
-
-  const latest = weightRecords[weightRecords.length - 1];
-  const unit = latest.metadata.unit;
-  const values = weightRecords.map((record) => record.metadata.value);
-
-  if (weightRecords.length === 1) {
-    return {
-      kind: 'weight',
-      valueLabel: formatWeightValue(latest.metadata.value, unit),
-      status: 'normal',
-      subtitleMode: 'latest',
-      sparklinePoints: [0.5],
-      hasData: true,
-    };
-  }
-
-  const earliest = weightRecords[0];
-  const delta = latest.metadata.value - earliest.metadata.value;
-
+function buildStatusMetric(kind: 'poop' | 'pee', chartDays: TrendChartDay[]): TrendMetric {
   return {
-    kind: 'weight',
-    valueLabel: formatSignedDelta(delta, unit),
-    status: 'normal',
-    subtitleMode: 'delta',
-    sparklinePoints: normalizeSparklinePoints(values),
-    hasData: true,
+    kind,
+    displayMode: 'status',
+    chartDays,
+    hasData: chartDays.some((day) => day.status !== 'no_data'),
   };
+}
+
+
+export function normalizeTrendChartPoints(chartDays: TrendChartDay[]): (number | null)[] {
+  const values = chartDays
+    .map((day) => day.value)
+    .filter((value): value is number => value !== null);
+
+  if (values.length === 0) {
+    return chartDays.map(() => null);
+  }
+
+  if (values.length === 1) {
+    return chartDays.map((day) => (day.value === null ? null : 0.5));
+  }
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min;
+
+  if (range === 0) {
+    return chartDays.map((day) => (day.value === null ? null : 0.5));
+  }
+
+  return chartDays.map((day) =>
+    day.value === null ? null : (day.value - min) / range
+  );
 }
 
 export function buildDashboardTrends(
@@ -190,32 +199,47 @@ export function buildDashboardTrends(
   records: PetRecord[],
   referenceDate: Date = new Date()
 ): DashboardTrends {
-  const today = new Date(referenceDate);
-  today.setHours(0, 0, 0, 0);
-  const todayKey = formatLocalDate(today);
-  const windowStartKey = formatLocalDate(addDays(today, -(TREND_WINDOW_DAYS - 1)));
+  const dayKeys = buildRollingDayKeys(referenceDate, TREND_CHART_DAYS);
 
-  const appetiteScores = buildCheckInSeries(
-    checkIns,
-    windowStartKey,
-    todayKey,
-    (checkIn) => APPETITE_SCORES[checkIn.appetite]
-  );
-  const energyScores = buildCheckInSeries(
-    checkIns,
-    windowStartKey,
-    todayKey,
-    (checkIn) => ENERGY_SCORES[checkIn.energy]
-  );
-
-  const weight = buildWeightMetric(records, windowStartKey, todayKey);
-  const appetite = buildScoreMetric('appetite', appetiteScores);
-  const energy = buildScoreMetric('energy', energyScores);
+  const metricsByKind: Record<TrendMetricKind, TrendMetric> = {
+    weight: buildLineMetric('weight', buildWeightChartDays(records, dayKeys)),
+    appetite: buildLineMetric(
+      'appetite',
+      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => APPETITE_SCORES[checkIn.appetite])
+    ),
+    waterIntake: buildLineMetric(
+      'waterIntake',
+      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => WATER_INTAKE_SCORES[checkIn.waterIntake])
+    ),
+    energy: buildLineMetric(
+      'energy',
+      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => ENERGY_SCORES[checkIn.energy])
+    ),
+    mood: buildLineMetric(
+      'mood',
+      buildCheckInChartDays(checkIns, dayKeys, (checkIn) => MOOD_SCORES[checkIn.mood])
+    ),
+    poop: buildStatusMetric(
+      'poop',
+      buildCheckInChartDays(
+        checkIns,
+        dayKeys,
+        (checkIn) => (checkIn.poop === 'normal' ? 100 : checkIn.poop === 'not_observed' ? 70 : 25),
+        (checkIn) => mapEliminationStatus(checkIn.poop)
+      )
+    ),
+    pee: buildStatusMetric(
+      'pee',
+      buildCheckInChartDays(
+        checkIns,
+        dayKeys,
+        (checkIn) => (checkIn.pee === 'normal' ? 100 : checkIn.pee === 'not_observed' ? 70 : 25),
+        (checkIn) => mapEliminationStatus(checkIn.pee)
+      )
+    ),
+  };
 
   return {
-    weight,
-    appetite,
-    energy,
-    hasAnyData: weight.hasData || appetite.hasData || energy.hasData,
+    metrics: DASHBOARD_TREND_ORDER.map((kind) => metricsByKind[kind]),
   };
 }

@@ -323,14 +323,17 @@ export type Translations = {
     missedCheckInYesterday: string;
     missedCheckInCta: string;
     trendsTitle: string;
+    trendsPeriod: string;
     trendsWeight: string;
     trendsAppetite: string;
+    trendsWaterIntake: string;
     trendsEnergy: string;
+    trendsMood: string;
+    trendsPoop: string;
+    trendsPee: string;
     trendsNormal: string;
     trendsNoData: string;
-    trendsComparedToLast30Days: string;
     trendsLatestRecord: string;
-    setupGuide: {
       title: string;
       hide: string;
       hideA11y: string;

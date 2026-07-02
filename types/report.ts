@@ -71,6 +71,14 @@ export type ReportPetSummary = {
   microchipId: string;
 };
 
+export type ReportShellLabels = {
+  pdfTitleSuffix: string;
+  qrCodeAlt: string;
+  appStoreBadgeAriaLabel: string;
+  appStoreBadgeLine1: string;
+  appStoreBadgeLine2: string;
+};
+
 export type ReportDocumentLabels = {
   dailyObservations: string;
   recordsSection: string;

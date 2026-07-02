@@ -7,23 +7,29 @@ import {
   REPORT_PDF_PAGE_WIDTH_PT,
 } from './html/report-layout';
 
-const DEFAULT_REPORT_FILE_NAME = 'report';
+type ExportReportPdfOptions = {
+  fileName?: string;
+  shareDialogTitle: string;
+  defaultFileName: string;
+};
 
 /**
  * Strips characters that are invalid in file names across iOS/Android/desktop
  * (the slash family plus reserved Windows characters) so the share sheet shows
  * a clean, human-readable name instead of failing or mangling the path.
  */
-function sanitizeReportFileName(name: string): string {
+function sanitizeReportFileName(name: string, defaultFileName: string): string {
   const cleaned = name
     .replace(/[/\\:*?"<>|\u0000-\u001f]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
-  return cleaned.length > 0 ? cleaned : DEFAULT_REPORT_FILE_NAME;
+  return cleaned.length > 0 ? cleaned : defaultFileName;
 }
 
-export async function exportReportPdf(html: string, fileName?: string): Promise<void> {
+export async function exportReportPdf(html: string, options: ExportReportPdfOptions): Promise<void> {
+  const { fileName, shareDialogTitle, defaultFileName } = options;
+
   const { uri } = await Print.printToFileAsync({
     html,
     width: REPORT_PDF_PAGE_WIDTH_PT,
@@ -39,7 +45,7 @@ export async function exportReportPdf(html: string, fileName?: string): Promise<
   // surface an opaque UUID. Copy the PDF to a named cache file and share that.
   let shareUri = uri;
   if (fileName) {
-    const safeName = sanitizeReportFileName(fileName);
+    const safeName = sanitizeReportFileName(fileName, defaultFileName);
     const source = new File(uri);
     const destination = new File(Paths.cache, `${safeName}.pdf`);
 
@@ -54,6 +60,6 @@ export async function exportReportPdf(html: string, fileName?: string): Promise<
   await Sharing.shareAsync(shareUri, {
     mimeType: 'application/pdf',
     UTI: 'com.adobe.pdf',
-    dialogTitle: 'Share report',
+    dialogTitle: shareDialogTitle,
   });
 }

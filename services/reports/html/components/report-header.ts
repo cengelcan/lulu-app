@@ -1,4 +1,5 @@
 import { REPORT_APP_NAME } from '@/constants/branding';
+import type { ReportShellLabels } from '@/types/report';
 import { escapeHtml } from '@/utils/html';
 
 type ReportHeaderParams = {
@@ -17,25 +18,38 @@ export function renderReportHeader({ qrCodeHtml, appStoreBadgeHtml = '' }: Repor
     </header>`;
 }
 
-export function renderQrCodeHtml(qrCodeDataUri: string | null): string {
+export function renderQrCodeHtml(
+  qrCodeDataUri: string | null,
+  qrCodeAlt: string
+): string {
   if (qrCodeDataUri) {
-    return `<img class="report-qr" src="${qrCodeDataUri}" alt="QR code" />`;
+    return `<img class="report-qr" src="${qrCodeDataUri}" alt="${escapeHtml(qrCodeAlt)}" />`;
   }
 
   return `<div class="report-qr report-qr-placeholder" aria-hidden="true"></div>`;
 }
 
-export function renderAppStoreBadgeHtml(showAppStoreBadge: boolean): string {
+export function renderAppStoreBadgeHtml(
+  showAppStoreBadge: boolean,
+  shellLabels: Pick<
+    ReportShellLabels,
+    'appStoreBadgeAriaLabel' | 'appStoreBadgeLine1' | 'appStoreBadgeLine2'
+  >
+): string {
   if (!showAppStoreBadge) {
     return '';
   }
 
+  const line1 = escapeHtml(shellLabels.appStoreBadgeLine1);
+  const line2 = escapeHtml(shellLabels.appStoreBadgeLine2);
+  const ariaLabel = escapeHtml(shellLabels.appStoreBadgeAriaLabel);
+
   return `
-    <div class="app-store-badge" aria-label="Download on the App Store">
+    <div class="app-store-badge" aria-label="${ariaLabel}">
       <svg viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
         <rect width="120" height="36" rx="6" fill="#000" />
-        <text x="38" y="12" fill="#fff" font-size="7" font-family="-apple-system, sans-serif">Download on the</text>
-        <text x="38" y="26" fill="#fff" font-size="12" font-weight="700" font-family="-apple-system, sans-serif">App Store</text>
+        <text x="38" y="12" fill="#fff" font-size="7" font-family="-apple-system, sans-serif">${line1}</text>
+        <text x="38" y="26" fill="#fff" font-size="12" font-weight="700" font-family="-apple-system, sans-serif">${line2}</text>
         <path d="M18 8c-.2 2.1 1.5 3.1 1.6 3.2-1.4 2-3.6 1.4-4.4 1.3-.9-.6-2.4-.6-3.9.6-2 1.5-1.6 4.4 1.4 6.8 1.9 1.6 4.4 2.7 5.8 1.1.9-1.1.6-2.7 1.3-3.4.7-.7 1.9-.5 2.4-.3.5.2 1.3.8 2 .8.7 0 1.1-.4 1.8-.4.7 0 1.2.4 2 .3 1-.1 1.7-.9 2.4-1.5-2.1-1.2-1.8-4.3.2-5.2-.9-1.1-2.3-1.2-2.8-1.2-.9 0-1.7.5-2.2.5z" fill="#fff"/>
       </svg>
     </div>`;

@@ -45,6 +45,9 @@ export const ALLOWED_IDENTICAL_KEYS = new Set<string>([
   'records.types.symptom',
   'setup.petNameBreed.nameLabel',
 
+  // Brand
+  'reports.appStoreBadgeLine2',
+
   // Medical terms (latin/international)
   'pet.options.healthCondition.diabetes',
   'pet.options.healthCondition.arthritis',

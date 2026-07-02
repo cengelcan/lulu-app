@@ -464,6 +464,12 @@ export const en: Translations = {
       generatedFor: 'Generated for',
       dateRange: 'Date range',
     },
+    pdfTitleSuffix: '— Report',
+    shareDialogTitle: 'Share report',
+    defaultFileName: 'report',
+    qrCodeAlt: 'QR code',
+    appStoreBadgeLine1: 'Download on the',
+    appStoreBadgeLine2: 'App Store',
   },
   records: {
     title: 'Records',

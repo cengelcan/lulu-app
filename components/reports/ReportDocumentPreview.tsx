@@ -11,13 +11,17 @@ import type {
   ReportDocumentLabels,
   ReportPetSummary,
   ReportPreviewContent,
+  ReportShellLabels,
   ReportSummary,
 } from '@/types/report';
+import type { ResolvedLanguage } from '@/types/language';
 
 type ReportDocumentPreviewProps = {
   pet: ReportPetSummary;
   content: ReportPreviewContent;
   labels: ReportDocumentLabels;
+  shellLabels: ReportShellLabels;
+  language: ResolvedLanguage;
   formatDate: (date: string) => string;
   generatedAtLabel: string;
   formatPageLabel: (current: number, total: number) => string;
@@ -48,6 +52,8 @@ export function ReportDocumentPreview({
   pet,
   content,
   labels,
+  shellLabels,
+  language,
   formatDate,
   generatedAtLabel,
   formatPageLabel,
@@ -78,6 +84,8 @@ export function ReportDocumentPreview({
         pet,
         content,
         labels,
+        shellLabels,
+        language,
         formatDate,
         generatedAtLabel,
         formatPageLabel,
@@ -93,10 +101,12 @@ export function ReportDocumentPreview({
       formatPageLabel,
       generatedAtLabel,
       labels,
+      language,
       pet,
       photoDataUri,
       primaryColor,
       qrCodeDataUri,
+      shellLabels,
       summary,
     ]
   );

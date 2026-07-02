@@ -396,6 +396,12 @@ export type Translations = {
       generatedFor: string;
       dateRange: string;
     };
+    pdfTitleSuffix: string;
+    shareDialogTitle: string;
+    defaultFileName: string;
+    qrCodeAlt: string;
+    appStoreBadgeLine1: string;
+    appStoreBadgeLine2: string;
   };
   records: {
     title: string;

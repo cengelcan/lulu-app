@@ -471,6 +471,12 @@ export const de: Translations = {
       generatedFor: 'Erstellt für',
       dateRange: 'Datumsbereich',
     },
+    pdfTitleSuffix: '— Bericht',
+    shareDialogTitle: 'Bericht teilen',
+    defaultFileName: 'bericht',
+    qrCodeAlt: 'QR-Code',
+    appStoreBadgeLine1: 'Laden im',
+    appStoreBadgeLine2: 'App Store',
   },
   records: {
     title: 'Einträge',

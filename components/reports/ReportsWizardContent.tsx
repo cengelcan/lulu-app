@@ -39,6 +39,7 @@ import type {
   ReportPreviewContent,
   ReportRangePreset,
   ReportRecordDataKey,
+  ReportShellLabels,
   ReportSummary,
   ReportWizardStep,
 } from '@/types/report';
@@ -106,6 +107,17 @@ export function ReportsWizardContent() {
       dayStatusNormal: t('reports.review.dayStatusNormal'),
       dayStatusAlert: t('reports.review.dayStatusAlert'),
       summaryTitle: t('reports.review.summaryTitle'),
+    }),
+    [t]
+  );
+
+  const shellLabels = useMemo<ReportShellLabels>(
+    () => ({
+      pdfTitleSuffix: t('reports.pdfTitleSuffix'),
+      qrCodeAlt: t('reports.qrCodeAlt'),
+      appStoreBadgeAriaLabel: t('reports.review.appStoreBadge'),
+      appStoreBadgeLine1: t('reports.appStoreBadgeLine1'),
+      appStoreBadgeLine2: t('reports.appStoreBadgeLine2'),
     }),
     [t]
   );
@@ -272,6 +284,8 @@ export function ReportsWizardContent() {
         pet: petSummary,
         content: previewContent,
         labels: documentLabels,
+        shellLabels,
+        language,
         formatDate,
         generatedAtLabel,
         formatPageLabel,
@@ -285,7 +299,11 @@ export function ReportsWizardContent() {
       const rangeFileLabel = `${formatDate(resolvedRange.startDate)} - ${formatDate(resolvedRange.endDate)}`;
       const fileName = `${petSummary.name} - ${t('reports.exportFileName')} (${rangeFileLabel})`;
 
-      await exportReportPdf(html, fileName);
+      await exportReportPdf(html, {
+        fileName,
+        shareDialogTitle: t('reports.shareDialogTitle'),
+        defaultFileName: t('reports.defaultFileName'),
+      });
     } catch (error) {
       if (__DEV__) {
         console.error('Report export failed:', error);
@@ -338,6 +356,8 @@ export function ReportsWizardContent() {
               formatPageLabel={formatPageLabel}
               generatedAtLabel={generatedAtLabel}
               labels={documentLabels}
+              shellLabels={shellLabels}
+              language={language}
               pet={petSummary}
               primaryColor={primaryColor}
               photoDataUri={exportAssets?.photoDataUri ?? null}

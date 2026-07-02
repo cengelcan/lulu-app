@@ -15,14 +15,18 @@ import type {
   ReportDocumentLabels,
   ReportPetSummary,
   ReportPreviewContent,
+  ReportShellLabels,
   ReportSummary,
 } from '@/types/report';
+import type { ResolvedLanguage } from '@/types/language';
 import { escapeHtml } from '@/utils/html';
 
 type GenerateReportHtmlParams = {
   pet: ReportPetSummary;
   content: ReportPreviewContent;
   labels: ReportDocumentLabels;
+  shellLabels: ReportShellLabels;
+  language: ResolvedLanguage;
   formatDate: (date: string) => string;
   generatedAtLabel: string;
   formatPageLabel: (current: number, total: number) => string;
@@ -43,6 +47,8 @@ export function generateReportHtml({
   pet,
   content,
   labels,
+  shellLabels,
+  language,
   formatDate,
   generatedAtLabel,
   formatPageLabel,
@@ -54,8 +60,8 @@ export function generateReportHtml({
   mode = 'print',
 }: GenerateReportHtmlParams): string {
   const petPhotoHtml = renderPetPhotoHtml(pet.name, photoDataUri);
-  const qrCodeHtml = renderQrCodeHtml(qrCodeDataUri);
-  const appStoreBadgeHtml = renderAppStoreBadgeHtml(showAppStoreBadge);
+  const qrCodeHtml = renderQrCodeHtml(qrCodeDataUri, shellLabels.qrCodeAlt);
+  const appStoreBadgeHtml = renderAppStoreBadgeHtml(showAppStoreBadge, shellLabels);
 
   const hasSummary = Boolean(summary && summary.lines.length > 0);
   const pages = paginateReportContent(content, { hasSummary });
@@ -104,11 +110,11 @@ export function generateReportHtml({
       : '';
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${language}">
   <head>
     <meta charset="utf-8" />
     ${viewportMeta}
-    <title>${escapeHtml(pet.name)} — Report</title>
+    <title>${escapeHtml(pet.name)} ${escapeHtml(shellLabels.pdfTitleSuffix)}</title>
     <style>${buildReportStyles({ primaryColor, forScreen: mode === 'screen' })}</style>
   </head>
   <body>

@@ -8,9 +8,9 @@ import { RecordHistoryRow } from '@/components/records/RecordHistoryRow';
 import { RecordTypeGrid } from '@/components/records/RecordTypeGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { RECORD_TYPES } from '@/constants/record-types';
 import { Spacing, Typography } from '@/constants/theme';
+import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePetRecordStore } from '@/stores/pet-record.store';
@@ -66,16 +66,11 @@ export default function RecordsScreen() {
 
   const recentRecords = records.slice(0, RECENT_RECORDS_LIMIT);
   const isReadOnly = pet?.status === 'deceased';
+  const screenOptions = useHubStackScreenOptions(t('records.title'));
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          ...STACK_BACK_ONLY_OPTIONS,
-          headerShown: true,
-          title: t('records.title'),
-        }}
-      />
+      <Stack.Screen options={screenOptions} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         {isReadOnly ? (
           <ThemedText

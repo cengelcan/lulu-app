@@ -11,7 +11,7 @@ import { GroupedSection } from '@/components/pet/GroupedSection';
 import { ThemedText } from '@/components/themed-text';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { REMINDER_TYPES } from '@/constants/reminder-types';
-import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
+import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -79,6 +79,7 @@ export default function RemindersScreen() {
 
   const completedPreview = completedReminders.slice(0, COMPLETED_PREVIEW_LIMIT);
   const isReadOnly = pet?.status === 'deceased';
+  const screenOptions = useHubStackScreenOptions(t('reminders.title'));
 
   const handleTypePress = (type: ReminderTypeId) => {
     router.push(getReminderFormRoute(type) as Href);
@@ -103,13 +104,7 @@ export default function RemindersScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          ...STACK_BACK_ONLY_OPTIONS,
-          headerShown: true,
-          title: t('reminders.title'),
-        }}
-      />
+      <Stack.Screen options={screenOptions} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         {isReadOnly ? (
           <ThemedText

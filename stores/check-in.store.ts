@@ -4,6 +4,7 @@ import { deleteRemoteCheckIn, pushCheckIn } from '@/services/sync/check-ins-sync
 import * as checkInStorage from '@/storage/check-in.storage';
 import { useUserStore } from '@/stores/user.store';
 import type { CheckIn } from '@/types/check-in';
+import { getStoreErrorKey } from '@/utils/store-error';
 
 function getActiveUserId(): string | null {
   return useUserStore.getState().userId;
@@ -23,10 +24,6 @@ type CheckInState = {
   clearError: () => void;
 };
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
-
 export const useCheckInStore = create<CheckInState>((set, get) => ({
   latestCheckIn: null,
   checkIns: [],
@@ -42,7 +39,7 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load latest check-in'),
+        error: getStoreErrorKey(error, 'errors.loadLatestCheckIn'),
       });
     }
   },
@@ -58,7 +55,7 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load check-ins'),
+        error: getStoreErrorKey(error, 'errors.loadCheckIns'),
       });
     }
   },
@@ -88,7 +85,7 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to create check-in'),
+        error: getStoreErrorKey(error, 'errors.createCheckIn'),
       });
       throw error;
     }
@@ -117,7 +114,7 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to update check-in'),
+        error: getStoreErrorKey(error, 'errors.updateCheckIn'),
       });
       throw error;
     }
@@ -144,7 +141,7 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to delete check-in'),
+        error: getStoreErrorKey(error, 'errors.deleteCheckIn'),
       });
       throw error;
     }

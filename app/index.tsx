@@ -6,14 +6,18 @@ import { Button } from '@/components/ui/Button';
 import { Palette, Spacing, Typography } from '@/constants/theme';
 import { useBootstrap } from '@/hooks/use-bootstrap';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
+import { translateError } from '@/utils/translate-error';
 
 const LULU_LOGO = require('@/assets/images/lulu-logo.png');
 const LOGO_SIZE = 200;
 
 export default function SplashScreen() {
   const { phase, error, retry } = useBootstrap();
+  const { t } = useTranslation();
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const surfaceColor = useThemeColor({}, 'surface');
+  const resolvedError = translateError(t, error);
 
   const isLoading = phase === 'loading' || phase === 'redirecting';
 
@@ -32,12 +36,12 @@ export default function SplashScreen() {
             <ActivityIndicator color={brandAccentColor} size="small" style={styles.spinner} />
           ) : null}
 
-          {phase === 'error' && error ? (
+          {phase === 'error' && resolvedError ? (
             <View style={[styles.errorContainer, { backgroundColor: surfaceColor }]}>
               <Text allowFontScaling style={styles.errorText}>
-                {error}
+                {resolvedError}
               </Text>
-              <Button title="Try Again" onPress={() => void retry()} />
+              <Button title={t('common.tryAgain')} onPress={() => void retry()} />
             </View>
           ) : null}
         </View>

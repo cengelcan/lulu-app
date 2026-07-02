@@ -7,6 +7,8 @@ import { OnboardingCtaButton } from '@/components/onboarding/onboarding-cta-butt
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { getOnboardingBackground, getOnboardingImageScale } from '@/constants/onboarding';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
+import { translateError } from '@/utils/translate-error';
 
 const TOTAL_STEPS = 4;
 
@@ -33,6 +35,8 @@ export function OnboardingScreen({
   isLoading = false,
   error = null,
 }: OnboardingScreenProps) {
+  const { t } = useTranslation();
+  const resolvedError = translateError(t, error);
   const backgroundSource = getOnboardingBackground(step);
   const imageScale = getOnboardingImageScale(step);
 
@@ -116,7 +120,7 @@ export function OnboardingScreen({
         </View>
 
         <View style={styles.footer}>
-          {error ? <Text allowFontScaling style={styles.error}>{error}</Text> : null}
+          {resolvedError ? <Text allowFontScaling style={styles.error}>{resolvedError}</Text> : null}
 
           <OnboardingCtaButton title={buttonTitle} onPress={onContinue} disabled={isLoading} />
         </View>

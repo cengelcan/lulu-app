@@ -8,6 +8,7 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { translateError } from '@/utils/translate-error';
 
 const DEFAULT_TOTAL_STEPS = 6;
 
@@ -53,6 +54,7 @@ export function SetupScreen({
   buttonPill = false,
 }: SetupScreenProps) {
   const { t } = useTranslation();
+  const resolvedError = translateError(t, error);
   const resolvedButtonTitle = buttonTitle ?? t('common.continue');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const borderColor = useThemeColor({}, 'border');
@@ -128,9 +130,9 @@ export function SetupScreen({
         <View style={styles.form}>{children}</View>
       </View>
 
-      {error ? (
+      {resolvedError ? (
         <ThemedText lightColor={textSecondaryColor} darkColor={textSecondaryColor} style={styles.error}>
-          {error}
+          {resolvedError}
         </ThemedText>
       ) : null}
 

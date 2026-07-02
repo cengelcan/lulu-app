@@ -32,7 +32,7 @@ export async function exportReportPdf(html: string, fileName?: string): Promise<
 
   const canShare = await Sharing.isAvailableAsync();
   if (!canShare) {
-    throw new Error('Sharing is not available on this device');
+    throw new Error('errors.shareUnavailable');
   }
 
   // expo-print writes to a random cache path, so the share sheet would otherwise

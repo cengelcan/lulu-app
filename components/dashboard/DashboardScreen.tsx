@@ -28,6 +28,7 @@ import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { buildDashboardTrends } from '@/utils/trends';
+import { translateError } from '@/utils/translate-error';
 
 type DashboardScreenProps = {
   edges?: Edge[];
@@ -145,7 +146,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
         </View>
       ) : error ? (
         <View style={styles.centered}>
-          <ThemedText style={styles.message}>{error}</ThemedText>
+          <ThemedText style={styles.message}>{translateError(t, error)}</ThemedText>
           <Button title={t('common.tryAgain')} onPress={handleRetry} />
         </View>
       ) : !pet ? (

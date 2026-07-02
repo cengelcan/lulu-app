@@ -10,6 +10,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
 import type { ReminderTime } from '@/types/reminder';
+import { translateError } from '@/utils/translate-error';
 
 type NotificationSectionProps = {
   permission: NotificationPermissionStatus | null;
@@ -34,6 +35,7 @@ export function NotificationSection({
 }: NotificationSectionProps) {
   const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const resolvedError = translateError(t, error);
   const checkInEnabled = permission === 'allowed';
   const isDenied = permission === 'denied';
   const toggleDisabled = isLoading || isDenied;
@@ -72,7 +74,7 @@ export function NotificationSection({
         />
       </GroupedSection>
 
-      {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+      {resolvedError ? <ThemedText style={styles.error}>{resolvedError}</ThemedText> : null}
 
       {isDenied ? (
         <View style={styles.footer}>

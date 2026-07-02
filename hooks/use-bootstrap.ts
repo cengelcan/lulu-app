@@ -87,7 +87,7 @@ export function useBootstrap() {
 
     if (hasCompletedOnboarding === null) {
       await waitForMinSplashDuration(startedAt);
-      setError('Onboarding status is unavailable');
+      setError('errors.onboardingUnavailable');
       setPhase('error');
       return;
     }

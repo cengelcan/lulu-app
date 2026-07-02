@@ -182,7 +182,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         ...(wiped ? { displayName: null, avatarUri: null } : {}),
       });
     } catch (error) {
-      set({ error: getErrorMessage(error, 'unknown') });
+      set({ error: getErrorMessage(error, 'errors.unknown') });
       throw error;
     }
   },
@@ -207,7 +207,7 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       return { needsEmailConfirmation };
     } catch (error) {
-      set({ error: getErrorMessage(error, 'unknown') });
+      set({ error: getErrorMessage(error, 'errors.unknown') });
       throw error;
     }
   },
@@ -256,7 +256,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       // Requires a valid session, so run before clearing the local session.
       await authDeleteAccount();
     } catch (error) {
-      set({ error: getErrorMessage(error, 'unknown') });
+      set({ error: getErrorMessage(error, 'errors.unknown') });
       throw error;
     }
 
@@ -292,7 +292,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load profile'),
+        error: getErrorMessage(error, 'errors.loadProfile'),
       });
     }
   },
@@ -321,7 +321,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         }
       }
     } catch (error) {
-      set({ error: getErrorMessage(error, 'Failed to save name') });
+      set({ error: getErrorMessage(error, 'errors.saveName') });
       throw error;
     }
   },
@@ -360,7 +360,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         }
       }
     } catch (error) {
-      set({ error: getErrorMessage(error, 'Failed to save photo') });
+      set({ error: getErrorMessage(error, 'errors.savePhoto') });
       throw error;
     }
   },

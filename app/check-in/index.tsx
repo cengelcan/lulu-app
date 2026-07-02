@@ -32,6 +32,7 @@ import type {
   WaterIntake,
 } from '@/types/check-in';
 import { countCompletedCheckInFields, isCheckInFormComplete } from '@/utils/check-in';
+import { translateError } from '@/utils/translate-error';
 import {
   formatCheckInTitleDate,
   formatLocalDate,
@@ -292,7 +293,7 @@ export default function CheckInScreen() {
 
   const errorMessage =
     validationError ??
-    checkInError ??
+    translateError(t, checkInError) ??
     (isReadOnly ? t('checkIn.deceasedReadOnly') : null) ??
     (isFutureDate ? t('checkIn.futureDateError') : null);
 

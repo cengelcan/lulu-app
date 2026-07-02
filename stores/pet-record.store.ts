@@ -4,6 +4,7 @@ import { deleteRemotePetRecord, pushPetRecord } from '@/services/sync/records-sy
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import { useUserStore } from '@/stores/user.store';
 import type { PetRecord, RecordTypeId } from '@/types/pet-record';
+import { getStoreErrorKey } from '@/utils/store-error';
 
 function getActiveUserId(): string | null {
   return useUserStore.getState().userId;
@@ -22,10 +23,6 @@ type PetRecordState = {
   clearError: () => void;
 };
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
-
 export const usePetRecordStore = create<PetRecordState>((set, get) => ({
   records: [],
   isLoading: false,
@@ -41,7 +38,7 @@ export const usePetRecordStore = create<PetRecordState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load records'),
+        error: getStoreErrorKey(error, 'errors.loadRecords'),
       });
     }
   },
@@ -55,7 +52,7 @@ export const usePetRecordStore = create<PetRecordState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load records'),
+        error: getStoreErrorKey(error, 'errors.loadRecords'),
       });
     }
   },
@@ -83,7 +80,7 @@ export const usePetRecordStore = create<PetRecordState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to create record'),
+        error: getStoreErrorKey(error, 'errors.createRecord'),
       });
       throw error;
     }
@@ -110,7 +107,7 @@ export const usePetRecordStore = create<PetRecordState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to update record'),
+        error: getStoreErrorKey(error, 'errors.updateRecord'),
       });
       throw error;
     }
@@ -135,7 +132,7 @@ export const usePetRecordStore = create<PetRecordState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to delete record'),
+        error: getStoreErrorKey(error, 'errors.deleteRecord'),
       });
       throw error;
     }

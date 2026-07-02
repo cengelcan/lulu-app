@@ -25,12 +25,21 @@ function getValidationParams(key: string): TranslationParams | undefined {
 
 /** Translates validation error keys; passes through unknown strings unchanged. */
 export function translateValidationError(t: TranslateFn, error: string | null): string | null {
+  return translateError(t, error);
+}
+
+/** Translates store/validation error keys for display in the UI. */
+export function translateError(t: TranslateFn, error: string | null): string | null {
   if (!error) {
     return null;
   }
 
   if (error.startsWith('pet.validation.')) {
     return t(error, getValidationParams(error));
+  }
+
+  if (error.startsWith('errors.')) {
+    return t(error);
   }
 
   return error;

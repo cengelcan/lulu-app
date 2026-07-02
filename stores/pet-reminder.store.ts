@@ -13,6 +13,7 @@ import { DEFAULT_REMINDER_RECURRENCE } from '@/types/pet-reminder';
 import { DEFAULT_REMINDER_TIME } from '@/types/reminder';
 import { computeNextDueDate } from '@/utils/reminder-recurrence';
 import { reminderToRecord } from '@/utils/reminder-to-record';
+import { getStoreErrorKey } from '@/utils/store-error';
 
 function getActiveUserId(): string | null {
   return useUserStore.getState().userId;
@@ -47,10 +48,6 @@ type PetReminderState = {
   clearError: () => void;
 };
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
-
 async function syncReminderNotifications(): Promise<void> {
   try {
     await syncPetReminderNotificationSchedule();
@@ -74,7 +71,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load reminders'),
+        error: getStoreErrorKey(error, 'errors.loadReminders'),
       });
     }
   },
@@ -88,7 +85,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load reminders'),
+        error: getStoreErrorKey(error, 'errors.loadReminders'),
       });
     }
   },
@@ -117,7 +114,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to create reminder'),
+        error: getStoreErrorKey(error, 'errors.createReminder'),
       });
       throw error;
     }
@@ -145,7 +142,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to update reminder'),
+        error: getStoreErrorKey(error, 'errors.updateReminder'),
       });
       throw error;
     }
@@ -218,7 +215,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to complete reminder'),
+        error: getStoreErrorKey(error, 'errors.completeReminder'),
       });
       throw error;
     }
@@ -259,7 +256,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to skip reminder'),
+        error: getStoreErrorKey(error, 'errors.skipReminder'),
       });
       throw error;
     }
@@ -300,7 +297,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to snooze reminder'),
+        error: getStoreErrorKey(error, 'errors.snoozeReminder'),
       });
       throw error;
     }
@@ -326,7 +323,7 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to delete reminder'),
+        error: getStoreErrorKey(error, 'errors.deleteReminder'),
       });
       throw error;
     }

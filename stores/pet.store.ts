@@ -11,6 +11,7 @@ import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useUserStore } from '@/stores/user.store';
 import type { Pet, PetStatus } from '@/types/pet';
+import { getStoreErrorKey } from '@/utils/store-error';
 
 function getActiveUserId(): string | null {
   return useUserStore.getState().userId;
@@ -34,10 +35,6 @@ type PetState = {
   deletePet: (id: string) => Promise<void>;
   clearError: () => void;
 };
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
 
 export const usePetStore = create<PetState>((set, get) => ({
   pets: [],
@@ -65,7 +62,7 @@ export const usePetStore = create<PetState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load pets'),
+        error: getStoreErrorKey(error, 'errors.loadPets'),
       });
     }
   },
@@ -81,7 +78,7 @@ export const usePetStore = create<PetState>((set, get) => ({
       const [pet, pets] = await Promise.all([petStorage.getPetById(id), petStorage.getPets()]);
 
       if (!pet) {
-        throw new Error('Pet not found');
+        throw new Error('errors.petNotFound');
       }
 
       if (pet.status === 'deceased') {
@@ -107,7 +104,7 @@ export const usePetStore = create<PetState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load pet'),
+        error: getStoreErrorKey(error, 'errors.loadPet'),
       });
       throw error;
     }
@@ -135,7 +132,7 @@ export const usePetStore = create<PetState>((set, get) => ({
       }
       await syncPetReminderNotificationSchedule();
     } catch (error) {
-      set({ error: getErrorMessage(error, 'Failed to switch pet') });
+      set({ error: getStoreErrorKey(error, 'errors.switchPet') });
       throw error;
     }
   },
@@ -163,7 +160,7 @@ export const usePetStore = create<PetState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to create pet'),
+        error: getStoreErrorKey(error, 'errors.createPet'),
       });
       throw error;
     }
@@ -192,7 +189,7 @@ export const usePetStore = create<PetState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to update pet'),
+        error: getStoreErrorKey(error, 'errors.updatePet'),
       });
       throw error;
     }
@@ -205,7 +202,7 @@ export const usePetStore = create<PetState>((set, get) => ({
       const target = get().pets.find((entry) => entry.id === id) ?? get().pet;
 
       if (!target || target.id !== id) {
-        throw new Error('Pet not found');
+        throw new Error('errors.petNotFound');
       }
 
       const updated: Pet = {
@@ -253,7 +250,7 @@ export const usePetStore = create<PetState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to update pet status'),
+        error: getStoreErrorKey(error, 'errors.updatePetStatus'),
       });
       throw error;
     }
@@ -297,7 +294,7 @@ export const usePetStore = create<PetState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to delete pet'),
+        error: getStoreErrorKey(error, 'errors.deletePet'),
       });
       throw error;
     }

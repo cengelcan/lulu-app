@@ -63,7 +63,7 @@ import {
   buildPetFormSnapshot,
   getPetFormSnapshot,
 } from '@/utils/pet-form-snapshot';
-import { translateValidationError } from '@/utils/translate-error';
+import { translateError } from '@/utils/translate-error';
 
 function toggleHealthCondition(
   current: HealthCondition[],
@@ -468,7 +468,7 @@ export default function EditPetScreen() {
     }
   }, [leaveAfterModalClose, navigateToMyPets, pet, setPetStatus]);
 
-  const errorMessage = translateValidationError(t, validationError) ?? petError;
+  const errorMessage = translateError(t, validationError ?? petError);
   const canSave = isDirty && !isSaving;
 
   const showFullScreenLoader =

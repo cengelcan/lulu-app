@@ -22,6 +22,7 @@ import { Spacing, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { translateError } from '@/utils/translate-error';
 import { buildReportPreviewContent } from '@/services/reports/build-report-preview';
 import { buildReportSummary } from '@/services/reports/build-report-summary';
 import { exportReportPdf } from '@/services/reports/export-report-pdf';
@@ -289,7 +290,9 @@ export function ReportsWizardContent() {
       if (__DEV__) {
         console.error('Report export failed:', error);
       }
-      setValidationError(t('reports.exportFailed'));
+      const storeErrorKey =
+        error instanceof Error && error.message.startsWith('errors.') ? error.message : null;
+      setValidationError(translateError(t, storeErrorKey) ?? t('reports.exportFailed'));
     } finally {
       setIsExporting(false);
     }

@@ -16,6 +16,7 @@ import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import type { Pet } from '@/types/pet';
+import { translateError } from '@/utils/translate-error';
 
 type MyPetsTab = 'active' | 'memorial';
 
@@ -160,7 +161,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
         </View>
       ) : error ? (
         <View style={styles.centered}>
-          <ThemedText style={styles.message}>{error}</ThemedText>
+          <ThemedText style={styles.message}>{translateError(t, error)}</ThemedText>
           <Button title={t('common.tryAgain')} onPress={handleRetry} />
         </View>
       ) : pets.length === 0 ? (

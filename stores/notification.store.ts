@@ -18,6 +18,7 @@ import {
   type NotificationPermissionStatus,
 } from '@/storage/prefs.storage';
 import type { ReminderTime } from '@/types/reminder';
+import { getStoreErrorKey } from '@/utils/store-error';
 
 type NotificationState = {
   reminderTime: ReminderTime | null;
@@ -31,10 +32,6 @@ type NotificationState = {
   savePetReminderNotificationsEnabled: (enabled: boolean) => Promise<boolean>;
   clearError: () => void;
 };
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
 
 export const useNotificationStore = create<NotificationState>((set) => ({
   reminderTime: null,
@@ -57,7 +54,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load notification settings'),
+        error: getStoreErrorKey(error, 'errors.loadNotificationSettings'),
       });
     }
   },
@@ -72,7 +69,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to save reminder time'),
+        error: getStoreErrorKey(error, 'errors.saveReminderTime'),
       });
       throw error;
     }
@@ -98,7 +95,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to save notification permission'),
+        error: getStoreErrorKey(error, 'errors.saveNotificationPermission'),
       });
       throw error;
     }
@@ -126,7 +123,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to save pet reminder notifications'),
+        error: getStoreErrorKey(error, 'errors.savePetReminderNotifications'),
       });
       throw error;
     }

@@ -4,6 +4,7 @@ import {
   getOnboardingCompleted,
   setOnboardingCompleted,
 } from '@/storage/prefs.storage';
+import { getStoreErrorKey } from '@/utils/store-error';
 
 type OnboardingState = {
   hasCompletedOnboarding: boolean | null;
@@ -13,10 +14,6 @@ type OnboardingState = {
   completeOnboarding: () => Promise<void>;
   clearError: () => void;
 };
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
 
 export const useOnboardingStore = create<OnboardingState>((set) => ({
   hasCompletedOnboarding: null,
@@ -32,7 +29,7 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to load onboarding status'),
+        error: getStoreErrorKey(error, 'errors.loadOnboardingStatus'),
       });
     }
   },
@@ -46,7 +43,7 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: getErrorMessage(error, 'Failed to save onboarding status'),
+        error: getStoreErrorKey(error, 'errors.saveOnboardingStatus'),
       });
     }
   },

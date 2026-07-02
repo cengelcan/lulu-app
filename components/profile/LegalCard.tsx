@@ -6,7 +6,7 @@ import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser'
 import { ProfileListRow } from '@/components/profile/ProfileListRow';
 import { Card } from '@/components/ui/Card';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import { PRIVACY_POLICY_URL, TERMS_URL } from '@/constants/legal';
+import { LEGAL_URLS } from '@/constants/legal';
 import { useTranslation } from '@/hooks/use-translation';
 import {
   deleteAllLocalData,
@@ -72,13 +72,13 @@ export function LegalCard() {
           label={t('profile.privacyPolicy')}
           showChevron={false}
           showExternalIcon
-          onPress={() => void openLegalUrl(PRIVACY_POLICY_URL)}
+          onPress={() => void openLegalUrl(LEGAL_URLS.privacyPolicy)}
         />
         <ProfileListRow
           label={t('profile.terms')}
           showChevron={false}
           showExternalIcon
-          onPress={() => void openLegalUrl(TERMS_URL)}
+          onPress={() => void openLegalUrl(LEGAL_URLS.terms)}
         />
         <ProfileListRow
           label={t('profile.deleteAccount')}

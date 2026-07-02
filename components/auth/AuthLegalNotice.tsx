@@ -1,7 +1,7 @@
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { StyleSheet, Text } from 'react-native';
 
-import { PRIVACY_POLICY_URL, TERMS_URL } from '@/constants/legal';
+import { LEGAL_URLS } from '@/constants/legal';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -25,14 +25,14 @@ export function AuthLegalNotice() {
       {t('auth.termsNoticePrefix')}
       <Text
         accessibilityRole="link"
-        onPress={() => void openLegalUrl(TERMS_URL)}
+        onPress={() => void openLegalUrl(LEGAL_URLS.terms)}
         style={[styles.link, { color: brandAccentColor }]}>
         {t('profile.terms')}
       </Text>
       {t('auth.termsNoticeMiddle')}
       <Text
         accessibilityRole="link"
-        onPress={() => void openLegalUrl(PRIVACY_POLICY_URL)}
+        onPress={() => void openLegalUrl(LEGAL_URLS.privacyPolicy)}
         style={[styles.link, { color: brandAccentColor }]}>
         {t('profile.privacyPolicy')}
       </Text>

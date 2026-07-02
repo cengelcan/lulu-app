@@ -1,30 +1,42 @@
 import { StyleSheet, View } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Rect } from 'react-native-svg';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Palette } from '@/constants/theme';
+import { Palette, Radius } from '@/constants/theme';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 type RemindersEmptyIllustrationProps = {
   size?: number;
   accentColor?: string;
   borderColor?: string;
+  backgroundColor?: string;
 };
+
+const FRAME_INSET = 6;
 
 export function RemindersEmptyIllustration({
   size = 88,
   accentColor = Palette.badgeViolet,
   borderColor = 'rgba(161, 161, 170, 0.45)',
+  backgroundColor,
 }: RemindersEmptyIllustrationProps) {
+  const surfaceColor = useThemeColor({}, 'surface');
+  const fillColor = backgroundColor ?? surfaceColor;
   const calendarSize = Math.round(size * 0.38);
   const badgeSize = Math.round(size * 0.22);
+  const frameSize = size - FRAME_INSET * 2;
 
   return (
     <View style={[styles.wrapper, { width: size, height: size }]}>
       <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={size / 2 - 6}
+        <Rect
+          x={FRAME_INSET}
+          y={FRAME_INSET}
+          width={frameSize}
+          height={frameSize}
+          rx={Radius.lg}
+          ry={Radius.lg}
+          fill={fillColor}
           stroke={borderColor}
           strokeWidth="1.5"
           strokeDasharray="5 5"

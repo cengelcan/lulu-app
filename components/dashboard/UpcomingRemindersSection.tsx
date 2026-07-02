@@ -31,7 +31,6 @@ export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSection
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
   const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
-  const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
 
   const upcoming = buildUpcomingReminders(reminders, locale, t, {
     limit: 3,
@@ -56,9 +55,7 @@ export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSection
     return (
       <Card style={styles.container}>
         <View style={styles.header}>
-          <View style={[styles.headerIcon, { backgroundColor: brandAccentSoft }]}>
-            <IconSymbol name="clock.fill" size={18} color={REMINDER_ACCENT} />
-          </View>
+          <IconSymbol name="clock.fill" size={18} color={REMINDER_ACCENT} />
           <ThemedText
             lightColor={titleColor}
             darkColor={titleColor}
@@ -154,15 +151,8 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  headerIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: Radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    gap: Spacing.xs,
   },
   headerTitle: {
     ...Typography.bodySemiBold,

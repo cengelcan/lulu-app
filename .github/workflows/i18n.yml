@@ -1,0 +1,23 @@
+name: i18n
+
+on:
+  pull_request:
+    paths:
+      - 'i18n/**'
+      - '.github/workflows/i18n.yml'
+
+jobs:
+  check-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check EN/DE translation parity
+        run: npm run i18n:check

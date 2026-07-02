@@ -625,6 +625,9 @@ export const de: Translations = {
   reminders: {
     title: 'Erinnerungen',
     empty: 'Noch keine Erinnerungen. Erstelle eine, um Pflegeaufgaben im Blick zu behalten.',
+    emptyTitle: 'Noch keine Erinnerungen',
+    emptyDescription:
+      'Erstelle Erinnerungen für Medikamente, Tierarztbesuche, Pflege und mehr.',
     emptyUpcoming: 'Keine anstehenden Erinnerungen.',
     addReminder: 'Erinnerung hinzufügen',
     addReminderType: 'Plane eine {{type}}-Erinnerung für dein Tier.',

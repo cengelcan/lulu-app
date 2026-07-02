@@ -549,6 +549,8 @@ export type Translations = {
   reminders: {
     title: string;
     empty: string;
+    emptyTitle: string;
+    emptyDescription: string;
     emptyUpcoming: string;
     addReminder: string;
     addReminderType: string;

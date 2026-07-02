@@ -618,6 +618,9 @@ export const en: Translations = {
   reminders: {
     title: 'Reminders',
     empty: 'No reminders yet. Create one to stay on top of care tasks.',
+    emptyTitle: 'No reminders yet',
+    emptyDescription:
+      'Create reminders for medications, vet visits, grooming and more.',
     emptyUpcoming: 'No upcoming reminders scheduled.',
     addReminder: 'Add reminder',
     addReminderType: 'Schedule a {{type}} reminder for your pet.',

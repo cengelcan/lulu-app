@@ -1,19 +1,23 @@
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionHeader';
+import { RemindersEmptyIllustration } from '@/components/dashboard/RemindersEmptyIllustration';
 import { ReminderListRow } from '@/components/reminders/ReminderListRow';
 import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Spacing, Typography } from '@/constants/theme';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { getLocaleTag } from '@/utils/locale';
 import { getReminderFormRoute } from '@/utils/pet-reminder-display';
 import { buildUpcomingReminders, hasOverdueReminders } from '@/utils/upcoming-reminders';
 import type { PetReminder } from '@/types/pet-reminder';
+
+const REMINDER_ACCENT = Palette.badgeViolet;
 
 type UpcomingRemindersSectionProps = {
   reminders: PetReminder[];
@@ -23,7 +27,11 @@ export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSection
   const router = useRouter();
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
+  const titleColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const borderColor = useThemeColor({}, 'border');
+  const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
+  const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
 
   const upcoming = buildUpcomingReminders(reminders, locale, t, {
     limit: 3,
@@ -34,6 +42,9 @@ export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSection
   };
 
   const handleAddReminder = () => {
+    if (process.env.EXPO_OS === 'ios') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     router.push('/reminders' as Href);
   };
 
@@ -43,23 +54,62 @@ export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSection
     }
 
     return (
-      <View style={styles.section}>
-        <DashboardSectionHeader title={t('reminders.title')} icon="clock.fill" />
-        <Card style={styles.emptyCard}>
+      <Card style={styles.container}>
+        <View style={styles.header}>
+          <View style={[styles.headerIcon, { backgroundColor: brandAccentSoft }]}>
+            <IconSymbol name="clock.fill" size={18} color={REMINDER_ACCENT} />
+          </View>
           <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.emptyText}>
-            {t('reminders.empty')}
+            lightColor={titleColor}
+            darkColor={titleColor}
+            style={styles.headerTitle}>
+            {t('reminders.title')}
           </ThemedText>
-          <Button
-            title={t('reminders.addReminder')}
-            variant="secondary"
-            onPress={handleAddReminder}
-            style={styles.emptyButton}
-          />
-        </Card>
-      </View>
+        </View>
+
+        <View
+          style={[
+            styles.emptyContainer,
+            { borderColor, backgroundColor: surfaceSoftColor },
+          ]}>
+          <View style={styles.emptyContent}>
+            <RemindersEmptyIllustration
+              accentColor={REMINDER_ACCENT}
+              borderColor={borderColor}
+            />
+            <View style={styles.emptyTextBlock}>
+              <ThemedText
+                lightColor={titleColor}
+                darkColor={titleColor}
+                style={styles.emptyTitle}>
+                {t('reminders.emptyTitle')}
+              </ThemedText>
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.emptyDescription}>
+                {t('reminders.emptyDescription')}
+              </ThemedText>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('reminders.addReminder')}
+                onPress={handleAddReminder}
+                style={({ pressed }) => [
+                  styles.emptyButton,
+                  { borderColor: REMINDER_ACCENT, opacity: pressed ? 0.75 : 1 },
+                ]}>
+                <IconSymbol name="plus" size={16} color={REMINDER_ACCENT} />
+                <ThemedText
+                  lightColor={REMINDER_ACCENT}
+                  darkColor={REMINDER_ACCENT}
+                  style={styles.emptyButtonLabel}>
+                  {t('reminders.addReminder')}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Card>
     );
   }
 
@@ -99,21 +149,75 @@ const styles = StyleSheet.create({
   section: {
     gap: Spacing.sm,
   },
+  container: {
+    gap: Spacing.sm,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  headerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    ...Typography.bodySemiBold,
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: '600',
+    flex: 1,
+  },
   card: {
     padding: 0,
     gap: 0,
     overflow: 'hidden',
   },
-  emptyCard: {
+  emptyContainer: {
+    width: '100%',
+    borderRadius: Radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: Spacing.md,
+  },
+  emptyContent: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    paddingVertical: Spacing.lg,
   },
-  emptyText: {
-    ...Typography.body,
-    textAlign: 'center',
+  emptyTextBlock: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  emptyTitle: {
+    ...Typography.bodySemiBold,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '600',
+  },
+  emptyDescription: {
+    ...Typography.caption,
+    fontSize: 13,
+    lineHeight: 18,
   },
   emptyButton: {
-    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: Spacing.xxs,
+    minHeight: 40,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginTop: Spacing.xxs,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+  },
+  emptyButtonLabel: {
+    ...Typography.button,
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '600',
   },
 });

@@ -1,8 +1,14 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-export function configureNotificationHandler(): void {
+import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
+
+export async function configureNotificationHandler(): Promise<void> {
   if (Platform.OS === 'web') {
+    return;
+  }
+
+  const Notifications = await getExpoNotificationsModule();
+  if (!Notifications) {
     return;
   }
 

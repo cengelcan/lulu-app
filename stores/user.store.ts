@@ -90,6 +90,8 @@ async function enforceUserDataIsolation(userId: string): Promise<boolean> {
 
   if (previousUserId && previousUserId !== userId) {
     await wipeUserScopedData();
+    const { resetUserScopedStores } = await import('@/services/cleanup/reset-user-scoped-stores');
+    resetUserScopedStores();
     wiped = true;
   }
 

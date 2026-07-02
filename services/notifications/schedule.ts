@@ -1,4 +1,3 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import {
@@ -9,6 +8,7 @@ import {
   CHECK_IN_REMINDER_SOUND,
 } from '@/services/notifications/constants';
 import { getCheckInReminderContent } from '@/services/notifications/content';
+import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
 import { getActivePet } from '@/storage/pet.storage';
 import {
@@ -19,8 +19,17 @@ import {
 } from '@/storage/prefs.storage';
 import type { ReminderTime } from '@/types/reminder';
 
+type ExpoNotificationsModule = NonNullable<
+  Awaited<ReturnType<typeof getExpoNotificationsModule>>
+>;
+
 export async function cancelCheckInReminder(): Promise<void> {
   if (Platform.OS === 'web') {
+    return;
+  }
+
+  const Notifications = await getExpoNotificationsModule();
+  if (!Notifications) {
     return;
   }
 
@@ -32,6 +41,7 @@ export async function cancelCheckInReminder(): Promise<void> {
 }
 
 async function scheduleDailyCheckInReminder(
+  Notifications: ExpoNotificationsModule,
   reminderTime: ReminderTime,
   petName: string,
   language: Awaited<ReturnType<typeof getAppLanguage>>
@@ -95,5 +105,10 @@ export async function syncCheckInReminderSchedule(input?: {
     return;
   }
 
-  await scheduleDailyCheckInReminder(reminderTime, petName, language);
+  const Notifications = await getExpoNotificationsModule();
+  if (!Notifications) {
+    return;
+  }
+
+  await scheduleDailyCheckInReminder(Notifications, reminderTime, petName, language);
 }

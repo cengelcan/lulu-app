@@ -6,10 +6,7 @@ import 'react-native-reanimated';
 
 import { useNotificationResponse } from '@/hooks/use-notification-response';
 import { useAuthDeepLink } from '@/hooks/use-auth-deep-link';
-import { configureNotificationHandler } from '@/services/notifications';
 import { useLanguageStore } from '@/stores/language.store';
-
-configureNotificationHandler();
 
 export default function RootLayout() {
   const loadLanguage = useLanguageStore((state) => state.loadLanguage);
@@ -19,6 +16,12 @@ export default function RootLayout() {
   useEffect(() => {
     void loadLanguage();
   }, [loadLanguage]);
+
+  useEffect(() => {
+    void import('@/services/notifications/handler').then(({ configureNotificationHandler }) =>
+      configureNotificationHandler()
+    );
+  }, []);
 
   return (
     <ThemeProvider value={DarkTheme}>

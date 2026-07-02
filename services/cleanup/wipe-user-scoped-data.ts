@@ -5,11 +5,6 @@ import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { removeActivePetId, removeCheckInReminderTime } from '@/storage/prefs.storage';
 import { clearUserProfile } from '@/storage/user.storage';
-import { useCheckInStore } from '@/stores/check-in.store';
-import { useNotificationStore } from '@/stores/notification.store';
-import { usePetReminderStore } from '@/stores/pet-reminder.store';
-import { usePetRecordStore } from '@/stores/pet-record.store';
-import { usePetStore } from '@/stores/pet.store';
 
 /**
  * Clears all user-scoped local data (pets, check-ins, records, reminder, profile)
@@ -30,29 +25,4 @@ export async function wipeUserScopedData(): Promise<void> {
     removeCheckInReminderTime(),
     clearUserProfile(),
   ]);
-
-  usePetStore.setState({
-    pets: [],
-    pet: null,
-    activePetId: null,
-    isLoading: false,
-    error: null,
-  });
-  useCheckInStore.setState({
-    latestCheckIn: null,
-    checkIns: [],
-    isLoading: false,
-    error: null,
-  });
-  usePetRecordStore.setState({
-    records: [],
-    isLoading: false,
-    error: null,
-  });
-  usePetReminderStore.setState({
-    reminders: [],
-    isLoading: false,
-    error: null,
-  });
-  useNotificationStore.setState({ reminderTime: null });
 }

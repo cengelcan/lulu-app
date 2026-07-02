@@ -1,21 +1,31 @@
-import * as Notifications from 'expo-notifications';
 import type { Href } from 'expo-router';
 import { Platform } from 'react-native';
 
 import { CHECK_IN_ROUTE } from '@/services/notifications/constants';
+import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
+
+type NotificationResponse = {
+  notification: {
+    request: {
+      content: {
+        data: unknown;
+      };
+    };
+  };
+};
 
 function isHref(value: unknown): value is Href {
   return typeof value === 'string' && value.startsWith('/');
 }
 
 export function getRouteFromNotificationResponse(
-  response: Notifications.NotificationResponse | null | undefined
+  response: NotificationResponse | null | undefined
 ): Href | null {
   if (!response) {
     return null;
   }
 
-  const data = response.notification.request.content.data;
+  const data = response.notification.request.content.data as { route?: unknown } | null | undefined;
 
   if (isHref(data?.route)) {
     return data.route;
@@ -26,6 +36,11 @@ export function getRouteFromNotificationResponse(
 
 export async function getNotificationLaunchRoute(): Promise<Href | null> {
   if (Platform.OS === 'web') {
+    return null;
+  }
+
+  const Notifications = await getExpoNotificationsModule();
+  if (!Notifications) {
     return null;
   }
 

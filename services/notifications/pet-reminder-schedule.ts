@@ -1,4 +1,3 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import {
@@ -8,6 +7,7 @@ import {
   PET_REMINDER_REMINDER_SOUND,
 } from '@/services/notifications/constants';
 import { getPetReminderNotificationContent } from '@/services/notifications/content';
+import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
 import { getActivePet } from '@/storage/pet.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
@@ -19,9 +19,14 @@ import type { PetReminder } from '@/types/pet-reminder';
 import { parseLocalDate } from '@/utils/date';
 import { getReminderFormRoute } from '@/utils/pet-reminder-display';
 
+type ExpoNotificationsModule = NonNullable<
+  Awaited<ReturnType<typeof getExpoNotificationsModule>>
+>;
+
 function buildReminderTrigger(
+  Notifications: ExpoNotificationsModule,
   reminder: PetReminder
-): Notifications.SchedulableNotificationTriggerInput | null {
+): Record<string, unknown> | null {
   const parsed = parseLocalDate(reminder.dueDate);
   if (!parsed) {
     return null;
@@ -42,11 +47,12 @@ function buildReminderTrigger(
 }
 
 async function schedulePetReminderNotification(
+  Notifications: ExpoNotificationsModule,
   reminder: PetReminder,
   petName: string,
   language: Awaited<ReturnType<typeof getAppLanguage>>
 ): Promise<void> {
-  const trigger = buildReminderTrigger(reminder);
+  const trigger = buildReminderTrigger(Notifications, reminder);
   if (!trigger) {
     return;
   }
@@ -76,6 +82,11 @@ export async function cancelAllPetReminderNotifications(): Promise<void> {
     return;
   }
 
+  const Notifications = await getExpoNotificationsModule();
+  if (!Notifications) {
+    return;
+  }
+
   const scheduled = await Notifications.getAllScheduledNotificationsAsync();
 
   await Promise.all(
@@ -89,6 +100,11 @@ export async function cancelAllPetReminderNotifications(): Promise<void> {
 
 export async function cancelPetReminderNotification(reminderId: string): Promise<void> {
   if (Platform.OS === 'web') {
+    return;
+  }
+
+  const Notifications = await getExpoNotificationsModule();
+  if (!Notifications) {
     return;
   }
 
@@ -125,9 +141,16 @@ export async function syncPetReminderNotificationSchedule(input?: {
     return;
   }
 
+  const Notifications = await getExpoNotificationsModule();
+  if (!Notifications) {
+    return;
+  }
+
   const pendingReminders = await petReminderStorage.getPendingPetRemindersByPetId(pet.id);
 
   await Promise.all(
-    pendingReminders.map((reminder) => schedulePetReminderNotification(reminder, pet.name, language))
+    pendingReminders.map((reminder) =>
+      schedulePetReminderNotification(Notifications, reminder, pet.name, language)
+    )
   );
 }

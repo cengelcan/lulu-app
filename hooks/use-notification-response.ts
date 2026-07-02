@@ -1,9 +1,10 @@
-import * as Notifications from 'expo-notifications';
 import { useRouter, useRootNavigationState } from 'expo-router';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
+import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { getRouteFromNotificationResponse } from '@/services/notifications/response';
+import { isExpoGo } from '@/utils/is-expo-go';
 
 export function useNotificationResponse(): void {
   const router = useRouter();
@@ -11,18 +12,31 @@ export function useNotificationResponse(): void {
   const isNavigationReady = Boolean(navigationState?.key);
 
   useEffect(() => {
-    if (Platform.OS === 'web' || !isNavigationReady) {
+    if (Platform.OS === 'web' || !isNavigationReady || isExpoGo()) {
       return;
     }
 
-    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
-      const route = getRouteFromNotificationResponse(response);
+    let subscription: { remove: () => void } | undefined;
 
-      if (route) {
-        router.push(route);
+    void (async () => {
+      const Notifications = await getExpoNotificationsModule();
+      if (!Notifications) {
+        return;
       }
-    });
 
-    return () => subscription.remove();
+      subscription = Notifications.addNotificationResponseReceivedListener(
+        (response: Parameters<typeof getRouteFromNotificationResponse>[0]) => {
+          const route = getRouteFromNotificationResponse(response);
+
+          if (route) {
+            router.push(route);
+          }
+        }
+      );
+    })();
+
+    return () => {
+      subscription?.remove();
+    };
   }, [isNavigationReady, router]);
 }

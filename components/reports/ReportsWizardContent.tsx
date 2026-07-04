@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { ReportCheckboxRow } from '@/components/reports/ReportCheckboxRow';
@@ -30,6 +31,7 @@ import { generateReportHtml } from '@/services/reports/generate-report-html';
 import * as checkInStorage from '@/storage/check-in.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import { usePetStore } from '@/stores/pet.store';
+import { canViewReports } from '@/utils/pet-access';
 import type {
   ReportCheckInDataKey,
   ReportDataSelection,
@@ -56,6 +58,7 @@ function getStepIndex(step: ReportWizardStep): number {
 }
 
 export function ReportsWizardContent() {
+  const router = useRouter();
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
   const petDisplay = usePetDisplay();
@@ -85,6 +88,12 @@ export function ReportsWizardContent() {
   useEffect(() => {
     void loadPet();
   }, [loadPet]);
+
+  useEffect(() => {
+    if (pet && !canViewReports(pet)) {
+      router.replace('/(tabs)/home');
+    }
+  }, [pet, router]);
 
   const formatDate = useCallback(
     (date: string) => formatCheckInTitleDate(date, locale),

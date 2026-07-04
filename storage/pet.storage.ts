@@ -4,6 +4,7 @@ import type {
   PetAgeGroup,
   PetSex,
   PetSpayNeuterStatus,
+  PetSharingRole,
   PetSpecies,
   PetStatus,
 } from '@/types/pet';
@@ -33,6 +34,8 @@ type PetRow = {
   breed: string | null;
   status: string | null;
   deceased_at: string | null;
+  sharing_role: string | null;
+  owner_user_id: string | null;
   created_at: string;
 };
 
@@ -54,6 +57,8 @@ function mapPetRow(row: PetRow): Pet {
     ownerName: row.owner_name,
     status: (row.status as PetStatus | null) ?? 'active',
     deceasedAt: row.deceased_at,
+    sharingRole: (row.sharing_role as PetSharingRole | null) ?? 'owner',
+    ownerUserId: row.owner_user_id,
     createdAt: row.created_at,
   };
 }
@@ -65,9 +70,9 @@ export async function createPet(pet: Pet): Promise<void> {
     `INSERT INTO pets (
        id, name, species, breed, age_group, health_conditions, photo_uri,
        color, sex, spay_neuter_status, birth_date, adoption_date, microchip_id, owner_name,
-       status, deceased_at, created_at
+       status, deceased_at, sharing_role, owner_user_id, created_at
      )
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     pet.id,
     pet.name,
     pet.species,
@@ -84,6 +89,8 @@ export async function createPet(pet: Pet): Promise<void> {
     pet.ownerName ?? null,
     pet.status ?? 'active',
     pet.deceasedAt ?? null,
+    pet.sharingRole ?? 'owner',
+    pet.ownerUserId ?? null,
     pet.createdAt
   );
 }
@@ -186,7 +193,8 @@ export async function updatePet(pet: Pet): Promise<void> {
     `UPDATE pets
      SET name = ?, species = ?, breed = ?, age_group = ?, health_conditions = ?, photo_uri = ?,
          color = ?, sex = ?, spay_neuter_status = ?, birth_date = ?, adoption_date = ?,
-         microchip_id = ?, owner_name = ?, status = ?, deceased_at = ?
+         microchip_id = ?, owner_name = ?, status = ?, deceased_at = ?,
+         sharing_role = ?, owner_user_id = ?
      WHERE id = ?`,
     pet.name,
     pet.species,
@@ -203,6 +211,8 @@ export async function updatePet(pet: Pet): Promise<void> {
     pet.ownerName ?? null,
     pet.status ?? 'active',
     pet.deceasedAt ?? null,
+    pet.sharingRole ?? 'owner',
+    pet.ownerUserId ?? null,
     pet.id
   );
 }

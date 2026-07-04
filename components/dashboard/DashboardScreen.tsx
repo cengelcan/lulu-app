@@ -22,6 +22,7 @@ import { QUICK_ACTIONS } from '@/constants/quick-actions';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { canViewReports } from '@/utils/pet-access';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
 import { usePetRecordStore } from '@/stores/pet-record.store';
@@ -68,6 +69,10 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     [checkIns, todayDateString]
   );
   const trends = useMemo(() => buildDashboardTrends(checkIns), [checkIns]);
+  const visibleQuickActions = useMemo(
+    () => (pet && canViewReports(pet) ? QUICK_ACTIONS : QUICK_ACTIONS.filter((action) => action.id !== 'reports')),
+    [pet]
+  );
 
   const ownerName = useMemo(() => {
     const userName = displayName?.trim();
@@ -203,7 +208,7 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
           <View style={styles.quickActionsSection}>
             <DashboardSectionHeader title={t('dashboard.quickActions')} icon="bolt.fill" />
             <View style={styles.quickActionsGrid}>
-              {QUICK_ACTIONS.map((action) => (
+              {visibleQuickActions.map((action) => (
                 <QuickActionItem
                   key={action.id}
                   label={t(action.labelKey)}

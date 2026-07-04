@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logActivityEvent } from '@/services/sharing/family-sharing';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import type { PetRecord } from '@/types/pet-record';
 import { normalizeLegacyRecordMetadata, normalizePetRecord } from '@/utils/pet-record-normalize';
@@ -50,11 +51,10 @@ function fromRemoteRow(row: RemotePetRecordRow): PetRecord {
   } as PetRecord);
 }
 
-export async function fetchRemotePetRecords(userId: string): Promise<PetRecord[]> {
+export async function fetchRemotePetRecords(_userId: string): Promise<PetRecord[]> {
   const { data, error } = await supabase
     .from('pet_records')
     .select('*')
-    .eq('user_id', userId)
     .order('date', { ascending: false });
 
   if (error) {
@@ -72,6 +72,13 @@ export async function pushPetRecord(userId: string, record: PetRecord): Promise<
   if (error) {
     throw new Error(error.message);
   }
+
+  void logActivityEvent({
+    id: `record-${record.id}`,
+    petId: record.petId,
+    eventType: 'record_created',
+    metadata: { type: record.type },
+  });
 }
 
 export async function deleteRemotePetRecord(id: string): Promise<void> {

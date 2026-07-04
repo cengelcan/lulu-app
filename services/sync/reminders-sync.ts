@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logActivityEvent } from '@/services/sharing/family-sharing';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import type { PetReminder, ReminderTimeOfDay } from '@/types/pet-reminder';
 import { normalizePetReminder, mergeStoredReminderMetadata, splitStoredReminderMetadata } from '@/utils/pet-reminder-normalize';
@@ -68,11 +69,10 @@ function fromRemoteRow(row: RemotePetReminderRow): PetReminder {
   } as PetReminder);
 }
 
-export async function fetchRemotePetReminders(userId: string): Promise<PetReminder[]> {
+export async function fetchRemotePetReminders(_userId: string): Promise<PetReminder[]> {
   const { data, error } = await supabase
     .from('pet_reminders')
     .select('*')
-    .eq('user_id', userId)
     .order('due_date', { ascending: true });
 
   if (error) {
@@ -89,6 +89,15 @@ export async function pushPetReminder(userId: string, reminder: PetReminder): Pr
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  if (reminder.status === 'completed') {
+    void logActivityEvent({
+      id: `reminder-${reminder.id}-completed`,
+      petId: reminder.petId,
+      eventType: 'reminder_completed',
+      metadata: { type: reminder.type },
+    });
   }
 }
 

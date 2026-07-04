@@ -1,6 +1,7 @@
 import type { Href } from 'expo-router';
 
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
+import type { ActivityEvent } from '@/types/sharing';
 import type { CheckIn } from '@/types/check-in';
 import type { Pet } from '@/types/pet';
 import type { PetReminder } from '@/types/pet-reminder';
@@ -65,6 +66,9 @@ export type InboxProviderInput = {
   referenceDate: Date;
   locale: string;
   t: InboxTranslateFn;
+  activityEvents?: ActivityEvent[];
+  currentUserId?: string | null;
+  actorDisplayNames?: Map<string, string | null>;
 };
 
 export type InboxProvider = (input: InboxProviderInput) => InboxItem[];

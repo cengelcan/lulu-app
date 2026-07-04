@@ -8,6 +8,7 @@ import { Radius, Spacing, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { isSharedPet } from '@/utils/pet-access';
 import type { Pet } from '@/types/pet';
 import { formatMemorialDate } from '@/utils/date';
 import { getLocaleTag } from '@/utils/locale';
@@ -152,6 +153,7 @@ function ActivePetListRow({
   onOpenProfile,
 }: ActivePetListRowProps) {
   const { displayPetBreed, displayPetSpecies } = usePetDisplay();
+  const { t } = useTranslation();
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const brandAccentBorderColor = useThemeColor({}, 'brandAccentBorder');
   const primaryTextColor = useThemeColor({}, 'primaryText');
@@ -161,6 +163,7 @@ function ActivePetListRow({
   const breed = displayPetBreed(pet.breed);
   const speciesLabel = displayPetSpecies(pet.species);
   const breedLabel = breed !== displayPetBreed(null) ? breed : speciesLabel;
+  const sharedLabel = isSharedPet(pet) ? t('myPets.sharedBadge') : null;
 
   const handleSelect = () => {
     if (disabled) {
@@ -216,7 +219,7 @@ function ActivePetListRow({
             darkColor={textSecondaryColor}
             numberOfLines={1}
             style={styles.subtitle}>
-            {breedLabel}
+            {sharedLabel ? `${breedLabel} · ${sharedLabel}` : breedLabel}
           </ThemedText>
         </View>
         {isSwitching ? (

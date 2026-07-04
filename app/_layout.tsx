@@ -6,12 +6,14 @@ import 'react-native-reanimated';
 
 import { useNotificationResponse } from '@/hooks/use-notification-response';
 import { useAuthDeepLink } from '@/hooks/use-auth-deep-link';
+import { useJoinDeepLink } from '@/hooks/use-join-deep-link';
 import { useLanguageStore } from '@/stores/language.store';
 
 export default function RootLayout() {
   const loadLanguage = useLanguageStore((state) => state.loadLanguage);
   useNotificationResponse();
   useAuthDeepLink();
+  useJoinDeepLink();
 
   useEffect(() => {
     void loadLanguage();
@@ -37,6 +39,8 @@ export default function RootLayout() {
         <Stack.Screen name="pet-profile" />
         <Stack.Screen name="edit-pet" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="family-sharing" />
+        <Stack.Screen name="join-family" />
         <Stack.Screen name="reports" />
         <Stack.Screen name="records" />
         <Stack.Screen name="reminders" />

@@ -8,6 +8,7 @@ import type {
   PetAgeGroup,
   PetSex,
   PetSpayNeuterStatus,
+  PetSharingRole,
   PetSpecies,
   PetStatus,
 } from '@/types/pet';
@@ -72,7 +73,9 @@ function toRemoteRow(pet: Pet, userId: string): Record<string, unknown> {
   };
 }
 
-function fromRemoteRow(row: RemotePetRow): Pet {
+function fromRemoteRow(row: RemotePetRow, currentUserId: string): Pet {
+  const sharingRole: PetSharingRole = row.user_id === currentUserId ? 'owner' : 'member';
+
   return {
     id: row.id,
     name: row.name,
@@ -90,6 +93,8 @@ function fromRemoteRow(row: RemotePetRow): Pet {
     ownerName: row.owner_name,
     status: (row.status as PetStatus | null) ?? 'active',
     deceasedAt: row.deceased_at,
+    sharingRole,
+    ownerUserId: sharingRole === 'member' ? row.user_id : null,
     createdAt: row.created_at,
   };
 }
@@ -98,17 +103,20 @@ export async function fetchRemotePets(userId: string): Promise<Pet[]> {
   const { data, error } = await supabase
     .from('pets')
     .select('*')
-    .eq('user_id', userId)
     .order('created_at', { ascending: true });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return (data as RemotePetRow[]).map(fromRemoteRow);
+  return (data as RemotePetRow[]).map((row) => fromRemoteRow(row, userId));
 }
 
 export async function pushPet(userId: string, pet: Pet): Promise<void> {
+  if ((pet.sharingRole ?? 'owner') !== 'owner') {
+    return;
+  }
+
   const { error } = await supabase.from('pets').upsert(toRemoteRow(pet, userId), {
     onConflict: 'id',
   });
@@ -199,10 +207,12 @@ export async function pullPetsIntoLocal(userId: string): Promise<Pet[]> {
 
     if (localPets.length > 0) {
       for (const pet of localPets) {
-        await pushPet(userId, pet);
+        if ((pet.sharingRole ?? 'owner') === 'owner') {
+          await pushPet(userId, pet);
+        }
       }
 
-      return localPets;
+      return localPets.filter((pet) => (pet.sharingRole ?? 'owner') === 'owner');
     }
 
     return [];

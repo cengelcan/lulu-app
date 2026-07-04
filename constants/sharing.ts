@@ -1,0 +1,10 @@
+export const FAMILY_CODE_LENGTH = 6;
+
+export const FAMILY_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+export const MAX_FAMILY_MEMBERS = 5;
+
+export const FAMILY_JOIN_PATH_PREFIX = '/join/';
+
+export const FAMILY_SHARING_DEV_BYPASS =
+  process.env.EXPO_PUBLIC_FAMILY_SHARING_DEV_BYPASS === 'true';

@@ -1,4 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import type { Href } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
@@ -6,6 +7,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ProfileDetailRow } from '@/components/pet/ProfileDetailRow';
+import { SettingsValueRow } from '@/components/settings/SettingsValueRow';
 import { ThemedText } from '@/components/themed-text';
 import { HeaderTextButton } from '@/components/ui/HeaderTextButton';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
@@ -15,6 +17,7 @@ import { usePetStore } from '@/stores/pet.store';
 import { STACK_BACK_ONLY_OPTIONS, HEADER_ACTION_CONTAINER_STYLE } from '@/constants/navigation';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
+import { canEditPetProfile, canManageFamilySharing } from '@/utils/pet-access';
 
 export default function PetProfileScreen() {
   const router = useRouter();
@@ -58,7 +61,7 @@ export default function PetProfileScreen() {
   }, [isLoading, pet, router]);
 
   const handleEditProfile = useCallback(() => {
-    if (!pet) {
+    if (!pet || !canEditPetProfile(pet)) {
       return;
     }
 
@@ -69,16 +72,21 @@ export default function PetProfileScreen() {
   }, [pet, router]);
 
   const headerRight = useCallback(
-    () => (
-      <HeaderTextButton
-        accessibilityLabel={t('pet.editProfileA11y')}
-        color={primaryColor}
-        label={t('pet.editProfile')}
-        onPress={handleEditProfile}
-      />
-    ),
-    [handleEditProfile, primaryColor, t]
+    () =>
+      pet && canEditPetProfile(pet) ? (
+        <HeaderTextButton
+          accessibilityLabel={t('pet.editProfileA11y')}
+          color={primaryColor}
+          label={t('pet.editProfile')}
+          onPress={handleEditProfile}
+        />
+      ) : null,
+    [handleEditProfile, pet, primaryColor, t]
   );
+
+  const handleOpenFamilySharing = useCallback(() => {
+    router.push('/family-sharing' as Href);
+  }, [router]);
 
   const screenOptions = useMemo(
     () => ({
@@ -162,6 +170,17 @@ export default function PetProfileScreen() {
           <GroupedSection title={t('pet.sections.owner')}>
             <ProfileDetailRow label={t('pet.fields.ownerName')} value={displayPetText(pet.ownerName)} isLast />
           </GroupedSection>
+
+          {canManageFamilySharing(pet) ? (
+            <GroupedSection title={t('sharing.settingsSection')}>
+              <SettingsValueRow
+                label={t('sharing.shareWithFamily')}
+                value={t('sharing.manage')}
+                onPress={handleOpenFamilySharing}
+                isLast
+              />
+            </GroupedSection>
+          ) : null}
         </View>
       </ScreenContainer>
     </>

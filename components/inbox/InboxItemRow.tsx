@@ -63,6 +63,15 @@ export function InboxItemRow({ item, showPetName, isLast = false, onPress }: Inb
         <ThemedText type="defaultSemiBold" numberOfLines={2}>
           {title}
         </ThemedText>
+        {item.actorDisplayName && item.source === 'family' ? (
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            numberOfLines={1}
+            style={styles.actorName}>
+            {item.actorDisplayName}
+          </ThemedText>
+        ) : null}
         {subtitle ? (
           <ThemedText
             lightColor={textSecondaryColor}
@@ -103,6 +112,9 @@ const styles = StyleSheet.create({
   petName: {
     ...Typography.caption,
     fontWeight: '600',
+  },
+  actorName: {
+    ...Typography.caption,
   },
   subtitle: {
     ...Typography.caption,

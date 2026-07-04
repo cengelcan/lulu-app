@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logActivityEvent } from '@/services/sharing/family-sharing';
 import * as checkInStorage from '@/storage/check-in.storage';
 import type { CheckIn } from '@/types/check-in';
 
@@ -148,11 +149,10 @@ function normalizeLegacyPoop(value: string | null): CheckIn['poop'] {
   }
 }
 
-export async function fetchRemoteCheckIns(userId: string): Promise<CheckIn[]> {
+export async function fetchRemoteCheckIns(_userId: string): Promise<CheckIn[]> {
   const { data, error } = await supabase
     .from('check_ins')
     .select('*')
-    .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -170,6 +170,13 @@ export async function pushCheckIn(userId: string, checkIn: CheckIn): Promise<voi
   if (error) {
     throw new Error(error.message);
   }
+
+  void logActivityEvent({
+    id: `check-in-${checkIn.id}`,
+    petId: checkIn.petId,
+    eventType: 'check_in_updated',
+    metadata: { date: checkIn.date },
+  });
 }
 
 export async function deleteRemoteCheckIn(id: string): Promise<void> {

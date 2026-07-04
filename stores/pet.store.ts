@@ -11,6 +11,7 @@ import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useUserStore } from '@/stores/user.store';
 import type { Pet, PetStatus } from '@/types/pet';
+import { isPetOwner } from '@/utils/pet-access';
 import { getStoreErrorKey } from '@/utils/store-error';
 
 function getActiveUserId(): string | null {
@@ -167,6 +168,10 @@ export const usePetStore = create<PetState>((set, get) => ({
   },
 
   updatePet: async (pet) => {
+    if (!isPetOwner(pet)) {
+      throw new Error('errors.petReadOnly');
+    }
+
     set({ isLoading: true, error: null });
 
     try {
@@ -203,6 +208,10 @@ export const usePetStore = create<PetState>((set, get) => ({
 
       if (!target || target.id !== id) {
         throw new Error('errors.petNotFound');
+      }
+
+      if (!isPetOwner(target)) {
+        throw new Error('errors.petReadOnly');
       }
 
       const updated: Pet = {
@@ -257,6 +266,12 @@ export const usePetStore = create<PetState>((set, get) => ({
   },
 
   deletePet: async (id) => {
+    const target = get().pets.find((entry) => entry.id === id) ?? get().pet;
+
+    if (target && !isPetOwner(target)) {
+      throw new Error('errors.petReadOnly');
+    }
+
     set({ isLoading: true, error: null });
 
     try {

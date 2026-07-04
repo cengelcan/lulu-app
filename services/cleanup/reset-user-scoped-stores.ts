@@ -3,6 +3,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
 import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
+import { useSharingStore } from '@/stores/sharing.store';
 
 export function resetUserScopedStores(): void {
   usePetStore.setState({
@@ -29,4 +30,12 @@ export function resetUserScopedStores(): void {
     error: null,
   });
   useNotificationStore.setState({ reminderTime: null });
+  useSharingStore.setState({
+    familyGroup: null,
+    sharedPetIds: [],
+    members: [],
+    memberships: [],
+    isLoading: false,
+    error: null,
+  });
 }

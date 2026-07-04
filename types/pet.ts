@@ -27,6 +27,9 @@ export type PetSpayNeuterStatus =
 
 export type PetStatus = 'active' | 'deceased';
 
+/** `owner` = this account owns the pet; `member` = shared via family code. */
+export type PetSharingRole = 'owner' | 'member';
+
 export type Pet = {
   id: string;
   name: string;
@@ -44,6 +47,8 @@ export type Pet = {
   ownerName?: string | null;
   status: PetStatus;
   deceasedAt?: string | null;
+  sharingRole?: PetSharingRole;
+  ownerUserId?: string | null;
   createdAt: string;
 };
 

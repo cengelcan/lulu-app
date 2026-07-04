@@ -48,6 +48,7 @@ import { pickPetPhotoFromGallery } from '@/services/pet-photo';
 import { uploadPetPhoto } from '@/services/sync/pets-sync';
 import { usePetStore } from '@/stores/pet.store';
 import { useUserStore } from '@/stores/user.store';
+import { isPetOwner } from '@/utils/pet-access';
 import type {
   HealthCondition,
   PetAgeGroup,
@@ -275,6 +276,16 @@ export default function EditPetScreen() {
       router.dismissTo('/(tabs)/home');
     }
   }, [pet, petIsLoading, router, isDeleting, isUpdatingStatus, isDeleteModalVisible]);
+
+  useEffect(() => {
+    if (!pet || petIsLoading) {
+      return;
+    }
+
+    if (!isPetOwner(pet)) {
+      router.replace(`/pet-profile?id=${pet.id}`);
+    }
+  }, [pet, petIsLoading, router]);
 
   useEffect(() => {
     if (!pet) {
@@ -868,10 +879,10 @@ export default function EditPetScreen() {
       ) : null}
 
       <ConfirmModal
-        visible={isStatusModalVisible}
-        title={t(isDeceased ? 'pet.restorePetTitle' : 'pet.markDeceasedTitle', { name: pet.name })}
+        visible={isStatusModalVisible && pet !== null}
+        title={t(isDeceased ? 'pet.restorePetTitle' : 'pet.markDeceasedTitle', { name: pet?.name ?? '' })}
         message={t(isDeceased ? 'pet.restorePetMessage' : 'pet.markDeceasedMessage', {
-          name: pet.name,
+          name: pet?.name ?? '',
         })}
         confirmLabel={t(isDeceased ? 'pet.restorePet' : 'pet.markDeceased')}
         cancelLabel={t('common.cancel')}

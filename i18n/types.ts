@@ -663,6 +663,26 @@ export type Translations = {
     channelCheckIn: string;
     channelPetReminders: string;
   };
+  inbox: {
+    title: string;
+    allCaughtUp: string;
+    sections: {
+      actionRequired: string;
+      upcoming: string;
+      familyActivity: string;
+    };
+    missedCheckInToday: string;
+    missedCheckInYesterday: string;
+    overdueReminder: string;
+    upcomingReminder: string;
+    reminderForPet: string;
+    permissionDenied: string;
+    permissionDeniedSubtitle: string;
+    a11y: {
+      open: string;
+      unreadCount: string;
+    };
+  };
   myPets: {
     noPetsTitle: string;
     noPetsMessage: string;
@@ -870,6 +890,7 @@ export type Translations = {
     saveName: string;
     savePhoto: string;
     loadNotificationSettings: string;
+    loadInbox: string;
     saveReminderTime: string;
     saveNotificationPermission: string;
     savePetReminderNotifications: string;

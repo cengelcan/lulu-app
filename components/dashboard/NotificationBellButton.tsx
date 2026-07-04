@@ -1,26 +1,35 @@
 import * as Haptics from 'expo-haptics';
-import { useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
+import { InboxSheet } from '@/components/inbox/InboxSheet';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
+import { useInbox } from '@/hooks/use-inbox';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 
-type NotificationBellButtonProps = {
-  hasUnread?: boolean;
-};
-
-export function NotificationBellButton({ hasUnread = false }: NotificationBellButtonProps) {
+export function NotificationBellButton() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const { sections, actionRequiredCount, isLoading, error, refresh, showPetName } = useInbox();
 
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const borderColor = useThemeColor({}, 'border');
-  const surfaceColor = useThemeColor({}, 'surface');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const backgroundColor = useThemeColor({}, 'background');
+
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh])
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      void refresh();
+    }
+  }, [isOpen, refresh]);
 
   const handleOpen = () => {
     if (process.env.EXPO_OS === 'ios') {
@@ -33,16 +42,21 @@ export function NotificationBellButton({ hasUnread = false }: NotificationBellBu
     setIsOpen(false);
   };
 
+  const accessibilityLabel =
+    actionRequiredCount > 0
+      ? t('inbox.a11y.unreadCount', { count: actionRequiredCount })
+      : t('inbox.a11y.open');
+
   return (
     <>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t('dashboard.notificationsA11y')}
+        accessibilityLabel={accessibilityLabel}
         hitSlop={8}
         onPress={handleOpen}
         style={({ pressed }) => [styles.bellButton, { opacity: pressed ? 0.7 : 1 }]}>
         <IconSymbol name="bell.fill" size={22} color={textSecondaryColor} />
-        {hasUnread ? (
+        {actionRequiredCount > 0 ? (
           <View style={[styles.badge, { backgroundColor: brandAccentColor }]} />
         ) : null}
       </Pressable>
@@ -53,27 +67,14 @@ export function NotificationBellButton({ hasUnread = false }: NotificationBellBu
         visible={isOpen}
         onRequestClose={handleClose}>
         <View style={[styles.sheet, { backgroundColor }]}>
-          <View style={[styles.sheetHeader, { borderBottomColor: borderColor }]}>
-            <ThemedText type="defaultSemiBold" style={styles.sheetTitle}>
-              {t('dashboard.notificationsTitle')}
-            </ThemedText>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('common.cancel')}
-              hitSlop={8}
-              onPress={handleClose}
-              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
-              <IconSymbol name="xmark.circle" size={24} color={textSecondaryColor} />
-            </Pressable>
-          </View>
-          <View style={[styles.emptyState, { backgroundColor: surfaceColor, borderColor }]}>
-            <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
-              style={styles.emptyText}>
-              {t('dashboard.notificationsEmpty')}
-            </ThemedText>
-          </View>
+          <InboxSheet
+            sections={sections}
+            isLoading={isLoading}
+            error={error}
+            showPetName={showPetName}
+            onClose={handleClose}
+            onRefresh={refresh}
+          />
         </View>
       </Modal>
     </>
@@ -97,27 +98,5 @@ const styles = StyleSheet.create({
   },
   sheet: {
     flex: 1,
-    paddingTop: Spacing.lg,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  sheetTitle: {
-    ...Typography.titleSmall,
-  },
-  emptyState: {
-    margin: Spacing.lg,
-    borderRadius: Radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: Spacing.lg,
-  },
-  emptyText: {
-    ...Typography.body,
-    textAlign: 'center',
   },
 });

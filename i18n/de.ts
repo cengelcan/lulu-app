@@ -742,6 +742,26 @@ export const de: Translations = {
     channelCheckIn: 'Check-In Erinnerungen',
     channelPetReminders: 'Haustier-Erinnerungen',
   },
+  inbox: {
+    title: 'Benachrichtigungen',
+    allCaughtUp: 'Alles erledigt.',
+    sections: {
+      actionRequired: 'Handlung erforderlich',
+      upcoming: 'Bevorstehend',
+      familyActivity: 'Familienaktivität',
+    },
+    missedCheckInToday: '{{name}} hat heute noch keinen Check-In gemacht.',
+    missedCheckInYesterday: '{{name}} hat den Check-In von gestern verpasst.',
+    overdueReminder: '{{title}} ist überfällig',
+    upcomingReminder: '{{title}} · {{dateLabel}}',
+    reminderForPet: 'Für {{name}}',
+    permissionDenied: 'Benachrichtigungen sind deaktiviert.',
+    permissionDeniedSubtitle: 'Öffne die Einstellungen, um Erinnerungen zu aktivieren.',
+    a11y: {
+      open: 'Benachrichtigungen öffnen',
+      unreadCount: '{{count}} Einträge erfordern Aufmerksamkeit',
+    },
+  },
   myPets: {
     noPetsTitle: 'Noch keine Haustiere',
     noPetsMessage: 'Füge dein erstes Haustier hinzu, um mit der Erfassung zu beginnen.',
@@ -1000,6 +1020,7 @@ export const de: Translations = {
     savePhoto: 'Foto konnte nicht gespeichert werden. Bitte erneut versuchen.',
     loadNotificationSettings:
       'Benachrichtigungseinstellungen konnten nicht geladen werden. Bitte erneut versuchen.',
+    loadInbox: 'Benachrichtigungen konnten nicht geladen werden. Bitte erneut versuchen.',
     saveReminderTime: 'Erinnerungszeit konnte nicht gespeichert werden. Bitte erneut versuchen.',
     saveNotificationPermission:
       'Benachrichtigungsberechtigung konnte nicht gespeichert werden. Bitte erneut versuchen.',

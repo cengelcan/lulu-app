@@ -3,6 +3,7 @@ import * as checkInStorage from '@/storage/check-in.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
+import { clearDismissedInboxItems } from '@/storage/inbox-dismissed.storage';
 import {
   removeActivePetId,
   removeAppAppearance,
@@ -45,6 +46,7 @@ export async function deleteAllLocalData(): Promise<void> {
     removeNotificationPermission(),
     clearUserProfile(),
     clearLastStoreReviewPromptAt(),
+    clearDismissedInboxItems(),
   ]);
 }
 

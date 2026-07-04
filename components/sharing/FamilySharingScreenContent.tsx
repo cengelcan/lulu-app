@@ -1,4 +1,3 @@
-import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -25,6 +24,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { usePetStore } from '@/stores/pet.store';
 import { useSharingStore } from '@/stores/sharing.store';
 import { buildFamilyJoinUrl, formatFamilyCode } from '@/utils/sharing/family-code';
+import { copyTextToClipboard } from '@/utils/copy-to-clipboard';
 import { translateError } from '@/utils/translate-error';
 
 type FamilySharingScreenContentProps = {
@@ -123,9 +123,9 @@ export function FamilySharingScreenContent({
       return;
     }
 
-    await Clipboard.setStringAsync(formatFamilyCode(familyGroup.code));
+    const result = await copyTextToClipboard(formatFamilyCode(familyGroup.code));
 
-    if (process.env.EXPO_OS === 'ios') {
+    if (result === 'clipboard' && process.env.EXPO_OS === 'ios') {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
 

@@ -129,6 +129,8 @@ export type Translations = {
       weak_password: string;
       email_not_confirmed: string;
       network: string;
+      apple_unavailable: string;
+      apple_no_token: string;
       unknown: string;
     };
   };

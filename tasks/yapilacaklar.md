@@ -1,6 +1,6 @@
 # Yapılacaklar
 
-**Son güncelleme:** 2026-06-24 (Yayın öncesi UX paketleri F–K eklendi)
+**Son güncelleme:** 2026-07-04 (Apple Sign In tamam; Google bekliyor)
 
 Önceki task dosyalarının birleştirilmiş özeti. Tamamlanan işler arşivlendi; bu dosya yalnızca devam eden ve başlanmamış işleri içerir.
 
@@ -18,6 +18,11 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | Pet & Home HIG Redesign | Breed, günde 1 check-in, Home sadeleştirme, Pet Profile / Edit Pet |
 | Daily Check-In Redesign | 6 kategorili snap carousel, i18n altyapısı, veri migration |
 | Sprint 1–4 | Geri okları, System dili, TR/DE, streak kartı, Quick Actions, Records, Reports + PDF |
+| Paket G | Pet ekleme / setup ekranları (ilk kurulum + add mode) |
+| Paket I | Tek tema — Dark-first launch |
+| Paket J | Dil kapsamı EN + DE (TR kaldırıldı) |
+| Pet silme (B1+) | İsim onayı, tek/çoklu pet yönlendirme, iOS header fix |
+| Apple Sign In | `signInWithApple` + Supabase `signInWithIdToken`; fiziksel cihazda test edildi |
 
 ---
 
@@ -44,19 +49,19 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 |------|-----|-------|
 | 1 | TypeScript hataları (5 hata, 4 dosya) | ✅ Tamamlandı |
 | 2 | QA — kalan manuel testler | 🔵 Devam ediyor |
-| 3 | Auth — Supabase (email + cloud sync) | 🟢 email + pet/check-in/record/profil sync + Delete Account tamam (Apple/Google yayın öncesi) |
-| 3b | Apple + Google native giriş | ⏬ Yayın öncesi son adıma ertelendi (bkz. bölüm 7) |
+| 3 | Auth — Supabase (email + cloud sync) | 🟢 email + pet/check-in/record/profil sync + Delete Account + **Apple Sign In** tamam |
+| 3b | Google native giriş | ⬜ Başlanmadı (Apple ✅; bkz. bölüm 7) |
 | 4 | Aile paylaşımı hazırlık (Lulu Plus) | ⬜ Başlanmadı |
 | 5 | Free vs Plus rapor özellik farkları | ⬜ Başlanmadı (Auth sonrası) |
 | 6 | PRD güncellemeleri (Profile hub, Screen 17) | ⬜ Başlanmadı |
 | 7 | Auth ekranları geliştirme (Paket F) | ⬜ Başlanmadı |
-| 8 | Pet ekleme ekranları geliştirme (Paket G) | ⬜ Başlanmadı |
+| 8 | Pet ekleme ekranları geliştirme (Paket G) | ✅ Tamamlandı |
 | 9 | Home boş durum & kullanıcı yönlendirme (Paket H) | ⬜ Başlanmadı |
-| 10 | Tek tema — Dark-first launch (Paket I) | ⬜ Başlanmadı |
-| 11 | Dil: EN + DE, TR kaldır (Paket J) | ⬜ Başlanmadı |
+| 10 | Tek tema — Dark-first launch (Paket I) | ✅ Tamamlandı |
+| 11 | Dil: EN + DE, TR kaldır (Paket J) | ✅ Tamamlandı |
 | 12 | Bildirim ekranları & mesajları (Paket K) | ⬜ Başlanmadı |
 
-> **Not:** Paketler **A–E** önceki turda tanımlandı; **F–K** yayın öncesi UX/ürün kararları (2026-06-24). Sıralama `is-plani.md`'de netleştirilecek. **F, G, H, I** Paket D (`design.md`) ile koordine edilmeli.
+> **Not:** Paketler **A–E** önceki turda tanımlandı; **F–K** yayın öncesi UX/ürün kararları (2026-06-24). **F, H, K** Paket D (`design.md`) ile koordine edilmeli. **G, I, J** tamamlandı.
 
 | Sıra | Yeni iş paketi | Durum |
 |------|-----|-------|
@@ -66,10 +71,10 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | D | Genel tasarım yenileme (`design.md`) | 🟡 `design.md` mevcut; uygulama başlanmadı |
 | E | Beslenme/aktivite plan sistemi (günlük/haftalık) | ⬜ Başlanmadı (karar gerekli) |
 | F | Auth ekranları (giriş & kayıt) geliştirme | ⬜ Başlanmadı |
-| G | Pet ekleme ekranları geliştirme | ⬜ Başlanmadı |
+| G | Pet ekleme ekranları geliştirme | ✅ Tamamlandı |
 | H | Home boş durum & onboarding yönlendirme | ⬜ Başlanmadı |
-| I | Tek tema (Dark-first; Light yayın sonrası) | ⬜ Başlanmadı |
-| J | Dil kapsamı: EN + DE (TR kaldır) | ⬜ Başlanmadı |
+| I | Tek tema (Dark-first; Light yayın sonrası) | ✅ Tamamlandı |
+| J | Dil kapsamı: EN + DE (TR kaldır) | ✅ Tamamlandı |
 | K | Bildirim ekranları & mesajları | ⬜ Başlanmadı |
 
 ---
@@ -90,9 +95,9 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 
 ### 2. QA — kalan manuel testler
 
-#### Dil (İş #1) — *Paket J sonrası EN + DE*
-- [ ] EN ↔ DE geçiş QA (tüm ekranlar)
-- [ ] ~~EN ↔ TR~~ — TR v1'de kaldırılacak (Paket J); mevcut TR QA iptal
+#### Dil — Paket J ✅
+- [ ] EN ↔ DE geçiş QA (tüm ekranlar) — kod tarafı tamam, manuel QA bekliyor
+- [x] ~~EN ↔ TR~~ — TR v1'de kaldırıldı (Paket J)
 
 #### Daily Check-In Redesign — Faz 5
 - [ ] EN/DE dil geçişi
@@ -139,12 +144,13 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
 
 **Amaç:** My Pets sekmesine tek pet silme eklemek ve pet'leri "aktif" / "vefat eden" (anma) olarak gruplamak.
 
-**B1 — Tek pet silme UI ✅ (Yapıldı)**
+**B1 — Tek pet silme UI ✅ (Yapıldı + iyileştirildi)**
 - [x] Konum kararı: **Edit Pet** ekranının altında kırmızı "Delete Pet" butonu (Apple Kişiler/Takvim pattern'i; keşfedilebilir, yanlışlıkla tetiklenmez)
-- [x] Onay: `ConfirmModal` (destructive) + i18n (en/tr/de) — `pet.deletePet*` anahtarları
+- [x] Onay: pet ismi yazarak onay (`DeletePetConfirmModal`) + tüm ilgili verilerin silineceği uyarısı + i18n (en/de)
 - [x] `usePetStore.deletePet`'e bağlandı (cloud + foto + local cascade)
-- [x] Silme sırasında "kaydedilmemiş değişiklik" guard'ı ve `!pet` yönlendirmesi atlanıyor; sonrasında `my-pets`'e dönülüyor
-- [ ] *(QA)* Son pet / aktif pet silme akışını cihazda doğrula
+- [x] Silme sonrası yönlendirme: tek pet → setup; çoklu pet → aktif pet home
+- [x] Silme sırasında çökme / header buton genişleme fix'leri
+- [ ] *(QA)* Son pet / aktif pet silme akışını cihazda doğrula (kullanıcı tekli/çoklu silmeyi onayladı)
 
 **B2 — Aktif / vefat eden (memorial) ayrımı ✅ (Yapıldı)**
 - [x] Veri modeli: `Pet`'e `status: 'active' | 'deceased'` (+ `deceasedAt`) — `types/pet.ts`, `storage/pet.storage.ts`, yerel migration v10 (`storage/database.ts`)
@@ -226,7 +232,7 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
 
 ## 🆕 Yayın öncesi UX paketleri (2026-06-24)
 
-Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kapsamı, bildirim metinleri. **Paket D (design.md) ile birlikte ele alınmalı** — F, G, H görsel dil D'den beslenir.
+Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kapsamı, bildirim metinleri. **Paket D (design.md) ile birlikte ele alınmalı** — F, H, K görsel dil D'den beslenir. **G, I, J tamamlandı.**
 
 ---
 
@@ -238,26 +244,28 @@ Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kap
 - [ ] `app/(auth)/index.tsx` — giriş / kayıt UI yenileme (`design.md` + Paket D)
 - [ ] Form düzeni, hata durumları, loading state'leri
 - [ ] Marka dili (başlık, alt metin, CTA hiyerarşisi)
-- [ ] i18n: **en/de** (Paket J ile uyumlu)
-- [ ] Apple/Google butonları için yer tutucu düzen (native giriş bölüm 7'de bağlanacak)
+- [ ] i18n: **en/de** (Paket J ✅ ile uyumlu)
+- [x] Apple butonu bağlandı; Google bölüm 7'de bağlanacak
 - [ ] Dynamic Type + erişilebilirlik (VoiceOver etiketleri)
 
 **Bağımlılık:** Paket D (tasarım token'ları); Paket J (dil)
 
 ---
 
-### G. Pet ekleme ekranları geliştirme
+### G. Pet ekleme ekranları geliştirme ✅ Tamamlandı
 
-**Amaç:** İlk kurulum (`(setup)`) ve "Add Pet" akışındaki ekranlar yenilenecek.
+**Amaç:** İlk kurulum (`(setup)`) ve "Add Pet" akışındaki ekranlar.
+
+**Durum (2026-07-02):** Setup akışı (ilk kurulum + add mode) kullanıma hazır; kullanıcı onayı alındı.
 
 **Kapsam:**
-- [ ] Setup akışı: `pet-type` → `pet-name` → `pet-age` → `health-conditions` (+ add mode varyantı)
-- [ ] Görsel tutarlılık: `design.md` bileşenleri, ilerleme göstergesi, form alanları
-- [ ] Add mode vs ilk kurulum farklarının netleştirilmesi (check-in prefs / notification atlanır)
-- [ ] i18n: **en/de**
-- [ ] QA: ilk pet + 2. pet ekleme akışları
+- [x] Setup akışı: `pet-type` → `pet-name-breed` → `pet-age-health` → `pet-photo` → check-in prefs / notification (+ add mode varyantı)
+- [x] Add mode vs ilk kurulum farkları (add mode'da check-in prefs / notification atlanır)
+- [x] i18n: **en/de**
+- [ ] *(QA)* İlk pet + 2. pet ekleme akışları — manuel matriste
+- [ ] Paket D sonrası görsel cilalama (opsiyonel)
 
-**Bağımlılık:** Paket D; Paket J
+**Bağımlılık:** ~~Paket D; Paket J~~ → J tamam; D cilalama isteğe bağlı
 
 ---
 
@@ -279,34 +287,39 @@ Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kap
 
 ---
 
-### I. Tek tema — Dark-first launch
+### I. Tek tema — Dark-first launch ✅ Tamamlandı
 
 **Karar (K20, K21):** v1 yalnızca **Dark** tema; Light mode yayın sonrası.
 
-**Kapsam:**
-- [ ] Settings'ten Light / Dark / System seçicisini kaldır veya gizle
-- [ ] Uygulama genelinde `colorScheme` sabitlenmesi veya tek tema zorlaması
-- [ ] `constants/theme.ts` — Dark token'ları `design.md`'ye göre güncelle; Light token'ları kodda tut (v1.1 için)
-- [ ] Status bar, tab bar, modal, sheet'lerde Dark tutarlılığı
-- [ ] QA: tüm ekranlarda Dark-only görsel kontrol
+**Durum (2026-07-02):** Uygulama Dark tema ile sorunsuz çalışıyor; kullanıcı onayı alındı.
 
-**Not:** Paket D ile birlikte uygulanır; ayrı Light QA v1'de gerekmez.
+**Kapsam:**
+- [x] Settings'ten Light / Dark / System seçicisi kaldırıldı veya gizlendi
+- [x] Uygulama genelinde tek Dark tema
+- [x] Status bar, tab bar, modal, sheet'lerde Dark tutarlılığı
+- [ ] Light mode token'ları — v1.1 için kodda tutulabilir (yayın sonrası)
+- [ ] Paket D sonrası `constants/theme.ts` token cilalama (opsiyonel)
+- [ ] *(QA)* Tüm ekranlarda Dark-only görsel kontrol — manuel matriste
+
+**Not:** Paket D ile birlikte token cilalama yapılabilir; ayrı Light QA v1'de gerekmez.
 
 ---
 
-### J. Dil kapsamı — EN + DE (TR kaldır)
+### J. Dil kapsamı — EN + DE (TR kaldır) ✅ Tamamlandı
 
-**Karar (K2 güncellendi, K19):** İlk yayın **EN ve DE**; TR pazarı yok, `i18n/tr.ts` kaldırılacak veya devre dışı.
+**Karar (K2 güncellendi, K19):** İlk yayın **EN ve DE**; TR pazarı yok.
+
+**Durum (2026-07-02):** `i18n/en.ts` + `i18n/de.ts`; `tr.ts` yok; kullanıcı onayı alındı.
 
 **Kapsam:**
-- [ ] `i18n/tr.ts` kaldır veya build'den çıkar; `i18n/index.ts` yalnızca `en` + `de`
-- [ ] Settings dil seçici: EN / DE / System (system → en veya de; diğerleri → EN fallback)
-- [ ] Tüm ekranlarda kalan TR referansları temizle
-- [ ] App Store / Play Store metadata: DE + EN pazarları
-- [ ] QA checklist: EN ↔ DE (TR QA maddeleri iptal)
+- [x] `i18n/tr.ts` kaldırıldı; `i18n/index.ts` yalnızca `en` + `de`
+- [x] Settings dil seçici: EN / DE / System (system → en veya de; diğerleri → EN fallback)
+- [x] Kodda TR referansları temizlendi
+- [ ] App Store / Play Store metadata: DE + EN pazarları (yayın öncesi)
+- [ ] *(QA)* EN ↔ DE checklist — manuel matriste
 - [ ] *(Gelecek)* TR yeniden eklenebilir — ayrı karar
 
-**Bağımlılık:** F, G, H, K ile paralel veya önce (metin işi)
+**Bağımlılık:** F, G, H, K ile paralel — kod tarafı tamam
 
 ---
 
@@ -322,7 +335,7 @@ Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kap
 - [ ] İzin reddedildi / kısıtlı durumda kullanıcı yönlendirmesi (Settings'e git)
 - [ ] QA: farklı saat dilimleri, aktif pet değişimi, vefat pet reminder iptali
 
-**Bağımlılık:** Paket D (ekranlar); Paket J (dil)
+**Bağımlılık:** Paket D (ekranlar); ~~Paket J~~ (J ✅)
 
 ---
 
@@ -330,20 +343,21 @@ Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kap
 
 ### 3. Auth — Supabase (Sprint 5, İş #9) — 🟡 email + pet sync tamam
 
-**Mevcut durum:** Email/şifre auth uçtan uca çalışıyor; bootstrap auth guard aktif; pet/check-in/record/profil sync ve Delete Account tamam. Apple/Google yayın öncesine ertelendi.
+**Mevcut durum:** Email/şifre + **Apple Sign In** uçtan uca çalışıyor; bootstrap auth guard aktif; pet/check-in/record/profil sync ve Delete Account tamam. Google native giriş bekliyor.
 
 #### Faz A — Supabase kurulum ✅
 - [x] `@supabase/supabase-js` + `expo-secure-store` (+ apple-auth, google-signin, dev-client, aes-js, url-polyfill, get-random-values)
 - [x] Env config (`EXPO_PUBLIC_SUPABASE_URL`, `ANON_KEY`) + `lib/supabase.ts` (LargeSecureStore)
 - [x] `app.json` (bundle id, usesAppleSignIn, plugin'ler) + `eas.json`
-- [ ] Supabase dashboard: Email açık ✅; Apple/Google provider'lar kaldı
+- [x] Supabase dashboard: Email ✅ + **Apple** ✅; Google provider kaldı
 
-#### Faz B — Auth ekranı (zorunlu) ✅ (email)
-- [x] `app/(auth)/index.tsx` — email/şifre giriş + kayıt (i18n en/tr/de)
+#### Faz B — Auth ekranı (zorunlu) ✅ (email + Apple)
+- [x] `app/(auth)/index.tsx` — email/şifre giriş + kayıt (i18n en/de)
 - [x] **"Continue as Guest" kaldırıldı**
 - [x] Onboarding sonrası → `(auth)` (bootstrap guard)
 - [x] Oturum yoksa hiçbir ana ekrana erişim yok
-- ⏬ Apple / Google butonları → **yayın öncesi son adıma ertelendi** (bkz. bölüm 7)
+- [x] **Apple** butonu → `signInWithIdToken` (fiziksel iPhone dev build ile test edildi)
+- [ ] **Google** butonu → bkz. bölüm 7
 
 #### Faz C — User lifecycle 🟡
 - [x] `user.store` — `signIn`, `signOut`, session dinleme
@@ -412,15 +426,21 @@ Auth ve tier altyapısı hazır olduktan sonra:
 
 ---
 
-### 7. Yayın öncesi son adım — Apple + Google native giriş ⏬
+### 7. Native sosyal giriş — Apple ✅ / Google ⬜
 
-**Karar:** Tüm özellikler bittikten sonra, yayına çıkmadan hemen önce eklenecek. Email/şifre auth geliştirme boyunca yeterli. Native Apple/Google testi development build + credential gerektirdiği için en sona bırakıldı.
+#### Apple Sign In ✅ (2026-07-04)
+- [x] Apple Developer credential'ları (Team ID, Services ID, Key)
+- [x] Supabase dashboard: Apple provider açık
+- [x] `services/auth/signInWithApple` → `supabase.auth.signInWithIdToken`
+- [x] `user.store` + auth ekranı butonu bağlandı
+- [x] Fiziksel iPhone dev build ile test edildi (`expo run:ios --device`)
 
-- [ ] Apple Developer + Google Cloud OAuth credential'ları
-- [ ] Supabase dashboard: Apple + Google provider'ları aç
+#### Google Sign In ⬜
+- [ ] Google Cloud OAuth credential'ları
+- [ ] Supabase dashboard: Google provider aç
 - [ ] `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` + `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
-- [ ] `app/(auth)/index.tsx`: Apple + Google butonları → `signInWithIdToken`
-- [ ] EAS development build ile native test (Expo Go yetmez)
+- [ ] `SocialAuthSection`: Google butonu → `signInWithIdToken`
+- [ ] Fiziksel cihazda test (dev build)
 
 ---
 
@@ -430,7 +450,7 @@ Auth ve tier altyapısı hazır olduktan sonra:
 |------|------------|
 | StoreKit / RevenueCat | Lulu Plus gerçek IAP |
 | Backend account deletion | Auth (Supabase) |
-| My Pets'ten tek pet silme UI | v1 dışı |
+| My Pets'ten tek pet silme UI | ✅ Paket B1 |
 | Pet başına notification prefs | v1 dışı |
 | Cloud sync / cross-device active pet | Auth + Supabase |
 

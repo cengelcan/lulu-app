@@ -135,6 +135,9 @@ export const de: Translations = {
       weak_password: 'Das Passwort ist zu schwach. Verwende mindestens 6 Zeichen.',
       email_not_confirmed: 'Bitte bestätige deine E-Mail, bevor du dich anmeldest.',
       network: 'Netzwerkfehler. Bitte überprüfe deine Verbindung und versuche es erneut.',
+      apple_unavailable: 'Mit Apple anmelden ist auf diesem Gerät nicht verfügbar.',
+      apple_no_token:
+        'Anmeldung mit Apple konnte nicht abgeschlossen werden. Bitte versuche es erneut.',
       unknown: 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
     },
   },

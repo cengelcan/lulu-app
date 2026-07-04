@@ -130,6 +130,8 @@ export const en: Translations = {
       weak_password: 'Password is too weak. Use at least 6 characters.',
       email_not_confirmed: 'Please confirm your email before signing in.',
       network: 'Network error. Please check your connection and try again.',
+      apple_unavailable: 'Sign in with Apple is not available on this device.',
+      apple_no_token: 'Could not complete Sign in with Apple. Please try again.',
       unknown: 'Something went wrong. Please try again.',
     },
   },

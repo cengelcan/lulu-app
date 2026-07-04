@@ -11,7 +11,7 @@ import { AuthInput } from '@/components/auth/AuthInput';
 import { AuthLegalNotice } from '@/components/auth/AuthLegalNotice';
 import { AuthOrDivider } from '@/components/auth/AuthOrDivider';
 import { ContinueWithEmailButton } from '@/components/auth/ContinueWithEmailButton';
-import { SocialAuthSection } from '@/components/auth/SocialAuthSection';
+import { SocialAuthSection, useAppleSignInAvailable } from '@/components/auth/SocialAuthSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
@@ -49,8 +49,10 @@ export default function AuthScreen() {
   const { t } = useTranslation();
 
   const signInWithEmail = useUserStore((state) => state.signInWithEmail);
+  const signInWithApple = useUserStore((state) => state.signInWithApple);
   const signUpWithEmail = useUserStore((state) => state.signUpWithEmail);
   const loadPets = usePetStore((state) => state.loadPets);
+  const isAppleSignInAvailable = useAppleSignInAvailable();
 
   const emailInputRef = useRef<TextInput>(null);
 
@@ -63,6 +65,7 @@ export default function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAppleSigningIn, setIsAppleSigningIn] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [confirmEmailSent, setConfirmEmailSent] = useState(false);
 
@@ -162,6 +165,31 @@ export default function AuthScreen() {
     setShowEmailForm(true);
   }, []);
 
+  const handleAppleSignIn = useCallback(async () => {
+    setErrorKey(null);
+    setIsAppleSigningIn(true);
+
+    try {
+      await signInWithApple();
+
+      if (useUserStore.getState().authStatus !== 'authenticated') {
+        return;
+      }
+
+      await loadPets();
+      const route = await resolvePostAuthRoute();
+      if (route === '/(setup)/pet-type') {
+        useSetupStore.getState().beginSetup('initial');
+      }
+      router.replace(route);
+    } catch (error) {
+      const code: AuthErrorCode = error instanceof AuthError ? error.code : 'unknown';
+      setErrorKey(`auth.errors.${code}`);
+    } finally {
+      setIsAppleSigningIn(false);
+    }
+  }, [loadPets, router, signInWithApple]);
+
   const handleContinueWithEmail = useCallback(() => {
     if (!showEmailForm) {
       setShowEmailForm(true);
@@ -219,9 +247,15 @@ export default function AuthScreen() {
             subtitle={isSignUp ? t('auth.subtitleSignUp') : t('auth.subtitle')}
           />
 
-          <SocialAuthSection />
+          {isAppleSignInAvailable ? (
+            <SocialAuthSection
+              onApplePress={handleAppleSignIn}
+              appleLoading={isAppleSigningIn}
+              disabled={isSubmitting}
+            />
+          ) : null}
 
-          <AuthOrDivider />
+          {isAppleSignInAvailable ? <AuthOrDivider /> : null}
 
           <ContinueWithEmailButton
             onPress={handleContinueWithEmail}

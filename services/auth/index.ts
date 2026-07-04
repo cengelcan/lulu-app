@@ -1,5 +1,7 @@
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Linking from 'expo-linking';
+import { Platform } from 'react-native';
 
 import { supabase } from '@/lib/supabase';
 
@@ -10,7 +12,13 @@ export type AuthErrorCode =
   | 'weak_password'
   | 'email_not_confirmed'
   | 'network'
+  | 'apple_unavailable'
+  | 'apple_no_token'
   | 'unknown';
+
+export type SignInWithAppleResult =
+  | { status: 'success'; session: Session }
+  | { status: 'cancelled' };
 
 export class AuthError extends Error {
   code: AuthErrorCode;
@@ -53,6 +61,94 @@ function mapSupabaseAuthError(error: { message?: string; code?: string; status?:
   }
 
   return new AuthError('unknown', message);
+}
+
+function formatAppleDisplayName(
+  fullName: AppleAuthentication.AppleAuthenticationCredential['fullName']
+): string | null {
+  if (!fullName) {
+    return null;
+  }
+
+  const displayName = [fullName.givenName, fullName.familyName]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part))
+    .join(' ');
+
+  return displayName.length > 0 ? displayName : null;
+}
+
+function isAppleSignInCancelled(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === 'ERR_REQUEST_CANCELED'
+  );
+}
+
+export async function signInWithApple(): Promise<SignInWithAppleResult> {
+  if (Platform.OS !== 'ios') {
+    throw new AuthError('apple_unavailable');
+  }
+
+  const isAvailable = await AppleAuthentication.isAvailableAsync();
+
+  if (!isAvailable) {
+    throw new AuthError('apple_unavailable');
+  }
+
+  try {
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+
+    if (!credential.identityToken) {
+      throw new AuthError('apple_no_token');
+    }
+
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: 'apple',
+      token: credential.identityToken,
+    });
+
+    if (error) {
+      throw mapSupabaseAuthError(error);
+    }
+
+    if (!data.session) {
+      throw new AuthError('unknown', 'No session returned after Apple sign in');
+    }
+
+    const displayName = formatAppleDisplayName(credential.fullName);
+
+    if (displayName) {
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { full_name: displayName },
+      });
+
+      if (updateError) {
+        console.warn('[auth] Could not save Apple display name', updateError.message);
+      }
+    }
+
+    return { status: 'success', session: data.session };
+  } catch (error) {
+    if (isAppleSignInCancelled(error)) {
+      return { status: 'cancelled' };
+    }
+
+    if (error instanceof AuthError) {
+      throw error;
+    }
+
+    throw mapSupabaseAuthError(
+      error instanceof Error ? { message: error.message } : { message: 'unknown' }
+    );
+  }
 }
 
 export async function signInWithEmail(email: string, password: string): Promise<Session> {

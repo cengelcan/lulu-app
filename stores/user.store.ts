@@ -7,6 +7,7 @@ import {
   getCurrentSession,
   onAuthStateChange,
   signInWithEmail as authSignInWithEmail,
+  signInWithApple as authSignInWithApple,
   signOutUser,
   signUpWithEmail as authSignUpWithEmail,
 } from '@/services/auth';
@@ -40,6 +41,7 @@ type UserState = {
   error: string | null;
   initializeAuth: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithApple: () => Promise<void>;
   signUpWithEmail: (
     email: string,
     password: string
@@ -183,6 +185,46 @@ export const useUserStore = create<UserState>((set, get) => ({
         authStatus: 'authenticated',
         ...(wiped ? { displayName: null, avatarUri: null } : {}),
       });
+    } catch (error) {
+      set({ error: getErrorMessage(error, 'errors.unknown') });
+      throw error;
+    }
+  },
+
+  signInWithApple: async () => {
+    set({ error: null });
+
+    try {
+      const result = await authSignInWithApple();
+
+      if (result.status === 'cancelled') {
+        return;
+      }
+
+      const { session } = result;
+      const wiped = await enforceUserDataIsolation(session.user.id);
+      await syncUserDataFromCloud(session.user.id);
+
+      set({
+        userId: session.user.id,
+        email: session.user.email ?? null,
+        provider: resolveProvider(session),
+        authStatus: 'authenticated',
+        ...(wiped ? { displayName: null, avatarUri: null } : {}),
+      });
+
+      const fullName =
+        typeof session.user.user_metadata?.full_name === 'string'
+          ? session.user.user_metadata.full_name.trim()
+          : '';
+
+      if (fullName && !get().displayName) {
+        try {
+          await get().updateDisplayName(fullName);
+        } catch (nameError) {
+          console.warn('Failed to save Apple display name to profile', nameError);
+        }
+      }
     } catch (error) {
       set({ error: getErrorMessage(error, 'errors.unknown') });
       throw error;

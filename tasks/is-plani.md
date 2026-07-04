@@ -9,12 +9,12 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 
 ## Mevcut durum (doğrulama)
 
-**Son güncelleme:** 2026-06-24 — Paket F–K (yayın öncesi UX) eklendi; `design.md` mevcut.
+**Son güncelleme:** 2026-07-04 — Apple Sign In tamam; Google bekliyor
 
 | Alan | Durum |
 |------|-------|
 | TypeScript | `npx tsc --noEmit` → **temiz (0 hata)** |
-| Auth | `app/(auth)/index.tsx` gerçek email/şifre UI; "Continue as Guest" kaldırıldı; Apple/Google kaldı |
+| Auth | Email/şifre + **Apple Sign In** çalışıyor; Google bekliyor |
 | Bootstrap | `hooks/use-bootstrap.ts` auth guard aktif: `splash → onboarding → auth → setup → home` |
 | User store | `signIn/signOut/session listener` + `currentUserId↔user.id`; Supabase client (`lib/supabase.ts`) |
 | Sync | Pet/check-in/record/profil Supabase kaynak-doğruluk (write-through + pull) |
@@ -77,7 +77,7 @@ Auth'a başlamadan kod tabanını yeşile çekmek. **Tahmini: ~0.5–1 gün.**
 
 ### 0.2 QA — kalan manuel testler (Öncelik 2, paralel)
 
-- [ ] EN ↔ DE dil geçişi (tüm ekranlar) — *Paket J sonrası; TR QA iptal*
+- [ ] EN ↔ DE dil geçişi (tüm ekranlar) — *Paket J kod tarafı ✅; manuel QA bekliyor*
 - [ ] Daily Check-In Faz 5: dil geçişi, yeni kayıt + düzenleme, eski kayıt migration, VoiceOver / Reduce Motion
 - [ ] Profile Tab matrisi T1–T12 + 2 pet ile delete akışı
 - [ ] Multi-Pet matrisi T1–T10
@@ -97,14 +97,15 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 - [x] Env: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` (`.env` + `.env.example`)
 - [x] `lib/supabase.ts` client (`LargeSecureStore` — AES'li SecureStore session adaptörü)
 - [x] `app.json`: bundle id `com.luluapp.app`, `usesAppleSignIn`, plugin'ler; `eas.json` dev build profilleri
-- [ ] Supabase provider'lar: **Email açık** ✅; **Apple/Google kapalı** (credential + dashboard ayarı kaldı)
+- [x] Supabase provider'lar: **Email** ✅ + **Apple** ✅; **Google** kapalı
 
-### Faz B — Auth ekranı (zorunlu) ✅ (email)
-- [x] `app/(auth)/index.tsx` gerçek email/şifre UI (giriş ↔ kayıt, validasyon, i18n en/tr/de)
+### Faz B — Auth ekranı (zorunlu) ✅ (email + Apple)
+- [x] `app/(auth)/index.tsx` gerçek email/şifre UI (giriş ↔ kayıt, validasyon, i18n en/de)
 - [x] **"Continue as Guest" kaldırıldı**
 - [x] `use-bootstrap.ts` auth guard: oturum yoksa → `(auth)`
 - [x] Akış: `Splash → Onboarding → Auth → Setup (pet yoksa) → Home`
-- ⏬ Apple / Google butonları → **yayın öncesi son adıma ertelendi** (bkz. "Yayın öncesi" bölümü)
+- [x] **Apple** butonu → `signInWithIdToken` (fiziksel iPhone dev build ile test edildi)
+- [ ] **Google** butonu → bkz. "Google Sign In" bölümü
 
 ### Faz C — User lifecycle 🟡
 - [x] `user.store`: `signInWithEmail`, `signUpWithEmail`, `signOut`, session listener
@@ -178,9 +179,9 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 
 **Not:** Görsel Aktif/Anma ayrımı şimdilik basit bölüm (`GroupedSection`) olarak yapıldı; Paket D (design.md) sonrası cilalanacak.
 
-- [x] B1: **Edit Pet** ekranına "Delete Pet" (destructive Button + `ConfirmModal`) + i18n → `usePetStore.deletePet`
-- [x] B1: Silme guard'ları (dirty/`!pet`) atlanıyor, sonra `my-pets`'e dönülüyor
-- [ ] B1: *(QA)* Son pet / aktif pet silme akışını cihazda doğrula
+- [x] B1: **Edit Pet** ekranına "Delete Pet" (isim onayı + `DeletePetConfirmModal`) + i18n → `usePetStore.deletePet`
+- [x] B1: Silme yönlendirmesi (tek pet → setup; çoklu → home) + guard'lar + iOS header fix
+- [ ] B1: *(QA)* Son pet / aktif pet silme — kullanıcı tekli/çoklu onayladı; matris maddesi açık
 - [x] B2: `types/pet.ts` + `storage/pet.storage.ts` + yerel migration v10 → `status: 'active' | 'deceased'` (+ `deceasedAt`)
 - [x] B2: Supabase migration `0005_pet_status.sql` (`status`/`deceased_at`) + `pets-sync.ts` map
 - [x] B2: "Mark as deceased" / "Restore" aksiyonu (Edit Pet, geri alınabilir, `ConfirmModal` + i18n) → `usePetStore.setPetStatus`
@@ -228,28 +229,32 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 
 ## Paket F–K — Yayın öncesi UX (2026-06-24)
 
-Detay: `yapilacaklar.md` → "Yayın öncesi UX paketleri". **Önerilen sıra:** J (dil) erken · D+I (tema) · F+G+K (ekranlar) · H (Home empty) — hepsi `design.md` ile koordine.
+Detay: `yapilacaklar.md` → "Yayın öncesi UX paketleri". **Önerilen sıra:** ~~J~~ ✅ · ~~I~~ ✅ · ~~G~~ ✅ · D (tasarım) · F+K (ekranlar) · H (Home empty).
 
-| Paket | Konu | Tasarıma bağlı? |
-|-------|------|-----------------|
-| F | Auth giriş & kayıt ekranları | Evet (D) |
-| G | Pet ekleme / setup ekranları | Evet (D) |
-| H | Home boş durum & yönlendirme | Evet (D) |
-| I | Tek tema — Dark-first (Light sonra) | Evet (D) |
-| J | EN + DE; TR kaldır | Hayır |
-| K | Bildirim ekranları & mesajları | Kısmen (D + J) |
+| Paket | Konu | Durum | Tasarıma bağlı? |
+|-------|------|-------|-----------------|
+| F | Auth giriş & kayıt ekranları | ⬜ Başlanmadı | Evet (D) |
+| G | Pet ekleme / setup ekranları | ✅ Tamamlandı | — |
+| H | Home boş durum & yönlendirme | ⬜ Başlanmadı | Evet (D) |
+| I | Tek tema — Dark-first (Light sonra) | ✅ Tamamlandı | — |
+| J | EN + DE; TR kaldır | ✅ Tamamlandı | Hayır |
+| K | Bildirim ekranları & mesajları | ⬜ Başlanmadı | Kısmen (D) |
 
 ---
 
-## Yayın öncesi son adım — Apple + Google native giriş
+## Native sosyal giriş — Apple ✅ / Google ⬜
 
-> **Karar:** Tüm uygulama özellikleri tamamlandıktan sonra, yayına çıkmadan hemen önce eklenecek. Email/şifre auth geliştirme boyunca yeterli; Apple/Google native test development build + credential gerektirdiği için en sona bırakıldı.
+### Apple Sign In ✅ (2026-07-04)
+- [x] Apple Developer credential'ları + Supabase Apple provider
+- [x] `signInWithApple` → `signInWithIdToken`; auth ekranı + `user.store`
+- [x] Fiziksel iPhone dev build ile test edildi
 
-- [ ] Apple Developer + Google Cloud OAuth credential'ları
-- [ ] Supabase dashboard: Apple + Google provider'ları aç
+### Google Sign In ⬜
+- [ ] Google Cloud OAuth credential'ları
+- [ ] Supabase dashboard: Google provider aç
 - [ ] `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` + `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
-- [ ] `app/(auth)/index.tsx`: Apple + Google butonları → `signInWithIdToken`
-- [ ] EAS development build ile native test (Expo Go yetmez)
+- [ ] Google butonu → `signInWithIdToken`
+- [ ] Fiziksel cihazda test (dev build)
 
 ---
 
@@ -259,5 +264,5 @@ Detay: `yapilacaklar.md` → "Yayın öncesi UX paketleri". **Önerilen sıra:**
 |------|------------|
 | StoreKit / RevenueCat | Lulu Plus gerçek IAP |
 | Cloud sync / cross-device active pet | Auth + Supabase |
-| My Pets'ten tek pet silme UI | v1 dışı |
+| My Pets'ten tek pet silme UI | ✅ Paket B1 |
 | Pet başına notification prefs | v1 dışı |

@@ -22,13 +22,14 @@ export async function pullPlusStatusFromCloud(userId: string): Promise<PlusStatu
   }
 
   if (!data) {
-    return { isPlusActive: false, plusExpiresAt: null };
+    return { isPlusActive: false, plusExpiresAt: null, subscription: null };
   }
 
   const row = data as RemotePlusRow;
   return resolvePlusStatus({
     plusActive: row.plus_active,
     plusExpiresAt: row.plus_expires_at,
+    subscription: null,
   });
 }
 
@@ -46,6 +47,6 @@ export async function resolvePlusStatusForUser(
     return cloudStatus;
   } catch (error) {
     console.warn('Failed to pull Plus status from cloud', error);
-    return revenueCatStatus ?? { isPlusActive: false, plusExpiresAt: null };
+    return revenueCatStatus ?? { isPlusActive: false, plusExpiresAt: null, subscription: null };
   }
 }

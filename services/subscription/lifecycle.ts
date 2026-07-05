@@ -17,6 +17,7 @@ function applyPlusStatus(status: PlusStatus): void {
   useUserStore.setState({
     isPlusActive: status.isPlusActive,
     plusExpiresAt: status.plusExpiresAt,
+    plusSubscription: status.subscription,
   });
 }
 
@@ -35,7 +36,7 @@ export async function initializeSubscription(userId: string | null): Promise<voi
   activeUserId = userId;
 
   if (!userId) {
-    applyPlusStatus({ isPlusActive: false, plusExpiresAt: null });
+    applyPlusStatus({ isPlusActive: false, plusExpiresAt: null, subscription: null });
     return;
   }
 
@@ -74,5 +75,5 @@ export async function teardownSubscription(): Promise<void> {
 
   activeUserId = null;
   await teardownRevenueCat();
-  applyPlusStatus({ isPlusActive: false, plusExpiresAt: null });
+  applyPlusStatus({ isPlusActive: false, plusExpiresAt: null, subscription: null });
 }

@@ -800,7 +800,18 @@ export type Translations = {
     luluPlus: string;
     luluPlusDescription: string;
     luluPlusActiveStatus: string;
+    luluPlusPlanWeekly: string;
+    luluPlusPlanYearly: string;
+    luluPlusPlanLifetime: string;
+    luluPlusTrialEndsToday: string;
+    luluPlusTrialOneDayLeft: string;
+    luluPlusTrialDaysLeft: string;
+    luluPlusTrialEndsOn: string;
+    luluPlusNextRenewalOn: string;
     luluPlusRenewsOn: string;
+    luluPlusExpiresOn: string;
+    luluPlusLifetimeAccess: string;
+    luluPlusPurchasedOn: string;
     luluPlusFeaturePdf: string;
     luluPlusFeatureSharing: string;
     luluPlusFeatureBackup: string;

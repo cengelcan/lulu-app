@@ -6,9 +6,18 @@ import Purchases, {
   type PurchasesPackage,
 } from 'react-native-purchases';
 
-import { REVENUECAT_ENTITLEMENT_PLUS } from '@/constants/subscription';
+import {
+  REVENUECAT_ENTITLEMENT_PLUS,
+  SUBSCRIPTION_PRODUCT_IDS,
+} from '@/constants/subscription';
 
-import { type PlusStatus, resolvePlusStatus } from '@/services/subscription/plus-status';
+import {
+  type PlusPlanKind,
+  type PlusStatus,
+  type PlusSubscriptionDetails,
+  resolvePlusStatus,
+} from '@/services/subscription/plus-status';
+import { isIntroOrTrialPeriod } from '@/utils/subscription-display';
 
 let configured = false;
 let customerInfoListener: ((info: CustomerInfo) => void) | null = null;
@@ -62,16 +71,60 @@ export async function configureRevenueCat(): Promise<boolean> {
   }
 }
 
+function resolvePlanKind(productId: string | undefined): PlusPlanKind {
+  if (!productId) {
+    return 'unknown';
+  }
+
+  if (productId === SUBSCRIPTION_PRODUCT_IDS.weekly) {
+    return 'weekly';
+  }
+
+  if (productId === SUBSCRIPTION_PRODUCT_IDS.yearly) {
+    return 'yearly';
+  }
+
+  if (productId === SUBSCRIPTION_PRODUCT_IDS.lifetime) {
+    return 'lifetime';
+  }
+
+  return 'unknown';
+}
+
+function getSubscriptionDetailsFromEntitlement(
+  entitlement: NonNullable<CustomerInfo['entitlements']['active'][string]>
+): PlusSubscriptionDetails {
+  const planKind = resolvePlanKind(entitlement.productIdentifier);
+  const purchasedAt = entitlement.originalPurchaseDate ?? entitlement.latestPurchaseDate ?? null;
+  const expiresAt = entitlement.expirationDate ?? null;
+  const isTrialPeriod = isIntroOrTrialPeriod(
+    entitlement.periodType,
+    planKind,
+    purchasedAt,
+    expiresAt
+  );
+
+  return {
+    planKind,
+    productId: entitlement.productIdentifier ?? null,
+    isTrialPeriod,
+    willRenew: entitlement.willRenew ?? false,
+    expiresAt,
+    purchasedAt,
+  };
+}
+
 export function getPlusStatusFromCustomerInfo(info: CustomerInfo): PlusStatus {
   const entitlement = info.entitlements.active[REVENUECAT_ENTITLEMENT_PLUS];
 
   if (!entitlement) {
-    return { isPlusActive: false, plusExpiresAt: null };
+    return { isPlusActive: false, plusExpiresAt: null, subscription: null };
   }
 
   return resolvePlusStatus({
     plusActive: true,
     plusExpiresAt: entitlement.expirationDate,
+    subscription: getSubscriptionDetailsFromEntitlement(entitlement),
   });
 }
 

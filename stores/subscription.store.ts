@@ -52,6 +52,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       useUserStore.setState({
         isPlusActive: status.isPlusActive,
         plusExpiresAt: status.plusExpiresAt,
+        plusSubscription: status.subscription,
       });
       set({ isLoading: false });
       await refreshSubscriptionStatus();
@@ -80,6 +81,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       useUserStore.setState({
         isPlusActive: status.isPlusActive,
         plusExpiresAt: status.plusExpiresAt,
+        plusSubscription: status.subscription,
       });
       set({ isLoading: false });
       await refreshSubscriptionStatus();

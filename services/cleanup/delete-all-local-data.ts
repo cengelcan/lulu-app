@@ -109,6 +109,7 @@ export function resetAppStoresAfterDataDeletion(): void {
     email: null,
     isPlusActive: false,
     plusExpiresAt: null,
+    plusSubscription: null,
     isLoading: false,
     error: null,
   });

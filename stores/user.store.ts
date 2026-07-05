@@ -30,6 +30,7 @@ import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
 import { getCurrentUserId, setCurrentUserId, removeCurrentUserId } from '@/storage/prefs.storage';
 import { getUserProfile, setUserProfile } from '@/storage/user.storage';
+import type { PlusSubscriptionDetails } from '@/services/subscription/plus-status';
 import type { AuthProvider, UserProfile } from '@/types/user';
 
 export type AuthStatus = 'unknown' | 'authenticated' | 'unauthenticated';
@@ -43,6 +44,7 @@ type UserState = {
   email: string | null;
   isPlusActive: boolean;
   plusExpiresAt: string | null;
+  plusSubscription: PlusSubscriptionDetails | null;
   isLoading: boolean;
   error: string | null;
   initializeAuth: () => Promise<void>;
@@ -155,6 +157,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   email: null,
   isPlusActive: false,
   plusExpiresAt: null,
+  plusSubscription: null,
   isLoading: false,
   error: null,
 
@@ -310,6 +313,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         avatarUri: null,
         isPlusActive: false,
         plusExpiresAt: null,
+        plusSubscription: null,
         authStatus: 'unauthenticated',
       });
     }
@@ -361,6 +365,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       avatarUri: null,
       isPlusActive: false,
       plusExpiresAt: null,
+      plusSubscription: null,
       authStatus: 'unauthenticated',
     });
   },

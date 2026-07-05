@@ -333,7 +333,6 @@ export function LuluPlusPaywall({
   const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
-  const primaryColor = useThemeColor({}, 'primary');
 
   const isPlusActive = useUserStore((state) => state.isPlusActive);
   const offerings = useSubscriptionStore((state) => state.offerings);
@@ -698,7 +697,9 @@ export function LuluPlusPaywall({
             onPress={() => void handlePrimaryPress()}
             style={({ pressed }) => [
               styles.ctaButton,
-              isPlusActive ? { backgroundColor: primaryColor } : styles.ctaButtonGradient,
+              isPlusActive
+                ? { backgroundColor: brandAccentColor }
+                : styles.ctaButtonGradient,
               {
                 opacity:
                   !isPlusActive && !previewMode && (!canPurchase || isLoading) ? 0.45 : pressed ? 0.9 : 1,

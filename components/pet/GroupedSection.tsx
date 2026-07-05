@@ -11,6 +11,7 @@ type GroupedSectionProps = {
   cardStyle?: StyleProp<ViewStyle>;
   actionLabel?: string;
   onActionPress?: () => void;
+  titleTrailing?: React.ReactNode;
 };
 
 export function GroupedSection({
@@ -19,6 +20,7 @@ export function GroupedSection({
   cardStyle,
   actionLabel,
   onActionPress,
+  titleTrailing,
 }: GroupedSectionProps) {
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
@@ -26,12 +28,15 @@ export function GroupedSection({
   return (
     <View style={styles.section}>
       <View style={styles.header}>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.title}>
-          {title}
-        </ThemedText>
+        <View style={styles.titleRow}>
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.title}>
+            {title}
+          </ThemedText>
+          {titleTrailing}
+        </View>
         {actionLabel && onActionPress ? (
           <Pressable
             accessibilityRole="button"
@@ -62,11 +67,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xs,
     gap: Spacing.sm,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    flex: 1,
+  },
   title: {
     ...Typography.caption,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
-    flex: 1,
   },
   action: {
     ...Typography.caption,

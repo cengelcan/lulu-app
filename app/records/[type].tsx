@@ -10,6 +10,7 @@ import { RecordTypeFields } from '@/components/records/RecordTypeFields';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { DatePickerField } from '@/components/ui/DatePickerField';
+import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { RECORD_TYPES } from '@/constants/record-types';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
@@ -122,7 +123,8 @@ export default function RecordFormScreen() {
   const loadPet = usePetStore((state) => state.loadPet);
   const createRecord = usePetRecordStore((state) => state.createRecord);
   const updateRecord = usePetRecordStore((state) => state.updateRecord);
-  const { paywallVisible, requestAccess, dismissPaywall } = usePlusFeature('unlimitedRecords');
+  const { allowed: canCreateRecord, paywallVisible, requestAccess, dismissPaywall } =
+    usePlusFeature('unlimitedRecords');
   const isPlusActive = useUserStore((state) => state.isPlusActive);
 
   const [date, setDate] = useState(() => formatLocalDate(getTodayStart()));
@@ -390,6 +392,7 @@ export default function RecordFormScreen() {
               <Button
                 title={isEditMode ? t('records.saveChanges') : t('records.saveRecord')}
                 disabled={isSaving || notesOverLimit}
+                trailingIcon={!isEditMode && !canCreateRecord ? <PlusLockButtonIcon /> : undefined}
                 onPress={() => void handleSave()}
               />
             )}

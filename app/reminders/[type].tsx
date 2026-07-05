@@ -11,6 +11,7 @@ import { ReminderTypeFields } from '@/components/reminders/ReminderTypeFields';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { DatePickerField } from '@/components/ui/DatePickerField';
+import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { TimePickerField } from '@/components/ui/TimePickerField';
 import { REMINDER_TYPES } from '@/constants/reminder-types';
@@ -71,7 +72,8 @@ export default function ReminderFormScreen() {
   const skipReminder = usePetReminderStore((state) => state.skipReminder);
   const snoozeReminder = usePetReminderStore((state) => state.snoozeReminder);
   const deleteReminder = usePetReminderStore((state) => state.deleteReminder);
-  const { paywallVisible, requestAccess, dismissPaywall } = usePlusFeature('unlimitedReminders');
+  const { allowed: canCreateReminder, paywallVisible, requestAccess, dismissPaywall } =
+    usePlusFeature('unlimitedReminders');
   const isPlusActive = useUserStore((state) => state.isPlusActive);
 
   const [dueDate, setDueDate] = useState(() => formatLocalDate(getTodayStart()));
@@ -486,6 +488,9 @@ export default function ReminderFormScreen() {
                 <Button
                   title={isEditMode ? t('reminders.saveChanges') : t('reminders.saveReminder')}
                   disabled={isSaving || notesOverLimit}
+                  trailingIcon={
+                    !isEditMode && !canCreateReminder ? <PlusLockButtonIcon /> : undefined
+                  }
                   onPress={() => void handleSave()}
                 />
                 {isEditMode ? (

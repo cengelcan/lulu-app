@@ -8,6 +8,7 @@ import { MemorialTabContent } from '@/components/pets/MemorialTabContent';
 import { PetListRow } from '@/components/pet/PetListRow';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Spacing, Typography } from '@/constants/theme';
@@ -206,7 +207,11 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
             <View style={styles.petList}>{renderPetRows(visiblePets, false)}</View>
           )}
           {!isMemorialTab ? (
-            <Button title={t('common.addPetWithPlus')} onPress={handleAddPet} />
+            <Button
+              title={t('common.addPetWithPlus')}
+              trailingIcon={!canAddPet ? <PlusLockButtonIcon /> : undefined}
+              onPress={handleAddPet}
+            />
           ) : null}
         </View>
       )}

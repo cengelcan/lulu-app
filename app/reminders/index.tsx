@@ -9,10 +9,12 @@ import { ReminderTypeGrid } from '@/components/reminders/ReminderTypeGrid';
 import { RemindersFooter } from '@/components/reminders/RemindersFooter';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { ThemedText } from '@/components/themed-text';
+import { PlusLockIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { REMINDER_TYPES } from '@/constants/reminder-types';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
 import { Spacing, Typography } from '@/constants/theme';
+import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
@@ -52,6 +54,7 @@ export default function RemindersScreen() {
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const { allowed: canCreateReminder } = usePlusFeature('unlimitedReminders');
 
   const todayKey = useMemo(() => formatLocalDate(getTodayStart()), []);
   const tomorrowKey = useMemo(() => formatLocalDate(addDays(getTodayStart(), 1)), []);
@@ -115,7 +118,9 @@ export default function RemindersScreen() {
             {t('reminders.deceasedReadOnly')}
           </ThemedText>
         ) : (
-          <GroupedSection title={t('reminders.sectionCreate')}>
+          <GroupedSection
+            title={t('reminders.sectionCreate')}
+            titleTrailing={!canCreateReminder ? <PlusLockIcon /> : undefined}>
             <ReminderTypeGrid
               getGridLabel={(key) => t(key)}
               getGridSubtitle={(key) => t(key)}

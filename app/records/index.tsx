@@ -7,10 +7,12 @@ import { GroupedSection } from '@/components/pet/GroupedSection';
 import { RecordHistoryRow } from '@/components/records/RecordHistoryRow';
 import { RecordTypeGrid } from '@/components/records/RecordTypeGrid';
 import { ThemedText } from '@/components/themed-text';
+import { PlusLockIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { RECORD_TYPES } from '@/constants/record-types';
 import { Spacing, Typography } from '@/constants/theme';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
+import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePetRecordStore } from '@/stores/pet-record.store';
@@ -40,6 +42,7 @@ export default function RecordsScreen() {
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const { allowed: canCreateRecord } = usePlusFeature('unlimitedRecords');
 
   useFocusEffect(
     useCallback(() => {
@@ -81,7 +84,9 @@ export default function RecordsScreen() {
             {t('records.deceasedReadOnly')}
           </ThemedText>
         ) : (
-          <GroupedSection title={t('records.sectionTitle')}>
+          <GroupedSection
+            title={t('records.sectionTitle')}
+            titleTrailing={!canCreateRecord ? <PlusLockIcon /> : undefined}>
             <RecordTypeGrid
               getGridLabel={(key) => t(key)}
               onPressType={handleRecordTypePress}

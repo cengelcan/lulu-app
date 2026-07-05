@@ -10,6 +10,7 @@ import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { DatePickerField } from '@/components/ui/DatePickerField';
+import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES } from '@/constants/check-in';
 import { RECORD_TYPES } from '@/constants/record-types';
@@ -398,6 +399,7 @@ export function ReportsWizardContent() {
           <Button
             title={t('reports.shareReport')}
             disabled={isExporting || isLoadingReview || !previewContent || previewContent.isEmpty}
+            trailingIcon={!canExportPdf ? <PlusLockButtonIcon /> : undefined}
             onPress={() => void handleShareReport()}
           />
         </View>

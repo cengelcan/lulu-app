@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
+import { PlusLockBadge } from '@/components/ui/PlusLockIcon';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -11,6 +12,7 @@ type QuickActionItemProps = {
   subtitle: string;
   icon: IconSymbolName;
   iconTint?: 'primary' | 'warning';
+  locked?: boolean;
   onPress: () => void;
 };
 
@@ -19,6 +21,7 @@ export function QuickActionItem({
   subtitle,
   icon,
   iconTint = 'primary',
+  locked = false,
   onPress,
 }: QuickActionItemProps) {
   const warningColor = useThemeColor({}, 'warning');
@@ -39,38 +42,54 @@ export function QuickActionItem({
   };
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${label}, ${subtitle}`}
-      onPress={handlePress}
-      style={({ pressed }) => [
-        styles.item,
-        {
-          backgroundColor: surfaceColor,
-          borderColor,
-          opacity: pressed ? 0.85 : 1,
-        },
-      ]}>
-      <View style={[styles.iconContainer, { backgroundColor: iconBackground }]}>
-        <IconSymbol name={icon} size={20} color={accentColor} />
-      </View>
-      <View style={styles.textWrap}>
-        <ThemedText type="defaultSemiBold" style={styles.label} numberOfLines={1}>
-          {label}
-        </ThemedText>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.subtitle}
-          numberOfLines={2}>
-          {subtitle}
-        </ThemedText>
-      </View>
-    </Pressable>
+    <View style={styles.wrapper}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${label}, ${subtitle}`}
+        onPress={handlePress}
+        style={({ pressed }) => [
+          styles.item,
+          {
+            backgroundColor: surfaceColor,
+            borderColor,
+            opacity: pressed ? 0.85 : 1,
+          },
+        ]}>
+        <View style={[styles.iconContainer, { backgroundColor: iconBackground }]}>
+          <IconSymbol name={icon} size={20} color={accentColor} />
+        </View>
+        <View style={styles.textWrap}>
+          <ThemedText type="defaultSemiBold" style={styles.label} numberOfLines={1}>
+            {label}
+          </ThemedText>
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.subtitle}
+            numberOfLines={2}>
+            {subtitle}
+          </ThemedText>
+        </View>
+      </Pressable>
+      {locked ? (
+        <View style={styles.lockBadge} pointerEvents="none">
+          <PlusLockBadge />
+        </View>
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    position: 'relative',
+  },
+  lockBadge: {
+    position: 'absolute',
+    top: Spacing.xs,
+    right: Spacing.xs,
+  },
   item: {
     flex: 1,
     minHeight: 108,

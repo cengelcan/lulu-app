@@ -21,6 +21,7 @@ import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { QUICK_ACTIONS } from '@/constants/quick-actions';
 import { Spacing, Typography } from '@/constants/theme';
+import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { canViewReports } from '@/utils/pet-access';
@@ -70,6 +71,9 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     [checkIns, todayDateString]
   );
   const trends = useMemo(() => buildDashboardTrends(checkIns), [checkIns]);
+  const { allowed: canExportPdf } = usePlusFeature('pdfExport');
+  const { allowed: canCreateRecord } = usePlusFeature('unlimitedRecords');
+  const { allowed: canCreateReminder } = usePlusFeature('unlimitedReminders');
   const visibleQuickActions = useMemo(
     () => (pet && canViewReports(pet) ? QUICK_ACTIONS : QUICK_ACTIONS.filter((action) => action.id !== 'reports')),
     [pet]
@@ -220,6 +224,15 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
                   subtitle={t(action.subtitleKey)}
                   icon={action.icon}
                   iconTint={action.iconTint}
+                  locked={
+                    action.id === 'reports'
+                      ? !canExportPdf
+                      : action.id === 'records'
+                        ? !canCreateRecord
+                        : action.id === 'reminder'
+                          ? !canCreateReminder
+                          : false
+                  }
                   onPress={() => handleQuickActionPress(action.route)}
                 />
               ))}

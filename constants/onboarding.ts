@@ -1,5 +1,8 @@
 import type { ImageSourcePropType } from 'react-native';
 
+/** Set to true to show the 4 intro screens after welcome. */
+export const ONBOARDING_INTRO_SCREENS_ENABLED = false;
+
 export const ONBOARDING_BACKGROUNDS = {
   1: require('@/assets/images/onboarding/ob-bg-1.png'),
   2: require('@/assets/images/onboarding/ob-bg-2.png'),

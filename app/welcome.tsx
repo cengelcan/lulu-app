@@ -1,8 +1,9 @@
-import { useRouter } from 'expo-router';
+import { type Href, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { WelcomeScreen } from '@/components/welcome/welcome-screen';
+import { ONBOARDING_INTRO_SCREENS_ENABLED } from '@/constants/onboarding';
 import { useTranslation } from '@/hooks/use-translation';
 import { setOnboardingCompleted } from '@/storage/prefs.storage';
 import { setUserSetupPath } from '@/storage/setup-path.storage';
@@ -12,8 +13,15 @@ export default function WelcomeRoute() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const handleStart = useCallback(() => {
-    router.replace('/(onboarding)/intro-1');
+  const handleStart = useCallback(async () => {
+    if (ONBOARDING_INTRO_SCREENS_ENABLED) {
+      router.replace('/(onboarding)/intro-1');
+      return;
+    }
+
+    await setOnboardingCompleted(true);
+    useOnboardingStore.setState({ hasCompletedOnboarding: true });
+    router.replace('/(auth)?mode=signUp' as Href);
   }, [router]);
 
   const handleJoinFamily = useCallback(async () => {

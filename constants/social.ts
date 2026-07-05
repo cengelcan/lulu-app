@@ -1,4 +1,4 @@
-export const INSTAGRAM_URL = 'https://instagram.com/luluapp';
+export const INSTAGRAM_URL = 'https://instagram.com/lulupetapp';
 
 export const SHARE_URL = 'https://lulu.app';
 

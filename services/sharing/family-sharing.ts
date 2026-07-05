@@ -145,6 +145,8 @@ export async function rotateFamilyCode(familyGroupId: string): Promise<FamilyGro
 }
 
 export async function deactivateFamilyGroup(familyGroupId: string): Promise<void> {
+  await revokeFamilyGroupMemberships(familyGroupId);
+
   const { error } = await supabase
     .from('family_groups')
     .update({ is_active: false })
@@ -168,19 +170,39 @@ export async function updateFamilyGroupPets(
     throw new Error(deleteError.message);
   }
 
-  if (petIds.length === 0) {
-    return;
+  if (petIds.length > 0) {
+    const rows = petIds.map((petId) => ({
+      family_group_id: familyGroupId,
+      pet_id: petId,
+    }));
+
+    const { error: insertError } = await supabase.from('family_group_pets').insert(rows);
+
+    if (insertError) {
+      throw new Error(insertError.message);
+    }
   }
 
-  const rows = petIds.map((petId) => ({
-    family_group_id: familyGroupId,
-    pet_id: petId,
-  }));
+  await syncFamilyGroupMemberships(familyGroupId);
+}
 
-  const { error: insertError } = await supabase.from('family_group_pets').insert(rows);
+export async function syncFamilyGroupMemberships(familyGroupId: string): Promise<void> {
+  const { error } = await supabase.rpc('sync_family_group_memberships', {
+    p_family_group_id: familyGroupId,
+  });
 
-  if (insertError) {
-    throw new Error(insertError.message);
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function revokeFamilyGroupMemberships(familyGroupId: string): Promise<void> {
+  const { error } = await supabase.rpc('revoke_family_group_memberships', {
+    p_family_group_id: familyGroupId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
   }
 }
 
@@ -254,8 +276,36 @@ export async function leaveFamilyGroup(familyGroupId: string, userId: string): P
   }
 }
 
-export async function removeFamilyMember(membershipId: string): Promise<void> {
-  const { error } = await supabase.from('pet_memberships').delete().eq('id', membershipId);
+export async function removeFamilyMember(
+  familyGroupId: string,
+  memberUserId: string
+): Promise<void> {
+  const { data: memberships, error: fetchError } = await supabase
+    .from('pet_memberships')
+    .select('pet_id')
+    .eq('family_group_id', familyGroupId)
+    .eq('member_user_id', memberUserId);
+
+  if (fetchError) {
+    throw new Error(fetchError.message);
+  }
+
+  const petIds = (memberships ?? []).map((row) => row.pet_id as string);
+
+  for (const petId of petIds) {
+    await logActivityEvent({
+      id: `member-removed-${memberUserId}-${familyGroupId}-${petId}`,
+      petId,
+      eventType: 'member_left',
+      metadata: { familyGroupId, removedByOwner: true },
+    });
+  }
+
+  const { error } = await supabase
+    .from('pet_memberships')
+    .delete()
+    .eq('family_group_id', familyGroupId)
+    .eq('member_user_id', memberUserId);
 
   if (error) {
     throw new Error(error.message);

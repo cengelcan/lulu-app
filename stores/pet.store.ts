@@ -170,6 +170,15 @@ export const usePetStore = create<PetState>((set, get) => ({
         pet,
         isLoading: false,
       }));
+
+      if (userId) {
+        try {
+          const { useSharingStore } = await import('@/stores/sharing.store');
+          await useSharingStore.getState().autoShareNewPetIfActive(pet.id);
+        } catch (shareError) {
+          console.warn('Failed to auto-share new pet with family', shareError);
+        }
+      }
     } catch (error) {
       set({
         isLoading: false,

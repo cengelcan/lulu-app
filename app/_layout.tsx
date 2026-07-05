@@ -6,6 +6,8 @@ import 'react-native-reanimated';
 
 import { useNotificationResponse } from '@/hooks/use-notification-response';
 import { useAuthDeepLink } from '@/hooks/use-auth-deep-link';
+import { useFamilyMemberCloudSync } from '@/hooks/use-family-member-cloud-sync';
+import { useFamilySharingRealtime } from '@/hooks/use-family-sharing-realtime';
 import { useJoinDeepLink } from '@/hooks/use-join-deep-link';
 import { useLanguageStore } from '@/stores/language.store';
 
@@ -14,6 +16,8 @@ export default function RootLayout() {
   useNotificationResponse();
   useAuthDeepLink();
   useJoinDeepLink();
+  useFamilyMemberCloudSync();
+  useFamilySharingRealtime();
 
   useEffect(() => {
     void loadLanguage();

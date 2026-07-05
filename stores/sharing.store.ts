@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
-import { pullPetsIntoLocal, pushPet } from '@/services/sync/pets-sync';
+import { pushPet } from '@/services/sync/pets-sync';
+import { refreshDataAfterMembershipChange, refreshMemberDataFromCloud } from '@/services/sync/member-cloud-sync';
 import {
   acceptFamilyJoin,
   createFamilyGroup,
@@ -30,11 +31,14 @@ type SharingState = {
   ensureFamilyGroup: () => Promise<FamilyGroup>;
   rotateCode: () => Promise<void>;
   setSharedPets: (petIds: string[]) => Promise<void>;
-  removeMember: (membershipId: string) => Promise<void>;
+  removeMember: (familyGroupId: string, memberUserId: string) => Promise<void>;
   deactivateSharing: () => Promise<void>;
   previewJoin: (code: string) => Promise<FamilyJoinPreview>;
   joinFamily: (code: string) => Promise<void>;
   leaveFamily: (familyGroupId: string) => Promise<void>;
+  autoShareNewPetIfActive: (petId: string) => Promise<void>;
+  refreshMemberPetsFromCloud: () => Promise<void>;
+  handleSharingRealtimeUpdate: () => Promise<void>;
   clearError: () => void;
 };
 
@@ -49,9 +53,7 @@ function getUserId(): string {
 }
 
 async function refreshPetsFromCloud(userId: string): Promise<void> {
-  await pullPetsIntoLocal(userId);
-  const { usePetStore } = await import('@/stores/pet.store');
-  await usePetStore.getState().loadPets();
+  await refreshDataAfterMembershipChange(userId);
 }
 
 export const useSharingStore = create<SharingState>((set, get) => ({
@@ -147,10 +149,11 @@ export const useSharingStore = create<SharingState>((set, get) => ({
 
     await updateFamilyGroupPets(group.id, petIds);
     set({ sharedPetIds: petIds });
+    await get().loadOwnerFamilySharing();
   },
 
-  removeMember: async (membershipId) => {
-    await removeFamilyMember(membershipId);
+  removeMember: async (familyGroupId, memberUserId) => {
+    await removeFamilyMember(familyGroupId, memberUserId);
     await get().loadOwnerFamilySharing();
   },
 
@@ -174,7 +177,7 @@ export const useSharingStore = create<SharingState>((set, get) => ({
   joinFamily: async (code) => {
     const userId = getUserId();
     await acceptFamilyJoin(code);
-    await refreshPetsFromCloud(userId);
+    await refreshDataAfterMembershipChange(userId);
     await get().loadMemberMemberships();
   },
 
@@ -182,6 +185,49 @@ export const useSharingStore = create<SharingState>((set, get) => ({
     const userId = getUserId();
     await leaveFamilyGroup(familyGroupId, userId);
     await refreshPetsFromCloud(userId);
+    await get().loadMemberMemberships();
+  },
+
+  autoShareNewPetIfActive: async (petId) => {
+    const userId = getUserId();
+    const familyGroup = get().familyGroup ?? (await fetchOwnerFamilyGroup(userId));
+
+    if (!familyGroup?.isActive) {
+      return;
+    }
+
+    if (!get().familyGroup) {
+      set({ familyGroup });
+    }
+
+    const sharedPetIds =
+      get().sharedPetIds.length > 0
+        ? get().sharedPetIds
+        : await fetchFamilyGroupPetIds(familyGroup.id);
+
+    if (sharedPetIds.length === 0 || sharedPetIds.includes(petId)) {
+      return;
+    }
+
+    await get().setSharedPets([...sharedPetIds, petId]);
+  },
+
+  refreshMemberPetsFromCloud: async () => {
+    const userId = getUserId();
+    await refreshMemberDataFromCloud(userId);
+  },
+
+  handleSharingRealtimeUpdate: async () => {
+    const userId = getUserId();
+
+    await refreshDataAfterMembershipChange(userId);
+
+    const familyGroup = get().familyGroup ?? (await fetchOwnerFamilyGroup(userId));
+
+    if (familyGroup?.isActive) {
+      await get().loadOwnerFamilySharing();
+    }
+
     await get().loadMemberMemberships();
   },
 

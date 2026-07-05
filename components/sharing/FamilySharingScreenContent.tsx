@@ -164,7 +164,11 @@ export function FamilySharingScreenContent({
     ]);
   };
 
-  const handleRemoveMember = (membershipId: string, displayName: string | null) => {
+  const handleRemoveMember = (memberUserId: string, displayName: string | null) => {
+    if (!familyGroup) {
+      return;
+    }
+
     Alert.alert(
       t('sharing.removeMemberTitle'),
       t('sharing.removeMemberMessage', { name: displayName ?? t('sharing.someone') }),
@@ -174,7 +178,7 @@ export function FamilySharingScreenContent({
           text: t('sharing.removeMemberConfirm'),
           style: 'destructive',
           onPress: () => {
-            void removeMember(membershipId).catch((removeError) => {
+            void removeMember(familyGroup.id, memberUserId).catch((removeError) => {
               Alert.alert(
                 t('sharing.errorTitle'),
                 translateError(t, removeError instanceof Error ? removeError.message : 'errors.unknown') ??
@@ -338,7 +342,7 @@ export function FamilySharingScreenContent({
                         {t('sharing.memberPetCount', { count: member.petIds.length })}
                       </ThemedText>
                     </View>
-                    <Pressable onPress={() => handleRemoveMember(member.membershipId, member.displayName)}>
+                    <Pressable onPress={() => handleRemoveMember(member.memberUserId, member.displayName)}>
                       <ThemedText lightColor={brandAccentColor} darkColor={brandAccentColor}>
                         {t('sharing.removeMember')}
                       </ThemedText>

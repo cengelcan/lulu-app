@@ -5,7 +5,13 @@ import {
   syncCheckInReminderSchedule,
   syncPetReminderNotificationSchedule,
 } from '@/services/notifications';
-import { deletePetPhotoFiles, deleteRemotePet, pushPet } from '@/services/sync/pets-sync';
+import {
+  deletePetPhotoFiles,
+  deleteRemotePet,
+  pushPet,
+  syncOwnedLocalPetsToCloud,
+} from '@/services/sync/pets-sync';
+import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
 import { removeActivePetId } from '@/storage/prefs.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -144,12 +150,18 @@ export const usePetStore = create<PetState>((set, get) => ({
     try {
       await petStorage.createPet(pet);
 
-      const userId = getActiveUserId();
-      if (userId) {
-        try {
-          await pushPet(userId, pet);
-        } catch (syncError) {
-          console.warn('Failed to sync new pet to cloud', syncError);
+      let userId: string | null = null;
+      try {
+        userId = await requireAuthenticatedUserId();
+        await pushPet(userId, pet);
+      } catch (syncError) {
+        console.warn('Failed to sync new pet to cloud', syncError);
+        if (userId) {
+          try {
+            await syncOwnedLocalPetsToCloud(userId);
+          } catch (retryError) {
+            console.warn('Cloud pet sync retry also failed', retryError);
+          }
         }
       }
 

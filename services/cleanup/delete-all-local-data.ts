@@ -5,6 +5,11 @@ import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { clearDismissedInboxItems } from '@/storage/inbox-dismissed.storage';
 import {
+  clearJoinRemindersPromptState,
+} from '@/storage/join-reminders-prompt.storage';
+import { clearPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
+import { clearUserSetupPath } from '@/storage/setup-path.storage';
+import {
   removeActivePetId,
   removeAppAppearance,
   removeAppLanguage,
@@ -47,6 +52,9 @@ export async function deleteAllLocalData(): Promise<void> {
     clearUserProfile(),
     clearLastStoreReviewPromptAt(),
     clearDismissedInboxItems(),
+    clearPendingFamilyJoinCode(),
+    clearUserSetupPath(),
+    clearJoinRemindersPromptState(),
   ]);
 }
 

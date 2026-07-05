@@ -81,6 +81,10 @@ const options: SupabaseClientOptions<'public'> = {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, options);
 
+if (AppState.currentState === 'active') {
+  void supabase.auth.startAutoRefresh();
+}
+
 /**
  * Keep the session fresh while the app is in the foreground and stop refreshing
  * in the background to avoid unnecessary token churn.

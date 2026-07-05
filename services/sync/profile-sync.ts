@@ -123,9 +123,9 @@ export async function pullProfileIntoLocal(userId: string): Promise<UserProfile>
   if (!remoteProfile) {
     const localProfile = await getUserProfile();
 
-    if (localProfile.displayName || localProfile.avatarUri) {
-      await pushProfile(userId, localProfile);
-    }
+    // Always claim a profiles row for this user so family sharing / RLS helpers
+    // can resolve display names even before the user sets one.
+    await pushProfile(userId, localProfile);
 
     return localProfile;
   }

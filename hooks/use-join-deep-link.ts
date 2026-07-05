@@ -4,6 +4,9 @@ import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 
 import { setPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
+import { setOnboardingCompleted } from '@/storage/prefs.storage';
+import { setUserSetupPath } from '@/storage/setup-path.storage';
+import { useOnboardingStore } from '@/stores/onboarding.store';
 import { useUserStore } from '@/stores/user.store';
 import { parseFamilyCodeFromUrl } from '@/utils/sharing/family-code';
 
@@ -19,6 +22,9 @@ async function handleJoinUrl(
   }
 
   await setPendingFamilyJoinCode(code);
+  await setUserSetupPath('join_family');
+  await setOnboardingCompleted(true);
+  useOnboardingStore.setState({ hasCompletedOnboarding: true });
 
   if (isAuthenticated) {
     navigate(`/join-family?code=${code}` as Href);

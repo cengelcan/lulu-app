@@ -35,6 +35,7 @@ import { getRecordFormRoute } from '@/utils/pet-record-display';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { addDays } from '@/services/notifications/date';
 import { reminderTypeToRecordType } from '@/utils/reminder-to-record';
+import { canWritePetCareData } from '@/utils/pet-access';
 
 const COMPLETED_PREVIEW_LIMIT = 3;
 
@@ -78,7 +79,7 @@ export default function RemindersScreen() {
   const completedReminders = useMemo(() => listCompletedReminders(reminders), [reminders]);
 
   const completedPreview = completedReminders.slice(0, COMPLETED_PREVIEW_LIMIT);
-  const isReadOnly = pet?.status === 'deceased';
+  const isReadOnly = pet ? !canWritePetCareData(pet) : false;
   const screenOptions = useHubStackScreenOptions(t('reminders.title'));
 
   const handleTypePress = (type: ReminderTypeId) => {

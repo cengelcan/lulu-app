@@ -53,6 +53,7 @@ export const en: Translations = {
     footerLine2Accent: 'every',
     footerLine2After: ' vet visit.',
     startButton: 'Get Started',
+    joinFamilyButton: 'Join a family with a code',
   },
   onboarding: {
     intro1: {
@@ -232,6 +233,21 @@ export const en: Translations = {
       subtitle: 'Your profile is complete.',
       checkInPrompt: "Now it's time for {{name}}'s first daily check-in.",
       startFirstCheckIn: 'Start First Check-In',
+    },
+    pathChoice: {
+      title: 'How will you use Lulu?',
+      description: 'Choose the path that fits you. You can always add your own pet later.',
+      ownerTitle: 'I have a pet',
+      ownerDescription: 'Set up your pet and start tracking their health.',
+      joinTitle: 'Join a family',
+      joinDescription: 'Enter a family code to help care for a shared pet.',
+    },
+    joinDisplayName: {
+      title: 'What should we call you?',
+      description: 'Your family will see this name when you help with check-ins and records.',
+      label: 'Your name',
+      placeholder: 'Your name',
+      validationRequired: 'Please enter your name.',
     },
   },
   checkIn: {
@@ -432,6 +448,12 @@ export const en: Translations = {
         record: 'Add a health record',
         color: 'Add coat color',
       },
+    },
+    joinReminders: {
+      title: 'Get reminders for {{name}}',
+      message: 'Turn on daily check-in reminders so you never miss a day.',
+      enable: 'Enable reminders',
+      notNow: 'Not now',
     },
   },
   reports: {
@@ -823,6 +845,7 @@ export const en: Translations = {
     acceptJoin: 'Join family',
     joinSuccessTitle: 'Welcome to the family',
     joinSuccessMessage: 'Shared pets are now available in My Pets.',
+    addOwnPetInstead: 'Add my own pet instead',
     yourMembershipsSection: 'Your memberships',
     activeMembership: 'You are in a shared family',
     leaveFamily: 'Leave family',

@@ -2,24 +2,32 @@ import { type Href, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getNotificationLaunchRoute, syncCheckInReminderSchedule, syncPetReminderNotificationSchedule } from '@/services/notifications';
+import { getPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
+import { hasJoinIntent } from '@/utils/join-intent';
+import { resolveAuthenticatedNoPetRoute } from '@/utils/resolve-authenticated-no-pet-route';
 
 export type BootstrapPhase = 'loading' | 'error' | 'redirecting';
 
 /** PRD Screen 01 — minimum splash visibility before navigation */
 export const SPLASH_MIN_DURATION_MS = 1000;
 
-function resolveBootstrapRoute(
+async function resolveBootstrapRoute(
   hasCompletedOnboarding: boolean,
   isAuthenticated: boolean,
-  hasAnyPet: boolean
-): Href {
-  if (!hasCompletedOnboarding) {
+  hasAnyPet: boolean,
+  joinIntent: boolean
+): Promise<Href> {
+  if (!hasCompletedOnboarding && !joinIntent) {
     return '/welcome';
+  }
+
+  if (!hasCompletedOnboarding && joinIntent && !isAuthenticated) {
+    return '/(auth)?mode=signUp';
   }
 
   if (!isAuthenticated) {
@@ -27,7 +35,7 @@ function resolveBootstrapRoute(
   }
 
   if (!hasAnyPet) {
-    return '/(setup)/pet-type';
+    return resolveAuthenticatedNoPetRoute();
   }
 
   return '/(tabs)/home';
@@ -94,20 +102,31 @@ export function useBootstrap() {
 
     const isAuthenticated = useUserStore.getState().authStatus === 'authenticated';
     const hasAnyPet = await petStorage.hasAnyPet();
+    const joinIntent = await hasJoinIntent();
     const notificationRoute = await getNotificationLaunchRoute();
     await waitForMinSplashDuration(startedAt);
 
-    if (notificationRoute && isAuthenticated && hasAnyPet) {
+    const pendingJoinCode = isAuthenticated ? await getPendingFamilyJoinCode() : null;
+
+    if (notificationRoute && isAuthenticated && hasAnyPet && !pendingJoinCode) {
       setPhase('redirecting');
       router.replace(notificationRoute);
       return;
     }
 
     setPhase('redirecting');
-    const route = resolveBootstrapRoute(hasCompletedOnboarding, isAuthenticated, hasAnyPet);
+
+    const route = await resolveBootstrapRoute(
+      hasCompletedOnboarding,
+      isAuthenticated,
+      hasAnyPet,
+      joinIntent
+    );
+
     if (route === '/(setup)/pet-type') {
       useSetupStore.getState().beginSetup('initial');
     }
+
     router.replace(route);
   }, [
     clearOnboardingError,

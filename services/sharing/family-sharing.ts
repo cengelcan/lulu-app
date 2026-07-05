@@ -222,6 +222,27 @@ export async function acceptFamilyJoin(code: string): Promise<number> {
 }
 
 export async function leaveFamilyGroup(familyGroupId: string, userId: string): Promise<void> {
+  const { data: memberships, error: fetchError } = await supabase
+    .from('pet_memberships')
+    .select('pet_id')
+    .eq('family_group_id', familyGroupId)
+    .eq('member_user_id', userId);
+
+  if (fetchError) {
+    throw new Error(fetchError.message);
+  }
+
+  const petIds = (memberships ?? []).map((row) => row.pet_id as string);
+
+  for (const petId of petIds) {
+    await logActivityEvent({
+      id: `member-left-${userId}-${familyGroupId}-${petId}`,
+      petId,
+      eventType: 'member_left',
+      metadata: { familyGroupId },
+    });
+  }
+
   const { error } = await supabase
     .from('pet_memberships')
     .delete()

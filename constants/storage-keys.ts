@@ -13,6 +13,9 @@ export const StorageKeys = {
   petSetupGuideDismissed: '@pet_health_journal/pet_setup_guide_dismissed',
   inboxDismissed: '@pet_health_journal/inbox_dismissed',
   pendingFamilyJoinCode: '@pet_health_journal/pending_family_join_code',
+  userSetupPath: '@pet_health_journal/user_setup_path',
+  joinRemindersPromptPending: '@pet_health_journal/join_reminders_prompt_pending',
+  joinRemindersPromptDismissed: '@pet_health_journal/join_reminders_prompt_dismissed',
 } as const;
 
 export type StorageKey = (typeof StorageKeys)[keyof typeof StorageKeys];

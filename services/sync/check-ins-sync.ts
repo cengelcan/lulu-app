@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { logActivityEvent } from '@/services/sharing/family-sharing';
+import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
 import * as checkInStorage from '@/storage/check-in.storage';
+import * as petStorage from '@/storage/pet.storage';
 import type { CheckIn } from '@/types/check-in';
 
 type RemoteCheckInRow = {
@@ -162,7 +164,13 @@ export async function fetchRemoteCheckIns(_userId: string): Promise<CheckIn[]> {
   return (data as RemoteCheckInRow[]).map(fromRemoteRow);
 }
 
-export async function pushCheckIn(userId: string, checkIn: CheckIn): Promise<void> {
+export async function pushCheckIn(
+  _userId: string,
+  checkIn: CheckIn,
+  activityEventType: 'check_in_created' | 'check_in_updated' = 'check_in_updated'
+): Promise<void> {
+  const userId = await requireAuthenticatedUserId();
+
   const { error } = await supabase.from('check_ins').upsert(toRemoteRow(checkIn, userId), {
     onConflict: 'id',
   });
@@ -174,7 +182,7 @@ export async function pushCheckIn(userId: string, checkIn: CheckIn): Promise<voi
   void logActivityEvent({
     id: `check-in-${checkIn.id}`,
     petId: checkIn.petId,
-    eventType: 'check_in_updated',
+    eventType: activityEventType,
     metadata: { date: checkIn.date },
   });
 }
@@ -202,13 +210,20 @@ export async function pullCheckInsIntoLocal(userId: string): Promise<CheckIn[]> 
 
   if (remoteCheckIns.length === 0) {
     const localCheckIns = await checkInStorage.getAllCheckIns();
+    const localPets = await petStorage.getPets();
+    const ownedPetIds = new Set(
+      localPets
+        .filter((pet) => (pet.sharingRole ?? 'owner') === 'owner')
+        .map((pet) => pet.id)
+    );
+    const claimableCheckIns = localCheckIns.filter((checkIn) => ownedPetIds.has(checkIn.petId));
 
-    if (localCheckIns.length > 0) {
-      for (const checkIn of localCheckIns) {
+    if (claimableCheckIns.length > 0) {
+      for (const checkIn of claimableCheckIns) {
         await pushCheckIn(userId, checkIn);
       }
 
-      return localCheckIns;
+      return claimableCheckIns;
     }
 
     return [];

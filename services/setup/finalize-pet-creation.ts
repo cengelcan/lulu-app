@@ -1,8 +1,8 @@
 import type { Router } from 'expo-router';
 
-import { uploadPetPhoto } from '@/services/sync/pets-sync';
+import { syncOwnedLocalPetsToCloud, uploadPetPhoto } from '@/services/sync/pets-sync';
+import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
-import { useUserStore } from '@/stores/user.store';
 import type { HealthCondition, Pet, PetSpecies } from '@/types/pet';
 import { derivePetAgeGroupFromBirthDate } from '@/utils/pet-age';
 import {
@@ -68,15 +68,22 @@ async function createPetWithPhoto(
   updatePet: (pet: Pet) => Promise<void>
 ): Promise<Pet> {
   const pet = buildPetFromDraft(draft);
+  let userId: string | null = null;
+
+  try {
+    userId = await requireAuthenticatedUserId();
+  } catch {
+    // Photo upload and cloud sync require auth; local createPet still runs below.
+  }
 
   await createPet(pet);
 
   if (!draft.photoUri) {
+    await syncPetToCloudAfterSetup();
     return pet;
   }
 
   let nextPhotoUri = draft.photoUri;
-  const userId = useUserStore.getState().userId;
 
   if (userId && draft.photoUpload) {
     try {
@@ -94,10 +101,21 @@ async function createPetWithPhoto(
   if (nextPhotoUri !== pet.photoUri) {
     const petWithPhoto = { ...pet, photoUri: nextPhotoUri };
     await updatePet(petWithPhoto);
+    await syncPetToCloudAfterSetup();
     return petWithPhoto;
   }
 
+  await syncPetToCloudAfterSetup();
   return pet;
+}
+
+async function syncPetToCloudAfterSetup(): Promise<void> {
+  try {
+    const userId = await requireAuthenticatedUserId();
+    await syncOwnedLocalPetsToCloud(userId);
+  } catch (syncError) {
+    console.warn('Pet saved locally but cloud sync failed after setup', syncError);
+  }
 }
 
 type FinalizeAddModePetDeps = {

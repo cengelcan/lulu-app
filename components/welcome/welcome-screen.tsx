@@ -22,6 +22,7 @@ type WelcomeScreenProps = {
   startButtonTitle: string;
   onStart: () => void;
   isLoading?: boolean;
+  footerExtra?: React.ReactNode;
 };
 
 export function WelcomeScreen({
@@ -34,6 +35,7 @@ export function WelcomeScreen({
   startButtonTitle,
   onStart,
   isLoading = false,
+  footerExtra,
 }: WelcomeScreenProps) {
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const buttonTextColor = useThemeColor({}, 'primaryText');
@@ -99,6 +101,7 @@ export function WelcomeScreen({
             style={styles.startButton}
             trailingIcon={<IconSymbol name="pawprint.fill" size={18} color={buttonTextColor} />}
           />
+          {footerExtra ? <View style={styles.footerExtra}>{footerExtra}</View> : null}
         </View>
       </SafeAreaView>
     </View>
@@ -174,6 +177,10 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingBottom: Spacing.sm,
+    gap: Spacing.md,
+  },
+  footerExtra: {
+    alignItems: 'center',
   },
   startButton: {
     width: '100%',

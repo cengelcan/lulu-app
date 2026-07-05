@@ -55,6 +55,7 @@ export type Translations = {
     footerLine2Accent: string;
     footerLine2After: string;
     startButton: string;
+    joinFamilyButton: string;
   };
   onboarding: {
     intro1: {
@@ -213,6 +214,21 @@ export type Translations = {
       checkInPrompt: string;
       startFirstCheckIn: string;
     };
+    pathChoice: {
+      title: string;
+      description: string;
+      ownerTitle: string;
+      ownerDescription: string;
+      joinTitle: string;
+      joinDescription: string;
+    };
+    joinDisplayName: {
+      title: string;
+      description: string;
+      label: string;
+      placeholder: string;
+      validationRequired: string;
+    };
   };
   checkIn: {
     title: string;
@@ -362,6 +378,12 @@ export type Translations = {
         record: string;
         color: string;
       };
+    };
+    joinReminders: {
+      title: string;
+      message: string;
+      enable: string;
+      notNow: string;
     };
   };
   reports: {
@@ -752,6 +774,7 @@ export type Translations = {
     acceptJoin: string;
     joinSuccessTitle: string;
     joinSuccessMessage: string;
+    addOwnPetInstead: string;
     yourMembershipsSection: string;
     activeMembership: string;
     leaveFamily: string;

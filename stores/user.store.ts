@@ -12,8 +12,10 @@ import {
   signUpWithEmail as authSignUpWithEmail,
 } from '@/services/auth';
 import { wipeUserScopedData } from '@/services/cleanup/wipe-user-scoped-data';
+import { resetUserScopedStores } from '@/services/cleanup/reset-user-scoped-stores';
 import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
 import { deletePetPhotoFiles, pullPetsIntoLocal } from '@/services/sync/pets-sync';
+import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
 import {
   deleteAvatarFiles,
   pullProfileIntoLocal,
@@ -22,7 +24,7 @@ import {
 } from '@/services/sync/profile-sync';
 import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
-import { getCurrentUserId, setCurrentUserId } from '@/storage/prefs.storage';
+import { getCurrentUserId, setCurrentUserId, removeCurrentUserId } from '@/storage/prefs.storage';
 import { getUserProfile, setUserProfile } from '@/storage/user.storage';
 import type { AuthProvider, UserProfile } from '@/types/user';
 
@@ -88,39 +90,55 @@ let authSubscriptionStarted = false;
  */
 async function enforceUserDataIsolation(userId: string): Promise<boolean> {
   const previousUserId = await getCurrentUserId();
-  let wiped = false;
+  const shouldWipe = previousUserId !== null && previousUserId !== userId;
 
-  if (previousUserId && previousUserId !== userId) {
+  if (shouldWipe) {
     await wipeUserScopedData();
-    const { resetUserScopedStores } = await import('@/services/cleanup/reset-user-scoped-stores');
     resetUserScopedStores();
-    wiped = true;
   }
 
   await setCurrentUserId(userId);
-  return wiped;
+  return shouldWipe;
 }
 
-/**
- * Pulls the user's cloud data into the local cache. Best-effort (offline-safe).
- *
- * Order matters: pets first so check-ins/records satisfy the cloud FK
- * (their pet_id must exist in the cloud pets table before they are pushed up
- * during the first-sync migration).
- */
-async function syncUserDataFromCloud(userId: string): Promise<void> {
-  try {
-    await pullPetsIntoLocal(userId);
-    await pullCheckInsIntoLocal(userId);
-    await pullPetRecordsIntoLocal(userId);
-    await pullPetRemindersIntoLocal(userId);
-    const profile = await pullProfileIntoLocal(userId);
-    useUserStore.setState({
-      displayName: profile.displayName,
-      avatarUri: profile.avatarUri,
-    });
-  } catch (error) {
-    console.warn('Failed to sync user data from cloud', error);
+function isRlsPolicyError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes('row-level security policy')
+  );
+}
+
+async function syncUserDataFromCloud(): Promise<void> {
+  let retriedAfterRlsFailure = false;
+
+  while (true) {
+    try {
+      const userId = await requireAuthenticatedUserId();
+      await pullPetsIntoLocal(userId);
+      await pullCheckInsIntoLocal(userId);
+      await pullPetRecordsIntoLocal(userId);
+      await pullPetRemindersIntoLocal(userId);
+      const profile = await pullProfileIntoLocal(userId);
+      useUserStore.setState({
+        displayName: profile.displayName,
+        avatarUri: profile.avatarUri,
+      });
+      return;
+    } catch (error) {
+      if (!retriedAfterRlsFailure && isRlsPolicyError(error)) {
+        console.warn(
+          'Cloud sync hit RLS with stale local data — clearing local cache and retrying',
+          error
+        );
+        await wipeUserScopedData();
+        resetUserScopedStores();
+        retriedAfterRlsFailure = true;
+        continue;
+      }
+
+      console.warn('Failed to sync user data from cloud', error);
+      return;
+    }
   }
 }
 
@@ -156,16 +174,19 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       const session = await getCurrentSession();
 
-      // Reconcile the data-owner marker to the active session on every launch.
-      // This claims the current local data for the logged-in user (no wipe) and
-      // prevents a stale marker from triggering a spurious wipe on next sign-in.
-      // Account isolation is still enforced at the sign-in transition.
+      // Enforce isolation when the stored data-owner marker differs from the
+      // active session (account switch) or when local cache exists without a
+      // marker (e.g. after sign-out cleared the marker but left stale data).
       if (session) {
-        await setCurrentUserId(session.user.id);
-        await syncUserDataFromCloud(session.user.id);
+        applySession(session);
+        const wiped = await enforceUserDataIsolation(session.user.id);
+        await syncUserDataFromCloud();
+        if (wiped) {
+          set({ displayName: null, avatarUri: null });
+        }
+      } else {
+        applySession(session);
       }
-
-      applySession(session);
     } catch {
       set({ authStatus: 'unauthenticated' });
     }
@@ -177,7 +198,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       const session = await authSignInWithEmail(email, password);
       const wiped = await enforceUserDataIsolation(session.user.id);
-      await syncUserDataFromCloud(session.user.id);
+      await syncUserDataFromCloud();
       set({
         userId: session.user.id,
         email: session.user.email ?? null,
@@ -203,7 +224,7 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       const { session } = result;
       const wiped = await enforceUserDataIsolation(session.user.id);
-      await syncUserDataFromCloud(session.user.id);
+      await syncUserDataFromCloud();
 
       set({
         userId: session.user.id,
@@ -239,7 +260,7 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       if (session) {
         const wiped = await enforceUserDataIsolation(session.user.id);
-        await syncUserDataFromCloud(session.user.id);
+        await syncUserDataFromCloud();
         set({
           userId: session.user.id,
           email: session.user.email ?? null,
@@ -262,6 +283,9 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       await signOutUser();
     } finally {
+      await wipeUserScopedData();
+      resetUserScopedStores();
+      await removeCurrentUserId();
       set({
         userId: null,
         email: null,

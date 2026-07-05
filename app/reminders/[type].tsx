@@ -35,6 +35,7 @@ import { getReminderTypeLabelKey } from '@/utils/pet-reminder-display';
 import { isReminderOverdue } from '@/utils/reminder-overdue';
 import { resolveReminderTypeId } from '@/utils/pet-reminder-normalize';
 import { validatePetReminderForm } from '@/utils/pet-reminder-validation';
+import { canWritePetCareData } from '@/utils/pet-access';
 
 function createReminderId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -85,7 +86,7 @@ export default function ReminderFormScreen() {
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const isEditMode = Boolean(reminderId);
-  const isReadOnly = pet?.status === 'deceased';
+  const isReadOnly = pet ? !canWritePetCareData(pet) : false;
   const isCompleted = existingReminder?.status === 'completed';
   const isSkipped = existingReminder?.status === 'skipped';
   const isOverdue = useMemo(() => {

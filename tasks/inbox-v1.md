@@ -339,15 +339,15 @@ inbox: {
 
 ---
 
-## v2 checklist (aile paylaşımı — bu task'ın dışında)
+## v2 checklist (aile paylaşımı — inbox entegrasyonu)
 
-Aile paylaşımı sprint'inde inbox'a eklemek için:
+Aile paylaşımı sprint'inde inbox'a eklemek için planlanmıştı; **kod tarafı tamamlandı**:
 
-- [ ] `supabase/migrations/00xx_activity_events.sql`
-- [ ] `types/sharing.ts` + `pet_shares` / `invites`
-- [ ] `buildFamilyActivityItems` provider implementasyonu
-- [ ] `InboxSheet` — `familyActivity` bölümünü göster (şu an titleKey hazır)
-- [ ] “Başkasının eylemi” filtresi: `actorUserId !== currentUserId`
+- [x] `supabase/migrations/0009_family_sharing.sql` (`activity_events`)
+- [x] `types/sharing.ts` + `family_groups` / `pet_memberships`
+- [x] `buildFamilyActivityItems` provider implementasyonu
+- [x] Inbox — `familyActivity` bölümü (`group-inbox-sections.ts`)
+- [x] “Başkasının eylemi” filtresi: `actorUserId !== currentUserId`
 - [ ] (Opsiyonel) Push: “Anna checked in for Luna”
 
-Bu maddeler `yapilacaklar.md` → Aile paylaşımı + inbox v2 olarak kalır; **v1 bu dosyayı bloklamaz**.
+Detay: `yapilacaklar.md` → §4 Faz F.

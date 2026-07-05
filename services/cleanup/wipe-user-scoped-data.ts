@@ -1,9 +1,11 @@
 import { cancelCheckInReminder, cancelAllPetReminderNotifications } from '@/services/notifications';
 import * as checkInStorage from '@/storage/check-in.storage';
+import { clearPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { removeActivePetId, removeCheckInReminderTime } from '@/storage/prefs.storage';
+import { clearUserSetupPath } from '@/storage/setup-path.storage';
 import { clearUserProfile } from '@/storage/user.storage';
 
 /**
@@ -24,5 +26,7 @@ export async function wipeUserScopedData(): Promise<void> {
     removeActivePetId(),
     removeCheckInReminderTime(),
     clearUserProfile(),
+    clearUserSetupPath(),
+    clearPendingFamilyJoinCode(),
   ]);
 }

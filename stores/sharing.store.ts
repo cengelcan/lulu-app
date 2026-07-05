@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
+import { pullPetsIntoLocal, pushPet } from '@/services/sync/pets-sync';
 import {
   acceptFamilyJoin,
   createFamilyGroup,
@@ -129,6 +129,20 @@ export const useSharingStore = create<SharingState>((set, get) => ({
 
     if (!group) {
       throw new Error('errors.familyGroupNotFound');
+    }
+
+    const userId = getUserId();
+    const { usePetStore } = await import('@/stores/pet.store');
+    const ownedPets = usePetStore
+      .getState()
+      .pets.filter((pet) => (pet.sharingRole ?? 'owner') === 'owner');
+
+    for (const petId of petIds) {
+      const pet = ownedPets.find((entry) => entry.id === petId);
+
+      if (pet) {
+        await pushPet(userId, pet);
+      }
     }
 
     await updateFamilyGroupPets(group.id, petIds);

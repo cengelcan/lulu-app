@@ -32,6 +32,7 @@ import type {
   WaterIntake,
 } from '@/types/check-in';
 import { countCompletedCheckInFields, isCheckInFormComplete } from '@/utils/check-in';
+import { canWritePetCareData } from '@/utils/pet-access';
 import { translateError } from '@/utils/translate-error';
 import {
   formatCheckInTitleDate,
@@ -108,7 +109,7 @@ export default function CheckInScreen() {
 
   const selectedDateObject = useMemo(() => parseLocalDate(selectedDate), [selectedDate]);
   const isFutureDate = selectedDateObject ? isFutureLocalDate(selectedDateObject) : false;
-  const isReadOnly = pet?.status === 'deceased';
+  const isReadOnly = pet ? !canWritePetCareData(pet) : false;
 
   const existingCheckIn = useMemo(
     () => checkIns.find((checkIn) => checkIn.date === selectedDate) ?? null,

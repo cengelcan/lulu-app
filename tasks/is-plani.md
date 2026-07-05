@@ -9,7 +9,7 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 
 ## Mevcut durum (doğrulama)
 
-**Son güncelleme:** 2026-07-04 — Apple Sign In tamam; Google bekliyor
+**Son güncelleme:** 2026-07-05 — Aile paylaşımı kod tarafı tamam; QA + IAP bekliyor
 
 | Alan | Durum |
 |------|-------|
@@ -17,7 +17,8 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 | Auth | Email/şifre + **Apple Sign In** çalışıyor; Google bekliyor |
 | Bootstrap | `hooks/use-bootstrap.ts` auth guard aktif: `splash → onboarding → auth → setup → home` |
 | User store | `signIn/signOut/session listener` + `currentUserId↔user.id`; Supabase client (`lib/supabase.ts`) |
-| Sync | Pet/check-in/record/profil Supabase kaynak-doğruluk (write-through + pull) |
+| Sync | Pet/check-in/record/profil/reminder Supabase kaynak-doğruluk (write-through + pull) |
+| Aile paylaşımı | Kod tamam (`0009` migration uygulandı); Plus gating dev bypass ile test; IAP + QA bekliyor |
 
 > **Guest kararı:** Canlı kullanıcı var ancak mevcut local veri korunmak zorunda değil (kullanıcılar yeniden profil oluşturacak). → Auth geçişinde **guest→hesap migration gerekmez**; temiz wipe yeterli. (Hesap izolasyonu: farklı hesap girişinde yerel veri wipe; pet'ler buluttan geri gelir.)
 
@@ -36,13 +37,13 @@ flowchart TD
   PD --> PBui[Paket B-görsel: Aktif/Anma]
   PD --> PCrest[Paket C: Records listeleme + ekler]
   PCgrid[Paket C: Records grid + türler ✅] -.D öncesi.-> PCrest
-  A1 --> A2[Aşama 2: Aile Paylaşımı - Plus]
+  A1 --> A2[Aşama 2: Aile Paylaşımı - Plus 🟡]
   A1 --> A3a[Aşama 3: Tier gating]
   A0 -.paralel.-> A3b[Aşama 3: PRD docs]
   PCrest --> PE[Paket E: Beslenme/aktivite planı - en son]
 ```
 
-**Yürütme sırası (klasik):** Aşama 0 (TS + QA paralel) → Aşama 1 (✅) → Aşama 2 + Aşama 3 paralel.
+**Yürütme sırası (klasik):** Aşama 0 (TS + QA paralel) → Aşama 1 (✅) → **Aşama 2 (🟡 kod ✅, QA + IAP)** → Aşama 3 paralel.
 
 ## Yeni paketler — yürütme sırası
 
@@ -77,6 +78,7 @@ Auth'a başlamadan kod tabanını yeşile çekmek. **Tahmini: ~0.5–1 gün.**
 
 ### 0.2 QA — kalan manuel testler (Öncelik 2, paralel)
 
+- [ ] Aile paylaşımı matrisi: owner/member akışları, deep link → auth → join, inbox aktivite (2 hesap)
 - [ ] EN ↔ DE dil geçişi (tüm ekranlar) — *Paket J kod tarafı ✅; manuel QA bekliyor*
 - [ ] Daily Check-In Faz 5: dil geçişi, yeni kayıt + düzenleme, eski kayıt migration, VoiceOver / Reduce Motion
 - [ ] Profile Tab matrisi T1–T12 + 2 pet ile delete akışı
@@ -130,28 +132,57 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 
 ---
 
-## Aşama 2 — Aile Paylaşımı (başlanmamış, Lulu Plus)
+## Aşama 2 — Aile Paylaşımı (🟡 kod tamam, QA + IAP bekliyor)
 
-**Bağımlılık:** Aşama 1 (A–E). **Tahmini: ~3–4 gün.**
+**Bağımlılık:** Aşama 1 (A–E). **Tahmini kalan:** ~1 gün QA + IAP entegrasyonu (StoreKit/RevenueCat ayrı).
 
-### Faz A — Domain modeli
-- [ ] `types/sharing.ts`: `CaregiverRole`, `PetInvite`, `SharedPet`
-- [ ] Supabase tabloları: `pet_shares`, `invites`
-- [ ] İzin matrisi: owner / editor / viewer
+**Kilitli kararlar (2026-07-05):** Davet = kod + deep link. Rol = owner + member. Test = dev bypass. **Join path:** onboarding atlanır (K25), fork auth sonrası (K26), Home reminders kartı (K27), display name sor (K28).
 
-### Faz B — Supabase RLS & API
-- [ ] Row Level Security: role bazlı pet erişimi
-- [ ] Davet akışı: email / deep link
-- [ ] Çakışma: iki caregiver aynı gün check-in güncellerse?
+> Uygulanan mimari: `family_groups` + `pet_memberships` — orijinal plandaki `pet_shares` / `invites` / editor-viewer yerine.
 
-### Faz C — UI
-- [ ] Pet Profile / Settings → "Share with Family"
-- [ ] `isPlusActive === false` → upgrade CTA (Lulu Plus)
-- [ ] `isPlusActive === true` → davet gönder / caregiver listesi
+### Faz A — Domain modeli ✅
+- [x] `types/sharing.ts`: `FamilyGroup`, `PetMembership`, `ActivityEvent`
+- [x] `types/pet.ts`: `sharingRole`, `ownerUserId`
+- [x] Supabase: `0009_family_sharing.sql` (migration uygulandı)
 
-### Faz D — Store
-- [ ] Aktif pet listesi: kendi pet'lerim + paylaşılanlar
-- [ ] Paylaşılan pet'lerde rol bazlı UI (viewer = read-only)
+### Faz B — Supabase RLS & API ✅
+- [x] RLS + helper functions (`has_pet_access`, vb.)
+- [x] RPC: `preview_family_join`, `accept_family_join`, `log_activity_event`
+- [x] Davet: kod + deep link (`lulu://join/CODE`)
+- [ ] Çakışma: iki caregiver aynı gün check-in — ileri faz (sync kuyruk)
+
+### Faz C — UI ✅
+- [x] `/family-sharing`, `/join-family`
+- [x] Settings + Pet Profile giriş; Plus paywall / dev bypass
+
+### Faz D — Store & sync ✅
+- [x] `sharing.store.ts`, `family-sharing.ts`, `pets-sync` sharingRole
+- [x] My Pets: owned + shared; shared badge
+
+### Faz E — Rol bazlı UI ✅ (kod)
+- [x] `pet-access.ts` guard'ları; edit-pet redirect; reports gating; care data `canWritePetCareData`
+- [ ] *(QA)* Member uçtan uca
+
+### Faz F — Aktivite & inbox ✅
+- [x] Sync activity logging; inbox family provider; `member_left`; create/update check-in ayrımı
+- [ ] *(Opsiyonel)* Push bildirimleri
+
+### Faz G — Post-auth join ✅
+- [x] `resolve-post-auth-route.ts`; bootstrap + auth `joinCode` param
+
+### Faz H — Join path (setup bypass) 🟡 uygulandı — QA bekliyor
+
+Detay: `yapilacaklar.md` §4 Faz H.
+
+- [x] Path choice, onboarding atlama, display name, join finalize, Home reminders kartı
+- [ ] *(QA)* Join path uçtan uca + owner regresyon
+
+### Kalan
+- [ ] **Faz H** (join path — yukarı)
+- [ ] Manuel QA (2 hesap / 2 cihaz)
+- [ ] StoreKit/RevenueCat → `isPlusActive`
+- [ ] Bilinen sorunlar — `yapilacaklar.md` §4 alt bölüm (kullanıcı ekleyecek)
+- [ ] *(v2)* editor/viewer rolleri
 
 ---
 
@@ -262,7 +293,8 @@ Detay: `yapilacaklar.md` → "Yayın öncesi UX paketleri". **Önerilen sıra:**
 
 | Konu | Bağımlılık |
 |------|------------|
-| StoreKit / RevenueCat | Lulu Plus gerçek IAP |
+| StoreKit / RevenueCat | Lulu Plus IAP + aile paylaşımı Plus gating |
+| Aile paylaşımı QA | Manuel test (owner/member/deep link/inbox) |
 | Cloud sync / cross-device active pet | Auth + Supabase |
 | My Pets'ten tek pet silme UI | ✅ Paket B1 |
 | Pet başına notification prefs | v1 dışı |

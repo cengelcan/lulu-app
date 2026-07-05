@@ -2,6 +2,7 @@ import { decode } from 'base64-arraybuffer';
 
 import { supabase } from '@/lib/supabase';
 import * as petStorage from '@/storage/pet.storage';
+import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
 import type {
   HealthCondition,
   Pet,
@@ -100,6 +101,8 @@ function fromRemoteRow(row: RemotePetRow, currentUserId: string): Pet {
 }
 
 export async function fetchRemotePets(userId: string): Promise<Pet[]> {
+  await requireAuthenticatedUserId();
+
   const { data, error } = await supabase
     .from('pets')
     .select('*')
@@ -112,17 +115,58 @@ export async function fetchRemotePets(userId: string): Promise<Pet[]> {
   return (data as RemotePetRow[]).map((row) => fromRemoteRow(row, userId));
 }
 
-export async function pushPet(userId: string, pet: Pet): Promise<void> {
+export async function pushPet(_userId: string, pet: Pet): Promise<void> {
   if ((pet.sharingRole ?? 'owner') !== 'owner') {
     return;
   }
 
-  const { error } = await supabase.from('pets').upsert(toRemoteRow(pet, userId), {
-    onConflict: 'id',
-  });
+  const userId = await requireAuthenticatedUserId();
+  const row = toRemoteRow(pet, userId);
 
-  if (error) {
-    throw new Error(error.message);
+  const { error: insertError } = await supabase.from('pets').insert(row);
+
+  if (!insertError) {
+    return;
+  }
+
+  // PostgREST upsert hits RLS on pets even for new rows; use insert + update instead.
+  if (insertError.code === '23505') {
+    const { user_id: _userId, id: _id, ...updateFields } = row;
+    const { error: updateError } = await supabase
+      .from('pets')
+      .update(updateFields)
+      .eq('id', pet.id);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    return;
+  }
+
+  throw new Error(insertError.message);
+}
+
+/**
+ * Pushes any locally-owned pets that are missing from the cloud. Used after setup
+ * and on sign-in so a failed first pushPet attempt can be retried without wiping
+ * the local cache.
+ */
+export async function syncOwnedLocalPetsToCloud(userId: string): Promise<void> {
+  const localPets = await petStorage.getPets();
+  const ownedLocal = localPets.filter((pet) => (pet.sharingRole ?? 'owner') === 'owner');
+
+  if (ownedLocal.length === 0) {
+    return;
+  }
+
+  const remotePets = await fetchRemotePets(userId);
+  const remoteIds = new Set(remotePets.map((pet) => pet.id));
+
+  for (const pet of ownedLocal) {
+    if (!remoteIds.has(pet.id)) {
+      await pushPet(userId, pet);
+    }
   }
 }
 
@@ -204,15 +248,11 @@ export async function pullPetsIntoLocal(userId: string): Promise<Pet[]> {
 
   if (remotePets.length === 0) {
     const localPets = await petStorage.getPets();
+    const ownedLocal = localPets.filter((pet) => (pet.sharingRole ?? 'owner') === 'owner');
 
-    if (localPets.length > 0) {
-      for (const pet of localPets) {
-        if ((pet.sharingRole ?? 'owner') === 'owner') {
-          await pushPet(userId, pet);
-        }
-      }
-
-      return localPets.filter((pet) => (pet.sharingRole ?? 'owner') === 'owner');
+    if (ownedLocal.length > 0) {
+      await syncOwnedLocalPetsToCloud(userId);
+      return ownedLocal;
     }
 
     return [];

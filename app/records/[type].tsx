@@ -29,6 +29,7 @@ import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { getRecordTypeLabelKey } from '@/utils/pet-record-display';
 import { resolveRecordTypeId } from '@/utils/pet-record-normalize';
 import { validatePetRecordForm } from '@/utils/pet-record-validation';
+import { canWritePetCareData } from '@/utils/pet-access';
 
 function createRecordId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -132,7 +133,7 @@ export default function RecordFormScreen() {
 
   const isEditMode = Boolean(recordId && existingRecord);
   const notesOverLimit = notes.length > PET_RECORD_NOTES_MAX_LENGTH;
-  const isReadOnly = pet?.status === 'deceased';
+  const isReadOnly = pet ? !canWritePetCareData(pet) : false;
 
   const screenTitle = useMemo(() => {
     if (!recordType) {

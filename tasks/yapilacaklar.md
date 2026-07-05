@@ -1,6 +1,6 @@
 # Yapılacaklar
 
-**Son güncelleme:** 2026-07-04 (Apple Sign In tamam; Google bekliyor)
+**Son güncelleme:** 2026-07-05 (Aile paylaşımı kod tarafı tamam; QA + IAP bekliyor)
 
 Önceki task dosyalarının birleştirilmiş özeti. Tamamlanan işler arşivlendi; bu dosya yalnızca devam eden ve başlanmamış işleri içerir.
 
@@ -23,6 +23,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | Paket J | Dil kapsamı EN + DE (TR kaldırıldı) |
 | Pet silme (B1+) | İsim onayı, tek/çoklu pet yönlendirme, iOS header fix |
 | Apple Sign In | `signInWithApple` + Supabase `signInWithIdToken`; fiziksel cihazda test edildi |
+| Aile paylaşımı (kod) | `0009_family_sharing.sql`, owner/member modeli, `/family-sharing` + `/join-family`, inbox aktivite feed, Plus gating (dev bypass) |
 
 ---
 
@@ -40,6 +41,13 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | K16 | Ücretsiz / ücretli | İki tier (Free + Lulu Plus); ikisi de auth gerektirir |
 | K17 | Auth ekranı | **Zorunlu** — onboarding sonrası giriş şart |
 | K18 | Aile paylaşımı | **Lulu Plus** aboneliği arkasında |
+| K22 | Aile paylaşımı — davet | **Kod + deep link** (`lulu://join/CODE`); email daveti yok |
+| K23 | Aile paylaşımı — member yetkisi | **Member bakım verisi yazar** (check-in, record, reminder); profil düzenleme / silme / raporlar / paylaşım yönetimi **owner-only** |
+| K24 | Aile paylaşımı — test | Geliştirmede `EXPO_PUBLIC_FAMILY_SHARING_DEV_BYPASS=true`; gerçek IAP (StoreKit/RevenueCat) sonra |
+| K25 | Join path — onboarding | **Join Family** yolu onboarding (intro ×4) **atlar**; owner yolu onboarding görür |
+| K26 | İlk kurulum fork | Auth sonrası, pet yoksa: **Owner vs Join Family** seçim ekranı (`path-choice`) |
+| K27 | Join path — bildirim | Setup'taki notification ekranı yok; join sonrası **Home'da hafif "Enable reminders?" kartı** |
+| K28 | Join path — isim | Email kayıtlı join kullanıcısından katılmadan önce **display name** sorulur (aile listesinde görünür) |
 
 ---
 
@@ -51,7 +59,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | 2 | QA — kalan manuel testler | 🔵 Devam ediyor |
 | 3 | Auth — Supabase (email + cloud sync) | 🟢 email + pet/check-in/record/profil sync + Delete Account + **Apple Sign In** tamam |
 | 3b | Google native giriş | ⬜ Başlanmadı (Apple ✅; bkz. bölüm 7) |
-| 4 | Aile paylaşımı hazırlık (Lulu Plus) | ⬜ Başlanmadı |
+| 4 | Aile paylaşımı (Lulu Plus) | 🟡 Kod tamam; **Faz H (join path)** + QA + IAP bekliyor |
 | 5 | Free vs Plus rapor özellik farkları | ⬜ Başlanmadı (Auth sonrası) |
 | 6 | PRD güncellemeleri (Profile hub, Screen 17) | ⬜ Başlanmadı |
 | 7 | Auth ekranları geliştirme (Paket F) | ⬜ Başlanmadı |
@@ -111,6 +119,14 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 
 #### Multi-Pet Migration — manuel test matrisi
 - [ ] T1–T10: Fresh install, eski kullanıcı upgrade, 2. pet ekleme, pet switch, reminder metni, Delete All Data, dark mode vb.
+
+#### Aile paylaşımı — manuel test matrisi
+- [ ] Owner: paylaşım aç → kod paylaş / link → pet seç → üye listesi → üye çıkar → paylaşımı kapat
+- [ ] Member: koda katıl → shared pet My Pets'te → check-in / record / reminder yaz → profil düzenleme & raporlar kapalı mı?
+- [ ] Deep link: girişsiz link → auth → otomatik `/join-family` yönlendirmesi
+- [ ] Inbox: aile aktivitesi (başkasının check-in / record / ayrılma)
+- [ ] 5 üye limiti; owner pet silerse member tarafı
+- [ ] `EXPO_PUBLIC_FAMILY_SHARING_DEV_BYPASS=true` ile Plus gating bypass
 
 ---
 
@@ -387,28 +403,89 @@ Splash → Onboarding (ilk kez) → Auth (zorunlu) → Setup (pet yoksa) → Hom
 
 ---
 
-### 4. Aile paylaşımı hazırlık (Sprint 5, İş #10)
+### 4. Aile paylaşımı (Sprint 5, İş #10) — 🟡 kod tamam, QA + IAP bekliyor
 
-Auth + Supabase tamamlandıktan sonra. **Lulu Plus** aboneliği gerekli.
+**Lulu Plus** aboneliği gerekli (şimdilik dev bypass ile test — K24).
 
-#### Faz A — Domain modeli
-- [ ] `types/sharing.ts` — `CaregiverRole`, `PetInvite`, `SharedPet`
-- [ ] Supabase tabloları: `pet_shares`, `invites`
-- [ ] İzin matrisi: owner / editor / viewer
+> **Not:** Orijinal plandaki `pet_shares` / `invites` / editor-viewer modeli yerine uygulanan mimari: `family_groups` + `pet_memberships` + **owner / member** rolleri (K23).
 
-#### Faz B — Supabase RLS & API
-- [ ] Row Level Security: pet erişimi role göre
-- [ ] Davet akışı: email / deep link
-- [ ] Çakışma: iki caregiver aynı gün check-in güncellerse?
+#### Faz A — Domain modeli ✅
+- [x] `types/sharing.ts` — `FamilyGroup`, `PetMembership`, `ActivityEvent`, `FamilyJoinPreview`
+- [x] `types/pet.ts` — `sharingRole: 'owner' | 'member'`, `ownerUserId`
+- [x] Supabase tabloları: `family_groups`, `family_group_pets`, `pet_memberships`, `activity_events` (`0009_family_sharing.sql` — **migration uygulandı**)
+- [x] Yerel SQLite: `sharing_role`, `owner_user_id` kolonları (`storage/database.ts`)
 
-#### Faz C — UI
-- [ ] Pet Profile veya Settings → "Share with Family"
-- [ ] `isPlusActive === false` → upgrade CTA (Lulu Plus)
-- [ ] `isPlusActive === true` → davet gönder / caregiver listesi
+#### Faz B — Supabase RLS & API ✅
+- [x] RLS: `has_pet_access`, owner tam erişim; member read + bakım verisi yazma
+- [x] RPC: `preview_family_join`, `accept_family_join`, `log_activity_event`
+- [x] Davet akışı: **kod + deep link** (`lulu://join/CODE`) — email yok (K22)
+- [x] Deep link handler: `hooks/use-join-deep-link.ts` + pending kod (`storage/pending-family-join.storage.ts`)
+- [ ] Çakışma: iki caregiver aynı gün check-in güncellerse — strateji tanımlı değil (sync Faz E ileri faz)
 
-#### Faz D — Store
-- [ ] Aktif pet listesi: kendi pet'lerim + paylaşılanlar
-- [ ] Paylaşılan pet'lerde rol bazlı UI (viewer = read-only)
+#### Faz C — UI ✅
+- [x] `/family-sharing` — kod oluştur/rotasyon, pet seçimi, üye listesi, paylaşımı kapat
+- [x] `/join-family` — kod gir, önizle, katıl, ayrıl
+- [x] Settings (`FamilySharingSettingsSection`) + Pet Profile giriş noktaları
+- [x] `isPlusActive === false` → upgrade CTA (`LuluPlusPaywall`); bypass: `EXPO_PUBLIC_FAMILY_SHARING_DEV_BYPASS`
+
+#### Faz D — Store & sync ✅
+- [x] `stores/sharing.store.ts` — owner/member akışları
+- [x] `services/sharing/family-sharing.ts` — API katmanı
+- [x] `services/sync/pets-sync.ts` — paylaşılan pet pull; owner-only push
+- [x] My Pets: kendi pet'ler + paylaşılanlar; `sharedBadge` (`PetListRow`)
+
+#### Faz E — Rol bazlı UI ✅ (kod)
+- [x] `utils/pet-access.ts` — `canEditPetProfile`, `canDeletePet`, `canViewReports`, `canWritePetCareData`
+- [x] `edit-pet`: owner olmayan → `pet-profile` redirect
+- [x] Pet Profile: edit / family sharing yalnızca owner
+- [x] Reports + Dashboard Quick Actions: member için rapor gizli
+- [x] Check-in / records / reminders: `canWritePetCareData` (member yazar; vefat eden pet salt-okunur)
+- [ ] *(QA)* Member akışı uçtan uca cihazda doğrula
+
+#### Faz F — Aktivite feed & inbox ✅
+- [x] `logActivityEvent` — check-in, record, reminder sync'lerinde
+- [x] `services/sharing/activity-events-sync.ts` + `buildFamilyActivityItems` provider
+- [x] `hooks/use-inbox.ts` — aile aktivitesi yükleme; başkasının eylemi filtresi
+- [x] `member_left` aktivite logu (ayrılırken, membership silinmeden önce)
+- [x] `check_in_created` vs `check_in_updated` ayrımı
+- [ ] *(Opsiyonel)* Push: "Anna checked in for Luna"
+
+#### Faz G — Post-auth join ✅
+- [x] `utils/resolve-post-auth-route.ts` — pending kod varsa `/join-family`
+- [x] `hooks/use-bootstrap.ts` — cold start'ta pending join yönlendirmesi
+- [x] `app/(auth)/index.tsx` — `joinCode` query param → pending storage
+
+#### Faz H — Join path (setup bypass) 🟡 **Uygulandı — QA bekliyor**
+
+**Kilitli kararlar:** K25–K28 (2026-07-05).
+
+```
+Owner:  Splash → Welcome → Onboarding×4 → Auth → path-choice → Setup → Home
+Join:   Splash → Welcome → Auth → [display name?] → join-family → Home
+Deep link: Splash → Auth → join-family (fork + onboarding atlanır)
+```
+
+- [x] **H1 — Path choice** (`/(setup)/path-choice`)
+- [x] **H2 — `userSetupPath` persist**
+- [x] **H3 — Join path onboarding atlama** (Welcome link + deep link)
+- [x] **H4 — Deep link:** fork + onboarding atlanır
+- [x] **H5 — Display name** (`/(setup)/join-display-name`)
+- [x] **H6 — Join finalize** → active pet + Home
+- [x] **H7 — Home reminders kartı** (`JoinRemindersCard`)
+- [x] **H8 — "Add my own pet instead"** fallback
+- [x] **H9 — i18n + routing**
+- [ ] *(QA)* Join path uçtan uca + owner regresyon
+
+#### Kalan
+- [ ] **Manuel QA** — bkz. QA matrisi (Aile paylaşımı)
+- [ ] **StoreKit / RevenueCat** → `isPlusActive` gerçek IAP (A1 ile birlikte)
+- [ ] Çakışma çözümü (offline-first sync kuyruk — Auth Faz E ileri faz)
+- [ ] *(v2)* `editor` / `viewer` rol ayrımı — şimdilik tek `member` rolü yeterli (K23)
+
+#### Bilinen sorunlar / güncellemeler
+
+- **Setup duvarı (join path):** ~~Yeni kullanıcılar aile koduna rağmen onboarding + pet setup zorunlu~~ → **Faz H uygulandı** (QA bekliyor).
+- *(Kullanıcı tarafından eklenecek — diğer maddeler)*
 
 ---
 
@@ -448,7 +525,9 @@ Auth ve tier altyapısı hazır olduktan sonra:
 
 | Konu | Bağımlılık |
 |------|------------|
-| StoreKit / RevenueCat | Lulu Plus gerçek IAP |
+| StoreKit / RevenueCat | Lulu Plus gerçek IAP + aile paylaşımı Plus gating |
+| Aile paylaşımı QA | 2 hesap / 2 cihaz manuel test |
+| Aile paylaşımı — bilinen sorunlar | `yapilacaklar.md` §4 alt bölüm |
 | Backend account deletion | Auth (Supabase) |
 | My Pets'ten tek pet silme UI | ✅ Paket B1 |
 | Pet başına notification prefs | v1 dışı |

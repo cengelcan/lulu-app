@@ -53,6 +53,7 @@ export const de: Translations = {
     footerLine2Accent: 'jeden',
     footerLine2After: ' Tierarztbesuch.',
     startButton: "Los geht's",
+    joinFamilyButton: 'Mit Familiencode beitreten',
   },
   onboarding: {
     intro1: {
@@ -239,6 +240,21 @@ export const de: Translations = {
       subtitle: 'Dein Profil ist fertig.',
       checkInPrompt: 'Jetzt ist es Zeit für den ersten täglichen Check-In von {{name}}.',
       startFirstCheckIn: 'Ersten Check-In starten',
+    },
+    pathChoice: {
+      title: 'Wie möchtest du Lulu nutzen?',
+      description: 'Wähle den passenden Weg. Du kannst später jederzeit ein eigenes Haustier hinzufügen.',
+      ownerTitle: 'Ich habe ein Haustier',
+      ownerDescription: 'Richte dein Haustier ein und starte mit der Gesundheitsübersicht.',
+      joinTitle: 'Familie beitreten',
+      joinDescription: 'Gib einen Familiencode ein, um ein geteiltes Haustier mitzubetreuen.',
+    },
+    joinDisplayName: {
+      title: 'Wie sollen wir dich nennen?',
+      description: 'Deine Familie sieht diesen Namen bei Check-Ins und Einträgen.',
+      label: 'Dein Name',
+      placeholder: 'Dein Name',
+      validationRequired: 'Bitte gib deinen Namen ein.',
     },
   },
   checkIn: {
@@ -440,6 +456,12 @@ export const de: Translations = {
         record: 'Gesundheitseintrag hinzufügen',
         color: 'Fellfarbe hinzufügen',
       },
+    },
+    joinReminders: {
+      title: 'Erinnerungen für {{name}}',
+      message: 'Aktiviere tägliche Check-In-Erinnerungen, damit du keinen Tag verpasst.',
+      enable: 'Erinnerungen aktivieren',
+      notNow: 'Nicht jetzt',
     },
   },
   reports: {
@@ -833,6 +855,7 @@ export const de: Translations = {
     acceptJoin: 'Familie beitreten',
     joinSuccessTitle: 'Willkommen in der Familie',
     joinSuccessMessage: 'Geteilte Haustiere findest du jetzt unter Meine Haustiere.',
+    addOwnPetInstead: 'Stattdessen eigenes Haustier hinzufügen',
     yourMembershipsSection: 'Deine Mitgliedschaften',
     activeMembership: 'Du bist in einer geteilten Familie',
     leaveFamily: 'Familie verlassen',

@@ -72,7 +72,7 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
       const userId = getActiveUserId();
       if (userId) {
         try {
-          await pushCheckIn(userId, checkIn);
+          await pushCheckIn(userId, checkIn, 'check_in_created');
         } catch (syncError) {
           console.warn('Failed to sync new check-in to cloud', syncError);
         }

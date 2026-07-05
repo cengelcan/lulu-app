@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,10 +22,16 @@ import {
   type AuthErrorCode,
   requestPasswordReset,
 } from '@/services/auth';
-import * as petStorage from '@/storage/pet.storage';
+import { setPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
+import { setOnboardingCompleted } from '@/storage/prefs.storage';
+import { clearUserSetupPath, setUserSetupPath } from '@/storage/setup-path.storage';
 import { usePetStore } from '@/stores/pet.store';
+import { useOnboardingStore } from '@/stores/onboarding.store';
 import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
+import { normalizeFamilyCode } from '@/utils/sharing/family-code';
+import { hasJoinIntent } from '@/utils/join-intent';
+import { resolvePostAuthRoute } from '@/utils/resolve-post-auth-route';
 
 type AuthMode = 'signIn' | 'signUp';
 
@@ -38,14 +44,12 @@ function resolveAuthMode(modeParam?: string | string[]): AuthMode {
   return value === SIGN_UP_MODE_PARAM ? 'signUp' : 'signIn';
 }
 
-async function resolvePostAuthRoute(): Promise<Href> {
-  const hasAnyPet = await petStorage.hasAnyPet();
-  return hasAnyPet ? '/(tabs)/home' : '/(setup)/pet-type';
-}
-
 export default function AuthScreen() {
   const router = useRouter();
-  const { mode: modeParam } = useLocalSearchParams<{ mode?: string | string[] }>();
+  const { mode: modeParam, joinCode: joinCodeParam } = useLocalSearchParams<{
+    mode?: string | string[];
+    joinCode?: string | string[];
+  }>();
   const { t } = useTranslation();
 
   const signInWithEmail = useUserStore((state) => state.signInWithEmail);
@@ -77,6 +81,21 @@ export default function AuthScreen() {
       setShowEmailForm(true);
     }
   }, [modeParam]);
+
+  useEffect(() => {
+    const rawJoinCode = Array.isArray(joinCodeParam) ? joinCodeParam[0] : joinCodeParam;
+
+    if (!rawJoinCode) {
+      return;
+    }
+
+    void (async () => {
+      await setPendingFamilyJoinCode(normalizeFamilyCode(rawJoinCode));
+      await setUserSetupPath('join_family');
+      await setOnboardingCompleted(true);
+      useOnboardingStore.setState({ hasCompletedOnboarding: true });
+    })();
+  }, [joinCodeParam]);
 
   const alertColor = useThemeColor({}, 'alert');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
@@ -129,6 +148,10 @@ export default function AuthScreen() {
           setPassword('');
           setConfirmPassword('');
           return;
+        }
+
+        if (!(await hasJoinIntent())) {
+          await clearUserSetupPath();
         }
       } else {
         await signInWithEmail(trimmedEmail, password);

@@ -16,7 +16,7 @@ export default function JoinFamilyScreen() {
           title: t('sharing.joinFamily'),
         }}
       />
-      <JoinFamilyScreenContent edges={['bottom']} />
+      <JoinFamilyScreenContent edges={['bottom']} showOwnerFallback />
     </>
   );
 }

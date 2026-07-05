@@ -23,6 +23,7 @@ import {
   getRecordSummary,
   getRecordTypeLabelKey,
 } from '@/utils/pet-record-display';
+import { canWritePetCareData } from '@/utils/pet-access';
 
 const RECENT_RECORDS_LIMIT = 8;
 
@@ -65,7 +66,7 @@ export default function RecordsScreen() {
   };
 
   const recentRecords = records.slice(0, RECENT_RECORDS_LIMIT);
-  const isReadOnly = pet?.status === 'deceased';
+  const isReadOnly = pet ? !canWritePetCareData(pet) : false;
   const screenOptions = useHubStackScreenOptions(t('records.title'));
 
   return (

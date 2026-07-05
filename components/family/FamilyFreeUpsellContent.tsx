@@ -8,7 +8,6 @@ import { FamilyHeroPlaceholder } from '@/components/family/FamilyHeroPlaceholder
 import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';

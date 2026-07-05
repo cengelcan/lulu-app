@@ -305,6 +305,8 @@ export default function EditPetScreen() {
     setAdoptionDate(pet.adoptionDate ?? '');
     setMicrochipId(pet.microchipId ?? '');
     setOwnerName(pet.ownerName ?? '');
+    // Reset form fields only when switching to a different pet, not on every field update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on pet id
   }, [pet?.id]);
 
   usePreventRemove(isDirty && !isSaving && !isDeleting && !isUpdatingStatus && !canLeave, ({ data }) => {

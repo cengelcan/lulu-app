@@ -99,8 +99,10 @@ export async function cancelAllPetReminderNotifications(): Promise<void> {
 
   await Promise.all(
     scheduled
-      .filter((notification) => isPetReminderNotificationId(notification.identifier))
-      .map((notification) =>
+      .filter((notification: { identifier: string }) =>
+        isPetReminderNotificationId(notification.identifier)
+      )
+      .map((notification: { identifier: string }) =>
         Notifications.cancelScheduledNotificationAsync(notification.identifier)
       )
   );

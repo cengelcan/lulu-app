@@ -1,4 +1,5 @@
 import { FAMILY_CODE_ALPHABET, FAMILY_CODE_LENGTH } from '@/constants/sharing';
+import { APP_SCHEME } from '@/services/notifications/constants';
 
 export function generateFamilyCode(): string {
   let code = '';
@@ -27,7 +28,7 @@ export function formatFamilyCode(code: string): string {
 
 export function buildFamilyJoinUrl(code: string): string {
   const normalized = normalizeFamilyCode(code);
-  return `lulu://join/${normalized}`;
+  return `${APP_SCHEME}://join/${normalized}`;
 }
 
 export function parseFamilyCodeFromUrl(url: string): string | null {

@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionHeader';
 import { ThemedText } from '@/components/themed-text';
@@ -44,12 +44,14 @@ const CHECK_IN_COLORS = {
   },
 } as const;
 
+type CheckInDayColors = (typeof CHECK_IN_COLORS)[keyof typeof CHECK_IN_COLORS];
+
 type DayPillProps = {
   weekdayLabel: string;
   isCompleted: boolean;
   isFuture: boolean;
   isToday: boolean;
-  colors: (typeof CHECK_IN_COLORS)['dark'];
+  colors: CheckInDayColors;
   onPress: () => void;
 };
 
@@ -112,12 +114,11 @@ function DayPill({ weekdayLabel, isCompleted, isFuture, isToday, colors, onPress
 export function DailyCheckInProgress() {
   const router = useRouter();
   const { t, language } = useTranslation();
-  const colorScheme = useColorScheme();
   const checkIns = useCheckInStore((state) => state.checkIns);
   const isLoading = useCheckInStore((state) => state.isLoading);
 
   const primaryColor = useThemeColor({}, 'primary');
-  const colors = colorScheme === 'dark' ? CHECK_IN_COLORS.dark : CHECK_IN_COLORS.light;
+  const colors = CHECK_IN_COLORS.dark;
   const locale = getLocaleTag(language);
 
   const weekDays = useMemo(() => getCurrentWeekDays(), []);

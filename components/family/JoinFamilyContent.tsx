@@ -1,5 +1,4 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import type { Href } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 

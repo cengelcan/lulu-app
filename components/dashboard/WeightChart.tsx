@@ -215,6 +215,7 @@ export function WeightChart({
   );
   const segments = useMemo(() => getChartSegments(chartPoints), [chartPoints]);
   const areaPath = useMemo(() => buildAreaPath(chartPoints, height), [chartPoints, height]);
+  const guideYs = useMemo(() => getGuideYPositions(height), [height]);
 
   const handlePlotLayout = (event: LayoutChangeEvent) => {
     setPlotWidth(event.nativeEvent.layout.width);
@@ -287,8 +288,6 @@ export function WeightChart({
       : change && change.valueDelta < 0
         ? Palette.warning
         : titleColor;
-
-  const guideYs = useMemo(() => getGuideYPositions(height), [height]);
 
   return (
     <View style={styles.wrapper}>

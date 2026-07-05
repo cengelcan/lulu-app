@@ -14,7 +14,7 @@ const basePet: Pet = {
   id: 'pet-1',
   name: 'Lulu',
   species: 'cat',
-  ageGroup: 'adult',
+  ageGroup: '4_7_years',
   healthConditions: ['none'],
   status: 'active',
   createdAt: '2026-01-01T00:00:00.000Z',
@@ -30,6 +30,7 @@ describe('getPetSetupGuideTasks', () => {
         date: '2026-01-02',
         metadata: { value: 4, unit: 'kg' },
         createdAt: '2026-01-02T00:00:00.000Z',
+        updatedAt: '2026-01-02T00:00:00.000Z',
       },
       {
         id: 'vaccine-1',
@@ -38,6 +39,7 @@ describe('getPetSetupGuideTasks', () => {
         date: '2026-01-03',
         metadata: { vaccineName: 'Rabies' },
         createdAt: '2026-01-03T00:00:00.000Z',
+        updatedAt: '2026-01-03T00:00:00.000Z',
       },
     ];
 

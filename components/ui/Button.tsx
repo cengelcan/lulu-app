@@ -57,7 +57,8 @@ export function Button({
 }: ButtonProps) {
   const tokens = variantStyles[variant];
   const backgroundColor = useThemeColor({}, tokens.background ?? 'background');
-  const textColor = tokens.gradient ? Palette.onDark : useThemeColor({}, tokens.text);
+  const themeTextColor = useThemeColor({}, tokens.text);
+  const textColor = tokens.gradient ? Palette.onDark : themeTextColor;
   const borderColor = useThemeColor({}, 'border');
 
   const handlePress: PressableProps['onPress'] = (event) => {

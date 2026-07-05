@@ -1,12 +1,12 @@
-import { Image } from 'expo-image';
-import type { StyleProp, ViewStyle } from 'react-native';
+import { Image, type ImageStyle } from 'expo-image';
+import type { StyleProp } from 'react-native';
 
 const LULU_LOGO = require('@/assets/brand/lulu-logo.png');
 
 type LuluLogoProps = {
   size: number;
   accessibilityLabel?: string;
-  style?: StyleProp<ViewStyle>;
+  style?: StyleProp<ImageStyle>;
 };
 
 export function LuluLogo({ size, accessibilityLabel, style }: LuluLogoProps) {

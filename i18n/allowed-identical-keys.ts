@@ -16,6 +16,7 @@ export const ALLOWED_IDENTICAL_KEYS = new Set<string>([
   'profile.luluPlus',
   'paywall.title',
   'paywall.badge',
+  'paywall.featuresTitleAccent',
   'paywall.planLifetimeTitle',
   'paywall.freePetLimit',
   'paywall.notIncluded',

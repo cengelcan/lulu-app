@@ -353,7 +353,10 @@ export function LuluPlusPaywall({
     }
   }, [loadOfferings, previewMode, visible]);
 
-  const packages = previewMode ? [] : (offerings?.availablePackages ?? []);
+  const packages = useMemo(
+    () => (previewMode ? [] : (offerings?.availablePackages ?? [])),
+    [previewMode, offerings]
+  );
   const showMockPlans = previewMode || (__DEV__ && !isLoading && packages.length === 0);
 
   const selectedPackage = useMemo(

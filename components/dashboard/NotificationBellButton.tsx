@@ -5,7 +5,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
 import { InboxSheet } from '@/components/inbox/InboxSheet';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Radius, Spacing } from '@/constants/theme';
+import { Radius } from '@/constants/theme';
 import { useInbox } from '@/hooks/use-inbox';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';

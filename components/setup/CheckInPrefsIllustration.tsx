@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Palette, Radius, Spacing } from '@/constants/theme';
+import { Palette, Radius } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 const DOG_ICON = require('@/assets/images/pet-icon-dog.png');

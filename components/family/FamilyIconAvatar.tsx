@@ -2,7 +2,6 @@ import { StyleSheet, View } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { getFamilyIconPreset } from '@/constants/family-icons';
-import { Radius } from '@/constants/theme';
 
 type FamilyIconAvatarProps = {
   iconKey: string | null | undefined;

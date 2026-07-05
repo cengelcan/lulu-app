@@ -1,6 +1,6 @@
 import { type Href, useRouter } from 'expo-router';
 import { useCallback } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { WelcomeScreen } from '@/components/welcome/welcome-screen';
 import { ONBOARDING_INTRO_SCREENS_ENABLED } from '@/constants/onboarding';

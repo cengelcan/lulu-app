@@ -48,54 +48,64 @@ type DayPillProps = {
   weekdayLabel: string;
   isCompleted: boolean;
   isFuture: boolean;
+  isToday: boolean;
   colors: (typeof CHECK_IN_COLORS)['dark'];
   onPress: () => void;
 };
 
-function DayPill({ weekdayLabel, isCompleted, isFuture, colors, onPress }: DayPillProps) {
+function DayPill({ weekdayLabel, isCompleted, isFuture, isToday, colors, onPress }: DayPillProps) {
   const labelColor = isCompleted
     ? colors.completedText
     : isFuture
       ? colors.pendingTextFuture
       : colors.pendingText;
 
+  const todayIndicatorColor = isCompleted ? colors.completedText : colors.accent;
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled: isFuture }}
-      accessibilityLabel={weekdayLabel}
-      disabled={isFuture}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.dayPill,
-        isCompleted
-          ? { backgroundColor: colors.accent, borderColor: colors.accent }
-          : { backgroundColor: 'transparent', borderColor: colors.pendingBorder },
-        { opacity: pressed && !isFuture ? 0.85 : 1 },
-      ]}>
-      <ThemedText
-        lightColor={labelColor}
-        darkColor={labelColor}
-        style={styles.dayLabel}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.8}>
-        {weekdayLabel}
-      </ThemedText>
-      {isCompleted ? (
-        <View style={[styles.statusCircle, { backgroundColor: colors.completedText }]}>
-          <IconSymbol name="checkmark" size={10} color={colors.accent} />
-        </View>
-      ) : (
-        <View
-          style={[
-            styles.statusCircle,
-            styles.statusCirclePending,
-            { borderColor: isFuture ? colors.pendingRingFuture : colors.pendingRing },
-          ]}
-        />
-      )}
-    </Pressable>
+    <View style={styles.dayColumn}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isFuture }}
+        accessibilityLabel={weekdayLabel}
+        disabled={isFuture}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.dayPill,
+          isCompleted
+            ? { backgroundColor: colors.accent, borderColor: colors.accent }
+            : { backgroundColor: 'transparent', borderColor: colors.pendingBorder },
+          { opacity: pressed && !isFuture ? 0.85 : 1 },
+        ]}>
+        <ThemedText
+          lightColor={labelColor}
+          darkColor={labelColor}
+          style={styles.dayLabel}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}>
+          {weekdayLabel}
+        </ThemedText>
+        {isCompleted ? (
+          <View style={[styles.statusCircle, { backgroundColor: colors.completedText }]}>
+            <IconSymbol name="checkmark" size={10} color={colors.accent} />
+          </View>
+        ) : (
+          <View
+            style={[
+              styles.statusCircle,
+              styles.statusCirclePending,
+              { borderColor: isFuture ? colors.pendingRingFuture : colors.pendingRing },
+            ]}
+          />
+        )}
+      </Pressable>
+      <View style={styles.todayIndicatorSlot}>
+        {isToday ? (
+          <View style={[styles.todayIndicator, { backgroundColor: todayIndicatorColor }]} />
+        ) : null}
+      </View>
+    </View>
   );
 }
 
@@ -166,6 +176,7 @@ export function DailyCheckInProgress() {
                 weekdayLabel={formatWeekdayShort(day, locale)}
                 isCompleted={completedDayKeys.has(dayKey)}
                 isFuture={isFuture}
+                isToday={dayKey === todayKey}
                 colors={colors}
                 onPress={() => handleDayPress(day)}
               />
@@ -188,9 +199,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.xs,
   },
-  dayPill: {
+  dayColumn: {
     flex: 1,
     minWidth: 0,
+    alignItems: 'center',
+  },
+  dayPill: {
+    alignSelf: 'stretch',
     minHeight: 58,
     borderRadius: Radius.md,
     borderWidth: StyleSheet.hairlineWidth,
@@ -216,5 +231,16 @@ const styles = StyleSheet.create({
   statusCirclePending: {
     borderWidth: StyleSheet.hairlineWidth,
     backgroundColor: 'transparent',
+  },
+  todayIndicatorSlot: {
+    height: 6,
+    marginTop: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  todayIndicator: {
+    width: 18,
+    height: 3,
+    borderRadius: Radius.full,
   },
 });

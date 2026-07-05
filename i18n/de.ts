@@ -280,7 +280,7 @@ export const de: Translations = {
     progressCard: {
       completed: 'Alle Gesundheitschecks abgeschlossen! 🎉',
       completedSubtitle: 'Alles sieht normal aus.',
-      completedLabel: 'abgeschlossen',
+      completedLabel: 'fertig',
       inProgress: '{{count}}/{{total}} abgeschlossen',
       inProgressSubtitle: 'Weiter so — fast geschafft.',
       attention: 'Check-In mit Auffälligkeiten',
@@ -406,8 +406,8 @@ export const de: Translations = {
     quickActions: 'Schnellaktionen',
     reports: 'Berichte',
     reportsSubtitle: 'PDF erstellen',
-    records: 'Aufzeichnungen',
-    recordsSubtitle: 'Alle Einträge',
+    records: 'Einträge',
+    recordsSubtitle: 'Alle anzeigen',
     reminder: 'Erinnerung',
     reminderSubtitle: 'Neue Erinnerung',
     notificationsTitle: 'Benachrichtigungen',
@@ -810,7 +810,7 @@ export const de: Translations = {
     memorialFooter: 'Erinnerungen verblassen nie.',
     deceasedOn: 'Verstorben am {{date}}',
     petsSection: 'Tiere',
-    memorialSection: 'In liebevoller Erinnerung',
+    memorialSection: 'Gedenken',
     sharedBadge: 'Geteilt',
   },
   family: {

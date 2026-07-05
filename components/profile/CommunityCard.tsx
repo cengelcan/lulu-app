@@ -3,43 +3,35 @@ import * as StoreReview from 'expo-store-review';
 
 import { ProfileListRow } from '@/components/profile/ProfileListRow';
 import { Card } from '@/components/ui/Card';
-import { APP_STORE_REVIEW_URL, INSTAGRAM_URL, SHARE_URL } from '@/constants/social';
-import { useTranslation } from '@/hooks/use-translation';
 import {
-  getLastStoreReviewPromptAt,
-  setLastStoreReviewPromptAt,
-} from '@/storage/user.storage';
+  APP_STORE_REVIEW_DEEP_LINK,
+  APP_STORE_REVIEW_URL,
+  INSTAGRAM_URL,
+  SHARE_URL,
+} from '@/constants/social';
+import { useTranslation } from '@/hooks/use-translation';
 
-const REVIEW_COOLDOWN_MS = 90 * 24 * 60 * 60 * 1000;
+async function openAppStoreReviewPage(): Promise<void> {
+  for (const url of [APP_STORE_REVIEW_URL, APP_STORE_REVIEW_DEEP_LINK]) {
+    try {
+      await Linking.openURL(url);
+      return;
+    } catch {
+      // Try the next URL scheme.
+    }
+  }
+}
 
 export function CommunityCard() {
   const { t } = useTranslation();
 
-  const openStoreReviewPage = () => {
-    void Linking.openURL(APP_STORE_REVIEW_URL);
-  };
-
   const handleRate = async () => {
-    // The native in-app prompt is rate-limited by the OS, so we only use it
-    // when available and outside our own cooldown. In every other case we send
-    // the user to the store listing instead of showing a dead-end.
-    const isAvailable = await StoreReview.isAvailableAsync();
-
-    if (!isAvailable) {
-      openStoreReviewPage();
+    if (await StoreReview.hasAction()) {
+      await StoreReview.requestReview();
       return;
     }
 
-    const lastPromptAt = await getLastStoreReviewPromptAt();
-    const now = Date.now();
-
-    if (lastPromptAt !== null && now - lastPromptAt < REVIEW_COOLDOWN_MS) {
-      openStoreReviewPage();
-      return;
-    }
-
-    await StoreReview.requestReview();
-    await setLastStoreReviewPromptAt(now);
+    await openAppStoreReviewPage();
   };
 
   const handleShare = async () => {

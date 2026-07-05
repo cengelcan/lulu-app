@@ -20,7 +20,8 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { DatePickerField } from '@/components/ui/DatePickerField';
-import { HeaderTextButton } from '@/components/ui/HeaderTextButton';
+import { HeaderIconButton } from '@/components/ui/HeaderIconButton';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import {
   HEALTH_CONDITION_OPTIONS,
@@ -541,15 +542,15 @@ export default function EditPetScreen() {
 
   const headerRight = useCallback(
     () => (
-      <HeaderTextButton
+      <HeaderIconButton
         accessibilityLabel={t('pet.saveA11y')}
-        color={primaryColor}
+        borderColor={borderColor}
         disabled={!canSave}
-        label={t('common.save')}
-        onPress={() => void handleSave()}
-      />
+        onPress={() => void handleSave()}>
+        <IconSymbol name="checkmark" size={18} color={primaryColor} />
+      </HeaderIconButton>
     ),
-    [canSave, handleSave, primaryColor, t]
+    [borderColor, canSave, handleSave, primaryColor, t]
   );
 
   const screenOptions = useMemo(

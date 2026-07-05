@@ -6,6 +6,7 @@ type HeaderIconButtonProps = {
   accessibilityLabel: string;
   borderColor: string;
   children: React.ReactNode;
+  disabled?: boolean;
   onPress: () => void;
   style?: StyleProp<ViewStyle>;
 };
@@ -14,6 +15,7 @@ export function HeaderIconButton({
   accessibilityLabel,
   borderColor,
   children,
+  disabled = false,
   onPress,
   style,
 }: HeaderIconButtonProps) {
@@ -21,11 +23,13 @@ export function HeaderIconButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       hitSlop={8}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        { borderColor, opacity: pressed ? 0.7 : 1 },
+        { borderColor, opacity: disabled ? 0.35 : pressed ? 0.7 : 1 },
         style,
       ]}>
       {children}

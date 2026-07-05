@@ -681,7 +681,7 @@ export type Translations = {
   };
   notifications: {
     reminderTitle: string;
-    reminderBody: string;
+    reminderBodies: [string, string, string, string, string];
     petReminderBody: string;
     channelCheckIn: string;
     channelPetReminders: string;

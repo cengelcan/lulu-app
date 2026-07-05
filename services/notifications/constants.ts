@@ -11,6 +11,14 @@ export const CHECK_IN_NOTIFICATION_DATA = {
 
 export const CHECK_IN_REMINDER_NOTIFICATION_ID = 'pet-health-check-in-reminder';
 
+export const CHECK_IN_REMINDER_NOTIFICATION_ID_PREFIX = 'pet-health-check-in-reminder';
+
+export const CHECK_IN_REMINDER_SCHEDULE_HORIZON_DAYS = 14;
+
+export function getCheckInReminderNotificationId(dateKey: string): string {
+  return `${CHECK_IN_REMINDER_NOTIFICATION_ID_PREFIX}-${dateKey}`;
+}
+
 export const ANDROID_CHECK_IN_CHANNEL_ID = 'check-in-reminders-v2';
 
 export const CHECK_IN_REMINDER_SOUND = 'bell-ring.wav';

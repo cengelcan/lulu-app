@@ -760,7 +760,13 @@ export const de: Translations = {
   },
   notifications: {
     reminderTitle: 'Pet Health Journal',
-    reminderBody: 'Wie geht es {{name}} heute?',
+    reminderBodies: [
+      'Wie geht es {{name}} heute?',
+      'Zeit für {{name}}s täglichen Check-In 💜',
+      'Wie fühlt sich {{name}} heute?',
+      'Kurz einchecken: Wie geht es {{name}}?',
+      '{{name}} wartet auf den Check-In heute!',
+    ],
     petReminderBody: '{{title}} für {{name}} ist fällig',
     channelCheckIn: 'Check-In Erinnerungen',
     channelPetReminders: 'Haustier-Erinnerungen',

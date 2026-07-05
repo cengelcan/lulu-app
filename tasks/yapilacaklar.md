@@ -1,6 +1,6 @@
 # Yapılacaklar
 
-**Son güncelleme:** 2026-07-05 (Lulu Plus IAP sandbox'ta doğrulandı; aile paylaşımı QA bekliyor)
+**Son güncelleme:** 2026-07-05 (QA turu: aile paylaşımı, join path, profile, multi-pet, pet silme/vefat ✅; DE placeholder + vefat görsel + bildirim ekranları kaldı)
 
 Önceki task dosyalarının birleştirilmiş özeti. Tamamlanan işler arşivlendi; bu dosya yalnızca devam eden ve başlanmamış işleri içerir.
 
@@ -23,8 +23,10 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | Paket J | Dil kapsamı EN + DE (TR kaldırıldı) |
 | Pet silme (B1+) | İsim onayı, tek/çoklu pet yönlendirme, iOS header fix |
 | Apple Sign In | `signInWithApple` + Supabase `signInWithIdToken`; fiziksel cihazda test edildi |
-| Aile paylaşımı (kod) | `0009_family_sharing.sql`, owner/member modeli, `/family-sharing` + `/join-family`, inbox aktivite feed |
-| Lulu Plus (IAP) | RevenueCat + paywall + tier gating; `0015`/`0016` migrations; webhook Edge Function; sandbox test ✅ |
+| Aile paylaşımı | Family tab, owner/member modeli, join path (Faz H), inbox aktivite feed — **QA ✅** |
+| Lulu Plus (IAP) | RevenueCat + paywall + tier gating; `0015`/`0016` migrations; webhook Edge Function; sandbox + Free/Plus QA ✅ |
+| QA — çekirdek akışlar | Profile tab, multi-pet (Free + Plus), pet silme, vefat/anma davranışı — **QA ✅** |
+| QA — dil (EN + DE) | Genel geçiş sorunsuz; birkaç DE kelimesi placeholder'a sığmıyor — düzeltme bekliyor |
 
 ---
 
@@ -57,25 +59,25 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | Sıra | İş | Durum |
 |------|-----|-------|
 | 1 | TypeScript hataları (5 hata, 4 dosya) | ✅ Tamamlandı |
-| 2 | QA — kalan manuel testler | 🔵 Devam ediyor |
+| 2 | QA — kalan manuel testler | 🟡 Çekirdek akışlar ✅; Daily Check-In + DE placeholder kaldı |
 | 3 | Auth — Supabase (email + cloud sync) | 🟢 email + pet/check-in/record/profil sync + Delete Account + **Apple Sign In** tamam |
 | 3b | Google native giriş | ⬜ Başlanmadı (Apple ✅; bkz. bölüm 7) |
-| 4 | Aile paylaşımı (Lulu Plus) | 🟡 Kod + IAP tamam; **Faz H (join path)** + QA bekliyor |
+| 4 | Aile paylaşımı (Lulu Plus) | ✅ Kod + IAP + **QA tamam** |
 | 5 | Free vs Plus rapor özellik farkları | 🟡 PDF export Plus arkasında; diğer rapor farkları netleştirilecek |
 | 6 | PRD güncellemeleri (Profile hub, Screen 17) | ⬜ Başlanmadı |
 | 7 | Auth ekranları geliştirme (Paket F) | ⬜ Başlanmadı |
 | 8 | Pet ekleme ekranları geliştirme (Paket G) | ✅ Tamamlandı |
 | 9 | Home boş durum & kullanıcı yönlendirme (Paket H) | ⬜ Başlanmadı |
 | 10 | Tek tema — Dark-first launch (Paket I) | ✅ Tamamlandı |
-| 11 | Dil: EN + DE, TR kaldır (Paket J) | ✅ Tamamlandı |
-| 12 | Bildirim ekranları & mesajları (Paket K) | ⬜ Başlanmadı |
+| 11 | Dil: EN + DE, TR kaldır (Paket J) | ✅ QA geçti; DE placeholder düzeltmeleri kaldı |
+| 12 | Bildirim ekranları & mesajları (Paket K) | 🔵 Sırada — ekran tasarımları güncellenecek |
 
 > **Not:** Paketler **A–E** önceki turda tanımlandı; **F–K** yayın öncesi UX/ürün kararları (2026-06-24). **F, H, K** Paket D (`design.md`) ile koordine edilmeli. **G, I, J** tamamlandı.
 
 | Sıra | Yeni iş paketi | Durum |
 |------|-----|-------|
 | A | Eksik/placeholder özelliklerin tespiti & kararı | ✅ A1 + A2 + A3 + A4 tamam |
-| B | My Pets: pet silme + aktif/vefat eden ayrımı | ✅ B1 (silme) + B2 (status/anma) yapıldı |
+| B | My Pets: pet silme + aktif/vefat eden ayrımı | ✅ B1 + B2 QA geçti; vefat alanı görsel güncelleme bekliyor |
 | C | Records tasarım & listeleme güncellemeleri | 🟡 Grid + 8 kayıt türü yapıldı; listeleme/ekler bekliyor |
 | D | Genel tasarım yenileme (`design.md`) | 🟡 `design.md` mevcut; uygulama başlanmadı |
 | E | Beslenme/aktivite plan sistemi (günlük/haftalık) | ⬜ Başlanmadı (karar gerekli) |
@@ -84,7 +86,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | H | Home boş durum & onboarding yönlendirme | ⬜ Başlanmadı |
 | I | Tek tema (Dark-first; Light yayın sonrası) | ✅ Tamamlandı |
 | J | Dil kapsamı: EN + DE (TR kaldır) | ✅ Tamamlandı |
-| K | Bildirim ekranları & mesajları | ⬜ Başlanmadı |
+| K | Bildirim ekranları & mesajları | 🔵 Sırada |
 
 ---
 
@@ -104,8 +106,11 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 
 ### 2. QA — kalan manuel testler
 
-#### Dil — Paket J ✅
-- [ ] EN ↔ DE geçiş QA (tüm ekranlar) — kod tarafı tamam, manuel QA bekliyor
+> **2026-07-05 QA özeti:** Aile paylaşımı (full), Join path, Profile tab, Multi-pet (Free + Plus), pet silme & vefat davranışı sorunsuz. EN/DE genel geçiş sorunsuz; birkaç DE kelimesi placeholder'a sığmıyor (örnekler kullanıcıdan gelecek).
+
+#### Dil — Paket J 🟡
+- [x] EN ↔ DE geçiş QA (tüm ekranlar) — genel geçiş sorunsuz ✅
+- [ ] **DE placeholder taşmaları** — bazı Almanca kelimeler input/label alanlarına sığmıyor; kullanıcı örnekleri bekleniyor
 - [x] ~~EN ↔ TR~~ — TR v1'de kaldırıldı (Paket J)
 
 #### Daily Check-In Redesign — Faz 5
@@ -114,20 +119,25 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 - [ ] Eski kayıt migration
 - [ ] VoiceOver / Reduce Motion
 
-#### Profile Tab — manuel test matrisi
-- [ ] T1–T12: User Card, avatar, isim, Settings navigasyonu, Lulu Plus, Share, Instagram, Legal, Delete My Account, Dark mode, Dynamic Type
-- [ ] Delete akışı 2 pet ile manuel test
+#### Profile Tab — manuel test matrisi ✅
+- [x] T1–T12: User Card, avatar, isim, Settings navigasyonu, Lulu Plus, Share, Instagram, Legal, Delete My Account, Dark mode, Dynamic Type
+- [x] Delete akışı 2 pet ile manuel test
 
-#### Multi-Pet Migration — manuel test matrisi
-- [ ] T1–T10: Fresh install, eski kullanıcı upgrade, 2. pet ekleme, pet switch, reminder metni, Delete All Data, dark mode vb.
+#### Multi-Pet Migration — manuel test matrisi ✅
+- [x] T1–T10: Fresh install, eski kullanıcı upgrade, 2. pet ekleme, pet switch, reminder metni, Delete All Data, dark mode vb.
+- [x] Free + Plus tier senaryoları
 
-#### Aile paylaşımı — manuel test matrisi
-- [ ] Owner: paylaşım aç → kod paylaş / link → pet seç → üye listesi → üye çıkar → paylaşımı kapat
-- [ ] Member: koda katıl → shared pet My Pets'te → check-in / record / reminder yaz → profil düzenleme & raporlar kapalı mı?
-- [ ] Deep link: girişsiz link → auth → otomatik `/join-family` yönlendirmesi
-- [ ] Inbox: aile aktivitesi (başkasının check-in / record / ayrılma)
-- [ ] 5 üye limiti; owner pet silerse member tarafı
-- [ ] `EXPO_PUBLIC_FAMILY_SHARING_DEV_BYPASS=true` ile Plus gating bypass
+#### Aile paylaşımı — manuel test matrisi ✅
+- [x] Owner: paylaşım aç → kod paylaş / link → pet seç → üye listesi → üye çıkar → paylaşımı kapat
+- [x] Member: koda katıl → shared pet My Pets'te → check-in / record / reminder yaz → profil düzenleme & raporlar kapalı mı?
+- [x] Deep link: girişsiz link → auth → otomatik `/join-family` yönlendirmesi
+- [x] Inbox: aile aktivitesi (başkasının check-in / record / ayrılma)
+- [x] 5 üye limiti; owner pet silerse member tarafı
+- [x] Plus gating (sandbox IAP)
+
+#### Join path (Faz H) ✅
+- [x] Onboarding atlama, display name, join finalize, Home reminders kartı
+- [x] Owner regresyon (path-choice → setup → home)
 
 ---
 
@@ -167,7 +177,7 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
 - [x] `usePetStore.deletePet`'e bağlandı (cloud + foto + local cascade)
 - [x] Silme sonrası yönlendirme: tek pet → setup; çoklu pet → aktif pet home
 - [x] Silme sırasında çökme / header buton genişleme fix'leri
-- [ ] *(QA)* Son pet / aktif pet silme akışını cihazda doğrula (kullanıcı tekli/çoklu silmeyi onayladı)
+- [x] *(QA)* Son pet / aktif pet silme akışı cihazda doğrulandı ✅
 
 **B2 — Aktif / vefat eden (memorial) ayrımı ✅ (Yapıldı)**
 - [x] Veri modeli: `Pet`'e `status: 'active' | 'deceased'` (+ `deceasedAt`) — `types/pet.ts`, `storage/pet.storage.ts`, yerel migration v10 (`storage/database.ts`)
@@ -179,9 +189,10 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
   - Geçmiş check-in & records **salt-okunur** (Home memorial kartı, check-in & record form gating)
 - [x] "Mark as deceased" + "Restore" aksiyonu (geri alınabilir) — **Edit Pet** ekranında, Delete'in üstünde + `ConfirmModal` + i18n (en/tr/de)
 
-**Kalan (QA):**
-- [ ] Tek pet'i vefat etti işaretleyip cihazda doğrula (reminder iptal, Home memorial, records salt-okunur, restore)
-- [ ] Çok pet: aktif pet'i vefat etti işaretleyince aktif slotun başka canlı pet'e geçtiğini doğrula
+**QA ✅ — davranış sorunsuz. Kalan (görsel):**
+- [x] Tek pet vefat / restore akışı doğrulandı (reminder iptal, Home memorial, records salt-okunur)
+- [x] Çok pet: vefat sonrası aktif slot başka canlı pet'e geçiyor
+- [ ] **Vefat/anma alanı görsel güncellemeleri** — kullanıcı referans görselleri iletecek (My Pets memorial bölümü, Home memorial kartı vb.)
 
 ---
 
@@ -333,26 +344,30 @@ Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kap
 - [x] Settings dil seçici: EN / DE / System (system → en veya de; diğerleri → EN fallback)
 - [x] Kodda TR referansları temizlendi
 - [ ] App Store / Play Store metadata: DE + EN pazarları (yayın öncesi)
-- [ ] *(QA)* EN ↔ DE checklist — manuel matriste
+- [x] *(QA)* EN ↔ DE checklist — genel geçiş sorunsuz ✅
+- [ ] DE placeholder taşmaları — kullanıcı örnekleri bekleniyor
 - [ ] *(Gelecek)* TR yeniden eklenebilir — ayrı karar
 
 **Bağımlılık:** F, G, H, K ile paralel — kod tarafı tamam
 
 ---
 
-### K. Bildirim ekranları & mesajları
+### K. Bildirim ekranları & mesajları 🔵 Sırada
 
 **Amaç:** Bildirim izni ekranı, hatırlatıcı ayarları ve push/local notification metinleri güncellenecek.
 
+> **2026-07-05:** Kullanıcı kararı — normal bildirim ekranı tasarımları güncellenecek (bir sonraki aktif iş paketi).
+
 **Kapsam:**
 - [ ] Onboarding / setup: `notification-permission` ekranı tasarım & metin
-- [ ] Settings: hatırlatıcı saat seçimi UI/UX (`design.md`)
+- [ ] Settings: hatırlatıcı saat seçimi UI/UX
+- [ ] Join path Home kartı (`JoinRemindersCard`) — bildirim ekranlarıyla görsel uyum
 - [ ] Local notification metinleri (`services/notifications/`) — ton, kişiselleştirme (pet adı), **en/de**
 - [ ] Pet reminder bildirimleri (`pet-reminder-schedule.ts`) metin gözden geçirme
 - [ ] İzin reddedildi / kısıtlı durumda kullanıcı yönlendirmesi (Settings'e git)
 - [ ] QA: farklı saat dilimleri, aktif pet değişimi, vefat pet reminder iptali
 
-**Bağımlılık:** Paket D (ekranlar); ~~Paket J~~ (J ✅)
+**Bağımlılık:** ~~Paket J~~ (J ✅); Paket D ile koordine edilebilir ama bağımsız başlanabilir
 
 ---
 
@@ -405,7 +420,7 @@ Splash → Onboarding (ilk kez) → Auth (zorunlu) → Setup (pet yoksa) → Hom
 
 ---
 
-### 4. Aile paylaşımı (Sprint 5, İş #10) — 🟡 kod + IAP tamam, QA bekliyor
+### 4. Aile paylaşımı (Sprint 5, İş #10) — ✅ Tamamlandı (kod + IAP + QA)
 
 **Lulu Plus** aboneliği gerekli — gerçek IAP sandbox'ta doğrulandı (K24).
 
@@ -442,7 +457,7 @@ Splash → Onboarding (ilk kez) → Auth (zorunlu) → Setup (pet yoksa) → Hom
 - [x] Pet Profile: edit / family sharing yalnızca owner
 - [x] Reports + Dashboard Quick Actions: member için rapor gizli
 - [x] Check-in / records / reminders: `canWritePetCareData` (member yazar; vefat eden pet salt-okunur)
-- [ ] *(QA)* Member akışı uçtan uca cihazda doğrula
+- [x] *(QA)* Member akışı uçtan uca cihazda doğrulandı ✅
 
 #### Faz F — Aktivite feed & inbox ✅
 - [x] `logActivityEvent` — check-in, record, reminder sync'lerinde
@@ -457,7 +472,7 @@ Splash → Onboarding (ilk kez) → Auth (zorunlu) → Setup (pet yoksa) → Hom
 - [x] `hooks/use-bootstrap.ts` — cold start'ta pending join yönlendirmesi
 - [x] `app/(auth)/index.tsx` — `joinCode` query param → pending storage
 
-#### Faz H — Join path (setup bypass) 🟡 **Uygulandı — QA bekliyor**
+#### Faz H — Join path (setup bypass) ✅ **Uygulandı + QA geçti**
 
 **Kilitli kararlar:** K25–K28 (2026-07-05).
 
@@ -476,17 +491,16 @@ Deep link: Splash → Auth → join-family (fork + onboarding atlanır)
 - [x] **H7 — Home reminders kartı** (`JoinRemindersCard`)
 - [x] **H8 — "Add my own pet instead"** fallback
 - [x] **H9 — i18n + routing**
-- [ ] *(QA)* Join path uçtan uca + owner regresyon
+- [x] *(QA)* Join path uçtan uca + owner regresyon ✅
 
-#### Kalan
-- [ ] **Manuel QA** — bkz. QA matrisi (Aile paylaşımı)
+#### Kalan (v1 dışı / ileri faz)
 - [ ] Çakışma çözümü (offline-first sync kuyruk — Auth Faz E ileri faz)
+- [ ] *(Opsiyonel v2)* Push: "Anna checked in for Luna"
 - [ ] *(v2)* `editor` / `viewer` rol ayrımı — şimdilik tek `member` rolü yeterli (K23)
 
 #### Bilinen sorunlar / güncellemeler
 
-- **Setup duvarı (join path):** ~~Yeni kullanıcılar aile koduna rağmen onboarding + pet setup zorunlu~~ → **Faz H uygulandı** (QA bekliyor).
-- *(Kullanıcı tarafından eklenecek — diğer maddeler)*
+- **Setup duvarı (join path):** ~~Yeni kullanıcılar aile koduna rağmen onboarding + pet setup zorunlu~~ → **Faz H uygulandı + QA geçti** ✅
 
 ---
 
@@ -527,7 +541,7 @@ Deep link: Splash → Auth → join-family (fork + onboarding atlanır)
 | Konu | Bağımlılık |
 |------|------------|
 | Android IAP | Play Store + RevenueCat (şimdilik iOS only) |
-| Aile paylaşımı QA | 2 hesap / 2 cihaz manuel test |
+| Aile paylaşımı QA | ✅ Tamamlandı |
 | Production IAP smoke test | App Store yayını sonrası |
 | Aile paylaşımı — bilinen sorunlar | `yapilacaklar.md` §4 alt bölüm |
 | Backend account deletion | Auth (Supabase) |

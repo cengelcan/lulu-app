@@ -752,7 +752,13 @@ export const en: Translations = {
   },
   notifications: {
     reminderTitle: 'Pet Health Journal',
-    reminderBody: 'How is {{name}} today?',
+    reminderBodies: [
+      'How is {{name}} today?',
+      "Time for {{name}}'s daily check-in 💜",
+      "How's {{name}} doing today?",
+      'Quick moment to check in on {{name}}?',
+      "{{name}} is ready for today's check-in!",
+    ],
     petReminderBody: '{{title}} for {{name}} is due',
     channelCheckIn: 'Check-in reminders',
     channelPetReminders: 'Pet reminders',

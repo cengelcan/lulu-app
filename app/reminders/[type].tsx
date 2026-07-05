@@ -1,3 +1,4 @@
+import { HeaderBackButton } from '@react-navigation/elements';
 import type { Href } from 'expo-router';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -93,6 +94,26 @@ export default function ReminderFormScreen() {
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+
+  const leaveForm = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace('/reminders' as Href);
+  }, [router]);
+
+  const headerLeft = useCallback(
+    () => (
+      <HeaderBackButton
+        displayMode="minimal"
+        tintColor={primaryColor}
+        onPress={leaveForm}
+      />
+    ),
+    [leaveForm, primaryColor]
+  );
 
   const isEditMode = Boolean(reminderId);
   const isReadOnly = pet ? !canWritePetCareData(pet) : false;
@@ -242,7 +263,7 @@ export default function ReminderFormScreen() {
         await createReminder(newReminder);
       }
 
-      router.back();
+      leaveForm();
     } catch {
       setValidationError(t('reminders.saveFailed'));
     } finally {
@@ -257,6 +278,7 @@ export default function ReminderFormScreen() {
     isEditMode,
     isPlusActive,
     isReadOnly,
+    leaveForm,
     metadata,
     notes,
     pet?.id,
@@ -264,7 +286,6 @@ export default function ReminderFormScreen() {
     recurrence,
     reminderType,
     requestAccess,
-    router,
     t,
     updateReminder,
   ]);
@@ -278,13 +299,13 @@ export default function ReminderFormScreen() {
 
     try {
       await completeReminder(reminderId, pet.id);
-      router.back();
+      leaveForm();
     } catch {
       setValidationError(t('reminders.completeFailed'));
     } finally {
       setIsCompleting(false);
     }
-  }, [completeReminder, isCompleted, isReadOnly, pet?.id, reminderId, router, t]);
+  }, [completeReminder, isCompleted, isReadOnly, leaveForm, pet?.id, reminderId, t]);
 
   const handleSkip = useCallback(() => {
     if (!reminderId || !pet?.id || isReadOnly || isCompleted || isSkipped) {
@@ -302,7 +323,7 @@ export default function ReminderFormScreen() {
 
             try {
               await skipReminder(reminderId, pet.id);
-              router.back();
+              leaveForm();
             } catch {
               setValidationError(t('reminders.skipFailed'));
             } finally {
@@ -312,7 +333,7 @@ export default function ReminderFormScreen() {
         },
       },
     ]);
-  }, [isCompleted, isReadOnly, isSkipped, pet?.id, reminderId, router, skipReminder, t]);
+  }, [isCompleted, isReadOnly, isSkipped, leaveForm, pet?.id, reminderId, skipReminder, t]);
 
   const handleSnooze = useCallback(async () => {
     if (!reminderId || !pet?.id || isReadOnly || isCompleted || isSkipped) {
@@ -325,7 +346,7 @@ export default function ReminderFormScreen() {
 
     try {
       await snoozeReminder(reminderId, pet.id, nextDueDate, dueTime);
-      router.back();
+      leaveForm();
     } catch {
       setValidationError(t('reminders.snoozeFailed'));
     } finally {
@@ -336,9 +357,9 @@ export default function ReminderFormScreen() {
     isCompleted,
     isReadOnly,
     isSkipped,
+    leaveForm,
     pet?.id,
     reminderId,
-    router,
     snoozeReminder,
     t,
   ]);
@@ -357,7 +378,7 @@ export default function ReminderFormScreen() {
           void (async () => {
             try {
               await deleteReminder(reminderId, pet.id);
-              router.back();
+              leaveForm();
             } catch {
               setValidationError(t('reminders.deleteFailed'));
             }
@@ -365,7 +386,7 @@ export default function ReminderFormScreen() {
         },
       },
     ]);
-  }, [deleteReminder, isReadOnly, pet?.id, reminderId, router, t]);
+  }, [deleteReminder, isReadOnly, leaveForm, pet?.id, reminderId, t]);
 
   if (!reminderType) {
     return null;
@@ -380,6 +401,8 @@ export default function ReminderFormScreen() {
           ...STACK_BACK_ONLY_OPTIONS,
           headerShown: true,
           title: screenTitle,
+          headerBackVisible: false,
+          headerLeft,
         }}
       />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>

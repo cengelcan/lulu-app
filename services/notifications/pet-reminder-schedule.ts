@@ -8,6 +8,7 @@ import {
 } from '@/services/notifications/constants';
 import { getPetReminderNotificationContent } from '@/services/notifications/content';
 import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
+import { resolvePetPhotoAttachment } from '@/services/notifications/pet-photo-attachment';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
 import { getActivePet } from '@/storage/pet.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
@@ -46,10 +47,15 @@ function buildReminderTrigger(
   };
 }
 
+type SchedulePet = {
+  name: string;
+  photoUri?: string | null;
+};
+
 async function schedulePetReminderNotification(
   Notifications: ExpoNotificationsModule,
   reminder: PetReminder,
-  petName: string,
+  pet: SchedulePet,
   language: Awaited<ReturnType<typeof getAppLanguage>>
 ): Promise<void> {
   const trigger = buildReminderTrigger(Notifications, reminder);
@@ -57,7 +63,8 @@ async function schedulePetReminderNotification(
     return;
   }
 
-  const { title, body } = getPetReminderNotificationContent(reminder, petName, language);
+  const photoAttachment = await resolvePetPhotoAttachment(pet.photoUri);
+  const { title, body } = getPetReminderNotificationContent(reminder, pet.name, language);
   const route = getReminderFormRoute(reminder.type, reminder.id);
 
   await Notifications.scheduleNotificationAsync({
@@ -72,6 +79,7 @@ async function schedulePetReminderNotification(
         type: 'pet_reminder',
       },
       ...(Platform.OS === 'android' ? { channelId: ANDROID_PET_REMINDER_CHANNEL_ID } : {}),
+      ...(Platform.OS === 'ios' && photoAttachment ? { attachments: [photoAttachment] } : {}),
     },
     trigger,
   });
@@ -150,7 +158,12 @@ export async function syncPetReminderNotificationSchedule(input?: {
 
   await Promise.all(
     pendingReminders.map((reminder) =>
-      schedulePetReminderNotification(Notifications, reminder, pet.name, language)
+      schedulePetReminderNotification(
+        Notifications,
+        reminder,
+        { name: pet.name, photoUri: pet.photoUri },
+        language
+      )
     )
   );
 }

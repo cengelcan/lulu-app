@@ -876,10 +876,6 @@ export type Translations = {
     luluPlusExpiresOn: string;
     luluPlusLifetimeAccess: string;
     luluPlusPurchasedOn: string;
-    luluPlusFeaturePdf: string;
-    luluPlusFeatureSharing: string;
-    luluPlusFeatureBackup: string;
-    luluPlusFeaturePhotos: string;
     manage: string;
     upgrade: string;
     manageA11y: string;

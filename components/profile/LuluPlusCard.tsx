@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { LULU_PLUS_FEATURES } from '@/constants/plus-features';
 import { useTranslation } from '@/hooks/use-translation';
 import { refreshSubscriptionStatus } from '@/services/subscription/lifecycle';
 import type { PlusSubscriptionDetails } from '@/services/subscription/plus-status';
@@ -23,13 +24,6 @@ const APP_STORE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscription
 const GRADIENT_COLORS = ['#6B4FC4', '#8B6FD4', '#A998D6'] as const;
 const GRADIENT_START = { x: 0, y: 1 };
 const GRADIENT_END = { x: 1, y: 0 };
-
-const FEATURE_KEYS = [
-  'profile.luluPlusFeaturePdf',
-  'profile.luluPlusFeatureSharing',
-  'profile.luluPlusFeatureBackup',
-  'profile.luluPlusFeaturePhotos',
-] as const;
 
 type FeatureRowProps = {
   label: string;
@@ -203,8 +197,8 @@ export function LuluPlusCard() {
               {t('profile.luluPlusDescription')}
             </Text>
             <View style={styles.featureList}>
-              {FEATURE_KEYS.map((key) => (
-                <FeatureRow key={key} label={t(key)} />
+              {LULU_PLUS_FEATURES.map((feature) => (
+                <FeatureRow key={feature.titleKey} label={t(feature.titleKey)} />
               ))}
             </View>
           </>

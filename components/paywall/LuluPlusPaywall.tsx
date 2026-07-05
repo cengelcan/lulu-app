@@ -26,6 +26,7 @@ import {
   SUBSCRIPTION_PREVIEW_PRICES,
   type SubscriptionProductId,
 } from '@/constants/subscription';
+import { LULU_PLUS_FEATURES } from '@/constants/plus-features';
 import { Fonts, Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -36,13 +37,6 @@ import { useUserStore } from '@/stores/user.store';
 const HERO_IMAGE = require('@/assets/images/welcome-bg.png');
 const APP_STORE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscriptions';
 const HERO_LOGO_SIZE = 56;
-
-type FeatureConfig = {
-  icon: IconSymbolName;
-  titleKey: string;
-  descriptionKey: string;
-  iconColor: string;
-};
 
 type PlanVisual = {
   icon: IconSymbolName;
@@ -56,45 +50,6 @@ type PlanOption = {
   subtitleKey: string;
   visual: PlanVisual;
 };
-
-const FEATURES: FeatureConfig[] = [
-  {
-    icon: 'chart.line.uptrend.xyaxis',
-    titleKey: 'paywall.trendsTitle',
-    descriptionKey: 'paywall.trendsDescription',
-    iconColor: Palette.badgeViolet,
-  },
-  {
-    icon: 'calendar.badge.checkmark',
-    titleKey: 'paywall.smartRemindersTitle',
-    descriptionKey: 'paywall.smartRemindersDescription',
-    iconColor: Palette.badgeOrange,
-  },
-  {
-    icon: 'doc.text.fill',
-    titleKey: 'paywall.advancedReportsTitle',
-    descriptionKey: 'paywall.advancedReportsDescription',
-    iconColor: Palette.brandAccent,
-  },
-  {
-    icon: 'person.2.fill',
-    titleKey: 'paywall.familySharingTitle',
-    descriptionKey: 'paywall.familySharingDescription',
-    iconColor: Palette.badgePink,
-  },
-  {
-    icon: 'clock.fill',
-    titleKey: 'paywall.longerHistoryTitle',
-    descriptionKey: 'paywall.longerHistoryDescription',
-    iconColor: Palette.brandAccentDark,
-  },
-  {
-    icon: 'pawprint.fill',
-    titleKey: 'paywall.multiplePetsTitle',
-    descriptionKey: 'paywall.multiplePetsDescription',
-    iconColor: Palette.badgeEmerald,
-  },
-];
 
 const PLAN_OPTIONS: PlanOption[] = [
   {
@@ -604,7 +559,7 @@ export function LuluPlusPaywall({
               </Text>
 
               <View style={styles.featureGrid}>
-                {FEATURES.map((feature) => (
+                {LULU_PLUS_FEATURES.map((feature) => (
                   <FeatureTile
                     key={feature.titleKey}
                     icon={feature.icon}

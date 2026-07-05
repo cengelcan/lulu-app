@@ -31,6 +31,7 @@ export type Translations = {
   tabs: {
     home: string;
     myPets: string;
+    family: string;
     profile: string;
   };
   settings: {
@@ -726,6 +727,69 @@ export type Translations = {
     petsSection: string;
     memorialSection: string;
     sharedBadge: string;
+  };
+  family: {
+    statusMeta: string;
+    premiumBadge: string;
+    sharedPets: string;
+    seeAll: string;
+    noSharedPets: string;
+    members: string;
+    manage: string;
+    inviteMember: string;
+    settings: string;
+    you: string;
+    roleOwner: string;
+    roleMember: string;
+    free: {
+      headline: string;
+      subheadline: string;
+      unlockCta: string;
+      joinWithCode: string;
+      maybeLater: string;
+    };
+    empty: {
+      headline: string;
+      subheadline: string;
+      createCta: string;
+      joinCta: string;
+    };
+    howItWorks: {
+      title: string;
+      step1: string;
+      step2: string;
+      step3: string;
+      step4: string;
+    };
+    benefits: {
+      sharedAccess: {
+        title: string;
+        description: string;
+      };
+      checkIns: {
+        title: string;
+        description: string;
+      };
+      coordination: {
+        title: string;
+        description: string;
+      };
+      reports: {
+        title: string;
+        description: string;
+      };
+    };
+    create: {
+      title: string;
+      nameLabel: string;
+      iconLabel: string;
+      submit: string;
+    };
+    join: {
+      headline: string;
+      subheadline: string;
+      codePlaceholder: string;
+    };
   };
   sharing: {
     settingsSection: string;

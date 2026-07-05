@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { logActivityEvent } from '@/services/sharing/family-sharing';
+import { getLocalOwnedPetIds } from '@/services/sync/local-owned-pet-ids';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import type { PetReminder, ReminderTimeOfDay } from '@/types/pet-reminder';
 import { normalizePetReminder, mergeStoredReminderMetadata, splitStoredReminderMetadata } from '@/utils/pet-reminder-normalize';
@@ -124,13 +125,27 @@ export async function pullPetRemindersIntoLocal(userId: string): Promise<PetRemi
 
   if (remoteReminders.length === 0) {
     const localReminders = await petReminderStorage.getAllPetReminders();
+    const ownedPetIds = await getLocalOwnedPetIds();
+    const claimableReminders = localReminders.filter((reminder) =>
+      ownedPetIds.has(reminder.petId)
+    );
 
-    if (localReminders.length > 0) {
-      for (const reminder of localReminders) {
+    if (claimableReminders.length > 0) {
+      for (const reminder of claimableReminders) {
         await pushPetReminder(userId, reminder);
       }
 
-      return localReminders;
+      for (const reminder of localReminders) {
+        if (!ownedPetIds.has(reminder.petId)) {
+          await petReminderStorage.deletePetReminder(reminder.id);
+        }
+      }
+
+      return claimableReminders;
+    }
+
+    if (localReminders.length > 0) {
+      await petReminderStorage.deleteAllPetReminders();
     }
 
     return [];

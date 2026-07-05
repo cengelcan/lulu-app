@@ -3,6 +3,8 @@ export type PetMembershipRole = 'member';
 export type FamilyGroup = {
   id: string;
   ownerUserId: string;
+  name: string;
+  iconKey: string;
   code: string;
   isActive: boolean;
   createdAt: string;

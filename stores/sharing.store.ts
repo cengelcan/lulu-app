@@ -9,29 +9,38 @@ import {
   acceptFamilyJoin,
   createFamilyGroup,
   deactivateFamilyGroup,
+  fetchFamilyGroupById,
   fetchFamilyGroupPetIds,
   fetchFamilyMembers,
   fetchMembershipsForUser,
   fetchOwnerFamilyGroup,
+  fetchProfileDisplayName,
   leaveFamilyGroup,
   previewFamilyJoin,
   removeFamilyMember,
   rotateFamilyCode,
   updateFamilyGroupPets,
+  updateFamilyGroupProfile,
 } from '@/services/sharing/family-sharing';
 import { useUserStore } from '@/stores/user.store';
 import type { FamilyGroup, FamilyJoinPreview, FamilyMemberSummary } from '@/types/sharing';
 
 type SharingState = {
   familyGroup: FamilyGroup | null;
+  memberFamilyGroup: FamilyGroup | null;
+  familyOwnerDisplayName: string | null;
   sharedPetIds: string[];
   members: FamilyMemberSummary[];
   memberships: Awaited<ReturnType<typeof fetchMembershipsForUser>>;
+  familyTabLoaded: boolean;
   isLoading: boolean;
   error: string | null;
   loadOwnerFamilySharing: () => Promise<void>;
   loadMemberMemberships: () => Promise<void>;
-  ensureFamilyGroup: () => Promise<FamilyGroup>;
+  loadMemberFamilyGroup: () => Promise<void>;
+  loadFamilyTab: (options?: { silent?: boolean }) => Promise<void>;
+  ensureFamilyGroup: (input?: { name?: string; iconKey?: string }) => Promise<FamilyGroup>;
+  updateFamilyProfile: (input: { name?: string; iconKey?: string }) => Promise<void>;
   rotateCode: () => Promise<void>;
   setSharedPets: (petIds: string[]) => Promise<void>;
   removeMember: (familyGroupId: string, memberUserId: string) => Promise<void>;
@@ -61,9 +70,12 @@ async function refreshPetsFromCloud(userId: string): Promise<void> {
 
 export const useSharingStore = create<SharingState>((set, get) => ({
   familyGroup: null,
+  memberFamilyGroup: null,
+  familyOwnerDisplayName: null,
   sharedPetIds: [],
   members: [],
   memberships: [],
+  familyTabLoaded: false,
   isLoading: false,
   error: null,
 
@@ -109,13 +121,127 @@ export const useSharingStore = create<SharingState>((set, get) => ({
     }
   },
 
-  ensureFamilyGroup: async () => {
+  loadMemberFamilyGroup: async () => {
     const userId = getUserId();
-    const familyGroup = await createFamilyGroup(userId);
+    const memberships = get().memberships.length
+      ? get().memberships
+      : await fetchMembershipsForUser(userId);
+
+    if (memberships.length === 0) {
+      set({ memberFamilyGroup: null });
+      return;
+    }
+
+    const familyGroupId = memberships[0].familyGroupId;
+    const memberFamilyGroup = await fetchFamilyGroupById(familyGroupId);
+    const members = memberFamilyGroup ? await fetchFamilyMembers(familyGroupId) : [];
+
+    set({
+      memberships,
+      memberFamilyGroup,
+      members,
+      sharedPetIds: memberFamilyGroup
+        ? await fetchFamilyGroupPetIds(memberFamilyGroup.id)
+        : [],
+    });
+  },
+
+  loadFamilyTab: async (options) => {
+    const silent = options?.silent ?? get().familyTabLoaded;
+
+    if (!silent) {
+      set({ isLoading: true, error: null });
+    } else {
+      set({ error: null });
+    }
+
+    try {
+      const userId = getUserId();
+      const [familyGroup, memberships] = await Promise.all([
+        fetchOwnerFamilyGroup(userId),
+        fetchMembershipsForUser(userId),
+      ]);
+
+      if (familyGroup) {
+        const [sharedPetIds, members] = await Promise.all([
+          fetchFamilyGroupPetIds(familyGroup.id),
+          fetchFamilyMembers(familyGroup.id),
+        ]);
+
+        set({
+          familyGroup,
+          memberFamilyGroup: null,
+          familyOwnerDisplayName: null,
+          sharedPetIds,
+          members,
+          memberships,
+          isLoading: false,
+          familyTabLoaded: true,
+        });
+        return;
+      }
+
+      if (memberships.length > 0) {
+        const familyGroupId = memberships[0].familyGroupId;
+        const memberFamilyGroup = await fetchFamilyGroupById(familyGroupId);
+        const [sharedPetIds, members, familyOwnerDisplayName] = memberFamilyGroup
+          ? await Promise.all([
+              fetchFamilyGroupPetIds(memberFamilyGroup.id),
+              fetchFamilyMembers(familyGroupId),
+              fetchProfileDisplayName(memberFamilyGroup.ownerUserId),
+            ])
+          : [[], [], null];
+
+        set({
+          familyGroup: null,
+          memberFamilyGroup,
+          familyOwnerDisplayName,
+          sharedPetIds,
+          members,
+          memberships,
+          isLoading: false,
+          familyTabLoaded: true,
+        });
+        return;
+      }
+
+      set({
+        familyGroup: null,
+        memberFamilyGroup: null,
+        familyOwnerDisplayName: null,
+        sharedPetIds: [],
+        members: [],
+        memberships,
+        isLoading: false,
+        familyTabLoaded: true,
+      });
+    } catch (error) {
+      set({
+        isLoading: false,
+        familyTabLoaded: get().familyTabLoaded,
+        error: error instanceof Error ? error.message : 'errors.loadFamilySharing',
+      });
+    }
+  },
+
+  ensureFamilyGroup: async (input) => {
+    const userId = getUserId();
+    const familyGroup = await createFamilyGroup(userId, input);
     const sharedPetIds = await fetchFamilyGroupPetIds(familyGroup.id);
 
-    set({ familyGroup, sharedPetIds });
+    set({ familyGroup, memberFamilyGroup: null, sharedPetIds });
     return familyGroup;
+  },
+
+  updateFamilyProfile: async (input) => {
+    const group = get().familyGroup;
+
+    if (!group) {
+      throw new Error('errors.familyGroupNotFound');
+    }
+
+    const familyGroup = await updateFamilyGroupProfile(group.id, input);
+    set({ familyGroup });
   },
 
   rotateCode: async () => {
@@ -170,6 +296,7 @@ export const useSharingStore = create<SharingState>((set, get) => ({
     await deactivateFamilyGroup(group.id);
     set({
       familyGroup: null,
+      memberFamilyGroup: null,
       sharedPetIds: [],
       members: [],
     });
@@ -188,7 +315,7 @@ export const useSharingStore = create<SharingState>((set, get) => ({
     const userId = getUserId();
     await leaveFamilyGroup(familyGroupId, userId);
     await refreshPetsFromCloud(userId);
-    await get().loadMemberMemberships();
+    await get().loadFamilyTab();
   },
 
   autoShareNewPetIfActive: async (petId) => {

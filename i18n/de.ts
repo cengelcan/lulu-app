@@ -29,6 +29,7 @@ export const de: Translations = {
   tabs: {
     home: 'Start',
     myPets: 'Meine Haustiere',
+    family: 'Familie',
     profile: 'Profil',
   },
   settings: {
@@ -806,6 +807,71 @@ export const de: Translations = {
     memorialSection: 'In liebevoller Erinnerung',
     sharedBadge: 'Geteilt',
   },
+  family: {
+    statusMeta: '{{members}} Mitglieder · {{pets}} Haustiere',
+    premiumBadge: 'Premium',
+    sharedPets: 'Geteilte Haustiere',
+    seeAll: 'Alle anzeigen',
+    noSharedPets: 'Noch keine geteilten Haustiere.',
+    members: 'Mitglieder',
+    manage: 'Verwalten',
+    inviteMember: 'Mitglied einladen',
+    settings: 'Familieneinstellungen',
+    you: '(Du)',
+    roleOwner: 'Inhaber',
+    roleMember: 'Mitglied',
+    free: {
+      headline: 'Gemeinsam pflegen, weniger Sorgen 💜',
+      subheadline:
+        'Teile die tägliche Pflege deines Haustiers mit Familie, Partner oder Tiersitter.',
+      unlockCta: 'Mit Lulu Plus freischalten',
+      joinWithCode: 'Mit Einladungscode beitreten',
+      maybeLater: 'Vielleicht später',
+    },
+    empty: {
+      headline: 'Teile die Haustierpflege mit deinen Liebsten',
+      subheadline:
+        'Erstelle eine Familie oder tritt einer bei, um die Pflege gemeinsam zu verfolgen.',
+      createCta: 'Familie erstellen',
+      joinCta: 'Familie beitreten',
+    },
+    howItWorks: {
+      title: 'Wie funktioniert es?',
+      step1: 'Familie erstellen oder beitreten',
+      step2: 'Liebste einladen',
+      step3: 'Haustiere teilen',
+      step4: 'Gemeinsam jeden Tag pflegen',
+    },
+    benefits: {
+      sharedAccess: {
+        title: 'Geteilter Haustierzugang',
+        description: 'Alle können dasselbe Haustierprofil verfolgen.',
+      },
+      checkIns: {
+        title: 'Gemeinsame Check-ins',
+        description: 'Familienmitglieder können tägliche Updates hinzufügen.',
+      },
+      coordination: {
+        title: 'Bessere Koordination',
+        description: 'Verpasste Mahlzeiten, Medikamente oder Symptome vermeiden.',
+      },
+      reports: {
+        title: 'Geteilte Berichte',
+        description: 'Tierarztberichte gemeinsam vorbereiten.',
+      },
+    },
+    create: {
+      title: 'Familie erstellen',
+      nameLabel: 'Familienname',
+      iconLabel: 'Foto hinzufügen (optional)',
+      submit: 'Familie erstellen',
+    },
+    join: {
+      headline: 'Einladungscode eingeben',
+      subheadline: 'Den Code erhältst du von einem Familienmitglied.',
+      codePlaceholder: 'LULU-1234',
+    },
+  },
   sharing: {
     settingsSection: 'Familie',
     shareWithFamily: 'Mit Familie teilen',
@@ -822,7 +888,7 @@ export const de: Translations = {
       'Erstelle einen Familiencode, damit Angehörige bei Check-Ins, Einträgen und Erinnerungen helfen können.',
     enableSharing: 'Familienfreigabe aktivieren',
     familyCodeSection: 'Familiencode',
-    familyCodeHint: 'Teile diesen Code oder Link mit Familienmitgliedern.',
+    familyCodeHint: 'Teile diesen Code mit Familienmitgliedern.',
     copyCode: 'Code kopieren',
     shareLink: 'Link teilen',
     rotateCode: 'Neuen Code erstellen',

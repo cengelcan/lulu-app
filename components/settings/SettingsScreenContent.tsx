@@ -3,7 +3,6 @@ import { useCallback } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
-import { FamilySharingSettingsSection } from '@/components/settings/FamilySharingSettingsSection';
 import { LanguageSection } from '@/components/settings/LanguageSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
@@ -99,7 +98,6 @@ export function SettingsScreenContent({
               onTogglePetReminders={(enabled) => void handleTogglePetReminders(enabled)}
               onTimeChange={(time) => void handleTimeChange(time)}
             />
-            <FamilySharingSettingsSection />
             <LanguageSection language={languagePreference} onSelect={handleLanguageSelect} />
           </>
         )}

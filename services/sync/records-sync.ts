@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { logActivityEvent } from '@/services/sharing/family-sharing';
+import { getLocalOwnedPetIds } from '@/services/sync/local-owned-pet-ids';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import type { PetRecord } from '@/types/pet-record';
 import { normalizeLegacyRecordMetadata, normalizePetRecord } from '@/utils/pet-record-normalize';
@@ -104,13 +105,25 @@ export async function pullPetRecordsIntoLocal(userId: string): Promise<PetRecord
 
   if (remoteRecords.length === 0) {
     const localRecords = await petRecordStorage.getAllPetRecords();
+    const ownedPetIds = await getLocalOwnedPetIds();
+    const claimableRecords = localRecords.filter((record) => ownedPetIds.has(record.petId));
 
-    if (localRecords.length > 0) {
-      for (const record of localRecords) {
+    if (claimableRecords.length > 0) {
+      for (const record of claimableRecords) {
         await pushPetRecord(userId, record);
       }
 
-      return localRecords;
+      for (const record of localRecords) {
+        if (!ownedPetIds.has(record.petId)) {
+          await petRecordStorage.deletePetRecord(record.id);
+        }
+      }
+
+      return claimableRecords;
+    }
+
+    if (localRecords.length > 0) {
+      await petRecordStorage.deleteAllPetRecords();
     }
 
     return [];

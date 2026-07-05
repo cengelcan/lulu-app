@@ -91,6 +91,8 @@ const MAPPING = {
   'icloud.fill': 'cloud',
   'gift.fill': 'card-giftcard',
   'person.2.fill': 'groups',
+  'person.badge.plus': 'person-add',
+  'rectangle.portrait.and.arrow.right': 'logout',
   'checkmark.circle.fill': 'check-circle',
   'xmark': 'close',
 } as IconMapping;

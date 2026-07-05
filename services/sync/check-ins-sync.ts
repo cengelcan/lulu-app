@@ -1,8 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { logActivityEvent } from '@/services/sharing/family-sharing';
+import { getLocalOwnedPetIds } from '@/services/sync/local-owned-pet-ids';
 import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
 import * as checkInStorage from '@/storage/check-in.storage';
-import * as petStorage from '@/storage/pet.storage';
 import type { CheckIn } from '@/types/check-in';
 
 type RemoteCheckInRow = {
@@ -210,12 +210,7 @@ export async function pullCheckInsIntoLocal(userId: string): Promise<CheckIn[]> 
 
   if (remoteCheckIns.length === 0) {
     const localCheckIns = await checkInStorage.getAllCheckIns();
-    const localPets = await petStorage.getPets();
-    const ownedPetIds = new Set(
-      localPets
-        .filter((pet) => (pet.sharingRole ?? 'owner') === 'owner')
-        .map((pet) => pet.id)
-    );
+    const ownedPetIds = await getLocalOwnedPetIds();
     const claimableCheckIns = localCheckIns.filter((checkIn) => ownedPetIds.has(checkIn.petId));
 
     if (claimableCheckIns.length > 0) {
@@ -223,7 +218,17 @@ export async function pullCheckInsIntoLocal(userId: string): Promise<CheckIn[]> 
         await pushCheckIn(userId, checkIn);
       }
 
+      for (const checkIn of localCheckIns) {
+        if (!ownedPetIds.has(checkIn.petId)) {
+          await checkInStorage.deleteCheckIn(checkIn.id);
+        }
+      }
+
       return claimableCheckIns;
+    }
+
+    if (localCheckIns.length > 0) {
+      await checkInStorage.deleteAllCheckIns();
     }
 
     return [];

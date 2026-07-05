@@ -32,9 +32,12 @@ export function resetUserScopedStores(): void {
   useNotificationStore.setState({ reminderTime: null });
   useSharingStore.setState({
     familyGroup: null,
+    memberFamilyGroup: null,
+    familyOwnerDisplayName: null,
     sharedPetIds: [],
     members: [],
     memberships: [],
+    familyTabLoaded: false,
     isLoading: false,
     error: null,
   });

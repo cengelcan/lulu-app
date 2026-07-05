@@ -44,6 +44,7 @@ export default function RootLayout() {
         <Stack.Screen name="edit-pet" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="family-sharing" />
+        <Stack.Screen name="family" />
         <Stack.Screen name="join-family" />
         <Stack.Screen name="reports" />
         <Stack.Screen name="records" />

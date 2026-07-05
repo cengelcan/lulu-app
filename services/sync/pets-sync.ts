@@ -255,6 +255,7 @@ export async function pullPetsIntoLocal(userId: string): Promise<Pet[]> {
       return ownedLocal;
     }
 
+    await petStorage.deleteAllPets();
     return [];
   }
 

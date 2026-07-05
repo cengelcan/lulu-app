@@ -29,6 +29,7 @@ export const en: Translations = {
   tabs: {
     home: 'Home',
     myPets: 'My Pets',
+    family: 'Family',
     profile: 'Profile',
   },
   settings: {
@@ -798,6 +799,69 @@ export const en: Translations = {
     memorialSection: 'In Loving Memory',
     sharedBadge: 'Shared',
   },
+  family: {
+    statusMeta: '{{members}} members · {{pets}} pets',
+    premiumBadge: 'Premium',
+    sharedPets: 'Shared Pets',
+    seeAll: 'See all',
+    noSharedPets: 'No shared pets yet.',
+    members: 'Members',
+    manage: 'Manage',
+    inviteMember: 'Invite Member',
+    settings: 'Family Settings',
+    you: '(You)',
+    roleOwner: 'Owner',
+    roleMember: 'Member',
+    free: {
+      headline: 'Care together, worry less 💜',
+      subheadline: 'Share your pet\'s daily care with your family, partner or pet sitter.',
+      unlockCta: 'Unlock with Lulu Plus',
+      joinWithCode: 'Join with an invitation code',
+      maybeLater: 'Maybe later',
+    },
+    empty: {
+      headline: 'Share pet care with your loved ones',
+      subheadline: 'Create a family or join an existing one to follow your pet\'s care together.',
+      createCta: 'Create Family',
+      joinCta: 'Join Family',
+    },
+    howItWorks: {
+      title: 'How it works?',
+      step1: 'Create or join a family',
+      step2: 'Invite your loved ones',
+      step3: 'Share your pets',
+      step4: 'Care together, every day',
+    },
+    benefits: {
+      sharedAccess: {
+        title: 'Shared pet access',
+        description: 'Everyone can follow the same pet profile.',
+      },
+      checkIns: {
+        title: 'Common check-ins',
+        description: 'Family members can add daily updates.',
+      },
+      coordination: {
+        title: 'Better coordination',
+        description: 'Avoid missed meals, medicine or symptoms.',
+      },
+      reports: {
+        title: 'Shared reports',
+        description: 'Prepare vet reports together.',
+      },
+    },
+    create: {
+      title: 'Create Family',
+      nameLabel: 'Family Name',
+      iconLabel: 'Add a photo (optional)',
+      submit: 'Create Family',
+    },
+    join: {
+      headline: 'Enter invitation code',
+      subheadline: 'You can get the code from a family member.',
+      codePlaceholder: 'LULU-1234',
+    },
+  },
   sharing: {
     settingsSection: 'Family',
     shareWithFamily: 'Share with Family',
@@ -812,7 +876,7 @@ export const en: Translations = {
     setupMessage: 'Create a family code so loved ones can help with daily check-ins, records, and reminders.',
     enableSharing: 'Enable family sharing',
     familyCodeSection: 'Family code',
-    familyCodeHint: 'Share this code or link with family members.',
+    familyCodeHint: 'Share this code with family members.',
     copyCode: 'Copy code',
     shareLink: 'Share link',
     rotateCode: 'Generate new code',

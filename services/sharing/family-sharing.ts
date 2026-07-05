@@ -10,6 +10,8 @@ import { generateFamilyCode, normalizeFamilyCode } from '@/utils/sharing/family-
 type RemoteFamilyGroupRow = {
   id: string;
   owner_user_id: string;
+  name: string;
+  icon_key: string;
   code: string;
   is_active: boolean;
   created_at: string;
@@ -29,6 +31,8 @@ function fromFamilyGroupRow(row: RemoteFamilyGroupRow): FamilyGroup {
   return {
     id: row.id,
     ownerUserId: row.owner_user_id,
+    name: row.name ?? 'Lulu Family',
+    iconKey: row.icon_key ?? 'house_paw',
     code: row.code,
     isActive: row.is_active,
     createdAt: row.created_at,
@@ -88,7 +92,39 @@ export async function fetchMemberPetIds(userId: string): Promise<string[]> {
   return (data ?? []).map((row) => row.pet_id as string);
 }
 
-export async function createFamilyGroup(userId: string): Promise<FamilyGroup> {
+export async function fetchProfileDisplayName(userId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('display_name')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data?.display_name as string | null | undefined) ?? null;
+}
+
+export async function fetchFamilyGroupById(familyGroupId: string): Promise<FamilyGroup | null> {
+  const { data, error } = await supabase
+    .from('family_groups')
+    .select('*')
+    .eq('id', familyGroupId)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data ? fromFamilyGroupRow(data as RemoteFamilyGroupRow) : null;
+}
+
+export async function createFamilyGroup(
+  userId: string,
+  input?: { name?: string; iconKey?: string }
+): Promise<FamilyGroup> {
   const existing = await fetchOwnerFamilyGroup(userId);
 
   if (existing) {
@@ -103,6 +139,8 @@ export async function createFamilyGroup(userId: string): Promise<FamilyGroup> {
         owner_user_id: userId,
         code,
         is_active: true,
+        name: input?.name?.trim() || 'Lulu Family',
+        icon_key: input?.iconKey || 'house_paw',
       })
       .select('*')
       .single();
@@ -117,6 +155,34 @@ export async function createFamilyGroup(userId: string): Promise<FamilyGroup> {
   }
 
   throw new Error('Failed to generate a unique family code');
+}
+
+export async function updateFamilyGroupProfile(
+  familyGroupId: string,
+  input: { name?: string; iconKey?: string }
+): Promise<FamilyGroup> {
+  const updates: Partial<RemoteFamilyGroupRow> = {};
+
+  if (input.name !== undefined) {
+    updates.name = input.name.trim() || 'Lulu Family';
+  }
+
+  if (input.iconKey !== undefined) {
+    updates.icon_key = input.iconKey;
+  }
+
+  const { data, error } = await supabase
+    .from('family_groups')
+    .update(updates)
+    .eq('id', familyGroupId)
+    .select('*')
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return fromFamilyGroupRow(data as RemoteFamilyGroupRow);
 }
 
 export async function rotateFamilyCode(familyGroupId: string): Promise<FamilyGroup> {

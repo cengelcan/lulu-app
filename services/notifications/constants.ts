@@ -21,7 +21,7 @@ export function getCheckInReminderNotificationId(dateKey: string): string {
 
 export const ANDROID_CHECK_IN_CHANNEL_ID = 'check-in-reminders-v2';
 
-export const CHECK_IN_REMINDER_SOUND = 'bell-ring.wav';
+export const CHECK_IN_REMINDER_SOUND = 'bell_ring.wav';
 
 /** Legacy slot IDs — cancelled on sync to clean up pre-migration schedules. */
 export const LEGACY_CHECK_IN_REMINDER_SLOT_IDS = [
@@ -39,7 +39,7 @@ export const PET_REMINDER_NOTIFICATION_ID_PREFIX = 'pet-health-reminder-';
 
 export const ANDROID_PET_REMINDER_CHANNEL_ID = 'pet-reminders-v1';
 
-export const PET_REMINDER_REMINDER_SOUND = 'bell-ring.wav';
+export const PET_REMINDER_REMINDER_SOUND = 'bell_ring.wav';
 
 export function getPetReminderNotificationId(reminderId: string): string {
   return `${PET_REMINDER_NOTIFICATION_ID_PREFIX}${reminderId}`;

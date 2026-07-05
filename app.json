@@ -49,7 +49,7 @@
         "expo-notifications",
         {
           "sounds": [
-            "./assets/sounds/bell-ring.wav"
+            "./assets/sounds/bell_ring.wav"
           ]
         }
       ],

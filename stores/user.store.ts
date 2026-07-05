@@ -13,6 +13,10 @@ import {
 } from '@/services/auth';
 import { wipeUserScopedData } from '@/services/cleanup/wipe-user-scoped-data';
 import { resetUserScopedStores } from '@/services/cleanup/reset-user-scoped-stores';
+import {
+  initializeSubscription,
+  teardownSubscription,
+} from '@/services/subscription/lifecycle';
 import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
 import { deletePetPhotoFiles, pullPetsIntoLocal } from '@/services/sync/pets-sync';
 import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
@@ -168,6 +172,12 @@ export const useUserStore = create<UserState>((set, get) => ({
       authSubscriptionStarted = true;
       onAuthStateChange((_event, session) => {
         applySession(session);
+
+        if (session) {
+          void initializeSubscription(session.user.id);
+        } else {
+          void teardownSubscription();
+        }
       });
     }
 
@@ -181,11 +191,13 @@ export const useUserStore = create<UserState>((set, get) => ({
         applySession(session);
         const wiped = await enforceUserDataIsolation(session.user.id);
         await syncUserDataFromCloud();
+        await initializeSubscription(session.user.id);
         if (wiped) {
           set({ displayName: null, avatarUri: null });
         }
       } else {
         applySession(session);
+        await teardownSubscription();
       }
     } catch {
       set({ authStatus: 'unauthenticated' });
@@ -199,6 +211,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       const session = await authSignInWithEmail(email, password);
       const wiped = await enforceUserDataIsolation(session.user.id);
       await syncUserDataFromCloud();
+      await initializeSubscription(session.user.id);
       set({
         userId: session.user.id,
         email: session.user.email ?? null,
@@ -225,6 +238,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       const { session } = result;
       const wiped = await enforceUserDataIsolation(session.user.id);
       await syncUserDataFromCloud();
+      await initializeSubscription(session.user.id);
 
       set({
         userId: session.user.id,
@@ -261,6 +275,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       if (session) {
         const wiped = await enforceUserDataIsolation(session.user.id);
         await syncUserDataFromCloud();
+        await initializeSubscription(session.user.id);
         set({
           userId: session.user.id,
           email: session.user.email ?? null,
@@ -283,6 +298,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       await signOutUser();
     } finally {
+      await teardownSubscription();
       await wipeUserScopedData();
       resetUserScopedStores();
       await removeCurrentUserId();
@@ -334,6 +350,8 @@ export const useUserStore = create<UserState>((set, get) => ({
     } catch (error) {
       console.warn('Failed to clear local session after account deletion', error);
     }
+
+    await teardownSubscription();
 
     set({
       userId: null,

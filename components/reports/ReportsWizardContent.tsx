@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
+import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { ReportCheckboxRow } from '@/components/reports/ReportCheckboxRow';
 import { ReportDocumentPreview } from '@/components/reports/ReportDocumentPreview';
 import { SelectableOption } from '@/components/setup/selectable-option';
@@ -21,6 +22,7 @@ import {
 } from '@/constants/reports';
 import { Spacing, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
+import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { translateError } from '@/utils/translate-error';
@@ -79,6 +81,9 @@ export function ReportsWizardContent() {
   const [isLoadingReview, setIsLoadingReview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const { allowed: canExportPdf, paywallVisible, requestAccess, dismissPaywall } =
+    usePlusFeature('pdfExport');
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -283,6 +288,11 @@ export function ReportsWizardContent() {
       return;
     }
 
+    if (!canExportPdf) {
+      requestAccess();
+      return;
+    }
+
     setIsExporting(true);
     setValidationError(null);
 
@@ -391,6 +401,7 @@ export function ReportsWizardContent() {
             onPress={() => void handleShareReport()}
           />
         </View>
+        {paywallVisible ? <LuluPlusPaywall visible onDismiss={dismissPaywall} /> : null}
       </View>
     );
   }

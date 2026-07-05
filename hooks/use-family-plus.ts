@@ -1,8 +1,9 @@
-import { FAMILY_SHARING_DEV_BYPASS } from '@/constants/sharing';
+import { PLUS_DEV_BYPASS } from '@/constants/subscription';
 import { useUserStore } from '@/stores/user.store';
+import { isPlusEntitled } from '@/utils/subscription-limits';
 
 export function canUseFamilySharing(isPlusActive: boolean): boolean {
-  return isPlusActive || FAMILY_SHARING_DEV_BYPASS;
+  return isPlusEntitled(isPlusActive);
 }
 
 export function useFamilyPlusAccess(): {

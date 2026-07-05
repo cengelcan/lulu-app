@@ -85,6 +85,14 @@ const MAPPING = {
   'cloud.sun.fill': 'wb-cloudy',
   'shield.fill': 'shield',
   'slider.horizontal.3': 'tune',
+  'arrow.clockwise': 'refresh',
+  'chart.bar.fill': 'bar-chart',
+  'photo.fill': 'photo',
+  'icloud.fill': 'cloud',
+  'gift.fill': 'card-giftcard',
+  'person.2.fill': 'groups',
+  'checkmark.circle.fill': 'check-circle',
+  'xmark': 'close',
 } as IconMapping;
 
 /**

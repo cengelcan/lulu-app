@@ -48,6 +48,7 @@ export default function RootLayout() {
         <Stack.Screen name="reports" />
         <Stack.Screen name="records" />
         <Stack.Screen name="reminders" />
+        <Stack.Screen name="paywall-preview" />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>

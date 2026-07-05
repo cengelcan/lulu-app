@@ -3,6 +3,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 
+import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { RecordNotesField } from '@/components/records/RecordNotesField';
 import { ReminderRecurrenceField } from '@/components/reminders/ReminderRecurrenceField';
@@ -15,11 +16,13 @@ import { TimePickerField } from '@/components/ui/TimePickerField';
 import { REMINDER_TYPES } from '@/constants/reminder-types';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Spacing, Typography } from '@/constants/theme';
+import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
 import { usePetStore } from '@/stores/pet.store';
+import { useUserStore } from '@/stores/user.store';
 import {
   createDefaultReminderMetadata,
   DEFAULT_REMINDER_RECURRENCE,
@@ -35,6 +38,7 @@ import { getReminderTypeLabelKey } from '@/utils/pet-reminder-display';
 import { isReminderOverdue } from '@/utils/reminder-overdue';
 import { resolveReminderTypeId } from '@/utils/pet-reminder-normalize';
 import { validatePetReminderForm } from '@/utils/pet-reminder-validation';
+import { canUsePlusFeature } from '@/utils/subscription-limits';
 import { canWritePetCareData } from '@/utils/pet-access';
 
 function createReminderId(): string {
@@ -60,12 +64,15 @@ export default function ReminderFormScreen() {
   const reminderId = Array.isArray(idParam) ? idParam[0] : idParam;
 
   const pet = usePetStore((state) => state.pet);
+  const pets = usePetStore((state) => state.pets);
   const createReminder = usePetReminderStore((state) => state.createReminder);
   const updateReminder = usePetReminderStore((state) => state.updateReminder);
   const completeReminder = usePetReminderStore((state) => state.completeReminder);
   const skipReminder = usePetReminderStore((state) => state.skipReminder);
   const snoozeReminder = usePetReminderStore((state) => state.snoozeReminder);
   const deleteReminder = usePetReminderStore((state) => state.deleteReminder);
+  const { paywallVisible, requestAccess, dismissPaywall } = usePlusFeature('unlimitedReminders');
+  const isPlusActive = useUserStore((state) => state.isPlusActive);
 
   const [dueDate, setDueDate] = useState(() => formatLocalDate(getTodayStart()));
   const [dueTime, setDueTime] = useState({ ...DEFAULT_REMINDER_TIME });
@@ -186,6 +193,14 @@ export default function ReminderFormScreen() {
       return;
     }
 
+    if (!isEditMode) {
+      const allowed = await canUsePlusFeature('unlimitedReminders', isPlusActive, pets);
+      if (!allowed) {
+        requestAccess();
+        return;
+      }
+    }
+
     setValidationError(null);
     setIsSaving(true);
 
@@ -238,12 +253,15 @@ export default function ReminderFormScreen() {
     existingReminder,
     isCompleted,
     isEditMode,
+    isPlusActive,
     isReadOnly,
     metadata,
     notes,
     pet?.id,
+    pets,
     recurrence,
     reminderType,
+    requestAccess,
     router,
     t,
     updateReminder,
@@ -506,6 +524,7 @@ export default function ReminderFormScreen() {
           </>
         )}
       </ScreenContainer>
+      {paywallVisible ? <LuluPlusPaywall visible onDismiss={dismissPaywall} /> : null}
     </>
   );
 }

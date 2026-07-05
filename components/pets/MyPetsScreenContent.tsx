@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
+import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { MemorialTabContent } from '@/components/pets/MemorialTabContent';
 import { PetListRow } from '@/components/pet/PetListRow';
 import { ThemedText } from '@/components/themed-text';
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Spacing, Typography } from '@/constants/theme';
+import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -40,6 +42,13 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
 
   const loadCheckIns = useCheckInStore((state) => state.loadCheckIns);
   const beginSetup = useSetupStore((state) => state.beginSetup);
+
+  const {
+    allowed: canAddPet,
+    paywallVisible,
+    requestAccess,
+    dismissPaywall,
+  } = usePlusFeature('multiplePets');
 
   const [isSwitching, setIsSwitching] = useState(false);
   const [switchingPetId, setSwitchingPetId] = useState<string | null>(null);
@@ -77,6 +86,11 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
   };
 
   const handleAddPet = () => {
+    if (!canAddPet) {
+      requestAccess();
+      return;
+    }
+
     beginSetup('add');
     router.push('/(setup)/pet-type?mode=add');
   };
@@ -196,6 +210,9 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
           ) : null}
         </View>
       )}
+      {paywallVisible ? (
+        <LuluPlusPaywall visible onDismiss={dismissPaywall} />
+      ) : null}
     </ScreenContainer>
   );
 }

@@ -15,6 +15,8 @@ export const ALLOWED_IDENTICAL_KEYS = new Set<string>([
   'notifications.reminderTitle',
   'profile.luluPlus',
   'paywall.title',
+  'paywall.badge',
+  'paywall.planLifetimeTitle',
   'paywall.freePetLimit',
   'paywall.notIncluded',
   'profile.version',

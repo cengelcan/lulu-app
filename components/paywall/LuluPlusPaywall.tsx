@@ -1,279 +1,368 @@
 import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import type { PurchasesPackage } from 'react-native-purchases';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/Button';
+import { LuluLogo } from '@/components/LuluLogo';
+import { BrandGradientFill } from '@/components/ui/BrandGradient';
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
-import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
-import { useTranslation } from '@/hooks/use-translation';
+import { LEGAL_URLS } from '@/constants/legal';
+import {
+  SUBSCRIPTION_PRODUCT_IDS,
+  SUBSCRIPTION_PREVIEW_PRICES,
+  type SubscriptionProductId,
+} from '@/constants/subscription';
+import { Fonts, Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/use-translation';
+import { isRevenueCatAvailable } from '@/services/subscription/revenuecat';
+import { useSubscriptionStore } from '@/stores/subscription.store';
+import { useUserStore } from '@/stores/user.store';
 
-type ComparisonFreeValue = 'dash' | 'limited' | 'basic' | 'one';
-type ComparisonPlusValue = 'check' | 'all';
+const HERO_IMAGE = require('@/assets/images/welcome-bg.png');
+const APP_STORE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscriptions';
+const HERO_LOGO_SIZE = 56;
 
-type ComparisonRow = {
-  titleKey: string;
-  free: ComparisonFreeValue;
-  plus: ComparisonPlusValue;
-};
-
-type BenefitConfig = {
+type FeatureConfig = {
   icon: IconSymbolName;
   titleKey: string;
   descriptionKey: string;
+  iconColor: string;
 };
 
-type ValueStep = {
+type PlanVisual = {
   icon: IconSymbolName;
-  titleKey: string;
-  descriptionKey: string;
+  badgeKey?: string;
+  badgeStyle?: 'popular' | 'save' | 'lifetime';
 };
 
-const VALUE_STEPS: ValueStep[] = [
+type PlanOption = {
+  id: SubscriptionProductId;
+  titleKey: string;
+  subtitleKey: string;
+  visual: PlanVisual;
+};
+
+const FEATURES: FeatureConfig[] = [
   {
     icon: 'chart.line.uptrend.xyaxis',
-    titleKey: 'paywall.stepOneTitle',
-    descriptionKey: 'paywall.stepOneDescription',
+    titleKey: 'paywall.trendsTitle',
+    descriptionKey: 'paywall.trendsDescription',
+    iconColor: Palette.badgeViolet,
   },
   {
-    icon: 'pawprint.fill',
-    titleKey: 'paywall.stepTwoTitle',
-    descriptionKey: 'paywall.stepTwoDescription',
+    icon: 'calendar.badge.checkmark',
+    titleKey: 'paywall.smartRemindersTitle',
+    descriptionKey: 'paywall.smartRemindersDescription',
+    iconColor: Palette.badgeOrange,
   },
-  {
-    icon: 'sparkles',
-    titleKey: 'paywall.stepThreeTitle',
-    descriptionKey: 'paywall.stepThreeDescription',
-  },
-];
-
-const COMPARISON_ROWS: ComparisonRow[] = [
-  { titleKey: 'paywall.advancedReportsTitle', free: 'dash', plus: 'check' },
-  { titleKey: 'paywall.longerHistoryTitle', free: 'limited', plus: 'check' },
-  { titleKey: 'paywall.multiplePetsTitle', free: 'one', plus: 'all' },
-  { titleKey: 'paywall.familySharingTitle', free: 'dash', plus: 'check' },
-  { titleKey: 'paywall.smartRemindersTitle', free: 'basic', plus: 'check' },
-  { titleKey: 'paywall.trendsTitle', free: 'dash', plus: 'check' },
-];
-
-const BENEFITS: BenefitConfig[] = [
   {
     icon: 'doc.text.fill',
     titleKey: 'paywall.advancedReportsTitle',
     descriptionKey: 'paywall.advancedReportsDescription',
+    iconColor: Palette.brandAccent,
+  },
+  {
+    icon: 'person.2.fill',
+    titleKey: 'paywall.familySharingTitle',
+    descriptionKey: 'paywall.familySharingDescription',
+    iconColor: Palette.badgePink,
   },
   {
     icon: 'clock.fill',
     titleKey: 'paywall.longerHistoryTitle',
     descriptionKey: 'paywall.longerHistoryDescription',
+    iconColor: Palette.brandAccentDark,
   },
   {
     icon: 'pawprint.fill',
     titleKey: 'paywall.multiplePetsTitle',
     descriptionKey: 'paywall.multiplePetsDescription',
+    iconColor: Palette.badgeEmerald,
+  },
+];
+
+const PLAN_OPTIONS: PlanOption[] = [
+  {
+    id: SUBSCRIPTION_PRODUCT_IDS.weekly,
+    titleKey: 'paywall.planWeeklyTitle',
+    subtitleKey: 'paywall.trialWeekly',
+    visual: {
+      icon: 'crown.fill',
+    },
   },
   {
-    icon: 'person.fill',
-    titleKey: 'paywall.familySharingTitle',
-    descriptionKey: 'paywall.familySharingDescription',
+    id: SUBSCRIPTION_PRODUCT_IDS.yearly,
+    titleKey: 'paywall.planYearlyTitle',
+    subtitleKey: 'paywall.trialYearly',
+    visual: {
+      icon: 'star.fill',
+      badgeKey: 'paywall.planMostPopular',
+      badgeStyle: 'popular',
+    },
   },
   {
-    icon: 'bell.fill',
-    titleKey: 'paywall.smartRemindersTitle',
-    descriptionKey: 'paywall.smartRemindersDescription',
-  },
-  {
-    icon: 'chart.line.uptrend.xyaxis',
-    titleKey: 'paywall.trendsTitle',
-    descriptionKey: 'paywall.trendsDescription',
+    id: SUBSCRIPTION_PRODUCT_IDS.lifetime,
+    titleKey: 'paywall.planLifetimeTitle',
+    subtitleKey: 'paywall.lifetimePayOnce',
+    visual: {
+      icon: 'gift.fill',
+      badgeKey: 'paywall.planOneTimePayment',
+      badgeStyle: 'lifetime',
+    },
   },
 ];
 
 type LuluPlusPaywallProps = {
   visible: boolean;
   onDismiss: () => void;
+  onPurchaseComplete?: () => void;
+  /** Dev/screenshot mode — shows mock plan prices without RevenueCat. */
+  previewMode?: boolean;
+  /** Pre-select a plan (preview screenshots / deep links). */
+  initialSelectedPlan?: SubscriptionProductId;
 };
 
-type ValueStepRowProps = {
+async function openLegalUrl(url: string): Promise<void> {
+  await openBrowserAsync(url, {
+    presentationStyle: WebBrowserPresentationStyle.AUTOMATIC,
+  });
+}
+
+function findPackage(
+  packages: PurchasesPackage[],
+  productId: SubscriptionProductId
+): PurchasesPackage | null {
+  return packages.find((pkg) => pkg.product.identifier === productId) ?? null;
+}
+
+type FeatureTileProps = {
   icon: IconSymbolName;
   title: string;
   description: string;
-  isLast: boolean;
-  brandAccentColor: string;
+  iconColor: string;
+  textColor: string;
   textSecondaryColor: string;
 };
 
-function ValueStepRow({
+function FeatureTile({
   icon,
   title,
   description,
-  isLast,
-  brandAccentColor,
+  iconColor,
+  textColor,
   textSecondaryColor,
-}: ValueStepRowProps) {
+}: FeatureTileProps) {
   return (
-    <View style={styles.stepRow}>
-      <View style={styles.stepRail}>
-        <View style={[styles.stepIconWrap, { backgroundColor: Palette.brandAccentSoft }]}>
-          <IconSymbol name={icon} size={18} color={brandAccentColor} />
-        </View>
-        {!isLast ? <View style={[styles.stepLine, { backgroundColor: Palette.brandAccentBorder }]} /> : null}
-      </View>
-      <View style={styles.stepCopy}>
-        <ThemedText type="defaultSemiBold">{title}</ThemedText>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.stepDescription}>
+    <View style={styles.featureTile}>
+      <IconSymbol name={icon} size={20} color={iconColor} style={styles.featureIcon} />
+      <View style={styles.featureCopy}>
+        <Text
+          allowFontScaling
+          maxFontSizeMultiplier={1.4}
+          style={[styles.featureTitle, { color: textColor }]}>
+          {title}
+        </Text>
+        <Text
+          allowFontScaling
+          maxFontSizeMultiplier={1.5}
+          style={[styles.featureDescription, { color: textSecondaryColor }]}>
           {description}
-        </ThemedText>
+        </Text>
       </View>
     </View>
   );
 }
 
-type ComparisonCellProps = {
-  children: React.ReactNode;
-  align?: 'start' | 'center';
-};
-
-function ComparisonCell({ children, align = 'center' }: ComparisonCellProps) {
-  return (
-    <View style={[styles.comparisonCell, align === 'start' && styles.comparisonCellStart]}>
-      {children}
-    </View>
-  );
-}
-
-type ComparisonTableProps = {
-  rows: ComparisonRow[];
-  freeLabel: (value: ComparisonFreeValue) => string;
-  plusLabel: (value: ComparisonPlusValue) => string;
-  comparisonTitle: string;
-  freeColumn: string;
-  plusColumn: string;
-  brandAccentColor: string;
-  surfaceSoftColor: string;
-  textSecondaryColor: string;
-  t: (key: string) => string;
-};
-
-function ComparisonTable({
-  rows,
-  freeLabel,
-  plusLabel,
-  comparisonTitle,
-  freeColumn,
-  plusColumn,
-  brandAccentColor,
-  surfaceSoftColor,
-  textSecondaryColor,
-  t,
-}: ComparisonTableProps) {
-  return (
-    <View style={styles.comparisonTable}>
-      <View style={[styles.comparisonHeader, { backgroundColor: Palette.brandAccentSoft }]}>
-        <ComparisonCell align="start">
-          <ThemedText type="defaultSemiBold">{comparisonTitle}</ThemedText>
-        </ComparisonCell>
-        <ComparisonCell>
-          <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            type="defaultSemiBold">
-            {freeColumn}
-          </ThemedText>
-        </ComparisonCell>
-        <ComparisonCell>
-          <ThemedText type="defaultSemiBold" style={{ color: brandAccentColor }}>
-            {plusColumn}
-          </ThemedText>
-        </ComparisonCell>
-      </View>
-
-      {rows.map((row, index) => (
-        <View
-          key={row.titleKey}
-          style={[
-            styles.comparisonRow,
-            index % 2 === 1 ? { backgroundColor: surfaceSoftColor } : undefined,
-          ]}>
-          <ComparisonCell align="start">
-            <ThemedText style={styles.comparisonFeature}>{t(row.titleKey)}</ThemedText>
-          </ComparisonCell>
-          <ComparisonCell>
-            <Text
-              allowFontScaling
-              maxFontSizeMultiplier={Typography.body.maxFontSizeMultiplier}
-              style={[styles.comparisonValue, { color: textSecondaryColor }]}>
-              {freeLabel(row.free)}
-            </Text>
-          </ComparisonCell>
-          <ComparisonCell>
-            {row.plus === 'check' ? (
-              <View style={[styles.checkBadge, { backgroundColor: Palette.brandAccentSoft }]}>
-                <IconSymbol name="checkmark" size={14} color={brandAccentColor} />
-              </View>
-            ) : (
-              <Text
-                allowFontScaling
-                maxFontSizeMultiplier={Typography.body.maxFontSizeMultiplier}
-                style={[styles.comparisonValue, styles.comparisonValuePlus, { color: brandAccentColor }]}>
-                {plusLabel(row.plus)}
-              </Text>
-            )}
-          </ComparisonCell>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-type BenefitCardProps = {
-  icon: IconSymbolName;
+type PlanCardProps = {
   title: string;
-  description: string;
-  surfaceSoftColor: string;
+  price: string;
+  period?: string;
+  subtitle: string;
+  badge?: string;
+  selected: boolean;
+  onPress: () => void;
+  visual: PlanVisual;
   brandAccentColor: string;
+  brandAccentSoftColor: string;
+  surfaceColor: string;
+  textColor: string;
+  textSecondaryColor: string;
+  borderColor: string;
+};
+
+function PlanCard({
+  title,
+  price,
+  period,
+  subtitle,
+  badge,
+  selected,
+  onPress,
+  visual,
+  brandAccentColor,
+  brandAccentSoftColor,
+  surfaceColor,
+  textColor,
+  textSecondaryColor,
+  borderColor,
+}: PlanCardProps) {
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[
+        styles.planCard,
+        {
+          borderColor: selected ? brandAccentColor : borderColor,
+          backgroundColor: selected ? brandAccentSoftColor : surfaceColor,
+        },
+        selected && styles.planCardSelected,
+      ]}>
+      {badge ? (
+        <View style={[styles.planBadge, { backgroundColor: brandAccentSoftColor }]}>
+          <Text
+            allowFontScaling
+            maxFontSizeMultiplier={1.2}
+            numberOfLines={1}
+            style={[styles.planBadgeText, { color: brandAccentColor }]}>
+            {badge}
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.planBadgeSpacer} />
+      )}
+
+      <IconSymbol name={visual.icon} size={20} color={brandAccentColor} />
+
+      <Text
+        allowFontScaling
+        maxFontSizeMultiplier={1.3}
+        numberOfLines={1}
+        style={[styles.planTitle, { color: textColor }]}>
+        {title}
+      </Text>
+
+      <Text
+        allowFontScaling
+        maxFontSizeMultiplier={1.25}
+        numberOfLines={1}
+        style={[styles.planPrice, { color: textColor }]}>
+        {price}
+      </Text>
+      {period ? (
+        <Text
+          allowFontScaling
+          maxFontSizeMultiplier={1.25}
+          numberOfLines={1}
+          style={[styles.planPeriod, { color: textSecondaryColor }]}>
+          {period}
+        </Text>
+      ) : null}
+
+      <Text
+        allowFontScaling
+        maxFontSizeMultiplier={1.3}
+        numberOfLines={2}
+        style={[styles.planSubtitle, { color: textSecondaryColor }]}>
+        {subtitle}
+      </Text>
+
+      <View style={styles.planCardFooter}>
+        {selected ? (
+          <IconSymbol name="checkmark.circle.fill" size={20} color={brandAccentColor} />
+        ) : (
+          <View style={[styles.planRadioEmpty, { borderColor }]} />
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
+type TrustBadgeProps = {
+  icon: IconSymbolName;
+  label: string;
+  iconColor: string;
   textSecondaryColor: string;
 };
 
-function BenefitCard({
-  icon,
-  title,
-  description,
-  surfaceSoftColor,
-  brandAccentColor,
-  textSecondaryColor,
-}: BenefitCardProps) {
+function TrustBadge({ icon, label, iconColor, textSecondaryColor }: TrustBadgeProps) {
   return (
-    <View style={[styles.benefitCard, { backgroundColor: surfaceSoftColor }]}>
-      <View style={[styles.benefitIconWrap, { backgroundColor: Palette.brandAccentSoft }]}>
-        <IconSymbol name={icon} size={20} color={brandAccentColor} />
-      </View>
-      <View style={styles.benefitCopy}>
-        <ThemedText type="defaultSemiBold">{title}</ThemedText>
-        <ThemedText
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.benefitDescription}>
-          {description}
-        </ThemedText>
-      </View>
+    <View style={styles.trustBadge}>
+      <IconSymbol name={icon} size={18} color={iconColor} />
+      <Text
+        allowFontScaling
+        maxFontSizeMultiplier={1.3}
+        style={[styles.trustLabel, { color: textSecondaryColor }]}>
+        {label}
+      </Text>
     </View>
   );
 }
 
-export function LuluPlusPaywall({ visible, onDismiss }: LuluPlusPaywallProps) {
+export function LuluPlusPaywall({
+  visible,
+  onDismiss,
+  onPurchaseComplete,
+  previewMode = false,
+  initialSelectedPlan = SUBSCRIPTION_PRODUCT_IDS.yearly,
+}: LuluPlusPaywallProps) {
   const { t, language } = useTranslation();
   const insets = useSafeAreaInsets();
+
   const backgroundColor = useThemeColor({}, 'background');
-  const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
+  const surfaceColor = useThemeColor({}, 'surfaceElevated');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const brandAccentLightColor = useThemeColor({}, 'brandAccentLight');
+  const brandAccentSoftColor = useThemeColor({}, 'brandAccentSoft');
+  const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
+  const primaryColor = useThemeColor({}, 'primary');
+
+  const isPlusActive = useUserStore((state) => state.isPlusActive);
+  const offerings = useSubscriptionStore((state) => state.offerings);
+  const isLoading = useSubscriptionStore((state) => state.isLoading);
+  const loadOfferings = useSubscriptionStore((state) => state.loadOfferings);
+  const purchasePackage = useSubscriptionStore((state) => state.purchasePackage);
+  const restorePurchases = useSubscriptionStore((state) => state.restorePurchases);
+
+  const [selectedPlanId, setSelectedPlanId] = useState<SubscriptionProductId>(initialSelectedPlan);
+
+  useEffect(() => {
+    setSelectedPlanId(initialSelectedPlan);
+  }, [initialSelectedPlan]);
+
+  useEffect(() => {
+    if (visible && !previewMode) {
+      void loadOfferings();
+    }
+  }, [loadOfferings, previewMode, visible]);
+
+  const packages = previewMode ? [] : (offerings?.availablePackages ?? []);
+  const showMockPlans = previewMode || (__DEV__ && !isLoading && packages.length === 0);
+
+  const selectedPackage = useMemo(
+    () => findPackage(packages, selectedPlanId),
+    [packages, selectedPlanId]
+  );
+
+  const canPurchase = !previewMode && isRevenueCatAvailable() && selectedPackage !== null;
 
   const handleDismiss = () => {
     if (process.env.EXPO_OS === 'ios') {
@@ -282,165 +371,351 @@ export function LuluPlusPaywall({ visible, onDismiss }: LuluPlusPaywallProps) {
     onDismiss();
   };
 
-  const handlePrimaryPress = () => {
+  const handlePrimaryPress = async () => {
     if (process.env.EXPO_OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
-    Alert.alert(t('paywall.comingSoonAlertTitle'), t('paywall.comingSoonAlertMessage'), [
-      { text: t('common.ok'), style: 'default' },
-    ]);
+    if (previewMode) {
+      return;
+    }
+
+    if (isPlusActive) {
+      await Linking.openURL(APP_STORE_SUBSCRIPTIONS_URL);
+      return;
+    }
+
+    if (!selectedPackage) {
+      return;
+    }
+
+    try {
+      await purchasePackage(selectedPackage);
+      onPurchaseComplete?.();
+      onDismiss();
+    } catch {
+      // Store holds error state.
+    }
   };
 
-  const freeLabel = (value: ComparisonFreeValue) => {
-    switch (value) {
-      case 'limited':
-        return t('paywall.freeLimited');
-      case 'basic':
-        return t('paywall.freeBasic');
-      case 'one':
-        return t('paywall.freePetLimit');
+  const handleRestore = async () => {
+    if (previewMode) {
+      return;
+    }
+
+    try {
+      await restorePurchases();
+      if (useUserStore.getState().isPlusActive) {
+        onPurchaseComplete?.();
+        onDismiss();
+      }
+    } catch {
+      // Store holds error state.
+    }
+  };
+
+  const primaryCtaTitle = useMemo(() => {
+    if (isPlusActive) {
+      return t('paywall.manageSubscription');
+    }
+
+    switch (selectedPlanId) {
+      case SUBSCRIPTION_PRODUCT_IDS.weekly:
+        return t('paywall.ctaTrial3Day');
+      case SUBSCRIPTION_PRODUCT_IDS.yearly:
+        return t('paywall.ctaTrial7Day');
+      case SUBSCRIPTION_PRODUCT_IDS.lifetime:
+        return t('paywall.ctaLifetime');
       default:
-        return t('paywall.notIncluded');
+        return t('paywall.subscribeCta');
+    }
+  }, [isPlusActive, selectedPlanId, t]);
+
+  const getPlanPricing = (planId: SubscriptionProductId, pkg: PurchasesPackage | null) => {
+    const usePreviewPrice = previewMode || showMockPlans || __DEV__ || !pkg;
+    const amount = usePreviewPrice
+      ? SUBSCRIPTION_PREVIEW_PRICES[planId]
+      : pkg!.product.priceString;
+
+    switch (planId) {
+      case SUBSCRIPTION_PRODUCT_IDS.weekly:
+        return {
+          price: amount,
+          period: t('paywall.pricePerWeek'),
+        };
+      case SUBSCRIPTION_PRODUCT_IDS.yearly:
+        return {
+          price: amount,
+          period: t('paywall.pricePerYear'),
+        };
+      default:
+        return {
+          price: amount,
+          period: undefined,
+        };
     }
   };
 
-  const plusLabel = (value: ComparisonPlusValue) => {
-    if (value === 'all') {
-      return t('paywall.plusPetLimit');
+  const renderPlans = () => {
+    if (isPlusActive) {
+      return null;
     }
-    return '';
+
+    if (!previewMode && isLoading && packages.length === 0) {
+      return (
+        <View style={styles.plansLoading}>
+          <ActivityIndicator color={brandAccentColor} />
+          <Text allowFontScaling style={[styles.plansLoadingLabel, { color: textSecondaryColor }]}>
+            {t('paywall.loadingPlans')}
+          </Text>
+        </View>
+      );
+    }
+
+    if (!showMockPlans && packages.length === 0) {
+      return (
+        <Text allowFontScaling style={[styles.plansUnavailable, { color: textSecondaryColor }]}>
+          {t('paywall.plansUnavailable')}
+        </Text>
+      );
+    }
+
+    return (
+      <View style={styles.plansRow}>
+        {PLAN_OPTIONS.map((plan) => {
+          const pkg = findPackage(packages, plan.id);
+          const pricing = getPlanPricing(plan.id, pkg);
+          const badge = plan.visual.badgeKey ? t(plan.visual.badgeKey) : undefined;
+
+          return (
+            <PlanCard
+              key={plan.id}
+              title={t(plan.titleKey)}
+              price={pricing.price}
+              period={pricing.period}
+              subtitle={t(plan.subtitleKey)}
+              badge={badge}
+              selected={selectedPlanId === plan.id}
+              onPress={() => setSelectedPlanId(plan.id)}
+              visual={plan.visual}
+              brandAccentColor={brandAccentColor}
+              brandAccentSoftColor={brandAccentSoftColor}
+              surfaceColor={surfaceColor}
+              textColor={textColor}
+              textSecondaryColor={textSecondaryColor}
+              borderColor={borderColor}
+            />
+          );
+        })}
+      </View>
+    );
   };
 
   return (
     <Modal
       key={language}
       animationType="slide"
+      presentationStyle="fullScreen"
+      statusBarTranslucent={false}
       visible={visible}
       onRequestClose={handleDismiss}>
-      <SafeAreaView style={[styles.screen, { backgroundColor }]} edges={['top']}>
-        <View style={styles.topBar}>
-          <View style={styles.topBarSpacer} />
+      <View style={[styles.screen, { backgroundColor }]}>
+        <View style={[styles.heroHeader, { paddingTop: insets.top + Spacing.sm }]}>
+          <View style={styles.heroHeaderSide} />
+          <View style={styles.heroLogoWrap}>
+            <LuluLogo
+              accessibilityLabel={t('paywall.title')}
+              size={HERO_LOGO_SIZE}
+              style={styles.heroLogo}
+            />
+          </View>
           <Pressable
             accessibilityLabel={t('common.dismissDialog')}
             accessibilityRole="button"
-            hitSlop={12}
+            hitSlop={16}
             onPress={handleDismiss}
             style={styles.closeButton}>
-            <IconSymbol name="xmark.circle" size={28} color={textSecondaryColor} />
+            <IconSymbol name="xmark" size={18} color={Palette.ink} />
           </Pressable>
         </View>
 
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
-          <View style={styles.hero}>
-            <View style={[styles.badge, { backgroundColor: Palette.brandAccentSoft }]}>
+          <View style={styles.heroSection}>
+            <Image
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              source={HERO_IMAGE}
+              style={styles.heroImage}
+              contentFit="cover"
+              contentPosition="top center"
+              pointerEvents="none"
+            />
+            <LinearGradient
+              colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)', backgroundColor]}
+              locations={[0, 0.5, 1]}
+              style={styles.heroGradient}
+              pointerEvents="none"
+            />
+
+            <View style={styles.heroCopy}>
               <Text
                 allowFontScaling
-                maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
-                style={[styles.badgeLabel, { color: brandAccentColor }]}>
-                {t('paywall.badge')}
+                maxFontSizeMultiplier={1.25}
+                style={[styles.heroTitle, { color: brandAccentLightColor }]}>
+                {t('paywall.title')}
               </Text>
+              <View
+                style={[
+                  styles.heroPill,
+                  {
+                    backgroundColor: brandAccentSoftColor,
+                    borderColor: Palette.brandAccentBorder,
+                  },
+                ]}>
+                <IconSymbol name="sparkles" size={14} color={brandAccentColor} />
+                <Text
+                  allowFontScaling
+                  maxFontSizeMultiplier={1.3}
+                  style={[styles.heroPillText, { color: textColor }]}>
+                  {t('paywall.heroPill')}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.body}>
+            <View
+              style={[
+                styles.featuresCard,
+                {
+                  backgroundColor: surfaceColor,
+                  borderColor,
+                },
+              ]}>
+              <Text allowFontScaling maxFontSizeMultiplier={1.35} style={[styles.featuresTitle, { color: textColor }]}>
+                {t('paywall.featuresTitleBefore')}
+                <Text style={{ color: brandAccentColor, fontWeight: '700' }}>
+                  {t('paywall.featuresTitleAccent')}
+                </Text>
+                {t('paywall.featuresTitleAfter')}
+              </Text>
+
+              <View style={styles.featureGrid}>
+                {FEATURES.map((feature) => (
+                  <FeatureTile
+                    key={feature.titleKey}
+                    icon={feature.icon}
+                    title={t(feature.titleKey)}
+                    description={t(feature.descriptionKey)}
+                    iconColor={feature.iconColor}
+                    textColor={textColor}
+                    textSecondaryColor={textSecondaryColor}
+                  />
+                ))}
+              </View>
             </View>
 
-            <ThemedText type="title" style={styles.headline}>
-              {t('paywall.headline')}
-            </ThemedText>
+            {!isPlusActive ? <View style={styles.plansSection}>{renderPlans()}</View> : null}
 
-            <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
-              style={styles.subtitle}>
-              {t('paywall.subtitle')}
-            </ThemedText>
-          </View>
-
-          <View style={styles.stepsSection}>
-            {VALUE_STEPS.map((step, index) => (
-              <ValueStepRow
-                key={step.titleKey}
-                icon={step.icon}
-                title={t(step.titleKey)}
-                description={t(step.descriptionKey)}
-                isLast={index === VALUE_STEPS.length - 1}
-                brandAccentColor={brandAccentColor}
+            <View style={styles.trustRow}>
+              <TrustBadge
+                icon="shield.fill"
+                label={t('paywall.trustSecure')}
+                iconColor={brandAccentColor}
                 textSecondaryColor={textSecondaryColor}
               />
-            ))}
-          </View>
-
-          <ComparisonTable
-            rows={COMPARISON_ROWS}
-            freeLabel={freeLabel}
-            plusLabel={plusLabel}
-            comparisonTitle={t('paywall.comparisonTitle')}
-            freeColumn={t('paywall.freeColumn')}
-            plusColumn={t('paywall.plusColumn')}
-            brandAccentColor={brandAccentColor}
-            surfaceSoftColor={surfaceSoftColor}
-            textSecondaryColor={textSecondaryColor}
-            t={t}
-          />
-
-          <View style={styles.highlightsSection}>
-            <ThemedText type="subtitle" style={styles.highlightsTitle}>
-              {t('paywall.highlightTitle')}
-            </ThemedText>
-
-            {BENEFITS.map((benefit) => (
-              <BenefitCard
-                key={benefit.titleKey}
-                icon={benefit.icon}
-                title={t(benefit.titleKey)}
-                description={t(benefit.descriptionKey)}
-                surfaceSoftColor={surfaceSoftColor}
-                brandAccentColor={brandAccentColor}
+              <TrustBadge
+                icon="arrow.clockwise"
+                label={t('paywall.trustCancel')}
+                iconColor={Palette.brandAccentDark}
                 textSecondaryColor={textSecondaryColor}
               />
-            ))}
+              <TrustBadge
+                icon="heart.fill"
+                label={t('paywall.trustLoved')}
+                iconColor={Palette.badgePink}
+                textSecondaryColor={textSecondaryColor}
+              />
+            </View>
+
+            <Text
+              allowFontScaling
+              maxFontSizeMultiplier={1.5}
+              style={[styles.legalText, { color: textSecondaryColor }]}>
+              {t('paywall.legalRenewal')}
+            </Text>
+
+            <View style={styles.footerLinks}>
+              <Pressable accessibilityRole="link" onPress={() => void openLegalUrl(LEGAL_URLS.terms)}>
+                <Text
+                  allowFontScaling
+                  maxFontSizeMultiplier={1.3}
+                  style={[styles.footerLink, { color: brandAccentColor }]}>
+                  {t('profile.terms')}
+                </Text>
+              </Pressable>
+              <Text style={[styles.footerLinkDivider, { color: textSecondaryColor }]}>·</Text>
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => void openLegalUrl(LEGAL_URLS.privacyPolicy)}>
+                <Text
+                  allowFontScaling
+                  maxFontSizeMultiplier={1.3}
+                  style={[styles.footerLink, { color: brandAccentColor }]}>
+                  {t('profile.privacyPolicy')}
+                </Text>
+              </Pressable>
+              {!isPlusActive ? (
+                <>
+                  <Text style={[styles.footerLinkDivider, { color: textSecondaryColor }]}>·</Text>
+                  <Pressable accessibilityRole="button" onPress={() => void handleRestore()}>
+                    <Text
+                      allowFontScaling
+                      maxFontSizeMultiplier={1.3}
+                      style={[styles.footerLink, { color: brandAccentColor }]}>
+                      {t('paywall.restorePurchases')}
+                    </Text>
+                  </Pressable>
+                </>
+              ) : null}
+            </View>
           </View>
-
-          <LinearGradient
-            colors={[Palette.brandAccentSoft, 'rgba(169,152,214,0.04)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.reassuranceCard}>
-            <IconSymbol name="crown.fill" size={24} color={brandAccentColor} />
-            <ThemedText type="defaultSemiBold" style={styles.reassuranceTitle}>
-              {t('paywall.reassuranceTitle')}
-            </ThemedText>
-            <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
-              style={styles.reassuranceBody}>
-              {t('paywall.reassuranceBody')}
-            </ThemedText>
-          </LinearGradient>
-
-          <Text
-            allowFontScaling
-            maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
-            style={[styles.footerNote, { color: textSecondaryColor }]}>
-            {t('paywall.footerNote')}
-          </Text>
         </ScrollView>
 
         <View
           style={[
             styles.footer,
             {
-              borderTopColor: borderColor,
               paddingBottom: Math.max(insets.bottom, Spacing.md),
               backgroundColor,
+              borderTopColor: borderColor,
             },
           ]}>
-          <Button title={t('paywall.primaryButton')} onPress={handlePrimaryPress} />
-          <Button title={t('paywall.secondaryButton')} variant="ghost" onPress={handleDismiss} />
+          <Pressable
+            accessibilityRole="button"
+            disabled={!isPlusActive && !previewMode && (!canPurchase || isLoading)}
+            onPress={() => void handlePrimaryPress()}
+            style={({ pressed }) => [
+              styles.ctaButton,
+              isPlusActive ? { backgroundColor: primaryColor } : styles.ctaButtonGradient,
+              {
+                opacity:
+                  !isPlusActive && !previewMode && (!canPurchase || isLoading) ? 0.45 : pressed ? 0.9 : 1,
+              },
+            ]}>
+            {!isPlusActive ? <BrandGradientFill /> : null}
+            <IconSymbol name="sparkles" size={18} color={Palette.onDark} />
+            <Text allowFontScaling maxFontSizeMultiplier={1.3} style={styles.ctaLabel}>
+              {primaryCtaTitle}
+            </Text>
+            <IconSymbol name="chevron.right" size={18} color={Palette.onDark} />
+          </Pressable>
         </View>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }
@@ -449,178 +724,262 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  topBar: {
+  heroHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
     paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.xs,
+    paddingBottom: Spacing.xxs,
+    zIndex: 10,
   },
-  topBarSpacer: {
+  heroHeaderSide: {
+    width: 36,
+    height: 36,
+  },
+  heroLogoWrap: {
     flex: 1,
+    alignItems: 'center',
   },
   closeButton: {
-    padding: Spacing.xxs,
+    width: 36,
+    height: 36,
+    borderRadius: Radius.full,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
-    gap: Spacing.lg,
+    paddingBottom: Spacing.xl,
   },
-  hero: {
-    alignItems: 'center',
-    gap: Spacing.sm,
-    paddingTop: Spacing.xs,
-  },
-  badge: {
-    borderRadius: Radius.pill,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xxs,
-  },
-  badgeLabel: {
-    ...Typography.caption,
-    fontWeight: '600',
-  },
-  headline: {
-    textAlign: 'center',
-  },
-  subtitle: {
-    ...Typography.body,
-    textAlign: 'center',
-    maxWidth: 320,
-  },
-  stepsSection: {
-    gap: Spacing.xs,
-    paddingVertical: Spacing.xs,
-  },
-  stepRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  stepRail: {
-    alignItems: 'center',
-    width: 36,
-  },
-  stepIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: Radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepLine: {
-    flex: 1,
-    width: 2,
-    marginTop: Spacing.xxs,
-    marginBottom: Spacing.xxs,
-    borderRadius: Radius.pill,
-  },
-  stepCopy: {
-    flex: 1,
-    gap: Spacing.xxs,
-    paddingBottom: Spacing.sm,
-  },
-  stepDescription: {
-    ...Typography.body,
-  },
-  comparisonTable: {
-    borderRadius: Radius.lg,
+  heroSection: {
     overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Palette.brandAccentBorder,
   },
-  comparisonHeader: {
-    flexDirection: 'row',
+  heroImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  heroGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroCopy: {
     alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-  },
-  comparisonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    minHeight: 48,
-  },
-  comparisonCell: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  comparisonCellStart: {
-    alignItems: 'flex-start',
-    flex: 1.6,
-  },
-  comparisonFeature: {
-    ...Typography.body,
-    paddingRight: Spacing.xs,
-  },
-  comparisonValue: {
-    ...Typography.body,
-    textAlign: 'center',
-  },
-  comparisonValuePlus: {
-    fontWeight: '600',
-  },
-  checkBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: Radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  highlightsSection: {
-    gap: Spacing.sm,
-  },
-  highlightsTitle: {
-    textAlign: 'center',
-  },
-  benefitCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.sm,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-  },
-  benefitIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: Radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  benefitCopy: {
-    flex: 1,
+    paddingTop: Spacing.xxs,
+    paddingBottom: Spacing.sm,
     gap: Spacing.xxs,
   },
-  benefitDescription: {
-    ...Typography.body,
+  heroLogo: {
+    backgroundColor: 'transparent',
   },
-  reassuranceCard: {
-    borderRadius: Radius.lg,
-    padding: Spacing.lg,
+  heroTitle: {
+    textAlign: 'center',
+    fontSize: 42,
+    lineHeight: 44,
+    fontWeight: '600',
+    letterSpacing: -1.1,
+    marginTop: -2,
+    fontFamily: Platform.select({
+      ios: Fonts?.rounded,
+      web: Fonts?.rounded,
+      default: undefined,
+    }),
+  },
+  heroPill: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: Spacing.xxs,
+    marginTop: Spacing.xxs,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
   },
-  reassuranceTitle: {
-    textAlign: 'center',
-  },
-  reassuranceBody: {
-    ...Typography.body,
-    textAlign: 'center',
-  },
-  footerNote: {
+  heroPillText: {
     ...Typography.caption,
+    fontWeight: '600',
     textAlign: 'center',
+  },
+  body: {
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.lg,
     marginTop: -Spacing.xs,
   },
+  featuresCard: {
+    borderRadius: Radius.xl,
+    padding: Spacing.lg,
+    gap: Spacing.md,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  featuresTitle: {
+    ...Typography.titleSmall,
+    textAlign: 'center',
+  },
+  featureGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.md,
+  },
+  featureTile: {
+    width: '47%',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.xs,
+  },
+  featureIcon: {
+    marginTop: 1,
+  },
+  featureCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  featureTitle: {
+    ...Typography.caption,
+    fontWeight: '700',
+  },
+  featureDescription: {
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  plansSection: {
+    gap: Spacing.sm,
+  },
+  plansRow: {
+    flexDirection: 'row',
+    gap: Spacing.xs,
+    alignItems: 'stretch',
+  },
+  plansLoading: {
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+  },
+  plansLoadingLabel: {
+    ...Typography.body,
+    textAlign: 'center',
+  },
+  plansUnavailable: {
+    ...Typography.body,
+    textAlign: 'center',
+  },
+  planCard: {
+    flex: 1,
+    borderRadius: Radius.lg,
+    borderWidth: 1.5,
+    padding: Spacing.sm,
+    alignItems: 'center',
+    gap: Spacing.xxs,
+    minHeight: 168,
+  },
+  planCardSelected: {
+    borderWidth: 2.5,
+  },
+  planBadge: {
+    borderRadius: Radius.pill,
+    paddingHorizontal: Spacing.xxs,
+    paddingVertical: 2,
+    maxWidth: '100%',
+  },
+  planBadgeSpacer: {
+    height: 16,
+  },
+  planBadgeText: {
+    fontSize: 8,
+    lineHeight: 10,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+  },
+  planTitle: {
+    ...Typography.caption,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  planPrice: {
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  planPeriod: {
+    fontSize: 10,
+    lineHeight: 12,
+    textAlign: 'center',
+  },
+  planSubtitle: {
+    fontSize: 10,
+    lineHeight: 13,
+    textAlign: 'center',
+    flex: 1,
+  },
+  planCardFooter: {
+    marginTop: 'auto',
+    paddingTop: Spacing.xxs,
+  },
+  planRadioEmpty: {
+    width: 20,
+    height: 20,
+    borderRadius: Radius.full,
+    borderWidth: 1.5,
+  },
+  trustRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  trustBadge: {
+    flex: 1,
+    alignItems: 'center',
+    gap: Spacing.xxs,
+  },
+  trustLabel: {
+    fontSize: 11,
+    lineHeight: 14,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  legalText: {
+    ...Typography.caption,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  footerLinks: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingBottom: Spacing.sm,
+  },
+  footerLink: {
+    ...Typography.caption,
+    fontWeight: '600',
+  },
+  footerLinkDivider: {},
   footer: {
-    borderTopWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
-    gap: Spacing.xs,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  ctaButton: {
+    minHeight: 56,
+    borderRadius: Radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    overflow: 'hidden',
+  },
+  ctaButtonGradient: {
+    backgroundColor: 'transparent',
+  },
+  ctaLabel: {
+    ...Typography.button,
+    color: Palette.onDark,
+    flex: 1,
+    textAlign: 'center',
   },
 });

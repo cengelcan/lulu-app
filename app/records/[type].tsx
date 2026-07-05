@@ -3,6 +3,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { RecordNotesField } from '@/components/records/RecordNotesField';
 import { RecordTypeFields } from '@/components/records/RecordTypeFields';
@@ -13,11 +14,13 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { RECORD_TYPES } from '@/constants/record-types';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Spacing, Typography } from '@/constants/theme';
+import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
+import { useUserStore } from '@/stores/user.store';
 import {
   createDefaultMetadata,
   PET_RECORD_NOTES_MAX_LENGTH,
@@ -29,6 +32,7 @@ import { formatLocalDate, getTodayStart } from '@/utils/date';
 import { getRecordTypeLabelKey } from '@/utils/pet-record-display';
 import { resolveRecordTypeId } from '@/utils/pet-record-normalize';
 import { validatePetRecordForm } from '@/utils/pet-record-validation';
+import { canUsePlusFeature } from '@/utils/subscription-limits';
 import { canWritePetCareData } from '@/utils/pet-access';
 
 function createRecordId(): string {
@@ -114,9 +118,12 @@ export default function RecordFormScreen() {
   const recordId = Array.isArray(idParam) ? idParam[0] : idParam;
 
   const pet = usePetStore((state) => state.pet);
+  const pets = usePetStore((state) => state.pets);
   const loadPet = usePetStore((state) => state.loadPet);
   const createRecord = usePetRecordStore((state) => state.createRecord);
   const updateRecord = usePetRecordStore((state) => state.updateRecord);
+  const { paywallVisible, requestAccess, dismissPaywall } = usePlusFeature('unlimitedRecords');
+  const isPlusActive = useUserStore((state) => state.isPlusActive);
 
   const [date, setDate] = useState(() => formatLocalDate(getTodayStart()));
   const [notes, setNotes] = useState('');
@@ -230,6 +237,14 @@ export default function RecordFormScreen() {
       return;
     }
 
+    if (!isEditMode) {
+      const allowed = await canUsePlusFeature('unlimitedRecords', isPlusActive, pets);
+      if (!allowed) {
+        requestAccess();
+        return;
+      }
+    }
+
     setValidationError(null);
     setIsSaving(true);
 
@@ -273,11 +288,14 @@ export default function RecordFormScreen() {
     date,
     existingRecord,
     isEditMode,
+    isPlusActive,
     isReadOnly,
     metadata,
     notes,
     pet?.id,
+    pets,
     recordType,
+    requestAccess,
     router,
     t,
     updateRecord,
@@ -378,6 +396,7 @@ export default function RecordFormScreen() {
           </>
         )}
       </ScreenContainer>
+      {paywallVisible ? <LuluPlusPaywall visible onDismiss={dismissPaywall} /> : null}
     </>
   );
 }

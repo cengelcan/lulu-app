@@ -1,11 +1,22 @@
-import { useCheckInStore } from '@/stores/check-in.store';
-import { useNotificationStore } from '@/stores/notification.store';
-import { usePetReminderStore } from '@/stores/pet-reminder.store';
-import { usePetRecordStore } from '@/stores/pet-record.store';
-import { usePetStore } from '@/stores/pet.store';
-import { useSharingStore } from '@/stores/sharing.store';
+/* eslint-disable @typescript-eslint/no-require-imports -- lazy require breaks circular deps at bundle load */
 
+/**
+ * Store imports are deferred to call time so this module does not participate
+ * in the user.store ↔ pet/check-in/... require cycle at bundle load.
+ */
 export function resetUserScopedStores(): void {
+  const { usePetStore } = require('@/stores/pet.store') as typeof import('@/stores/pet.store');
+  const { useCheckInStore } =
+    require('@/stores/check-in.store') as typeof import('@/stores/check-in.store');
+  const { usePetRecordStore } =
+    require('@/stores/pet-record.store') as typeof import('@/stores/pet-record.store');
+  const { usePetReminderStore } =
+    require('@/stores/pet-reminder.store') as typeof import('@/stores/pet-reminder.store');
+  const { useNotificationStore } =
+    require('@/stores/notification.store') as typeof import('@/stores/notification.store');
+  const { useSharingStore } =
+    require('@/stores/sharing.store') as typeof import('@/stores/sharing.store');
+
   usePetStore.setState({
     pets: [],
     pet: null,

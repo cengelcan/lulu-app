@@ -8,17 +8,18 @@ import {
 } from '@/services/subscription/revenuecat';
 import { type PlusStatus } from '@/services/subscription/plus-status';
 import { resolvePlusStatusForUser } from '@/services/sync/subscription-sync';
-import { useUserStore } from '@/stores/user.store';
 
 let unsubscribeRevenueCat: (() => void) | null = null;
 let activeUserId: string | null = null;
+let initializedForUserId: string | null = null;
+let onPlusStatusChange: ((status: PlusStatus) => void) | null = null;
+
+export function registerPlusStatusHandler(handler: (status: PlusStatus) => void): void {
+  onPlusStatusChange = handler;
+}
 
 function applyPlusStatus(status: PlusStatus): void {
-  useUserStore.setState({
-    isPlusActive: status.isPlusActive,
-    plusExpiresAt: status.plusExpiresAt,
-    plusSubscription: status.subscription,
-  });
+  onPlusStatusChange?.(status);
 }
 
 async function syncPlusStatus(userId: string): Promise<void> {
@@ -28,17 +29,27 @@ async function syncPlusStatus(userId: string): Promise<void> {
 }
 
 export async function initializeSubscription(userId: string | null): Promise<void> {
+  if (!userId) {
+    if (activeUserId !== null || initializedForUserId !== null) {
+      await teardownSubscription();
+    } else {
+      applyPlusStatus({ isPlusActive: false, plusExpiresAt: null, subscription: null });
+    }
+    return;
+  }
+
+  if (userId === initializedForUserId) {
+    await syncPlusStatus(userId);
+    return;
+  }
+
   if (unsubscribeRevenueCat) {
     unsubscribeRevenueCat();
     unsubscribeRevenueCat = null;
   }
 
   activeUserId = userId;
-
-  if (!userId) {
-    applyPlusStatus({ isPlusActive: false, plusExpiresAt: null, subscription: null });
-    return;
-  }
+  initializedForUserId = userId;
 
   const configured = await configureRevenueCat();
 
@@ -74,6 +85,7 @@ export async function teardownSubscription(): Promise<void> {
   }
 
   activeUserId = null;
+  initializedForUserId = null;
   await teardownRevenueCat();
   applyPlusStatus({ isPlusActive: false, plusExpiresAt: null, subscription: null });
 }

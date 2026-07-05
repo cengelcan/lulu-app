@@ -15,6 +15,7 @@ import { wipeUserScopedData } from '@/services/cleanup/wipe-user-scoped-data';
 import { resetUserScopedStores } from '@/services/cleanup/reset-user-scoped-stores';
 import {
   initializeSubscription,
+  registerPlusStatusHandler,
   teardownSubscription,
 } from '@/services/subscription/lifecycle';
 import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
@@ -458,3 +459,11 @@ export const useUserStore = create<UserState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 }));
+
+registerPlusStatusHandler((status) => {
+  useUserStore.setState({
+    isPlusActive: status.isPlusActive,
+    plusExpiresAt: status.plusExpiresAt,
+    plusSubscription: status.subscription,
+  });
+});

@@ -20,6 +20,8 @@ import {
 import { isIntroOrTrialPeriod } from '@/utils/subscription-display';
 
 let configured = false;
+let configurePromise: Promise<boolean> | null = null;
+let loggedInUserId: string | null = null;
 let customerInfoListener: ((info: CustomerInfo) => void) | null = null;
 
 export function isNativePurchasesModuleLinked(): boolean {
@@ -55,20 +57,30 @@ export async function configureRevenueCat(): Promise<boolean> {
     return true;
   }
 
+  if (configurePromise) {
+    return configurePromise;
+  }
+
   const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY!;
 
-  try {
-    if (__DEV__) {
-      Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-    }
+  configurePromise = (async () => {
+    try {
+      if (__DEV__) {
+        Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+      }
 
-    Purchases.configure({ apiKey });
-    configured = true;
-    return true;
-  } catch (error) {
-    console.warn('[RevenueCat] configure failed', error);
-    return false;
-  }
+      Purchases.configure({ apiKey });
+      configured = true;
+      return true;
+    } catch (error) {
+      console.warn('[RevenueCat] configure failed', error);
+      return false;
+    } finally {
+      configurePromise = null;
+    }
+  })();
+
+  return configurePromise;
 }
 
 function resolvePlanKind(productId: string | undefined): PlusPlanKind {
@@ -129,7 +141,13 @@ export function getPlusStatusFromCustomerInfo(info: CustomerInfo): PlusStatus {
 }
 
 export async function logInRevenueCat(userId: string): Promise<PlusStatus> {
+  if (loggedInUserId === userId) {
+    const customerInfo = await Purchases.getCustomerInfo();
+    return getPlusStatusFromCustomerInfo(customerInfo);
+  }
+
   const { customerInfo } = await Purchases.logIn(userId);
+  loggedInUserId = userId;
   return getPlusStatusFromCustomerInfo(customerInfo);
 }
 
@@ -139,6 +157,7 @@ export async function logOutRevenueCat(): Promise<void> {
   }
 
   await Purchases.logOut();
+  loggedInUserId = null;
 }
 
 export async function fetchRevenueCatPlusStatus(): Promise<PlusStatus | null> {
@@ -205,5 +224,6 @@ export async function teardownRevenueCat(): Promise<void> {
       // Anonymous session after logout is fine.
     }
     configured = false;
+    loggedInUserId = null;
   }
 }

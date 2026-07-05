@@ -122,29 +122,37 @@ export async function pushPet(_userId: string, pet: Pet): Promise<void> {
 
   const userId = await requireAuthenticatedUserId();
   const row = toRemoteRow(pet, userId);
+  const { user_id: _rowUserId, id: _rowId, created_at: _rowCreatedAt, ...updateFields } = row;
+
+  // Update first so existing pets sync without hitting the insert-tier trigger
+  // (insert-first caused free_pet_limit_reached before duplicate-key fallback).
+  const { data, error: updateError } = await supabase
+    .from('pets')
+    .update(updateFields)
+    .eq('id', pet.id)
+    .select('id');
+
+  if (updateError) {
+    throw new Error(updateError.message);
+  }
+
+  if (data && data.length > 0) {
+    return;
+  }
 
   const { error: insertError } = await supabase.from('pets').insert(row);
 
-  if (!insertError) {
-    return;
-  }
-
-  // PostgREST upsert hits RLS on pets even for new rows; use insert + update instead.
-  if (insertError.code === '23505') {
-    const { user_id: _userId, id: _id, ...updateFields } = row;
-    const { error: updateError } = await supabase
-      .from('pets')
-      .update(updateFields)
-      .eq('id', pet.id);
-
-    if (updateError) {
-      throw new Error(updateError.message);
+  if (insertError) {
+    if (insertError.message === 'free_pet_limit_reached') {
+      throw new Error('errors.freePetLimitReached');
     }
 
-    return;
-  }
+    if (insertError.message === 'plus_pet_limit_reached') {
+      throw new Error('errors.plusPetLimitReached');
+    }
 
-  throw new Error(insertError.message);
+    throw new Error(insertError.message);
+  }
 }
 
 /**

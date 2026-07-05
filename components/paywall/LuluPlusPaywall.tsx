@@ -33,6 +33,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { isRevenueCatAvailable } from '@/services/subscription/revenuecat';
 import { useSubscriptionStore } from '@/stores/subscription.store';
 import { useUserStore } from '@/stores/user.store';
+import { translateError } from '@/utils/translate-error';
 
 const HERO_IMAGE = require('@/assets/images/welcome-bg.png');
 const APP_STORE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscriptions';
@@ -292,7 +293,9 @@ export function LuluPlusPaywall({
   const isPlusActive = useUserStore((state) => state.isPlusActive);
   const offerings = useSubscriptionStore((state) => state.offerings);
   const isLoading = useSubscriptionStore((state) => state.isLoading);
+  const subscriptionError = useSubscriptionStore((state) => state.error);
   const loadOfferings = useSubscriptionStore((state) => state.loadOfferings);
+  const clearSubscriptionError = useSubscriptionStore((state) => state.clearError);
   const purchasePackage = useSubscriptionStore((state) => state.purchasePackage);
   const restorePurchases = useSubscriptionStore((state) => state.restorePurchases);
 
@@ -312,7 +315,7 @@ export function LuluPlusPaywall({
     () => (previewMode ? [] : (offerings?.availablePackages ?? [])),
     [previewMode, offerings]
   );
-  const showMockPlans = previewMode || (__DEV__ && !isLoading && packages.length === 0);
+  const showMockPlans = previewMode;
 
   const selectedPackage = useMemo(
     () => findPackage(packages, selectedPlanId),
@@ -347,7 +350,13 @@ export function LuluPlusPaywall({
     }
 
     try {
+      clearSubscriptionError();
       await purchasePackage(selectedPackage);
+
+      if (!useUserStore.getState().isPlusActive) {
+        return;
+      }
+
       onPurchaseComplete?.();
       onDismiss();
     } catch {
@@ -431,9 +440,19 @@ export function LuluPlusPaywall({
 
     if (!showMockPlans && packages.length === 0) {
       return (
-        <Text allowFontScaling style={[styles.plansUnavailable, { color: textSecondaryColor }]}>
-          {t('paywall.plansUnavailable')}
-        </Text>
+        <View style={styles.plansUnavailableBlock}>
+          <Text allowFontScaling style={[styles.plansUnavailable, { color: textSecondaryColor }]}>
+            {translateError(t, subscriptionError) ?? t('paywall.plansUnavailable')}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void loadOfferings()}
+            style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
+            <Text allowFontScaling style={[styles.retryPlans, { color: brandAccentColor }]}>
+              {t('common.tryAgain')}
+            </Text>
+          </Pressable>
+        </View>
       );
     }
 
@@ -649,6 +668,11 @@ export function LuluPlusPaywall({
               borderTopColor: borderColor,
             },
           ]}>
+          {subscriptionError && !previewMode && packages.length > 0 ? (
+            <Text allowFontScaling style={[styles.purchaseError, { color: textSecondaryColor }]}>
+              {translateError(t, subscriptionError)}
+            </Text>
+          ) : null}
           <Pressable
             accessibilityRole="button"
             disabled={!isPlusActive && !previewMode && (!canPurchase || isLoading)}
@@ -803,6 +827,20 @@ const styles = StyleSheet.create({
   plansUnavailable: {
     ...Typography.body,
     textAlign: 'center',
+  },
+  plansUnavailableBlock: {
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+  },
+  retryPlans: {
+    ...Typography.body,
+    fontWeight: '600',
+  },
+  purchaseError: {
+    ...Typography.caption,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
   planCard: {
     flex: 1,

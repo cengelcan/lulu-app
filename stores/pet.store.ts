@@ -198,13 +198,14 @@ export const usePetStore = create<PetState>((set, get) => ({
     try {
       await petStorage.updatePet(pet);
 
-      const userId = getActiveUserId();
-      if (userId) {
-        try {
-          await pushPet(userId, pet);
-        } catch (syncError) {
-          console.warn('Failed to sync updated pet to cloud', syncError);
-        }
+      try {
+        const userId = await requireAuthenticatedUserId();
+        await pushPet(userId, pet);
+      } catch (syncError) {
+        console.warn('Failed to sync updated pet to cloud', syncError);
+        throw syncError instanceof Error && syncError.message.startsWith('errors.')
+          ? syncError
+          : new Error('errors.syncPetToCloud');
       }
 
       set((state) => ({

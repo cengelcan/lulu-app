@@ -1200,6 +1200,11 @@ export const de: Translations = {
     switchPet: 'Haustier konnte nicht gewechselt werden. Bitte erneut versuchen.',
     createPet: 'Haustier konnte nicht erstellt werden. Bitte erneut versuchen.',
     updatePet: 'Haustier konnte nicht aktualisiert werden. Bitte erneut versuchen.',
+    syncPetToCloud:
+      'Haustier wurde auf diesem Gerät gespeichert, konnte aber nicht in die Cloud synchronisiert werden. Verbindung prüfen und erneut speichern.',
+    freePetLimitReached:
+      'Im Free-Tarif ist nur ein aktives Haustier in der Cloud möglich. Lulu Plus schaltet weitere Haustiere frei.',
+    plusPetLimitReached: 'Du hast die maximale Anzahl aktiver Haustiere für Lulu Plus erreicht.',
     updatePetStatus: 'Status konnte nicht aktualisiert werden. Bitte erneut versuchen.',
     deletePet: 'Haustier konnte nicht gelöscht werden. Bitte erneut versuchen.',
     loadLatestCheckIn: 'Letzter Check-In konnte nicht geladen werden. Bitte erneut versuchen.',
@@ -1230,6 +1235,12 @@ export const de: Translations = {
     joinFamilyFailed: 'Beitritt zur Familie fehlgeschlagen. Bitte erneut versuchen.',
     leaveFamilyFailed: 'Familie verlassen fehlgeschlagen. Bitte erneut versuchen.',
     notAuthenticated: 'Bitte melde dich an, um fortzufahren.',
+    revenueCatUnavailable:
+      'In-App-Käufe sind in diesem Build nicht verfügbar. Nutze einen iOS-Dev-Client mit RevenueCat-Konfiguration.',
+    subscriptionPlansUnavailable:
+      'Abo-Pläne konnten nicht geladen werden. Verbindung prüfen und erneut versuchen.',
+    subscriptionEntitlementMissing:
+      'Die Zahlung war erfolgreich, aber Lulu Plus ist noch nicht aktiv. Verknüpfe in RevenueCat die Produkte mit dem Entitlement „plus“ und tippe auf Käufe wiederherstellen.',
     petReadOnly: 'Du kannst dieses Haustier ansehen, aber nur der Besitzer kann das Profil ändern.',
     saveReminderTime: 'Erinnerungszeit konnte nicht gespeichert werden. Bitte erneut versuchen.',
     saveNotificationPermission:

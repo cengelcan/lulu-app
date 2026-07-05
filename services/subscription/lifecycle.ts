@@ -78,6 +78,28 @@ export async function refreshSubscriptionStatus(): Promise<void> {
   await syncPlusStatus(activeUserId);
 }
 
+/** Ensures RevenueCat is configured and bound to the Supabase user before paywall IAP. */
+export async function ensureRevenueCatSession(userId: string): Promise<boolean> {
+  if (!isRevenueCatAvailable()) {
+    return false;
+  }
+
+  const configured = await configureRevenueCat();
+  if (!configured) {
+    return false;
+  }
+
+  try {
+    await logInRevenueCat(userId);
+    activeUserId = userId;
+    initializedForUserId = userId;
+    return true;
+  } catch (error) {
+    console.warn('RevenueCat logIn failed during paywall setup', error);
+    return false;
+  }
+}
+
 export async function teardownSubscription(): Promise<void> {
   if (unsubscribeRevenueCat) {
     unsubscribeRevenueCat();

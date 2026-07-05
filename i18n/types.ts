@@ -1061,6 +1061,9 @@ export type Translations = {
     switchPet: string;
     createPet: string;
     updatePet: string;
+    syncPetToCloud: string;
+    freePetLimitReached: string;
+    plusPetLimitReached: string;
     updatePetStatus: string;
     deletePet: string;
     loadLatestCheckIn: string;
@@ -1090,6 +1093,9 @@ export type Translations = {
     joinFamilyFailed: string;
     leaveFamilyFailed: string;
     notAuthenticated: string;
+    revenueCatUnavailable: string;
+    subscriptionPlansUnavailable: string;
+    subscriptionEntitlementMissing: string;
     petReadOnly: string;
     saveReminderTime: string;
     saveNotificationPermission: string;

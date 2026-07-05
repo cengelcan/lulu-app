@@ -1186,6 +1186,11 @@ export const en: Translations = {
     switchPet: 'Could not switch pet. Please try again.',
     createPet: 'Could not create pet. Please try again.',
     updatePet: 'Could not update pet. Please try again.',
+    syncPetToCloud:
+      'Pet saved on this device but could not sync to the cloud. Check your connection and try saving again.',
+    freePetLimitReached:
+      'Free accounts can only have one active pet in the cloud. Upgrade to Lulu Plus to sync additional pets.',
+    plusPetLimitReached: 'You have reached the maximum number of active pets for Lulu Plus.',
     updatePetStatus: 'Could not update pet status. Please try again.',
     deletePet: 'Could not delete pet. Please try again.',
     loadLatestCheckIn: 'Could not load the latest check-in. Please try again.',
@@ -1215,6 +1220,12 @@ export const en: Translations = {
     joinFamilyFailed: 'Could not join the family. Please try again.',
     leaveFamilyFailed: 'Could not leave the family. Please try again.',
     notAuthenticated: 'Please sign in to continue.',
+    revenueCatUnavailable:
+      'In-app purchases are not available on this build. Use an iOS dev client with RevenueCat configured.',
+    subscriptionPlansUnavailable:
+      'Subscription plans could not be loaded. Check your connection and try again.',
+    subscriptionEntitlementMissing:
+      'Payment went through but Lulu Plus is not active yet. In RevenueCat, link products to the "plus" entitlement and try Restore purchases.',
     petReadOnly: 'You can view this pet, but only the owner can change its profile.',
     saveReminderTime: 'Could not save reminder time. Please try again.',
     saveNotificationPermission: 'Could not save notification permission. Please try again.',

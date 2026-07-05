@@ -5,12 +5,13 @@ import { useSharingStore } from '@/stores/sharing.store';
 import { useUserStore } from '@/stores/user.store';
 
 /**
- * Pulls shared pets from the cloud when a family member returns to the app so
- * owner-side sharing changes show up without a full restart.
+ * Pulls shared pet care data from the cloud when a family participant returns
+ * to the app. Covers both members (shared pets) and owners (active family group
+ * with shared pets) so cross-device updates appear without a full restart.
  */
 export function useFamilyMemberCloudSync() {
   const authStatus = useUserStore((state) => state.authStatus);
-  const refreshMemberPetsFromCloud = useSharingStore((state) => state.refreshMemberPetsFromCloud);
+  const refreshSharedDataFromCloud = useSharingStore((state) => state.refreshSharedDataFromCloud);
   const isRefreshing = useRef(false);
 
   useEffect(() => {
@@ -24,9 +25,9 @@ export function useFamilyMemberCloudSync() {
       }
 
       isRefreshing.current = true;
-      void refreshMemberPetsFromCloud()
+      void refreshSharedDataFromCloud()
         .catch((error) => {
-          console.warn('Failed to refresh shared pets from cloud', error);
+          console.warn('Failed to refresh shared pet data from cloud', error);
         })
         .finally(() => {
           isRefreshing.current = false;
@@ -42,5 +43,5 @@ export function useFamilyMemberCloudSync() {
     });
 
     return () => subscription.remove();
-  }, [authStatus, refreshMemberPetsFromCloud]);
+  }, [authStatus, refreshSharedDataFromCloud]);
 }

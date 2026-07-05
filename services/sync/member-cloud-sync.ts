@@ -1,8 +1,27 @@
-import { fetchMemberPetIds } from '@/services/sharing/family-sharing';
+import {
+  fetchFamilyGroupPetIds,
+  fetchMemberPetIds,
+  fetchOwnerFamilyGroup,
+} from '@/services/sharing/family-sharing';
+import { syncPetReminderNotificationSchedule } from '@/services/notifications/pet-reminder-schedule';
 import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
 import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
 import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
+
+async function refreshPetCareStores(petId: string): Promise<void> {
+  const [{ useCheckInStore }, { usePetRecordStore }, { usePetReminderStore }] = await Promise.all([
+    import('@/stores/check-in.store'),
+    import('@/stores/pet-record.store'),
+    import('@/stores/pet-reminder.store'),
+  ]);
+
+  await Promise.all([
+    useCheckInStore.getState().loadCheckIns(petId),
+    usePetRecordStore.getState().loadRecords(petId),
+    usePetReminderStore.getState().loadReminders(petId),
+  ]);
+}
 
 async function reconcileActivePetAfterPull(previousActivePetId: string | null): Promise<void> {
   const { usePetStore } = await import('@/stores/pet.store');
@@ -13,12 +32,12 @@ async function reconcileActivePetAfterPull(previousActivePetId: string | null): 
   if (!stillHasActive && pets.length > 0) {
     const nextActive = pets.find((pet) => pet.status !== 'deceased') ?? pets[0];
     await usePetStore.getState().setActivePet(nextActive.id);
-    return;
   }
 
-  if (previousActivePetId && stillHasActive) {
-    const { useCheckInStore } = await import('@/stores/check-in.store');
-    await useCheckInStore.getState().loadCheckIns(previousActivePetId);
+  const activePetId = usePetStore.getState().activePetId;
+
+  if (activePetId) {
+    await refreshPetCareStores(activePetId);
   }
 }
 
@@ -32,16 +51,39 @@ async function pullAccessibleDataIntoLocal(userId: string): Promise<void> {
   await pullPetRemindersIntoLocal(userId);
   await usePetStore.getState().loadPets();
   await reconcileActivePetAfterPull(previousActivePetId);
+
+  try {
+    await syncPetReminderNotificationSchedule();
+  } catch (error) {
+    console.warn('Failed to sync pet reminder notifications after cloud pull', error);
+  }
+}
+
+async function hasSharedPetContext(userId: string): Promise<boolean> {
+  const memberPetIds = await fetchMemberPetIds(userId);
+
+  if (memberPetIds.length > 0) {
+    return true;
+  }
+
+  const familyGroup = await fetchOwnerFamilyGroup(userId);
+
+  if (!familyGroup?.isActive) {
+    return false;
+  }
+
+  const sharedPetIds = await fetchFamilyGroupPetIds(familyGroup.id);
+  return sharedPetIds.length > 0;
 }
 
 /**
- * Reconciles a family member's local cache with cloud data after the owner
- * changes shared pets or revokes access.
+ * Pulls shared pet data when the user is part of family sharing — as a member
+ * with shared pets, or as an owner with pets shared in an active family group.
  */
-export async function refreshMemberDataFromCloud(userId: string): Promise<void> {
-  const memberPetIds = await fetchMemberPetIds(userId);
+export async function refreshSharedPetDataFromCloud(userId: string): Promise<void> {
+  const shouldRefresh = await hasSharedPetContext(userId);
 
-  if (memberPetIds.length === 0) {
+  if (!shouldRefresh) {
     return;
   }
 

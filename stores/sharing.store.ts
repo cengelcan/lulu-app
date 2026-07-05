@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 
 import { pushPet } from '@/services/sync/pets-sync';
-import { refreshDataAfterMembershipChange, refreshMemberDataFromCloud } from '@/services/sync/member-cloud-sync';
+import {
+  refreshDataAfterMembershipChange,
+  refreshSharedPetDataFromCloud,
+} from '@/services/sync/member-cloud-sync';
 import {
   acceptFamilyJoin,
   createFamilyGroup,
@@ -37,7 +40,7 @@ type SharingState = {
   joinFamily: (code: string) => Promise<void>;
   leaveFamily: (familyGroupId: string) => Promise<void>;
   autoShareNewPetIfActive: (petId: string) => Promise<void>;
-  refreshMemberPetsFromCloud: () => Promise<void>;
+  refreshSharedDataFromCloud: () => Promise<void>;
   handleSharingRealtimeUpdate: () => Promise<void>;
   clearError: () => void;
 };
@@ -212,9 +215,9 @@ export const useSharingStore = create<SharingState>((set, get) => ({
     await get().setSharedPets([...sharedPetIds, petId]);
   },
 
-  refreshMemberPetsFromCloud: async () => {
+  refreshSharedDataFromCloud: async () => {
     const userId = getUserId();
-    await refreshMemberDataFromCloud(userId);
+    await refreshSharedPetDataFromCloud(userId);
   },
 
   handleSharingRealtimeUpdate: async () => {

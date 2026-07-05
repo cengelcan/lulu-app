@@ -1,0 +1,4 @@
+# https://supabase.com/docs/guides/cli/config
+
+[functions.revenuecat-webhook]
+verify_jwt = false

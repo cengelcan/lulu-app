@@ -9,7 +9,7 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 
 ## Mevcut durum (doğrulama)
 
-**Son güncelleme:** 2026-07-05 — Aile paylaşımı kod tarafı tamam; QA + IAP bekliyor
+**Son güncelleme:** 2026-07-05 — Lulu Plus IAP (RevenueCat) sandbox'ta doğrulandı; aile paylaşımı QA bekliyor
 
 | Alan | Durum |
 |------|-------|
@@ -18,7 +18,8 @@ Bu dosya, `yapilacaklar.md`'deki açık işleri yürütme sırasına, bağımlı
 | Bootstrap | `hooks/use-bootstrap.ts` auth guard aktif: `splash → onboarding → auth → setup → home` |
 | User store | `signIn/signOut/session listener` + `currentUserId↔user.id`; Supabase client (`lib/supabase.ts`) |
 | Sync | Pet/check-in/record/profil/reminder Supabase kaynak-doğruluk (write-through + pull) |
-| Aile paylaşımı | Kod tamam (`0009` migration uygulandı); Plus gating dev bypass ile test; IAP + QA bekliyor |
+| Lulu Plus (IAP) | RevenueCat + paywall + tier gating + webhook → Supabase (`0015`/`0016`); sandbox 2–3 hesap test ✅ |
+| Aile paylaşımı | Kod + gerçek Plus gating tamam (`0009` migration); manuel QA bekliyor |
 
 > **Guest kararı:** Canlı kullanıcı var ancak mevcut local veri korunmak zorunda değil (kullanıcılar yeniden profil oluşturacak). → Auth geçişinde **guest→hesap migration gerekmez**; temiz wipe yeterli. (Hesap izolasyonu: farklı hesap girişinde yerel veri wipe; pet'ler buluttan geri gelir.)
 
@@ -43,7 +44,7 @@ flowchart TD
   PCrest --> PE[Paket E: Beslenme/aktivite planı - en son]
 ```
 
-**Yürütme sırası (klasik):** Aşama 0 (TS + QA paralel) → Aşama 1 (✅) → **Aşama 2 (🟡 kod ✅, QA + IAP)** → Aşama 3 paralel.
+**Yürütme sırası (klasik):** Aşama 0 (TS + QA paralel) → Aşama 1 (✅) → **Aşama 2 (🟡 kod + IAP ✅, QA)** → Aşama 3 paralel.
 
 ## Yeni paketler — yürütme sırası
 
@@ -116,9 +117,11 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 - [x] Log Out → `(auth)`'a dön (LegalCard bağlandı)
 - [x] Delete Account → Supabase user sil + local wipe (`delete_user` SECURITY DEFINER RPC, `0003_delete_user.sql`; cascade + avatar storage temizliği; ardından `signOut('local')` + `deleteAllLocalData`)
 
-### Faz D — Free / Plus tier temeli ⬜
-- [ ] `isPlusActive` (şimdilik Supabase metadata; RevenueCat sonra)
-- [ ] Tier bazlı feature gating altyapısı (hook)
+### Faz D — Free / Plus tier temeli ✅
+- [x] `isPlusActive` — RevenueCat client + Supabase `profiles` (`plus_active`); webhook sync (`0016`)
+- [x] Tier bazlı feature gating (`usePlusFeature`, sunucu limitleri `0015`)
+- [x] Paywall (`LuluPlusPaywall`), profil kartı, restore / manage subscription
+- [x] Sandbox satın alma + Free/Plus limitleri test edildi (2–3 hesap)
 
 ### Faz E — Sync 🟡 (pet + check-in + record tamam)
 - [x] Supabase şeması: `pets` / `check_ins` / `pet_records` + RLS + `updated_at` trigger (`supabase/migrations/0001_init.sql`)
@@ -132,9 +135,9 @@ Aile Paylaşımı, Tier gating ve Sync hepsi buna bağlı.
 
 ---
 
-## Aşama 2 — Aile Paylaşımı (🟡 kod tamam, QA + IAP bekliyor)
+## Aşama 2 — Aile Paylaşımı (🟡 kod + IAP tamam, QA bekliyor)
 
-**Bağımlılık:** Aşama 1 (A–E). **Tahmini kalan:** ~1 gün QA + IAP entegrasyonu (StoreKit/RevenueCat ayrı).
+**Bağımlılık:** Aşama 1 (A–E). **Tahmini kalan:** ~1 gün manuel QA.
 
 **Kilitli kararlar (2026-07-05):** Davet = kod + deep link. Rol = owner + member. Test = dev bypass. **Join path:** onboarding atlanır (K25), fork auth sonrası (K26), Home reminders kartı (K27), display name sor (K28).
 
@@ -180,7 +183,6 @@ Detay: `yapilacaklar.md` §4 Faz H.
 ### Kalan
 - [ ] **Faz H** (join path — yukarı)
 - [ ] Manuel QA (2 hesap / 2 cihaz)
-- [ ] StoreKit/RevenueCat → `isPlusActive`
 - [ ] Bilinen sorunlar — `yapilacaklar.md` §4 alt bölüm (kullanıcı ekleyecek)
 - [ ] *(v2)* editor/viewer rolleri
 
@@ -203,8 +205,8 @@ Detay: `yapilacaklar.md` §4 Faz H.
 - [x] A2: Community **Rate Lulu** — yanıltıcı "Çok Yakında" kaldırıldı; in-app prompt uygun değilse mağaza sayfası açılıyor (`APP_STORE_REVIEW_URL`)
 - [x] A3: Records **Attachments** — placeholder + modal + component kaldırıldı; gerçek ek **Paket C**'ye taşındı
 - [x] A4: `deletePet` UI'a bağlandı (Paket B1)
-- [ ] A1: Lulu Plus coming-soon → IAP (Faz D / Gelecek) gelene kadar bilinçli kalır
-- [x] `ComingSoonModal` kullanımları gözden geçirildi (kalan tek bilinçli kullanım: Lulu Plus)
+- [x] A1: Lulu Plus — gerçek IAP (`LuluPlusCard` + `LuluPlusPaywall` + RevenueCat)
+- [x] `ComingSoonModal` kullanımları gözden geçirildi (Lulu Plus artık paywall kullanıyor)
 
 ## Paket B — Pet silme + status modeli — ✅ B1 + B2 tamam
 
@@ -293,8 +295,9 @@ Detay: `yapilacaklar.md` → "Yayın öncesi UX paketleri". **Önerilen sıra:**
 
 | Konu | Bağımlılık |
 |------|------------|
-| StoreKit / RevenueCat | Lulu Plus IAP + aile paylaşımı Plus gating |
 | Aile paylaşımı QA | Manuel test (owner/member/deep link/inbox) |
+| Android IAP | RevenueCat yalnızca iOS; Play Store sonra |
+| Production IAP smoke test | App Store yayını sonrası ilk gerçek satın alma |
 | Cloud sync / cross-device active pet | Auth + Supabase |
 | My Pets'ten tek pet silme UI | ✅ Paket B1 |
 | Pet başına notification prefs | v1 dışı |

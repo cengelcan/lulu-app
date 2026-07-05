@@ -1,6 +1,6 @@
 # Yapılacaklar
 
-**Son güncelleme:** 2026-07-05 (Aile paylaşımı kod tarafı tamam; QA + IAP bekliyor)
+**Son güncelleme:** 2026-07-05 (Lulu Plus IAP sandbox'ta doğrulandı; aile paylaşımı QA bekliyor)
 
 Önceki task dosyalarının birleştirilmiş özeti. Tamamlanan işler arşivlendi; bu dosya yalnızca devam eden ve başlanmamış işleri içerir.
 
@@ -23,7 +23,8 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | Paket J | Dil kapsamı EN + DE (TR kaldırıldı) |
 | Pet silme (B1+) | İsim onayı, tek/çoklu pet yönlendirme, iOS header fix |
 | Apple Sign In | `signInWithApple` + Supabase `signInWithIdToken`; fiziksel cihazda test edildi |
-| Aile paylaşımı (kod) | `0009_family_sharing.sql`, owner/member modeli, `/family-sharing` + `/join-family`, inbox aktivite feed, Plus gating (dev bypass) |
+| Aile paylaşımı (kod) | `0009_family_sharing.sql`, owner/member modeli, `/family-sharing` + `/join-family`, inbox aktivite feed |
+| Lulu Plus (IAP) | RevenueCat + paywall + tier gating; `0015`/`0016` migrations; webhook Edge Function; sandbox test ✅ |
 
 ---
 
@@ -43,7 +44,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | K18 | Aile paylaşımı | **Lulu Plus** aboneliği arkasında |
 | K22 | Aile paylaşımı — davet | **Kod + deep link** (`lulu://join/CODE`); email daveti yok |
 | K23 | Aile paylaşımı — member yetkisi | **Member bakım verisi yazar** (check-in, record, reminder); profil düzenleme / silme / raporlar / paylaşım yönetimi **owner-only** |
-| K24 | Aile paylaşımı — test | Geliştirmede `EXPO_PUBLIC_FAMILY_SHARING_DEV_BYPASS=true`; gerçek IAP (StoreKit/RevenueCat) sonra |
+| K24 | Aile paylaşımı — test | Gerçek IAP sandbox'ta doğrulandı; `EXPO_PUBLIC_FAMILY_SHARING_DEV_BYPASS` yalnızca geliştirme kolaylığı |
 | K25 | Join path — onboarding | **Join Family** yolu onboarding (intro ×4) **atlar**; owner yolu onboarding görür |
 | K26 | İlk kurulum fork | Auth sonrası, pet yoksa: **Owner vs Join Family** seçim ekranı (`path-choice`) |
 | K27 | Join path — bildirim | Setup'taki notification ekranı yok; join sonrası **Home'da hafif "Enable reminders?" kartı** |
@@ -59,8 +60,8 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 | 2 | QA — kalan manuel testler | 🔵 Devam ediyor |
 | 3 | Auth — Supabase (email + cloud sync) | 🟢 email + pet/check-in/record/profil sync + Delete Account + **Apple Sign In** tamam |
 | 3b | Google native giriş | ⬜ Başlanmadı (Apple ✅; bkz. bölüm 7) |
-| 4 | Aile paylaşımı (Lulu Plus) | 🟡 Kod tamam; **Faz H (join path)** + QA + IAP bekliyor |
-| 5 | Free vs Plus rapor özellik farkları | ⬜ Başlanmadı (Auth sonrası) |
+| 4 | Aile paylaşımı (Lulu Plus) | 🟡 Kod + IAP tamam; **Faz H (join path)** + QA bekliyor |
+| 5 | Free vs Plus rapor özellik farkları | 🟡 PDF export Plus arkasında; diğer rapor farkları netleştirilecek |
 | 6 | PRD güncellemeleri (Profile hub, Screen 17) | ⬜ Başlanmadı |
 | 7 | Auth ekranları geliştirme (Paket F) | ⬜ Başlanmadı |
 | 8 | Pet ekleme ekranları geliştirme (Paket G) | ✅ Tamamlandı |
@@ -73,7 +74,7 @@ Aşağıdaki büyük iş paketleri kod tarafında tamamlandı:
 
 | Sıra | Yeni iş paketi | Durum |
 |------|-----|-------|
-| A | Eksik/placeholder özelliklerin tespiti & kararı | 🟢 A2 + A3 yapıldı; A1 bilinçli ertelendi |
+| A | Eksik/placeholder özelliklerin tespiti & kararı | ✅ A1 + A2 + A3 + A4 tamam |
 | B | My Pets: pet silme + aktif/vefat eden ayrımı | ✅ B1 (silme) + B2 (status/anma) yapıldı |
 | C | Records tasarım & listeleme güncellemeleri | 🟡 Grid + 8 kayıt türü yapıldı; listeleme/ekler bekliyor |
 | D | Genel tasarım yenileme (`design.md`) | 🟡 `design.md` mevcut; uygulama başlanmadı |
@@ -144,13 +145,13 @@ Bu beş paket, mevcut çekirdek tamamlandıktan sonra ele alınacak yeni kapsam.
 
 | # | Yer | Dosya | Mevcut davranış | Karar / Durum |
 |---|-----|-------|-----------------|----------------|
-| A1 | **Lulu Plus** Upgrade/Manage butonu | `components/profile/LuluPlusCard.tsx` | `ComingSoonModal` açılıyor; gerçek abonelik yok | ⏬ **Bilinçli ertele** — StoreKit/RevenueCat'e bağlı (Faz D + Gelecek). IAP gelene kadar coming-soon kalır |
+| A1 | **Lulu Plus** Upgrade/Manage butonu | `components/profile/LuluPlusCard.tsx` | Gerçek IAP + paywall | ✅ **Yapıldı** — RevenueCat, sandbox test, webhook → Supabase |
 | A2 | **Community → Rate Lulu** | `components/profile/CommunityCard.tsx` | ~~StoreReview yoksa/cooldown'da `ComingSoonModal`~~ | ✅ **Yapıldı** — yanıltıcı modal kaldırıldı; in-app prompt uygun değilse mağaza sayfası açılıyor (`APP_STORE_REVIEW_URL`, mağaza canlı olunca gerçek write-review linki ile değiştirilecek) |
 | A3 | **Records → Attachments** (foto/dosya ekleme) | `app/records/[type].tsx` | ~~Karta basınca `ComingSoonModal`~~ | ✅ **Gizlendi** — placeholder kart + modal + `RecordAttachmentPlaceholder.tsx` kaldırıldı. Gerçek ek (foto/PDF → Supabase Storage) **Paket C** (Records yeniden tasarımı) kapsamına alındı |
 | A4 | **Tek pet silme** (`deletePet`) | `stores/pet.store.ts` → çağıran UI yoktu | ~~Ölü kod~~ | ✅ **Bağlandı** — Paket B1 ile Edit Pet ekranına "Delete Pet" eklendi |
 
 **Kalan:**
-- [ ] A1: Lulu Plus IAP gerçeklenince coming-soon kaldırılacak (Faz D / Gelecek)
+- [x] A1: Lulu Plus IAP tamamlandı
 - [x] A2 metni düzeltildi · A3 gizlendi · A4 UI'a bağlandı
 - [ ] Paket C'de: gerçek record ek yükleme (foto/PDF) tasarım + Supabase Storage
 
@@ -383,9 +384,10 @@ Kullanıcı kararları: giriş/setup/home deneyimi, tek Dark tema, EN+DE dil kap
 - [x] Hesap izolasyonu — farklı hesap girişinde yerel veri wipe
 - [x] Delete Account → Supabase user silme (`delete_user` RPC, `0003_delete_user.sql`; cascade + avatar storage) + local wipe
 
-#### Faz D — Free / Plus tier temeli ⬜
-- [ ] `isPlusActive` — Supabase metadata veya RevenueCat (sonra)
-- [ ] Tier'a göre özellik gating altyapısı
+#### Faz D — Free / Plus tier temeli ✅
+- [x] `isPlusActive` — RevenueCat + Supabase `profiles` (`plus_active`); webhook (`0016`)
+- [x] Tier'a göre özellik gating (`usePlusFeature`, `0015` sunucu limitleri)
+- [x] Paywall, restore, manage subscription; sandbox + Free/Plus limit testi
 
 #### Faz E — Sync 🟡 (pet + check-in + record tamam)
 - [x] Supabase şeması: `pets`/`check_ins`/`pet_records` + RLS + trigger (`supabase/migrations/0001_init.sql`)
@@ -403,9 +405,9 @@ Splash → Onboarding (ilk kez) → Auth (zorunlu) → Setup (pet yoksa) → Hom
 
 ---
 
-### 4. Aile paylaşımı (Sprint 5, İş #10) — 🟡 kod tamam, QA + IAP bekliyor
+### 4. Aile paylaşımı (Sprint 5, İş #10) — 🟡 kod + IAP tamam, QA bekliyor
 
-**Lulu Plus** aboneliği gerekli (şimdilik dev bypass ile test — K24).
+**Lulu Plus** aboneliği gerekli — gerçek IAP sandbox'ta doğrulandı (K24).
 
 > **Not:** Orijinal plandaki `pet_shares` / `invites` / editor-viewer modeli yerine uygulanan mimari: `family_groups` + `pet_memberships` + **owner / member** rolleri (K23).
 
@@ -478,7 +480,6 @@ Deep link: Splash → Auth → join-family (fork + onboarding atlanır)
 
 #### Kalan
 - [ ] **Manuel QA** — bkz. QA matrisi (Aile paylaşımı)
-- [ ] **StoreKit / RevenueCat** → `isPlusActive` gerçek IAP (A1 ile birlikte)
 - [ ] Çakışma çözümü (offline-first sync kuyruk — Auth Faz E ileri faz)
 - [ ] *(v2)* `editor` / `viewer` rol ayrımı — şimdilik tek `member` rolü yeterli (K23)
 
@@ -491,8 +492,8 @@ Deep link: Splash → Auth → join-family (fork + onboarding atlanır)
 
 ### 5. Free vs Plus rapor özellik farkları (İş #7, Faz D)
 
-Auth ve tier altyapısı hazır olduktan sonra:
-- [ ] Free vs Plus rapor özellik farkları — şimdilik tümü açık veya basit gating
+- [x] PDF export Plus arkasında (`usePlusFeature('pdfExport')`)
+- [ ] Diğer rapor özellik farkları netleştirilecek (şimdilik çoğu özellik açık)
 
 ---
 
@@ -525,8 +526,9 @@ Auth ve tier altyapısı hazır olduktan sonra:
 
 | Konu | Bağımlılık |
 |------|------------|
-| StoreKit / RevenueCat | Lulu Plus gerçek IAP + aile paylaşımı Plus gating |
+| Android IAP | Play Store + RevenueCat (şimdilik iOS only) |
 | Aile paylaşımı QA | 2 hesap / 2 cihaz manuel test |
+| Production IAP smoke test | App Store yayını sonrası |
 | Aile paylaşımı — bilinen sorunlar | `yapilacaklar.md` §4 alt bölüm |
 | Backend account deletion | Auth (Supabase) |
 | My Pets'ten tek pet silme UI | ✅ Paket B1 |

@@ -520,28 +520,9 @@ export function LuluPlusPaywall({
       visible={visible}
       onRequestClose={handleDismiss}>
       <View style={[styles.screen, { backgroundColor }]}>
-        <View style={[styles.heroHeader, { paddingTop: insets.top + Spacing.sm }]}>
-          <View style={styles.heroHeaderSide} />
-          <View style={styles.heroLogoWrap}>
-            <LuluLogo
-              accessibilityLabel={t('paywall.title')}
-              size={HERO_LOGO_SIZE}
-              style={styles.heroLogo}
-            />
-          </View>
-          <Pressable
-            accessibilityLabel={t('common.dismissDialog')}
-            accessibilityRole="button"
-            hitSlop={16}
-            onPress={handleDismiss}
-            style={styles.closeButton}>
-            <IconSymbol name="xmark" size={18} color={Palette.ink} />
-          </Pressable>
-        </View>
-
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + Spacing.sm }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
           <View style={styles.heroSection}>
@@ -561,7 +542,23 @@ export function LuluPlusPaywall({
               pointerEvents="none"
             />
 
+            <View style={styles.heroToolbar}>
+              <Pressable
+                accessibilityLabel={t('common.dismissDialog')}
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={handleDismiss}
+                style={({ pressed }) => [styles.heroCloseButton, { opacity: pressed ? 0.7 : 1 }]}>
+                <IconSymbol name="xmark.circle.fill" size={28} color="rgba(255,255,255,0.92)" />
+              </Pressable>
+            </View>
+
             <View style={styles.heroCopy}>
+              <LuluLogo
+                accessibilityLabel={t('paywall.title')}
+                size={HERO_LOGO_SIZE}
+                style={styles.heroLogo}
+              />
               <Text
                 allowFontScaling
                 maxFontSizeMultiplier={1.25}
@@ -724,29 +721,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  heroHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.xxs,
-    zIndex: 10,
-  },
-  heroHeaderSide: {
-    width: 36,
-    height: 36,
-  },
-  heroLogoWrap: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: Radius.full,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   scroll: {
     flex: 1,
   },
@@ -755,6 +729,15 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     overflow: 'hidden',
+  },
+  heroToolbar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  heroCloseButton: {
+    padding: Spacing.xxs,
   },
   heroImage: {
     ...StyleSheet.absoluteFillObject,
@@ -766,9 +749,9 @@ const styles = StyleSheet.create({
   },
   heroCopy: {
     alignItems: 'center',
-    paddingTop: Spacing.xxs,
+    paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.sm,
-    gap: Spacing.xxs,
+    gap: Spacing.sm,
   },
   heroLogo: {
     backgroundColor: 'transparent',
@@ -779,7 +762,6 @@ const styles = StyleSheet.create({
     lineHeight: 44,
     fontWeight: '600',
     letterSpacing: -1.1,
-    marginTop: -2,
     fontFamily: Platform.select({
       ios: Fonts?.rounded,
       web: Fonts?.rounded,

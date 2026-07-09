@@ -94,6 +94,7 @@ const MAPPING = {
   'person.badge.plus': 'person-add',
   'rectangle.portrait.and.arrow.right': 'logout',
   'checkmark.circle.fill': 'check-circle',
+  'xmark.circle.fill': 'cancel',
   'xmark': 'close',
 } as IconMapping;
 

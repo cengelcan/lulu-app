@@ -31,7 +31,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
   loadOfferings: async () => {
     if (!isRevenueCatAvailable()) {
-      set({ offerings: null, error: 'errors.revenueCatUnavailable' });
+      set({ offerings: null, isLoading: false, error: null });
       return;
     }
 

@@ -315,7 +315,10 @@ export function LuluPlusPaywall({
     () => (previewMode ? [] : (offerings?.availablePackages ?? [])),
     [previewMode, offerings]
   );
-  const showMockPlans = previewMode;
+  const showMockPlans =
+    previewMode ||
+    !isRevenueCatAvailable() ||
+    (__DEV__ && !isLoading && packages.length === 0);
 
   const selectedPackage = useMemo(
     () => findPackage(packages, selectedPlanId),
@@ -712,6 +715,7 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     overflow: 'hidden',
+    minHeight: 300,
   },
   heroToolbar: {
     flexDirection: 'row',

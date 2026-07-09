@@ -1,4 +1,4 @@
-import { HeaderBackButton } from '@react-navigation/elements';
+import { HeaderBackButton } from "expo-router/react-navigation";
 import { Stack, useRouter } from 'expo-router';
 
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';

@@ -1,4 +1,4 @@
-import { useNavigation, usePreventRemove } from '@react-navigation/native';
+import { useNavigation, usePreventRemove } from "expo-router/react-navigation";
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {

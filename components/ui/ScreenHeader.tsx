@@ -1,4 +1,4 @@
-import { HeaderBackButton } from '@react-navigation/elements';
+import { HeaderBackButton } from "expo-router/react-navigation";
 import { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 

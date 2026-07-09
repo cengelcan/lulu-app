@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import { supabase } from '@/lib/supabase';
+import { waitForBootstrap } from '@/services/bootstrap/bootstrap-gate';
 import { useSharingStore } from '@/stores/sharing.store';
 import { useUserStore } from '@/stores/user.store';
 
@@ -29,18 +30,22 @@ export function useFamilySharingRealtime() {
       }
 
       debounceTimer.current = setTimeout(() => {
-        if (isRefreshing.current) {
-          return;
-        }
+        void (async () => {
+          await waitForBootstrap();
 
-        isRefreshing.current = true;
-        void handleSharingRealtimeUpdate()
-          .catch((error) => {
+          if (isRefreshing.current) {
+            return;
+          }
+
+          isRefreshing.current = true;
+          try {
+            await handleSharingRealtimeUpdate();
+          } catch (error) {
             console.warn('Failed to apply family sharing realtime update', error);
-          })
-          .finally(() => {
+          } finally {
             isRefreshing.current = false;
-          });
+          }
+        })();
       }, DEBOUNCE_MS);
     };
 

@@ -8,6 +8,7 @@ import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
 import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
 import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
+import { withCloudDataSyncLock } from '@/services/sync/sync-lock';
 
 async function refreshPetCareStores(petId: string): Promise<void> {
   const [{ useCheckInStore }, { usePetRecordStore }, { usePetReminderStore }] = await Promise.all([
@@ -42,6 +43,7 @@ async function reconcileActivePetAfterPull(previousActivePetId: string | null): 
 }
 
 async function pullAccessibleDataIntoLocal(userId: string): Promise<void> {
+  return withCloudDataSyncLock(async () => {
   const { usePetStore } = await import('@/stores/pet.store');
   const previousActivePetId = usePetStore.getState().activePetId;
 
@@ -57,6 +59,7 @@ async function pullAccessibleDataIntoLocal(userId: string): Promise<void> {
   } catch (error) {
     console.warn('Failed to sync pet reminder notifications after cloud pull', error);
   }
+  });
 }
 
 async function hasSharedPetContext(userId: string): Promise<boolean> {

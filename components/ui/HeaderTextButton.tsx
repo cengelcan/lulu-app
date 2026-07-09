@@ -1,4 +1,4 @@
-import { HeaderButton } from '@react-navigation/elements';
+import { HeaderButton } from "expo-router/react-navigation";
 import { Platform, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';

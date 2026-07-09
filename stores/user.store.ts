@@ -29,6 +29,7 @@ import {
 } from '@/services/sync/profile-sync';
 import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
+import { withCloudDataSyncLock } from '@/services/sync/sync-lock';
 import { getCurrentUserId, setCurrentUserId, removeCurrentUserId } from '@/storage/prefs.storage';
 import { getUserProfile, setUserProfile } from '@/storage/user.storage';
 import type { PlusSubscriptionDetails } from '@/services/subscription/plus-status';
@@ -116,6 +117,7 @@ function isRlsPolicyError(error: unknown): boolean {
 }
 
 async function syncUserDataFromCloud(): Promise<void> {
+  return withCloudDataSyncLock(async () => {
   let retriedAfterRlsFailure = false;
 
   while (true) {
@@ -147,6 +149,7 @@ async function syncUserDataFromCloud(): Promise<void> {
       return;
     }
   }
+  });
 }
 
 export const useUserStore = create<UserState>((set, get) => ({

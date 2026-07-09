@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 
+import { waitForBootstrap } from '@/services/bootstrap/bootstrap-gate';
 import { useSharingStore } from '@/stores/sharing.store';
 import { useUserStore } from '@/stores/user.store';
 
@@ -19,26 +20,28 @@ export function useFamilyMemberCloudSync() {
       return;
     }
 
-    const refresh = () => {
+    const refresh = async () => {
+      await waitForBootstrap();
+
       if (isRefreshing.current) {
         return;
       }
 
       isRefreshing.current = true;
-      void refreshSharedDataFromCloud()
-        .catch((error) => {
-          console.warn('Failed to refresh shared pet data from cloud', error);
-        })
-        .finally(() => {
-          isRefreshing.current = false;
-        });
+      try {
+        await refreshSharedDataFromCloud();
+      } catch (error) {
+        console.warn('Failed to refresh shared pet data from cloud', error);
+      } finally {
+        isRefreshing.current = false;
+      }
     };
 
-    refresh();
+    void refresh();
 
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
-        refresh();
+        void refresh();
       }
     });
 

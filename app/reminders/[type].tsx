@@ -1,6 +1,5 @@
-import { HeaderBackButton } from '@react-navigation/elements';
-import type { Href } from 'expo-router';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { HeaderBackButton } from "expo-router/react-navigation";
+import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 

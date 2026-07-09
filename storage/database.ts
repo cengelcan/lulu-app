@@ -5,6 +5,7 @@ import { normalizeLegacyRecordMetadata } from '@/utils/pet-record-normalize';
 const DATABASE_NAME = 'pet_health_journal.db';
 
 let database: SQLite.SQLiteDatabase | null = null;
+let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 /**
  * Migration SQL lives in storage/migrations/*.sql.
@@ -474,16 +475,22 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
     return database;
   }
 
-  const db = await SQLite.openDatabaseAsync(DATABASE_NAME);
-  await runMigrations(db);
-  database = db;
-  return db;
+  if (!databasePromise) {
+    databasePromise = (async () => {
+      const db = await SQLite.openDatabaseAsync(DATABASE_NAME);
+      await runMigrations(db);
+      database = db;
+      return db;
+    })();
+  }
+
+  return databasePromise;
 }
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-  if (!database) {
-    return initDatabase();
+  if (database) {
+    return database;
   }
 
-  return database;
+  return initDatabase();
 }

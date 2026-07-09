@@ -1,5 +1,5 @@
-import { HeaderBackButton } from '@react-navigation/elements';
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import { HeaderBackButton } from 'expo-router/react-navigation';
+import type { NativeStackNavigationOptions } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
 

@@ -2,6 +2,7 @@ import { type Href, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getNotificationLaunchRoute, syncCheckInReminderSchedule, syncPetReminderNotificationSchedule } from '@/services/notifications';
+import { beginBootstrap, completeBootstrap } from '@/services/bootstrap/bootstrap-gate';
 import { getPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
@@ -63,12 +64,14 @@ export function useBootstrap() {
   const hasStarted = useRef(false);
 
   const runBootstrap = useCallback(async () => {
+    beginBootstrap();
     const startedAt = Date.now();
     setPhase('loading');
     setError(null);
     clearOnboardingError();
     clearPetError();
 
+    try {
     // Auth must resolve first so cloud pets are pulled into the local cache
     // before we load them into the pet store.
     await Promise.all([loadOnboardingStatus(), initializeAuth()]);
@@ -128,6 +131,9 @@ export function useBootstrap() {
     }
 
     router.replace(route);
+    } finally {
+      completeBootstrap();
+    }
   }, [
     clearOnboardingError,
     clearPetError,

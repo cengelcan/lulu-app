@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
-import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { MemorialTabContent } from '@/components/pets/MemorialTabContent';
 import { PetListRow } from '@/components/pet/PetListRow';
 import { ThemedText } from '@/components/themed-text';
@@ -46,9 +45,7 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
 
   const {
     allowed: canAddPet,
-    paywallVisible,
     requestAccess,
-    dismissPaywall,
   } = usePlusFeature('multiplePets');
 
   const [isSwitching, setIsSwitching] = useState(false);
@@ -215,9 +212,6 @@ export function MyPetsScreenContent({ edges = ['top', 'bottom'] }: MyPetsScreenC
           ) : null}
         </View>
       )}
-      {paywallVisible ? (
-        <LuluPlusPaywall visible onDismiss={dismissPaywall} />
-      ) : null}
     </ScreenContainer>
   );
 }

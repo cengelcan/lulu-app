@@ -1,10 +1,10 @@
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { LULU_PLUS_FEATURES } from '@/constants/plus-features';
@@ -106,12 +106,11 @@ function buildActiveSubscriptionCopy(
 }
 
 export function LuluPlusCard() {
+  const router = useRouter();
   const { t, language } = useTranslation();
   const isPlusActive = useUserStore((state) => state.isPlusActive);
   const plusExpiresAt = useUserStore((state) => state.plusExpiresAt);
   const plusSubscription = useUserStore((state) => state.plusSubscription);
-
-  const [isPaywallVisible, setIsPaywallVisible] = useState(false);
 
   useEffect(() => {
     if (isPlusActive) {
@@ -141,16 +140,15 @@ export function LuluPlusCard() {
       return;
     }
 
-    setIsPaywallVisible(true);
+    router.push('/paywall');
   };
 
   return (
-    <>
-      <LinearGradient
-        colors={[...GRADIENT_COLORS]}
-        start={GRADIENT_START}
-        end={GRADIENT_END}
-        style={styles.card}>
+    <LinearGradient
+      colors={[...GRADIENT_COLORS]}
+      start={GRADIENT_START}
+      end={GRADIENT_END}
+      style={styles.card}>
         <View style={styles.header}>
           <ThemedText type="subtitle" lightColor={Palette.onDark} darkColor={Palette.onDark}>
             {t('profile.luluPlus')}
@@ -218,16 +216,7 @@ export function LuluPlusCard() {
             </Text>
           </Pressable>
         ) : null}
-      </LinearGradient>
-
-      {isPaywallVisible ? (
-        <LuluPlusPaywall
-          key={language}
-          visible
-          onDismiss={() => setIsPaywallVisible(false)}
-        />
-      ) : null}
-    </>
+    </LinearGradient>
   );
 }
 

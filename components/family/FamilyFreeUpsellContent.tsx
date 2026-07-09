@@ -1,11 +1,10 @@
 import { useRouter } from 'expo-router';
 import type { Href } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { FamilyBenefitCard } from '@/components/family/FamilyBenefitCard';
 import { FamilyHeroPlaceholder } from '@/components/family/FamilyHeroPlaceholder';
-import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
@@ -16,7 +15,6 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 export function FamilyFreeUpsellContent() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [isPaywallVisible, setIsPaywallVisible] = useState(false);
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
 
@@ -74,7 +72,7 @@ export function FamilyFreeUpsellContent() {
         <Button
           title={t('family.free.unlockCta')}
           leadingIcon={<PlusLockButtonIcon />}
-          onPress={() => setIsPaywallVisible(true)}
+          onPress={() => router.push('/paywall')}
         />
         <Pressable
           accessibilityRole="button"
@@ -85,8 +83,6 @@ export function FamilyFreeUpsellContent() {
           </ThemedText>
         </Pressable>
       </View>
-
-      <LuluPlusPaywall visible={isPaywallVisible} onDismiss={() => setIsPaywallVisible(false)} />
     </View>
   );
 }

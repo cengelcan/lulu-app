@@ -23,6 +23,40 @@ let configured = false;
 let configurePromise: Promise<boolean> | null = null;
 let loggedInUserId: string | null = null;
 let customerInfoListener: ((info: CustomerInfo) => void) | null = null;
+let identityLock: Promise<void> = Promise.resolve();
+
+type RevenueCatIdentityOptions = {
+  email?: string | null;
+};
+
+async function withIdentityLock<T>(operation: () => Promise<T>): Promise<T> {
+  const previous = identityLock;
+  let release!: () => void;
+  identityLock = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+
+  await previous;
+
+  try {
+    return await operation();
+  } finally {
+    release();
+  }
+}
+
+async function syncSubscriberEmail(email: string | null | undefined): Promise<void> {
+  const normalized = email?.trim();
+  if (!normalized) {
+    return;
+  }
+
+  try {
+    await Purchases.setEmail(normalized);
+  } catch (error) {
+    console.warn('[RevenueCat] setEmail failed', error);
+  }
+}
 
 export function isNativePurchasesModuleLinked(): boolean {
   return Boolean(NativeModules.RNPurchases);
@@ -66,7 +100,7 @@ export async function configureRevenueCat(): Promise<boolean> {
   configurePromise = (async () => {
     try {
       if (__DEV__) {
-        Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+        Purchases.setLogLevel(LOG_LEVEL.INFO);
       }
 
       Purchases.configure({ apiKey });
@@ -140,24 +174,33 @@ export function getPlusStatusFromCustomerInfo(info: CustomerInfo): PlusStatus {
   });
 }
 
-export async function logInRevenueCat(userId: string): Promise<PlusStatus> {
-  if (loggedInUserId === userId) {
-    const customerInfo = await Purchases.getCustomerInfo();
-    return getPlusStatusFromCustomerInfo(customerInfo);
-  }
+export async function logInRevenueCat(
+  userId: string,
+  options?: RevenueCatIdentityOptions
+): Promise<PlusStatus> {
+  return withIdentityLock(async () => {
+    if (loggedInUserId === userId) {
+      await syncSubscriberEmail(options?.email);
+      const customerInfo = await Purchases.getCustomerInfo();
+      return getPlusStatusFromCustomerInfo(customerInfo);
+    }
 
-  const { customerInfo } = await Purchases.logIn(userId);
-  loggedInUserId = userId;
-  return getPlusStatusFromCustomerInfo(customerInfo);
+    const { customerInfo } = await Purchases.logIn(userId);
+    loggedInUserId = userId;
+    await syncSubscriberEmail(options?.email);
+    return getPlusStatusFromCustomerInfo(customerInfo);
+  });
 }
 
 export async function logOutRevenueCat(): Promise<void> {
-  if (!configured) {
-    return;
-  }
+  return withIdentityLock(async () => {
+    if (!configured) {
+      return;
+    }
 
-  await Purchases.logOut();
-  loggedInUserId = null;
+    await Purchases.logOut();
+    loggedInUserId = null;
+  });
 }
 
 export async function fetchRevenueCatPlusStatus(): Promise<PlusStatus | null> {
@@ -212,18 +255,20 @@ export function subscribeToRevenueCatUpdates(onUpdate: (status: PlusStatus) => v
 }
 
 export async function teardownRevenueCat(): Promise<void> {
-  if (customerInfoListener) {
-    Purchases.removeCustomerInfoUpdateListener(customerInfoListener);
-    customerInfoListener = null;
-  }
-
-  if (configured) {
-    try {
-      await Purchases.logOut();
-    } catch {
-      // Anonymous session after logout is fine.
+  return withIdentityLock(async () => {
+    if (customerInfoListener) {
+      Purchases.removeCustomerInfoUpdateListener(customerInfoListener);
+      customerInfoListener = null;
     }
-    configured = false;
-    loggedInUserId = null;
-  }
+
+    if (configured) {
+      try {
+        await Purchases.logOut();
+      } catch {
+        // Anonymous session after logout is fine.
+      }
+      configured = false;
+      loggedInUserId = null;
+    }
+  });
 }

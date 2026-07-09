@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { type PlusFeature } from '@/constants/subscription';
@@ -12,6 +13,7 @@ import {
 } from '@/utils/subscription-limits';
 
 export function usePlusFeature(feature: PlusFeature) {
+  const router = useRouter();
   const isPlusActive = useUserStore((state) => state.isPlusActive);
   const pets = usePetStore((state) => state.pets);
   const [context, setContext] = useState<PlusFeatureContext>(() => ({
@@ -20,7 +22,6 @@ export function usePlusFeature(feature: PlusFeature) {
     recordsThisMonth: 0,
     remindersThisMonth: 0,
   }));
-  const [paywallVisible, setPaywallVisible] = useState(false);
 
   const ownedActivePetCount = useMemo(() => countOwnedActivePets(pets), [pets]);
 
@@ -48,12 +49,8 @@ export function usePlusFeature(feature: PlusFeature) {
   );
 
   const requestAccess = useCallback(() => {
-    setPaywallVisible(true);
-  }, []);
-
-  const dismissPaywall = useCallback(() => {
-    setPaywallVisible(false);
-  }, []);
+    router.push('/paywall');
+  }, [router]);
 
   const refreshLimits = useCallback(async () => {
     const nextContext = await buildPlusFeatureContext(isPlusActive, pets);
@@ -66,9 +63,7 @@ export function usePlusFeature(feature: PlusFeature) {
     ownedActivePetCount,
     recordsThisMonth: context.recordsThisMonth,
     remindersThisMonth: context.remindersThisMonth,
-    paywallVisible,
     requestAccess,
-    dismissPaywall,
     refreshLimits,
   };
 }

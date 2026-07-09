@@ -181,7 +181,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         applySession(session);
 
         if (session) {
-          void initializeSubscription(session.user.id);
+          void initializeSubscription(session.user.id, { email: session.user.email });
         } else {
           void teardownSubscription();
         }
@@ -198,7 +198,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         applySession(session);
         const wiped = await enforceUserDataIsolation(session.user.id);
         await syncUserDataFromCloud();
-        await initializeSubscription(session.user.id);
+        await initializeSubscription(session.user.id, { email: session.user.email });
         if (wiped) {
           set({ displayName: null, avatarUri: null });
         }
@@ -218,7 +218,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       const session = await authSignInWithEmail(email, password);
       const wiped = await enforceUserDataIsolation(session.user.id);
       await syncUserDataFromCloud();
-      await initializeSubscription(session.user.id);
+      await initializeSubscription(session.user.id, { email: session.user.email });
       set({
         userId: session.user.id,
         email: session.user.email ?? null,
@@ -245,7 +245,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       const { session } = result;
       const wiped = await enforceUserDataIsolation(session.user.id);
       await syncUserDataFromCloud();
-      await initializeSubscription(session.user.id);
+      await initializeSubscription(session.user.id, { email: session.user.email });
 
       set({
         userId: session.user.id,
@@ -282,7 +282,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       if (session) {
         const wiped = await enforceUserDataIsolation(session.user.id);
         await syncUserDataFromCloud();
-        await initializeSubscription(session.user.id);
+        await initializeSubscription(session.user.id, { email: session.user.email });
         set({
           userId: session.user.id,
           email: session.user.email ?? null,

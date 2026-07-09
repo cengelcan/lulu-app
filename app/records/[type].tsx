@@ -3,7 +3,6 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { RecordNotesField } from '@/components/records/RecordNotesField';
 import { RecordTypeFields } from '@/components/records/RecordTypeFields';
@@ -123,7 +122,7 @@ export default function RecordFormScreen() {
   const loadPet = usePetStore((state) => state.loadPet);
   const createRecord = usePetRecordStore((state) => state.createRecord);
   const updateRecord = usePetRecordStore((state) => state.updateRecord);
-  const { allowed: canCreateRecord, paywallVisible, requestAccess, dismissPaywall } =
+  const { allowed: canCreateRecord, requestAccess } =
     usePlusFeature('unlimitedRecords');
   const isPlusActive = useUserStore((state) => state.isPlusActive);
 
@@ -399,7 +398,6 @@ export default function RecordFormScreen() {
           </>
         )}
       </ScreenContainer>
-      {paywallVisible ? <LuluPlusPaywall visible onDismiss={dismissPaywall} /> : null}
     </>
   );
 }

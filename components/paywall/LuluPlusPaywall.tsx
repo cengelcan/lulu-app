@@ -1,6 +1,4 @@
 import * as Haptics from 'expo-haptics';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -15,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import type { PurchasesPackage } from 'react-native-purchases';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LuluLogo } from '@/components/LuluLogo';
 import { BrandGradientFill } from '@/components/ui/BrandGradient';
@@ -35,9 +33,8 @@ import { useSubscriptionStore } from '@/stores/subscription.store';
 import { useUserStore } from '@/stores/user.store';
 import { translateError } from '@/utils/translate-error';
 
-const HERO_IMAGE = require('@/assets/images/welcome-bg.png');
 const APP_STORE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscriptions';
-const HERO_LOGO_SIZE = 56;
+const HERO_LOGO_SIZE = 80;
 
 type PlanVisual = {
   icon: IconSymbolName;
@@ -83,14 +80,17 @@ const PLAN_OPTIONS: PlanOption[] = [
   },
 ];
 
-type LuluPlusPaywallProps = {
-  visible: boolean;
+type LuluPlusPaywallContentProps = {
   onDismiss: () => void;
   onPurchaseComplete?: () => void;
   /** Dev/screenshot mode — shows mock plan prices without RevenueCat. */
   previewMode?: boolean;
   /** Pre-select a plan (preview screenshots / deep links). */
   initialSelectedPlan?: SubscriptionProductId;
+};
+
+type LuluPlusPaywallProps = LuluPlusPaywallContentProps & {
+  visible: boolean;
 };
 
 async function openLegalUrl(url: string): Promise<void> {
@@ -271,14 +271,13 @@ function TrustBadge({ icon, label, iconColor, textSecondaryColor }: TrustBadgePr
   );
 }
 
-export function LuluPlusPaywall({
-  visible,
+export function LuluPlusPaywallContent({
   onDismiss,
   onPurchaseComplete,
   previewMode = false,
   initialSelectedPlan = SUBSCRIPTION_PRODUCT_IDS.yearly,
-}: LuluPlusPaywallProps) {
-  const { t, language } = useTranslation();
+}: LuluPlusPaywallContentProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const backgroundColor = useThemeColor({}, 'background');
@@ -306,10 +305,10 @@ export function LuluPlusPaywall({
   }, [initialSelectedPlan]);
 
   useEffect(() => {
-    if (visible && !previewMode) {
+    if (!previewMode) {
       void loadOfferings();
     }
-  }, [loadOfferings, previewMode, visible]);
+  }, [loadOfferings, previewMode]);
 
   const packages = useMemo(
     () => (previewMode ? [] : (offerings?.availablePackages ?? [])),
@@ -491,75 +490,51 @@ export function LuluPlusPaywall({
   };
 
   return (
-    <Modal
-      key={language}
-      animationType="slide"
-      presentationStyle="fullScreen"
-      statusBarTranslucent={false}
-      visible={visible}
-      onRequestClose={handleDismiss}>
-      <View style={[styles.screen, { backgroundColor }]}>
+    <SafeAreaView style={[styles.screen, { backgroundColor }]} edges={['bottom']}>
+      <View style={styles.layout}>
+        <View style={[styles.headerBar, { paddingTop: insets.top + Spacing.md }]}>
+          <Pressable
+            accessibilityLabel={t('common.dismissDialog')}
+            accessibilityRole="button"
+            hitSlop={12}
+            onPress={handleDismiss}
+            style={({ pressed }) => [styles.closeButton, { opacity: pressed ? 0.7 : 1 }]}>
+            <IconSymbol name="xmark.circle.fill" size={30} color={textSecondaryColor} />
+          </Pressable>
+        </View>
+
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + Spacing.sm }]}
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
-          <View style={styles.heroSection}>
-            <Image
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              source={HERO_IMAGE}
-              style={styles.heroImage}
-              contentFit="cover"
-              contentPosition="top center"
-              pointerEvents="none"
+          <View style={styles.heroCopy}>
+            <LuluLogo
+              accessibilityLabel={t('paywall.title')}
+              size={HERO_LOGO_SIZE}
+              style={styles.heroLogo}
             />
-            <LinearGradient
-              colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)', backgroundColor]}
-              locations={[0, 0.5, 1]}
-              style={styles.heroGradient}
-              pointerEvents="none"
-            />
-
-            <View style={styles.heroToolbar}>
-              <Pressable
-                accessibilityLabel={t('common.dismissDialog')}
-                accessibilityRole="button"
-                hitSlop={8}
-                onPress={handleDismiss}
-                style={({ pressed }) => [styles.heroCloseButton, { opacity: pressed ? 0.7 : 1 }]}>
-                <IconSymbol name="xmark.circle.fill" size={28} color="rgba(255,255,255,0.92)" />
-              </Pressable>
-            </View>
-
-            <View style={styles.heroCopy}>
-              <LuluLogo
-                accessibilityLabel={t('paywall.title')}
-                size={HERO_LOGO_SIZE}
-                style={styles.heroLogo}
-              />
+            <Text
+              allowFontScaling
+              maxFontSizeMultiplier={1.25}
+              style={[styles.heroTitle, { color: brandAccentLightColor }]}>
+              {t('paywall.title')}
+            </Text>
+            <View
+              style={[
+                styles.heroPill,
+                {
+                  backgroundColor: brandAccentSoftColor,
+                  borderColor: Palette.brandAccentBorder,
+                },
+              ]}>
+              <IconSymbol name="sparkles" size={14} color={brandAccentColor} />
               <Text
                 allowFontScaling
-                maxFontSizeMultiplier={1.25}
-                style={[styles.heroTitle, { color: brandAccentLightColor }]}>
-                {t('paywall.title')}
+                maxFontSizeMultiplier={1.3}
+                style={[styles.heroPillText, { color: textColor }]}>
+                {t('paywall.heroPill')}
               </Text>
-              <View
-                style={[
-                  styles.heroPill,
-                  {
-                    backgroundColor: brandAccentSoftColor,
-                    borderColor: Palette.brandAccentBorder,
-                  },
-                ]}>
-                <IconSymbol name="sparkles" size={14} color={brandAccentColor} />
-                <Text
-                  allowFontScaling
-                  maxFontSizeMultiplier={1.3}
-                  style={[styles.heroPillText, { color: textColor }]}>
-                  {t('paywall.heroPill')}
-                </Text>
-              </View>
             </View>
           </View>
 
@@ -666,7 +641,6 @@ export function LuluPlusPaywall({
           style={[
             styles.footer,
             {
-              paddingBottom: Math.max(insets.bottom, Spacing.md),
               backgroundColor,
               borderTopColor: borderColor,
             },
@@ -682,9 +656,7 @@ export function LuluPlusPaywall({
             onPress={() => void handlePrimaryPress()}
             style={({ pressed }) => [
               styles.ctaButton,
-              isPlusActive
-                ? { backgroundColor: brandAccentColor }
-                : styles.ctaButtonGradient,
+              isPlusActive ? { backgroundColor: brandAccentColor } : styles.ctaButtonGradient,
               {
                 opacity:
                   !isPlusActive && !previewMode && (!canPurchase || isLoading) ? 0.45 : pressed ? 0.9 : 1,
@@ -699,6 +671,19 @@ export function LuluPlusPaywall({
           </Pressable>
         </View>
       </View>
+    </SafeAreaView>
+  );
+}
+
+/** @deprecated Prefer the `/paywall` route or `LuluPlusPaywallContent` on a full-screen stack screen. */
+export function LuluPlusPaywall({ visible, ...props }: LuluPlusPaywallProps) {
+  return (
+    <Modal
+      animationType="slide"
+      presentationStyle="fullScreen"
+      visible={visible}
+      onRequestClose={props.onDismiss}>
+      <LuluPlusPaywallContent {...props} />
     </Modal>
   );
 }
@@ -707,36 +692,34 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  layout: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: Spacing.xl,
+    flexGrow: 1,
+    paddingBottom: Spacing.lg,
   },
-  heroSection: {
-    overflow: 'hidden',
-    minHeight: 300,
-  },
-  heroToolbar: {
+  headerBar: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    marginBottom: Spacing.sm,
+    paddingBottom: Spacing.xs,
+    zIndex: 1,
   },
-  heroCloseButton: {
-    padding: Spacing.xxs,
-  },
-  heroImage: {
-    ...StyleSheet.absoluteFillObject,
-    width: '100%',
-    height: '100%',
-  },
-  heroGradient: {
-    ...StyleSheet.absoluteFillObject,
+  closeButton: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   heroCopy: {
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xxs,
     paddingBottom: Spacing.sm,
     gap: Spacing.sm,
   },
@@ -773,7 +756,6 @@ const styles = StyleSheet.create({
   body: {
     paddingHorizontal: Spacing.lg,
     gap: Spacing.lg,
-    marginTop: -Spacing.xs,
   },
   featuresCard: {
     borderRadius: Radius.xl,
@@ -944,6 +926,7 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   ctaButton: {

@@ -1,7 +1,6 @@
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
 
-import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
+import { LuluPlusPaywallContent } from '@/components/paywall/LuluPlusPaywall';
 import { SUBSCRIPTION_PRODUCT_IDS, type SubscriptionProductId } from '@/constants/subscription';
 
 const PLAN_PARAM_MAP = {
@@ -31,23 +30,16 @@ function resolveInitialPlan(plan?: string | string[]): SubscriptionProductId {
 export default function PaywallPreviewScreen() {
   const router = useRouter();
   const { plan } = useLocalSearchParams<{ plan?: string }>();
-  const [visible, setVisible] = useState(true);
 
   if (!__DEV__) {
     return <Redirect href="/(tabs)/home" />;
   }
 
-  if (!visible) {
-    return <Redirect href="/(tabs)/home" />;
-  }
-
   return (
-    <LuluPlusPaywall
-      visible={visible}
+    <LuluPlusPaywallContent
       previewMode
       initialSelectedPlan={resolveInitialPlan(plan)}
       onDismiss={() => {
-        setVisible(false);
         if (router.canGoBack()) {
           router.back();
         }

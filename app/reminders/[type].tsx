@@ -3,7 +3,6 @@ import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 
-import { LuluPlusPaywall } from '@/components/paywall/LuluPlusPaywall';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { RecordNotesField } from '@/components/records/RecordNotesField';
 import { ReminderRecurrenceField } from '@/components/reminders/ReminderRecurrenceField';
@@ -72,7 +71,7 @@ export default function ReminderFormScreen() {
   const skipReminder = usePetReminderStore((state) => state.skipReminder);
   const snoozeReminder = usePetReminderStore((state) => state.snoozeReminder);
   const deleteReminder = usePetReminderStore((state) => state.deleteReminder);
-  const { allowed: canCreateReminder, paywallVisible, requestAccess, dismissPaywall } =
+  const { allowed: canCreateReminder, requestAccess } =
     usePlusFeature('unlimitedReminders');
   const isPlusActive = useUserStore((state) => state.isPlusActive);
 
@@ -551,7 +550,6 @@ export default function ReminderFormScreen() {
           </>
         )}
       </ScreenContainer>
-      {paywallVisible ? <LuluPlusPaywall visible onDismiss={dismissPaywall} /> : null}
     </>
   );
 }

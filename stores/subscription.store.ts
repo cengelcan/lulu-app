@@ -44,7 +44,9 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const ready = await ensureRevenueCatSession(userId);
+      const ready = await ensureRevenueCatSession(userId, {
+        email: useUserStore.getState().email,
+      });
       if (!ready) {
         throw new Error('errors.revenueCatUnavailable');
       }

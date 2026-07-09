@@ -49,6 +49,14 @@ export default function RootLayout() {
         <Stack.Screen name="reports" />
         <Stack.Screen name="records" />
         <Stack.Screen name="reminders" />
+        <Stack.Screen
+          name="paywall"
+          options={{
+            presentation: 'fullScreenModal',
+            animation: 'slide_from_bottom',
+            contentStyle: { flex: 1 },
+          }}
+        />
         <Stack.Screen name="paywall-preview" />
       </Stack>
       <StatusBar style="light" />

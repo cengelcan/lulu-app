@@ -12,7 +12,13 @@ import { resolvePlusStatusForUser } from '@/services/sync/subscription-sync';
 let unsubscribeRevenueCat: (() => void) | null = null;
 let activeUserId: string | null = null;
 let initializedForUserId: string | null = null;
+let initializePromise: Promise<void> | null = null;
+let initializeTargetUserId: string | null = null;
 let onPlusStatusChange: ((status: PlusStatus) => void) | null = null;
+
+type SubscriptionInitOptions = {
+  email?: string | null;
+};
 
 export function registerPlusStatusHandler(handler: (status: PlusStatus) => void): void {
   onPlusStatusChange = handler;
@@ -28,16 +34,10 @@ async function syncPlusStatus(userId: string): Promise<void> {
   applyPlusStatus(status);
 }
 
-export async function initializeSubscription(userId: string | null): Promise<void> {
-  if (!userId) {
-    if (activeUserId !== null || initializedForUserId !== null) {
-      await teardownSubscription();
-    } else {
-      applyPlusStatus({ isPlusActive: false, plusExpiresAt: null, subscription: null });
-    }
-    return;
-  }
-
+async function initializeSubscriptionInner(
+  userId: string,
+  options?: SubscriptionInitOptions
+): Promise<void> {
   if (userId === initializedForUserId) {
     await syncPlusStatus(userId);
     return;
@@ -55,7 +55,7 @@ export async function initializeSubscription(userId: string | null): Promise<voi
 
   if (configured) {
     try {
-      await logInRevenueCat(userId);
+      await logInRevenueCat(userId, { email: options?.email });
     } catch (error) {
       console.warn('RevenueCat logIn failed', error);
     }
@@ -70,6 +70,41 @@ export async function initializeSubscription(userId: string | null): Promise<voi
   await syncPlusStatus(userId);
 }
 
+export async function initializeSubscription(
+  userId: string | null,
+  options?: SubscriptionInitOptions
+): Promise<void> {
+  if (!userId) {
+    initializePromise = null;
+    initializeTargetUserId = null;
+
+    if (activeUserId !== null || initializedForUserId !== null) {
+      await teardownSubscription();
+    } else {
+      applyPlusStatus({ isPlusActive: false, plusExpiresAt: null, subscription: null });
+    }
+    return;
+  }
+
+  if (initializePromise && initializeTargetUserId === userId) {
+    return initializePromise;
+  }
+
+  if (initializePromise) {
+    await initializePromise.catch(() => {});
+  }
+
+  initializeTargetUserId = userId;
+  initializePromise = initializeSubscriptionInner(userId, options).finally(() => {
+    if (initializeTargetUserId === userId) {
+      initializePromise = null;
+      initializeTargetUserId = null;
+    }
+  });
+
+  return initializePromise;
+}
+
 export async function refreshSubscriptionStatus(): Promise<void> {
   if (!activeUserId) {
     return;
@@ -79,7 +114,10 @@ export async function refreshSubscriptionStatus(): Promise<void> {
 }
 
 /** Ensures RevenueCat is configured and bound to the Supabase user before paywall IAP. */
-export async function ensureRevenueCatSession(userId: string): Promise<boolean> {
+export async function ensureRevenueCatSession(
+  userId: string,
+  options?: SubscriptionInitOptions
+): Promise<boolean> {
   if (!isRevenueCatAvailable()) {
     return false;
   }
@@ -90,7 +128,7 @@ export async function ensureRevenueCatSession(userId: string): Promise<boolean> 
   }
 
   try {
-    await logInRevenueCat(userId);
+    await logInRevenueCat(userId, { email: options?.email });
     activeUserId = userId;
     initializedForUserId = userId;
     return true;
@@ -101,6 +139,9 @@ export async function ensureRevenueCatSession(userId: string): Promise<boolean> 
 }
 
 export async function teardownSubscription(): Promise<void> {
+  initializePromise = null;
+  initializeTargetUserId = null;
+
   if (unsubscribeRevenueCat) {
     unsubscribeRevenueCat();
     unsubscribeRevenueCat = null;

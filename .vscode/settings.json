@@ -1,4 +1,7 @@
 {
+  "css.customData": [".vscode/email.css-data.json"],
+  "css.lint.unknownProperties": "ignore",
+  "html.validate.styles": false,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",

@@ -1,0 +1,17 @@
+{
+  "version": 1.1,
+  "properties": [
+    {
+      "name": "mso-table-lspace",
+      "description": "Outlook: removes left spacing between table cells."
+    },
+    {
+      "name": "mso-table-rspace",
+      "description": "Outlook: removes right spacing between table cells."
+    },
+    {
+      "name": "mso-hide",
+      "description": "Outlook: hides preheader text from the message body."
+    }
+  ]
+}

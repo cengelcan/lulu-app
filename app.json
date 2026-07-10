@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
+      "buildNumber": "3",
       "deploymentTarget": "16.4",
       "bundleIdentifier": "com.luluapp.app",
       "usesAppleSignIn": true,

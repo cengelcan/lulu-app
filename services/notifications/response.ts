@@ -39,17 +39,22 @@ export async function getNotificationLaunchRoute(): Promise<Href | null> {
     return null;
   }
 
-  const Notifications = await getExpoNotificationsModule();
-  if (!Notifications) {
+  try {
+    const Notifications = await getExpoNotificationsModule();
+    if (!Notifications) {
+      return null;
+    }
+
+    const response = await Notifications.getLastNotificationResponseAsync();
+    const route = getRouteFromNotificationResponse(response);
+
+    if (route) {
+      await Notifications.clearLastNotificationResponseAsync();
+    }
+
+    return route;
+  } catch (error) {
+    console.warn('[notifications] Failed to read launch notification route', error);
     return null;
   }
-
-  const response = await Notifications.getLastNotificationResponseAsync();
-  const route = getRouteFromNotificationResponse(response);
-
-  if (route) {
-    await Notifications.clearLastNotificationResponseAsync();
-  }
-
-  return route;
 }

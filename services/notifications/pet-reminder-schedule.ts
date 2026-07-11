@@ -7,6 +7,7 @@ import {
   PET_REMINDER_REMINDER_SOUND,
 } from '@/services/notifications/constants';
 import { getPetReminderNotificationContent } from '@/services/notifications/content';
+import { ensureNotificationHandlerConfigured } from '@/services/notifications/handler';
 import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { resolvePetPhotoAttachment } from '@/services/notifications/pet-photo-attachment';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
@@ -127,6 +128,8 @@ export async function syncPetReminderNotificationSchedule(input?: {
   if (Platform.OS === 'web') {
     return;
   }
+
+  await ensureNotificationHandlerConfigured();
 
   const [enabled, pet, language] = await Promise.all([
     input?.enabled !== undefined

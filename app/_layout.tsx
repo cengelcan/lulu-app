@@ -23,12 +23,6 @@ export default function RootLayout() {
     void loadLanguage();
   }, [loadLanguage]);
 
-  useEffect(() => {
-    void import('@/services/notifications/handler').then(({ configureNotificationHandler }) =>
-      configureNotificationHandler()
-    );
-  }, []);
-
   return (
     <ThemeProvider value={DarkTheme}>
       <Stack screenOptions={{ headerShown: false }}>

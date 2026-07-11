@@ -13,6 +13,7 @@ import {
   formatCheckInReminderDateKey,
 } from '@/services/notifications/check-in-reminder-variants';
 import { getCheckInReminderContentForDate } from '@/services/notifications/content';
+import { ensureNotificationHandlerConfigured } from '@/services/notifications/handler';
 import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { resolvePetPhotoAttachment } from '@/services/notifications/pet-photo-attachment';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
@@ -145,6 +146,8 @@ export async function syncCheckInReminderSchedule(input?: {
   if (Platform.OS === 'web') {
     return;
   }
+
+  await ensureNotificationHandlerConfigured();
 
   const [reminderTime, permission, activePet, language] = await Promise.all([
     input?.reminderTime !== undefined ? Promise.resolve(input.reminderTime) : getCheckInReminderTime(),

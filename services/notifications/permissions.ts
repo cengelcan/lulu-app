@@ -8,6 +8,7 @@ import {
   PET_REMINDER_REMINDER_SOUND,
 } from '@/services/notifications/constants';
 import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
+import { ensureNotificationHandlerConfigured } from '@/services/notifications/handler';
 import type { ResolvedLanguage } from '@/types/language';
 import { DEFAULT_APP_LANGUAGE } from '@/types/language';
 
@@ -71,6 +72,7 @@ export async function requestNotificationPermission(
     return false;
   }
 
+  await ensureNotificationHandlerConfigured();
   await ensureAndroidNotificationChannels(language);
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();

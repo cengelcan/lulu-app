@@ -106,7 +106,8 @@ export function useBootstrap() {
     const isAuthenticated = useUserStore.getState().authStatus === 'authenticated';
     const hasAnyPet = await petStorage.hasAnyPet();
     const joinIntent = await hasJoinIntent();
-    const notificationRoute = await getNotificationLaunchRoute();
+    const notificationRoute =
+      isAuthenticated && hasAnyPet ? await getNotificationLaunchRoute() : null;
     await waitForMinSplashDuration(startedAt);
 
     const pendingJoinCode = isAuthenticated ? await getPendingFamilyJoinCode() : null;

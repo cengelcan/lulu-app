@@ -1,4 +1,4 @@
-export { configureNotificationHandler } from '@/services/notifications/handler';
+export { configureNotificationHandler, ensureNotificationHandlerConfigured } from '@/services/notifications/handler';
 export {
   getNotificationLaunchRoute,
   getRouteFromNotificationResponse,

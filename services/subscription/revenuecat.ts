@@ -1,9 +1,8 @@
 import { NativeModules, Platform } from 'react-native';
-import Purchases, {
-  LOG_LEVEL,
-  type CustomerInfo,
-  type PurchasesOffering,
-  type PurchasesPackage,
+import type {
+  CustomerInfo,
+  PurchasesOffering,
+  PurchasesPackage,
 } from 'react-native-purchases';
 
 import {
@@ -19,6 +18,11 @@ import {
 } from '@/services/subscription/plus-status';
 import { isIntroOrTrialPeriod } from '@/utils/subscription-display';
 
+type PurchasesModule = typeof import('react-native-purchases').default;
+
+let purchasesModule: PurchasesModule | null = null;
+let purchasesModulePromise: Promise<PurchasesModule | null> | null = null;
+
 let configured = false;
 let configurePromise: Promise<boolean> | null = null;
 let loggedInUserId: string | null = null;
@@ -28,6 +32,33 @@ let identityLock: Promise<void> = Promise.resolve();
 type RevenueCatIdentityOptions = {
   email?: string | null;
 };
+
+async function loadPurchasesModule(): Promise<PurchasesModule | null> {
+  if (Platform.OS !== 'ios' || !isNativePurchasesModuleLinked()) {
+    return null;
+  }
+
+  if (purchasesModule) {
+    return purchasesModule;
+  }
+
+  if (!purchasesModulePromise) {
+    purchasesModulePromise = import('react-native-purchases')
+      .then((module) => {
+        purchasesModule = module.default;
+        return purchasesModule;
+      })
+      .catch((error) => {
+        console.warn('[RevenueCat] Failed to load native module', error);
+        return null;
+      })
+      .finally(() => {
+        purchasesModulePromise = null;
+      });
+  }
+
+  return purchasesModulePromise;
+}
 
 async function withIdentityLock<T>(operation: () => Promise<T>): Promise<T> {
   const previous = identityLock;
@@ -45,7 +76,10 @@ async function withIdentityLock<T>(operation: () => Promise<T>): Promise<T> {
   }
 }
 
-async function syncSubscriberEmail(email: string | null | undefined): Promise<void> {
+async function syncSubscriberEmail(
+  Purchases: PurchasesModule,
+  email: string | null | undefined
+): Promise<void> {
   const normalized = email?.trim();
   if (!normalized) {
     return;
@@ -99,7 +133,13 @@ export async function configureRevenueCat(): Promise<boolean> {
 
   configurePromise = (async () => {
     try {
+      const Purchases = await loadPurchasesModule();
+      if (!Purchases) {
+        return false;
+      }
+
       if (__DEV__) {
+        const { LOG_LEVEL } = await import('react-native-purchases');
         Purchases.setLogLevel(LOG_LEVEL.INFO);
       }
 
@@ -179,15 +219,20 @@ export async function logInRevenueCat(
   options?: RevenueCatIdentityOptions
 ): Promise<PlusStatus> {
   return withIdentityLock(async () => {
+    const Purchases = await loadPurchasesModule();
+    if (!Purchases) {
+      return { isPlusActive: false, plusExpiresAt: null, subscription: null };
+    }
+
     if (loggedInUserId === userId) {
-      await syncSubscriberEmail(options?.email);
+      await syncSubscriberEmail(Purchases, options?.email);
       const customerInfo = await Purchases.getCustomerInfo();
       return getPlusStatusFromCustomerInfo(customerInfo);
     }
 
     const { customerInfo } = await Purchases.logIn(userId);
     loggedInUserId = userId;
-    await syncSubscriberEmail(options?.email);
+    await syncSubscriberEmail(Purchases, options?.email);
     return getPlusStatusFromCustomerInfo(customerInfo);
   });
 }
@@ -195,6 +240,11 @@ export async function logInRevenueCat(
 export async function logOutRevenueCat(): Promise<void> {
   return withIdentityLock(async () => {
     if (!configured) {
+      return;
+    }
+
+    const Purchases = await loadPurchasesModule();
+    if (!Purchases) {
       return;
     }
 
@@ -208,6 +258,11 @@ export async function fetchRevenueCatPlusStatus(): Promise<PlusStatus | null> {
     return null;
   }
 
+  const Purchases = await loadPurchasesModule();
+  if (!Purchases) {
+    return null;
+  }
+
   const customerInfo = await Purchases.getCustomerInfo();
   return getPlusStatusFromCustomerInfo(customerInfo);
 }
@@ -217,24 +272,41 @@ export async function fetchOfferings(): Promise<PurchasesOffering | null> {
     return null;
   }
 
+  const Purchases = await loadPurchasesModule();
+  if (!Purchases) {
+    return null;
+  }
+
   const offerings = await Purchases.getOfferings();
   return offerings.current;
 }
 
 export async function purchaseRevenueCatPackage(pkg: PurchasesPackage): Promise<PlusStatus> {
+  const Purchases = await loadPurchasesModule();
+  if (!Purchases) {
+    return { isPlusActive: false, plusExpiresAt: null, subscription: null };
+  }
+
   const { customerInfo } = await Purchases.purchasePackage(pkg);
   return getPlusStatusFromCustomerInfo(customerInfo);
 }
 
 export async function restoreRevenueCatPurchases(): Promise<PlusStatus> {
+  const Purchases = await loadPurchasesModule();
+  if (!Purchases) {
+    return { isPlusActive: false, plusExpiresAt: null, subscription: null };
+  }
+
   const customerInfo = await Purchases.restorePurchases();
   return getPlusStatusFromCustomerInfo(customerInfo);
 }
 
 export function subscribeToRevenueCatUpdates(onUpdate: (status: PlusStatus) => void): () => void {
-  if (!configured) {
+  if (!configured || !purchasesModule) {
     return () => {};
   }
+
+  const Purchases = purchasesModule;
 
   if (customerInfoListener) {
     Purchases.removeCustomerInfoUpdateListener(customerInfoListener);
@@ -256,12 +328,14 @@ export function subscribeToRevenueCatUpdates(onUpdate: (status: PlusStatus) => v
 
 export async function teardownRevenueCat(): Promise<void> {
   return withIdentityLock(async () => {
-    if (customerInfoListener) {
+    const Purchases = purchasesModule ?? (await loadPurchasesModule());
+
+    if (customerInfoListener && Purchases) {
       Purchases.removeCustomerInfoUpdateListener(customerInfoListener);
       customerInfoListener = null;
     }
 
-    if (configured) {
+    if (configured && Purchases) {
       try {
         await Purchases.logOut();
       } catch {

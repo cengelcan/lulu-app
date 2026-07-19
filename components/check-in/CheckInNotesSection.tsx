@@ -24,7 +24,7 @@ export function CheckInNotesSection({
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
-  const primaryColor = useThemeColor({}, 'primary');
+  const alertColor = useThemeColor({}, 'alert');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
 
   return (
@@ -44,7 +44,7 @@ export function CheckInNotesSection({
             {
               color: textColor,
               backgroundColor: surfaceColor,
-              borderColor: isOverLimit ? primaryColor : borderColor,
+              borderColor: isOverLimit ? alertColor : borderColor,
             },
           ]}
           textAlignVertical="top"
@@ -56,10 +56,11 @@ export function CheckInNotesSection({
         </View>
       </View>
       <ThemedText
-        accessibilityLiveRegion="polite"
+        accessibilityLiveRegion={isOverLimit ? 'assertive' : 'polite'}
         accessibilityLabel={`${notes.length} of ${CHECK_IN_NOTES_MAX_LENGTH}`}
-        lightColor={isOverLimit ? primaryColor : textSecondaryColor}
-        darkColor={isOverLimit ? primaryColor : textSecondaryColor}
+        lightColor={isOverLimit ? alertColor : textSecondaryColor}
+        darkColor={isOverLimit ? alertColor : textSecondaryColor}
+        selectable
         style={styles.counter}>
         {notes.length} / {CHECK_IN_NOTES_MAX_LENGTH}
       </ThemedText>
@@ -95,6 +96,7 @@ const styles = StyleSheet.create({
   },
   counter: {
     ...Typography.caption,
+    fontVariant: ['tabular-nums'],
     textAlign: 'right',
   },
 });

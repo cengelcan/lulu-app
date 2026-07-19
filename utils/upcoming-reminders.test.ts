@@ -15,7 +15,7 @@ function createReminder(
     ...overrides,
     id: overrides.id ?? `reminder-${overrides.type}-${overrides.dueDate}`,
     petId: 'pet-1',
-    dueTime: { hour: 9, minute: 0 },
+    dueTime: overrides.dueTime ?? { hour: 9, minute: 0 },
     notes: null,
     recurrence: { frequency: 'none' as const },
     status: (overrides.status ?? 'pending') as PetReminder['status'],
@@ -93,6 +93,29 @@ describe('buildUpcomingReminders', () => {
     assert.equal(items[1]?.dueDate, '2026-08-01');
   });
 
+  it('does not classify an earlier time today as upcoming', () => {
+    const reminders = [
+      createReminder({
+        id: 'past-today',
+        type: 'medication',
+        dueDate: '2026-06-23',
+        dueTime: { hour: 9, minute: 0 },
+      }),
+      createReminder({
+        id: 'later-today',
+        type: 'custom',
+        dueDate: '2026-06-23',
+        dueTime: { hour: 15, minute: 0 },
+      }),
+    ];
+
+    const items = buildUpcomingReminders(reminders, 'en-US', t, {
+      referenceDate: REFERENCE_DATE,
+    });
+
+    assert.deepEqual(items.map((item) => item.reminderId), ['later-today']);
+  });
+
   it('ignores completed reminders', () => {
     const reminders = [
       createReminder({
@@ -109,6 +132,20 @@ describe('buildUpcomingReminders', () => {
     });
 
     assert.equal(items.length, 0);
+  });
+
+  it('excludes a reminder already highlighted as the primary Home action', () => {
+    const reminders = [
+      createReminder({ id: 'highlighted', type: 'vaccine', dueDate: '2026-06-24' }),
+      createReminder({ id: 'remaining', type: 'custom', dueDate: '2026-06-25' }),
+    ];
+
+    const items = buildUpcomingReminders(reminders, 'en-US', t, {
+      excludeReminderIds: ['highlighted'],
+      referenceDate: REFERENCE_DATE,
+    });
+
+    assert.deepEqual(items.map((item) => item.reminderId), ['remaining']);
   });
 
   it('reports whether any upcoming reminders exist within 7 days', () => {

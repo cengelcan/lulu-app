@@ -1,6 +1,6 @@
-# Allowed identical EN/DE translation keys
+# Allowed identical EN/DE/TR translation keys
 
-Some strings are intentionally the same in English and German. The parity checker (`npm run i18n:check`) excludes these from “untranslated DE” warnings.
+Some strings are intentionally the same across English, German, or Turkish. The parity checker (`npm run i18n:check`) excludes these from untranslated-string warnings.
 
 Configuration lives in `i18n/allowed-identical-keys.ts`.
 
@@ -28,6 +28,7 @@ Configuration lives in `i18n/allowed-identical-keys.ts`.
 |-----|--------|
 | `settings.languageEnglish` | Shown as “English” in every locale |
 | `settings.languageGerman` | Shown as “Deutsch” in every locale |
+| `settings.languageTurkish` | Shown as “Türkçe” in every locale |
 | `settings.languageSystem` | OS term, kept as “System” |
 
 ## Units & symbols

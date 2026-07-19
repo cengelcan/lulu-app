@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { RecordTextField } from '@/components/records/RecordTextField';
@@ -26,6 +27,45 @@ type RecordTypeFieldsProps = {
   metadata: PetRecordMetadataByType[RecordTypeId];
   onChangeMetadata: (metadata: PetRecordMetadataByType[RecordTypeId]) => void;
 };
+
+type WeightFieldsProps = {
+  data: PetRecordMetadataByType['weight'];
+  onChangeMetadata: (metadata: PetRecordMetadataByType['weight']) => void;
+};
+
+function WeightFields({ data, onChangeMetadata }: WeightFieldsProps) {
+  const { t } = useTranslation();
+  const [weightText, setWeightText] = useState(() =>
+    data.value > 0 ? String(data.value) : ''
+  );
+
+  return (
+    <View style={styles.section}>
+      <RecordTextField
+        keyboardType="decimal-pad"
+        label={t('records.fields.weightValue')}
+        maxLength={8}
+        placeholder={t('records.fields.weightValuePlaceholder')}
+        value={weightText}
+        onChangeText={(value) => {
+          setWeightText(value);
+          onChangeMetadata({ ...data, value: parseWeightInput(value) });
+        }}
+      />
+      <ThemedText type="defaultSemiBold">{t('records.fields.weightUnit')}</ThemedText>
+      <View style={styles.optionGroup}>
+        {WEIGHT_UNIT_OPTIONS.map((unit) => (
+          <SelectableOption
+            key={unit}
+            label={t(`records.units.${unit}`)}
+            selected={data.unit === unit}
+            onPress={() => onChangeMetadata({ ...data, unit: unit as WeightUnit })}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
 
 export function RecordTypeFields({ type, metadata, onChangeMetadata }: RecordTypeFieldsProps) {
   const { t } = useTranslation();
@@ -238,31 +278,11 @@ export function RecordTypeFields({ type, metadata, onChangeMetadata }: RecordTyp
     }
     case 'weight': {
       const data = metadata as PetRecordMetadataByType['weight'];
-      const weightText = data.value > 0 ? String(data.value) : '';
-
       return (
-        <View style={styles.section}>
-          <RecordTextField
-            keyboardType="decimal-pad"
-            label={t('records.fields.weightValue')}
-            placeholder={t('records.fields.weightValuePlaceholder')}
-            value={weightText}
-            onChangeText={(value) =>
-              onChangeMetadata({ ...data, value: parseWeightInput(value) })
-            }
-          />
-          <ThemedText type="defaultSemiBold">{t('records.fields.weightUnit')}</ThemedText>
-          <View style={styles.optionGroup}>
-            {WEIGHT_UNIT_OPTIONS.map((unit) => (
-              <SelectableOption
-                key={unit}
-                label={t(`records.units.${unit}`)}
-                selected={data.unit === unit}
-                onPress={() => onChangeMetadata({ ...data, unit: unit as WeightUnit })}
-              />
-            ))}
-          </View>
-        </View>
+        <WeightFields
+          data={data}
+          onChangeMetadata={(nextMetadata) => onChangeMetadata(nextMetadata)}
+        />
       );
     }
     case 'operation': {

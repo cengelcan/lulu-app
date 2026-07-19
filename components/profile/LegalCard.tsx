@@ -6,7 +6,7 @@ import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser'
 import { ProfileListRow } from '@/components/profile/ProfileListRow';
 import { Card } from '@/components/ui/Card';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import { LEGAL_URLS } from '@/constants/legal';
+import { getLegalUrls } from '@/constants/legal';
 import { useTranslation } from '@/hooks/use-translation';
 import {
   deleteAllLocalData,
@@ -22,7 +22,8 @@ async function openLegalUrl(url: string): Promise<void> {
 
 export function LegalCard() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const legalUrls = getLegalUrls(language);
   const provider = useUserStore((state) => state.provider);
   const signOut = useUserStore((state) => state.signOut);
   const deleteAccount = useUserStore((state) => state.deleteAccount);
@@ -72,13 +73,13 @@ export function LegalCard() {
           label={t('profile.privacyPolicy')}
           showChevron={false}
           showExternalIcon
-          onPress={() => void openLegalUrl(LEGAL_URLS.privacyPolicy)}
+          onPress={() => void openLegalUrl(legalUrls.privacyPolicy)}
         />
         <ProfileListRow
           label={t('profile.terms')}
           showChevron={false}
           showExternalIcon
-          onPress={() => void openLegalUrl(LEGAL_URLS.terms)}
+          onPress={() => void openLegalUrl(legalUrls.terms)}
         />
         <ProfileListRow
           label={t('profile.deleteAccount')}

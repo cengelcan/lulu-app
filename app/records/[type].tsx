@@ -1,13 +1,14 @@
 import type { Href } from 'expo-router';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { RecordNotesField } from '@/components/records/RecordNotesField';
 import { RecordTypeFields } from '@/components/records/RecordTypeFields';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { ContentState } from '@/components/ui/content-state';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
@@ -136,7 +137,7 @@ export default function RecordFormScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const primaryColor = useThemeColor({}, 'primary');
+  const alertColor = useThemeColor({}, 'alert');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const isEditMode = Boolean(recordId && existingRecord);
@@ -169,11 +170,6 @@ export default function RecordFormScreen() {
     }
 
     if (!recordId) {
-      setMetadata(createDefaultMetadata(recordType));
-      setDate(formatLocalDate(getTodayStart()));
-      setNotes('');
-      setExistingRecord(null);
-      setIsHydrating(false);
       return;
     }
 
@@ -293,7 +289,7 @@ export default function RecordFormScreen() {
     isReadOnly,
     metadata,
     notes,
-    pet?.id,
+    pet,
     pets,
     recordType,
     requestAccess,
@@ -319,9 +315,11 @@ export default function RecordFormScreen() {
       />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         {isHydrating ? (
-          <View style={styles.centered}>
-            <ActivityIndicator color={primaryColor} size="large" />
-          </View>
+          <ContentState
+            accessibilityLabel={`${t('common.loading')}. ${screenTitle}`}
+            kind="loading"
+            style={styles.centered}
+          />
         ) : (
           <>
             {typeDefinition ? (
@@ -375,7 +373,12 @@ export default function RecordFormScreen() {
             </GroupedSection>
 
             {validationError ? (
-              <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.error}>
+              <ThemedText
+                accessibilityLiveRegion="assertive"
+                lightColor={alertColor}
+                darkColor={alertColor}
+                selectable
+                style={styles.error}>
                 {validationError}
               </ThemedText>
             ) : null}

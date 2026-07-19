@@ -1,5 +1,6 @@
-import type { Router } from 'expo-router';
+import type { Href } from 'expo-router';
 
+import { runInitialSetupFinalization } from '@/services/setup/finalize-initial-setup';
 import { syncOwnedLocalPetsToCloud, uploadPetPhoto } from '@/services/sync/pets-sync';
 import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
@@ -24,6 +25,11 @@ export type SetupDraft = {
   healthConditions: HealthCondition[];
   photoUri?: string | null;
   photoUpload?: SetupPhotoUpload | null;
+};
+
+type SetupRouter = {
+  dismissTo: (href: Href) => void;
+  replace: (href: Href) => void;
 };
 
 export function createPetId(): string {
@@ -124,7 +130,7 @@ type FinalizeAddModePetDeps = {
   setActivePet: (petId: string) => Promise<void>;
   loadCheckIns: (petId: string) => Promise<void>;
   resetDraft: () => void;
-  router: Router;
+  router: SetupRouter;
 };
 
 type FinalizeInitialModePetDeps = {
@@ -133,7 +139,7 @@ type FinalizeInitialModePetDeps = {
   setActivePet: (petId: string) => Promise<void>;
   savePermission: (permission: NotificationPermissionStatus) => Promise<NotificationPermissionStatus>;
   resetDraft: () => void;
-  router: Router;
+  router: SetupRouter;
 };
 
 export async function finalizeAddModePet(
@@ -154,13 +160,13 @@ export async function finalizeInitialModePet(
   permission: NotificationPermissionStatus,
   deps: FinalizeInitialModePetDeps
 ): Promise<NotificationPermissionStatus> {
-  const resolvedPermission = await deps.savePermission(permission);
-  const pet = await createPetWithPhoto(draft, deps.createPet, deps.updatePet);
-
-  await deps.setActivePet(pet.id);
-
-  deps.resetDraft();
-  deps.router.replace('/(setup)/setup-complete');
-
-  return resolvedPermission;
+  return runInitialSetupFinalization(permission, {
+    createPet: () => createPetWithPhoto(draft, deps.createPet, deps.updatePet),
+    setActivePet: (pet) => deps.setActivePet(pet.id),
+    savePermission: deps.savePermission,
+    resetDraft: deps.resetDraft,
+    navigateToComplete: () => deps.router.replace('/(setup)/setup-complete'),
+    onNotificationError: (error) =>
+      console.warn('Pet setup completed but notification permission setup failed', error),
+  });
 }

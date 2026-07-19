@@ -1,7 +1,7 @@
 import { REMINDER_TYPES } from '@/constants/reminder-types';
 import type { PetReminder } from '@/types/pet-reminder';
 import { addDays } from '@/services/notifications/date';
-import { formatLocalDate, getTodayStart, parseLocalDate } from '@/utils/date';
+import { formatLocalDate, parseLocalDate } from '@/utils/date';
 import {
   getReminderTitle,
   getReminderTypeLabelKey,
@@ -126,19 +126,26 @@ export function buildUpcomingReminders(
   locale: string,
   t: TranslateFn,
   options?: {
+    excludeReminderIds?: readonly string[];
     limit?: number;
     referenceDate?: Date;
     withinDays?: number;
   }
 ): UpcomingReminderItem[] {
-  const today = options?.referenceDate ? new Date(options.referenceDate) : getTodayStart();
+  const referenceDate = options?.referenceDate ? new Date(options.referenceDate) : new Date();
+  const today = new Date(referenceDate);
   today.setHours(0, 0, 0, 0);
   const todayKey = formatLocalDate(today);
   const tomorrowKey = formatLocalDate(addDays(today, 1));
   const withinDays = options?.withinDays;
   const limit = options?.limit;
+  const excludedIds = new Set(options?.excludeReminderIds ?? []);
 
-  const candidates = listUpcomingPendingReminders(reminders, today).filter((reminder) => {
+  const candidates = listUpcomingPendingReminders(reminders, referenceDate).filter((reminder) => {
+    if (excludedIds.has(reminder.id)) {
+      return false;
+    }
+
     if (withinDays === undefined) {
       return true;
     }

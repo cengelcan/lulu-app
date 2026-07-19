@@ -107,6 +107,7 @@ export function UserCard() {
           accessibilityHint={t('profile.openPhotoPickerHintA11y')}
           accessibilityLabel={t('profile.changePhotoA11y')}
           accessibilityRole="button"
+          accessibilityState={{ disabled: isPickingPhoto }}
           disabled={isPickingPhoto}
           onPress={() => void handleChangePhoto()}
           style={({ pressed }) => [styles.avatarButton, { opacity: isPickingPhoto || pressed ? 0.85 : 1 }]}>
@@ -145,6 +146,7 @@ export function UserCard() {
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
+            selectable
             style={styles.email}>
             {email}
           </ThemedText>

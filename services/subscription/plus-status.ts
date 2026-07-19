@@ -1,4 +1,4 @@
-export type PlusPlanKind = 'weekly' | 'yearly' | 'lifetime' | 'unknown';
+export type PlusPlanKind = 'weekly' | 'monthly' | 'yearly' | 'lifetime' | 'unknown';
 
 export type PlusSubscriptionDetails = {
   planKind: PlusPlanKind;

@@ -1,10 +1,12 @@
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { OnboardingCtaButton } from '@/components/onboarding/onboarding-cta-button';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { shouldCompactOnboardingVisual } from '@/constants/form-layout';
+import { getScreenHorizontalPadding, LayoutTokens } from '@/constants/layout';
 import { getOnboardingBackground, getOnboardingImageScale } from '@/constants/onboarding';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
@@ -39,91 +41,105 @@ export function OnboardingScreen({
   const resolvedError = translateError(t, error);
   const backgroundSource = getOnboardingBackground(step);
   const imageScale = getOnboardingImageScale(step);
+  const { fontScale, height, width } = useWindowDimensions();
+  const compactVisual = shouldCompactOnboardingVisual(height, fontScale);
+  const horizontalPadding = getScreenHorizontalPadding(width);
+  const progressLabel = t('checkIn.progress', { count: step, total: TOTAL_STEPS });
 
   return (
     <View style={styles.root}>
       <StatusBar style="light" />
 
       <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            {onBack ? <ScreenHeader backTintColor={Palette.onDark} onBack={onBack} /> : null}
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={[styles.scrollContent, { paddingHorizontal: horizontalPadding }]}
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              {onBack ? <ScreenHeader backTintColor={Palette.onDark} onBack={onBack} /> : null}
 
-            <View
-              accessibilityRole="progressbar"
-              accessibilityLabel={`Step ${step} of ${TOTAL_STEPS}`}
-              accessibilityValue={{ min: 1, max: TOTAL_STEPS, now: step }}
-              style={styles.progress}>
-              {Array.from({ length: TOTAL_STEPS }, (_, index) => {
-                const stepNumber = index + 1;
-                const isActive = stepNumber === step;
-                const isCompleted = stepNumber < step;
+              <View
+                accessibilityRole="progressbar"
+                accessibilityLabel={progressLabel}
+                accessibilityValue={{ min: 1, max: TOTAL_STEPS, now: step }}
+                style={styles.progress}>
+                {Array.from({ length: TOTAL_STEPS }, (_, index) => {
+                  const stepNumber = index + 1;
+                  const isActive = stepNumber === step;
+                  const isCompleted = stepNumber < step;
 
-                return (
-                  <View
-                    key={stepNumber}
-                    style={[
-                      styles.progressDot,
-                      {
-                        backgroundColor:
-                          isActive || isCompleted ? Palette.brandAccentLight : '#3A3A3A',
-                        opacity: isActive ? 1 : isCompleted ? 0.7 : 0.45,
-                        width: isActive ? 24 : 8,
-                      },
-                    ]}
-                  />
-                );
-              })}
+                  return (
+                    <View
+                      key={stepNumber}
+                      style={[
+                        styles.progressDot,
+                        {
+                          backgroundColor:
+                            isActive || isCompleted ? Palette.brandAccentLight : '#3A3A3A',
+                          opacity: isActive ? 1 : isCompleted ? 0.7 : 0.45,
+                          width: isActive ? 24 : 8,
+                        },
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+
+              <Text allowFontScaling maxFontSizeMultiplier={2} style={styles.stepLabel}>
+                {progressLabel}
+              </Text>
+
+              <Text
+                accessibilityRole="header"
+                allowFontScaling
+                maxFontSizeMultiplier={1.35}
+                style={styles.title}>
+                {title}
+                {titleAccent ? (
+                  <>
+                    {'\n'}
+                    <Text style={styles.titleAccentLine}>{titleAccent}</Text>
+                  </>
+                ) : null}
+              </Text>
+
+              <Text allowFontScaling maxFontSizeMultiplier={2} selectable style={styles.description}>
+                {description}
+              </Text>
             </View>
 
-            <Text
-              allowFontScaling
-              maxFontSizeMultiplier={2}
-              style={styles.stepLabel}>
-              {step} of {TOTAL_STEPS}
-            </Text>
-
-            <Text
-              accessibilityRole="header"
-              allowFontScaling
-              maxFontSizeMultiplier={1.35}
-              style={styles.title}>
-              {title}
-              {titleAccent ? (
-                <>
-                  {'\n'}
-                  <Text style={styles.titleAccentLine}>{titleAccent}</Text>
-                </>
-              ) : null}
-            </Text>
-
-            <Text allowFontScaling maxFontSizeMultiplier={2} style={styles.description}>
-              {description}
-            </Text>
-          </View>
-
-          <View style={styles.visualArea}>
-            <View
-              style={[
-                styles.imageFrame,
-                { width: `${imageScale * 100}%`, height: `${imageScale * 100}%` },
-              ]}>
-              <Image
-                accessibilityIgnoresInvertColors
-                source={backgroundSource}
-                style={styles.backgroundImage}
-                contentFit="cover"
-                contentPosition="center"
-              />
+            <View style={[styles.visualArea, compactVisual && styles.visualAreaCompact]}>
+              <View
+                style={[
+                  styles.imageFrame,
+                  { width: `${imageScale * 100}%`, height: `${imageScale * 100}%` },
+                ]}>
+                <Image
+                  accessibilityIgnoresInvertColors
+                  source={backgroundSource}
+                  style={styles.backgroundImage}
+                  contentFit="cover"
+                  contentPosition="center"
+                />
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.footer}>
-          {resolvedError ? <Text allowFontScaling style={styles.error}>{resolvedError}</Text> : null}
+          <View style={styles.footer}>
+            {resolvedError ? (
+              <Text
+                accessibilityLiveRegion="assertive"
+                allowFontScaling
+                selectable
+                style={styles.error}>
+                {resolvedError}
+              </Text>
+            ) : null}
 
-          <OnboardingCtaButton title={buttonTitle} onPress={onContinue} disabled={isLoading} />
-        </View>
+            <OnboardingCtaButton title={buttonTitle} onPress={onContinue} disabled={isLoading} />
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -140,7 +156,12 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.lg,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    width: '100%',
+    maxWidth: LayoutTokens.readingContentMaxWidth,
+    alignSelf: 'center',
   },
   content: {
     flex: 1,
@@ -186,6 +207,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: -Spacing.lg,
   },
+  visualAreaCompact: {
+    minHeight: 160,
+  },
   imageFrame: {
     overflow: 'hidden',
   },
@@ -197,6 +221,6 @@ const styles = StyleSheet.create({
   error: {
     ...Typography.caption,
     textAlign: 'center',
-    color: Palette.onDarkSoft,
+    color: Palette.error,
   },
 });

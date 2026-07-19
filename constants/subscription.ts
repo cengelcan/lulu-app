@@ -3,9 +3,14 @@ export const REVENUECAT_ENTITLEMENT_PLUS = 'plus' as const;
 
 /** App Store product identifiers — must match App Store Connect + RevenueCat. */
 export const SUBSCRIPTION_PRODUCT_IDS = {
-  weekly: 'lulu_plus_weekly',
+  monthly: 'lulu_plus_monthly',
   yearly: 'lulu_plus_yearly',
   lifetime: 'lulu_plus_lifetime',
+} as const;
+
+/** Products hidden from the current paywall but still recognized in existing receipts. */
+export const LEGACY_SUBSCRIPTION_PRODUCT_IDS = {
+  weekly: 'lulu_plus_weekly',
 } as const;
 
 export type SubscriptionProductId =
@@ -13,16 +18,16 @@ export type SubscriptionProductId =
 
 /** Placeholder prices for dev preview / App Store review screenshots. */
 export const SUBSCRIPTION_PREVIEW_PRICES: Record<SubscriptionProductId, string> = {
-  [SUBSCRIPTION_PRODUCT_IDS.weekly]: '€2.99',
+  [SUBSCRIPTION_PRODUCT_IDS.monthly]: '€4.99',
   [SUBSCRIPTION_PRODUCT_IDS.yearly]: '€24.99',
   [SUBSCRIPTION_PRODUCT_IDS.lifetime]: '€59.99',
 };
 
-/** Strikethrough anchor for yearly vs paying weekly for a full year (2.99 × 52). */
-export const SUBSCRIPTION_YEARLY_COMPARE_PRICE = '€155.48';
+/** Strikethrough anchor for yearly vs paying monthly for a full year (4.99 × 12). */
+export const SUBSCRIPTION_YEARLY_COMPARE_PRICE = '€59.88';
 
-/** Approximate savings vs weekly billing, for paywall badge copy. */
-export const SUBSCRIPTION_YEARLY_SAVE_PERCENT = 84;
+/** Approximate savings vs monthly billing, for paywall badge copy. */
+export const SUBSCRIPTION_YEARLY_SAVE_PERCENT = 58;
 
 /** Free tier: active owned pets (deceased + shared pets excluded). */
 export const FREE_ACTIVE_PET_LIMIT = 1;

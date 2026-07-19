@@ -1,10 +1,11 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { AccentTitle } from '@/components/ui/AccentTitle';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
+import { shouldStackFormHeader } from '@/constants/form-layout';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -56,7 +57,10 @@ export function SetupScreen({
   const { t } = useTranslation();
   const resolvedError = translateError(t, error);
   const resolvedButtonTitle = buttonTitle ?? t('common.continue');
+  const { fontScale, width } = useWindowDimensions();
+  const stackHeader = shouldStackFormHeader(width, fontScale);
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const alertColor = useThemeColor({}, 'alert');
   const borderColor = useThemeColor({}, 'border');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
@@ -66,7 +70,7 @@ export function SetupScreen({
         {onBack ? <ScreenHeader onBack={onBack} /> : null}
         <View
           accessibilityRole="progressbar"
-          accessibilityLabel={`Step ${step} of ${totalSteps}`}
+          accessibilityLabel={t('checkIn.progress', { count: step, total: totalSteps })}
           accessibilityValue={{ min: 1, max: totalSteps, now: step }}
           style={styles.progress}>
           {Array.from({ length: totalSteps }, (_, index) => {
@@ -97,7 +101,7 @@ export function SetupScreen({
           {t('checkIn.progress', { count: step, total: totalSteps })}
         </ThemedText>
 
-        <View style={styles.titleRow}>
+        <View style={[styles.titleRow, stackHeader && styles.titleRowStacked]}>
           <View style={styles.titleContent}>
             {titleAccent ? (
               <AccentTitle
@@ -107,7 +111,7 @@ export function SetupScreen({
                 accentVariant={titleAccentVariant}
               />
             ) : (
-              <ThemedText type="title" style={styles.title}>
+              <ThemedText accessibilityRole="header" type="title" style={styles.title}>
                 {title}
               </ThemedText>
             )}
@@ -116,6 +120,7 @@ export function SetupScreen({
               <ThemedText
                 lightColor={textSecondaryColor}
                 darkColor={textSecondaryColor}
+                selectable
                 style={styles.description}>
                 {description}
               </ThemedText>
@@ -123,7 +128,9 @@ export function SetupScreen({
           </View>
 
           {headerIllustration ? (
-            <View style={styles.illustrationSlot}>{headerIllustration}</View>
+            <View style={[styles.illustrationSlot, stackHeader && styles.illustrationSlotStacked]}>
+              {headerIllustration}
+            </View>
           ) : null}
         </View>
 
@@ -131,7 +138,12 @@ export function SetupScreen({
       </View>
 
       {resolvedError ? (
-        <ThemedText lightColor={textSecondaryColor} darkColor={textSecondaryColor} style={styles.error}>
+        <ThemedText
+          accessibilityLiveRegion="assertive"
+          lightColor={alertColor}
+          darkColor={alertColor}
+          selectable
+          style={styles.error}>
           {resolvedError}
         </ThemedText>
       ) : null}
@@ -185,12 +197,19 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     minWidth: 0,
   },
+  titleRowStacked: {
+    flexDirection: 'column',
+  },
   title: {
     marginTop: 0,
   },
   illustrationSlot: {
     flexShrink: 0,
     paddingTop: Spacing.xxs,
+  },
+  illustrationSlotStacked: {
+    alignSelf: 'center',
+    paddingTop: 0,
   },
   description: {
     fontSize: 16,

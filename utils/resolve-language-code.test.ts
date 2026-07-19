@@ -14,9 +14,13 @@ describe('resolveLanguageCode', () => {
     assert.equal(resolveLanguageCode('EN'), 'en');
   });
 
+  it('maps Turkish device locales to tr', () => {
+    assert.equal(resolveLanguageCode('tr'), 'tr');
+    assert.equal(resolveLanguageCode('TR'), 'tr');
+  });
+
   it('falls back to en for unsupported locales', () => {
     assert.equal(resolveLanguageCode('fr'), 'en');
-    assert.equal(resolveLanguageCode('tr'), 'en');
     assert.equal(resolveLanguageCode('ja'), 'en');
   });
 

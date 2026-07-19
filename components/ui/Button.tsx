@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BrandGradientFill } from '@/components/ui/BrandGradient';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Palette, Radius, Spacing, Typography, type ThemeColor } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -53,6 +54,7 @@ export function Button({
   leadingIcon,
   trailingIcon,
   onPress,
+  accessibilityState,
   ...rest
 }: ButtonProps) {
   const tokens = variantStyles[variant];
@@ -71,6 +73,7 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ ...accessibilityState, disabled: Boolean(disabled) }}
       disabled={disabled}
       onPress={handlePress}
       style={({ pressed }) => [
@@ -106,12 +109,13 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 48,
+    minHeight: AccessibilityTokens.comfortableTouchTarget,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
+    borderCurve: 'continuous',
   },
   gradient: {
     overflow: 'hidden',

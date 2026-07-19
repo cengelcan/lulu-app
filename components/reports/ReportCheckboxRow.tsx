@@ -3,6 +3,7 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -19,7 +20,7 @@ export function ReportCheckboxRow({
   onPress,
   isLast = false,
 }: ReportCheckboxRowProps) {
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const accentColor = useThemeColor({}, 'accent');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
 
@@ -33,6 +34,7 @@ export function ReportCheckboxRow({
   return (
     <Pressable
       accessibilityRole="checkbox"
+      accessibilityLabel={label}
       accessibilityState={{ checked: selected }}
       onPress={handlePress}
       style={({ pressed }) => [
@@ -43,7 +45,7 @@ export function ReportCheckboxRow({
       <IconSymbol
         name={selected ? 'checkmark.circle' : 'circle'}
         size={22}
-        color={selected ? brandAccentColor : textSecondaryColor}
+        color={selected ? accentColor : textSecondaryColor}
       />
       <ThemedText type="defaultSemiBold" style={styles.label}>
         {label}
@@ -54,7 +56,7 @@ export function ReportCheckboxRow({
 
 const styles = StyleSheet.create({
   row: {
-    minHeight: 48,
+    minHeight: AccessibilityTokens.comfortableTouchTarget,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,

@@ -6,6 +6,7 @@ import type { PetRecord } from '@/types/pet-record';
 import {
   getPetSetupGuideProgress,
   getPetSetupGuideTasks,
+  getVisiblePetSetupGuideTasks,
   isPetSetupGuideComplete,
   shouldShowPetSetupGuide,
 } from '@/utils/pet-setup-guide';
@@ -71,5 +72,18 @@ describe('getPetSetupGuideTasks', () => {
     assert.equal(shouldShowPetSetupGuide(tasks, false, false), true);
     assert.equal(shouldShowPetSetupGuide(tasks, true, false), false);
     assert.equal(shouldShowPetSetupGuide(tasks, false, true), false);
+  });
+
+  it('shows only the first three incomplete tasks', () => {
+    const tasks = getPetSetupGuideTasks({
+      pet: { ...basePet, photoUri: 'file:///photo.jpg' },
+      hasTodayCheckIn: false,
+      records: [],
+    });
+
+    assert.deepEqual(
+      getVisiblePetSetupGuideTasks(tasks).map((task) => task.id),
+      ['checkIn', 'weight', 'record']
+    );
   });
 });

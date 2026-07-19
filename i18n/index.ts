@@ -1,5 +1,6 @@
 import { de } from '@/i18n/de';
 import { en } from '@/i18n/en';
+import { tr } from '@/i18n/tr';
 import type { TranslationParams, Translations } from '@/i18n/types';
 import type { ResolvedLanguage } from '@/types/language';
 import { DEFAULT_APP_LANGUAGE } from '@/types/language';
@@ -7,6 +8,7 @@ import { DEFAULT_APP_LANGUAGE } from '@/types/language';
 const catalogs: Record<ResolvedLanguage, Translations> = {
   en,
   de,
+  tr,
 };
 
 function interpolate(template: string, params?: TranslationParams): string {

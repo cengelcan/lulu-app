@@ -1,9 +1,10 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as Haptics from 'expo-haptics';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
+import { HealthOverviewCard } from '@/components/dashboard/HealthOverviewCard';
 import { DailyCheckInProgress } from '@/components/dashboard/DailyCheckInProgress';
 import { JoinRemindersCard } from '@/components/dashboard/JoinRemindersCard';
 import { PetSetupGuideCard } from '@/components/dashboard/PetSetupGuideCard';
@@ -11,15 +12,19 @@ import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionH
 import { GreetingHeader } from '@/components/dashboard/GreetingHeader';
 import { PetProfileCard } from '@/components/dashboard/PetProfileCard';
 import { QuickActionItem } from '@/components/dashboard/QuickActionItem';
+import { RecentActivitySection } from '@/components/dashboard/RecentActivitySection';
+import { TodayCareSection } from '@/components/dashboard/TodayCareSection';
 import { TrendsSection } from '@/components/dashboard/TrendsSection';
 import { WeightSection } from '@/components/dashboard/WeightSection';
-import { OverdueRemindersSection } from '@/components/dashboard/OverdueRemindersSection';
 import { UpcomingRemindersSection } from '@/components/dashboard/UpcomingRemindersSection';
+import { OverdueRemindersSection } from '@/components/dashboard/OverdueRemindersSection';
 import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
+import { ContentState } from '@/components/ui/content-state';
 import { QUICK_ACTIONS } from '@/constants/quick-actions';
+import { FeatureFlags } from '@/constants/feature-flags';
+import { LayoutTokens } from '@/constants/layout';
 import { Spacing, Typography } from '@/constants/theme';
 import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -31,8 +36,10 @@ import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
-import { formatLocalDate, getTodayStart } from '@/utils/date';
+import { formatLocalDate } from '@/utils/date';
 import { buildDashboardTrends } from '@/utils/trends';
+import { buildNextCareAction } from '@/utils/dashboard/build-next-care-action';
+import { resolveHomeState } from '@/utils/dashboard/resolve-home-state';
 import { translateError } from '@/utils/translate-error';
 
 type DashboardScreenProps = {
@@ -41,6 +48,8 @@ type DashboardScreenProps = {
 
 export default function DashboardScreen({ edges = ['top', 'bottom'] }: DashboardScreenProps) {
   const router = useRouter();
+  const [referenceNow, setReferenceNow] = useState(() => new Date());
+  const { fontScale, width } = useWindowDimensions();
   const { t } = useTranslation();
   const pet = usePetStore((state) => state.pet);
   const isLoading = usePetStore((state) => state.isLoading);
@@ -60,17 +69,31 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   const displayName = useUserStore((state) => state.displayName);
   const beginSetup = useSetupStore((state) => state.beginSetup);
 
-  const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const isDeceased = pet?.status === 'deceased';
 
-  const todayDateString = useMemo(() => formatLocalDate(getTodayStart()), []);
+  const todayDateString = useMemo(() => formatLocalDate(referenceNow), [referenceNow]);
   const todayCheckIn = useMemo(
     () => checkIns.find((checkIn) => checkIn.date === todayDateString) ?? null,
     [checkIns, todayDateString]
   );
-  const trends = useMemo(() => buildDashboardTrends(checkIns), [checkIns]);
+  const trends = useMemo(
+    () => buildDashboardTrends(checkIns, referenceNow),
+    [checkIns, referenceNow]
+  );
+  const nextCareAction = useMemo(
+    () => buildNextCareAction({ todayCheckIn, reminders, referenceDate: referenceNow }),
+    [referenceNow, reminders, todayCheckIn]
+  );
+  const highlightedUpcomingReminderId =
+    nextCareAction.kind === 'upcoming_reminder' ? nextCareAction.reminder.id : undefined;
+  const isWideLayout = width >= LayoutTokens.regularWidthBreakpoint && fontScale < 1.4;
+  const stackQuickActions = width < LayoutTokens.compactWidthBreakpoint || fontScale >= 1.4;
+  const homeState = resolveHomeState({
+    pet,
+    hasCareData: checkIns.length > 0 || records.length > 0 || reminders.length > 0,
+  });
   const { allowed: canExportPdf } = usePlusFeature('pdfExport');
   const { allowed: canCreateRecord } = usePlusFeature('unlimitedRecords');
   const { allowed: canCreateReminder } = usePlusFeature('unlimitedReminders');
@@ -93,30 +116,20 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
     void loadPet();
   }, [loadPet]);
 
-  useEffect(() => {
-    if (!pet?.id) {
-      return;
-    }
-
-    void loadCheckIns(pet.id);
-  }, [loadCheckIns, pet?.id]);
-
   useFocusEffect(
     useCallback(() => {
-      const activePetId = usePetStore.getState().pet?.id;
-      if (activePetId) {
-        void loadCheckIns(activePetId);
+      const refreshCurrentTime = () => setReferenceNow(new Date());
+      refreshCurrentTime();
+
+      if (pet?.id) {
+        void loadCheckIns(pet.id);
+        void loadReminders(pet.id);
       }
-    }, [loadCheckIns])
+
+      const minuteTimer = setInterval(refreshCurrentTime, 60_000);
+      return () => clearInterval(minuteTimer);
+    }, [loadCheckIns, loadReminders, pet])
   );
-
-  useEffect(() => {
-    if (!pet?.id) {
-      return;
-    }
-
-    void loadReminders(pet.id);
-  }, [loadReminders, pet?.id]);
 
   useEffect(() => {
     if (!pet?.id) {
@@ -151,40 +164,43 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
   };
 
   return (
-    <ScreenContainer scrollable edges={edges} contentStyle={styles.content}>
+    <ScreenContainer
+      scrollable
+      edges={edges}
+      maxContentWidth={LayoutTokens.dashboardContentMaxWidth}
+      contentStyle={styles.content}>
       {isLoading && !pet ? (
-        <View style={styles.centered}>
-          <ActivityIndicator color={primaryColor} size="large" />
-        </View>
+        <ContentState
+          kind="loading"
+          accessibilityLabel={t('common.loading')}
+          style={styles.centered}
+          testID="home-loading"
+        />
       ) : error ? (
-        <View style={styles.centered}>
-          <ThemedText style={styles.message}>{translateError(t, error)}</ThemedText>
-          <Button title={t('common.tryAgain')} onPress={handleRetry} />
-        </View>
+        <ContentState
+          kind="error"
+          message={translateError(t, error)}
+          actionLabel={t('common.tryAgain')}
+          onActionPress={handleRetry}
+          style={styles.centered}
+          testID="home-error"
+        />
       ) : !pet ? (
-        <View style={styles.centered}>
-          <ThemedText type="subtitle" style={styles.emptyTitle}>
-            {t('dashboard.noPetTitle')}
-          </ThemedText>
-          <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.message}>
-            {t('dashboard.noPetMessage')}
-          </ThemedText>
-          <Button title={t('common.setUpPet')} onPress={handleSetupPet} style={styles.setupButton} />
-        </View>
+        <ContentState
+          kind="empty"
+          title={t('dashboard.noPetTitle')}
+          message={t('dashboard.noPetMessage')}
+          actionLabel={t('common.setUpPet')}
+          onActionPress={handleSetupPet}
+          style={styles.centered}
+          testID="home-state-no_pet"
+        />
       ) : (
-        <View style={styles.body}>
-          <GreetingHeader
-            petName={pet.name}
-            ownerName={ownerName}
-            todayCheckIn={todayCheckIn}
-          />
+        <View style={styles.body} testID={`home-state-${homeState}`}>
+          <GreetingHeader ownerName={ownerName} />
 
           <PetProfileCard
             pet={pet}
-            todayCheckIn={todayCheckIn}
             onPress={handleOpenPetProfile}
           />
 
@@ -198,25 +214,39 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
                 {t('dashboard.memorialMessage', { name: pet.name })}
               </ThemedText>
             </Card>
+          ) : FeatureFlags.homeHealthOverview ? (
+            <View style={[styles.primaryGrid, isWideLayout ? styles.wideGrid : null]}>
+              <View style={styles.column}>
+                <TodayCareSection action={nextCareAction} petName={pet.name} />
+                <PetSetupGuideCard
+                  pet={pet}
+                  hasTodayCheckIn={todayCheckIn !== null}
+                  records={records}
+                />
+              </View>
+              <View style={styles.column}>
+                <HealthOverviewCard checkIns={checkIns} petName={pet.name} records={records} />
+              </View>
+            </View>
           ) : (
-            <DailyCheckInProgress />
+            <>
+              <DailyCheckInProgress />
+              <JoinRemindersCard petName={pet.name} />
+              <PetSetupGuideCard
+                pet={pet}
+                hasTodayCheckIn={todayCheckIn !== null}
+                records={records}
+              />
+            </>
           )}
-
-          {!isDeceased ? (
-            <JoinRemindersCard petName={pet.name} />
-          ) : null}
-
-          {!isDeceased ? (
-            <PetSetupGuideCard
-              pet={pet}
-              hasTodayCheckIn={todayCheckIn !== null}
-              records={records}
-            />
-          ) : null}
 
           <View style={styles.quickActionsSection}>
             <DashboardSectionHeader title={t('dashboard.quickActions')} icon="bolt.fill" />
-            <View style={styles.quickActionsGrid}>
+            <View
+              style={[
+                styles.quickActionsGrid,
+                stackQuickActions ? styles.quickActionsGridStacked : null,
+              ]}>
               {visibleQuickActions.map((action) => (
                 <QuickActionItem
                   key={action.id}
@@ -233,17 +263,48 @@ export default function DashboardScreen({ edges = ['top', 'bottom'] }: Dashboard
                           ? !canCreateReminder
                           : false
                   }
+                  lockedLabel={t('common.requiresLuluPlus')}
+                  expanded={stackQuickActions}
                   onPress={() => handleQuickActionPress(action.route)}
                 />
               ))}
             </View>
           </View>
 
-          {!isDeceased ? <TrendsSection trends={trends} /> : null}
-          {!isDeceased ? <WeightSection records={records} /> : null}
+          {!isDeceased && FeatureFlags.homeHealthOverview ? (
+            <JoinRemindersCard petName={pet.name} />
+          ) : null}
 
-          {!isDeceased ? <OverdueRemindersSection reminders={reminders} /> : null}
-          {!isDeceased ? <UpcomingRemindersSection reminders={reminders} /> : null}
+          {!isDeceased && FeatureFlags.homeHealthOverview ? (
+            <UpcomingRemindersSection
+              excludedReminderId={highlightedUpcomingReminderId}
+              referenceDate={referenceNow}
+              reminders={reminders}
+            />
+          ) : null}
+
+          {!isDeceased && FeatureFlags.homeHealthOverview ? (
+            <RecentActivitySection records={records} />
+          ) : null}
+
+          {!isDeceased && !FeatureFlags.homeHealthOverview ? (
+            <View style={[styles.detailGrid, isWideLayout ? styles.wideGrid : null]}>
+              <View style={styles.column}>
+                <TrendsSection trends={trends} />
+              </View>
+              <View style={styles.column}>
+                <WeightSection records={records} />
+              </View>
+            </View>
+          ) : null}
+
+          {!isDeceased && !FeatureFlags.homeHealthOverview ? (
+            <OverdueRemindersSection reminders={reminders} />
+          ) : null}
+          {!isDeceased && !FeatureFlags.homeHealthOverview ? (
+            <UpcomingRemindersSection referenceDate={referenceNow} reminders={reminders} />
+          ) : null}
+
         </View>
       )}
     </ScreenContainer>
@@ -265,14 +326,8 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingVertical: Spacing.xxl,
   },
-  emptyTitle: {
-    textAlign: 'center',
-  },
   message: {
     ...Typography.body,
-  },
-  setupButton: {
-    marginTop: Spacing.sm,
   },
   quickActionsSection: {
     gap: Spacing.sm,
@@ -280,5 +335,23 @@ const styles = StyleSheet.create({
   quickActionsGrid: {
     flexDirection: 'row',
     gap: Spacing.sm,
+  },
+  quickActionsGridStacked: {
+    flexWrap: 'wrap',
+  },
+  primaryGrid: {
+    gap: Spacing.lg,
+  },
+  detailGrid: {
+    gap: Spacing.lg,
+  },
+  wideGrid: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  column: {
+    flex: 1,
+    minWidth: 0,
+    gap: Spacing.lg,
   },
 });

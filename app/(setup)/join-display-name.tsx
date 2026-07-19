@@ -23,6 +23,7 @@ export default function JoinDisplayNameScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const textColor = useThemeColor({}, 'text');
+  const alertColor = useThemeColor({}, 'alert');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -55,7 +56,7 @@ export default function JoinDisplayNameScreen() {
   return (
     <ScreenContainer scrollable contentStyle={styles.content}>
       <View style={styles.body}>
-        <ThemedText type="title" style={styles.title}>
+        <ThemedText accessibilityRole="header" type="title" style={styles.title}>
           {t('setup.joinDisplayName.title')}
         </ThemedText>
         <ThemedText
@@ -80,7 +81,14 @@ export default function JoinDisplayNameScreen() {
         />
 
         {error ? (
-          <ThemedText style={styles.error}>{translateError(t, error)}</ThemedText>
+          <ThemedText
+            accessibilityLiveRegion="assertive"
+            lightColor={alertColor}
+            darkColor={alertColor}
+            selectable
+            style={styles.error}>
+            {translateError(t, error)}
+          </ThemedText>
         ) : null}
 
         <Button
@@ -119,7 +127,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
   },
   error: {
-    color: '#FF6B6B',
     ...Typography.caption,
+    textAlign: 'center',
   },
 });

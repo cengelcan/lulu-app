@@ -93,7 +93,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
       set({
         isLoading: false,
-        error: getStoreErrorKey(error, 'errors.subscriptionEntitlementMissing'),
+        error: getStoreErrorKey(error, 'errors.subscriptionPurchaseFailed'),
       });
       throw error;
     }

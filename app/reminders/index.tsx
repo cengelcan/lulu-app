@@ -1,6 +1,6 @@
 import type { Href } from 'expo-router';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { CompletedReminderRow } from '@/components/reminders/CompletedReminderRow';
@@ -34,7 +34,7 @@ import {
   getReminderTypeLabelKey,
 } from '@/utils/pet-reminder-display';
 import { getRecordFormRoute } from '@/utils/pet-record-display';
-import { formatLocalDate, getTodayStart } from '@/utils/date';
+import { formatLocalDate } from '@/utils/date';
 import { addDays } from '@/services/notifications/date';
 import { reminderTypeToRecordType } from '@/utils/reminder-to-record';
 import { canWritePetCareData } from '@/utils/pet-access';
@@ -43,6 +43,7 @@ const COMPLETED_PREVIEW_LIMIT = 3;
 
 export default function RemindersScreen() {
   const router = useRouter();
+  const [referenceNow, setReferenceNow] = useState(() => new Date());
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
 
@@ -56,8 +57,21 @@ export default function RemindersScreen() {
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const { allowed: canCreateReminder } = usePlusFeature('unlimitedReminders');
 
-  const todayKey = useMemo(() => formatLocalDate(getTodayStart()), []);
-  const tomorrowKey = useMemo(() => formatLocalDate(addDays(getTodayStart(), 1)), []);
+  const todayKey = useMemo(() => formatLocalDate(referenceNow), [referenceNow]);
+  const tomorrowKey = useMemo(
+    () => formatLocalDate(addDays(referenceNow, 1)),
+    [referenceNow]
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      const refreshCurrentTime = () => setReferenceNow(new Date());
+      refreshCurrentTime();
+
+      const minuteTimer = setInterval(refreshCurrentTime, 60_000);
+      return () => clearInterval(minuteTimer);
+    }, [])
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -72,12 +86,18 @@ export default function RemindersScreen() {
       }
 
       void loadReminders(pet.id);
-    }, [loadReminders, pet?.id])
+    }, [loadReminders, pet])
   );
 
-  const overdueReminders = useMemo(() => listOverduePendingReminders(reminders), [reminders]);
+  const overdueReminders = useMemo(
+    () => listOverduePendingReminders(reminders, referenceNow),
+    [referenceNow, reminders]
+  );
 
-  const pendingReminders = useMemo(() => listUpcomingPendingReminders(reminders), [reminders]);
+  const pendingReminders = useMemo(
+    () => listUpcomingPendingReminders(reminders, referenceNow),
+    [referenceNow, reminders]
+  );
 
   const completedReminders = useMemo(() => listCompletedReminders(reminders), [reminders]);
 

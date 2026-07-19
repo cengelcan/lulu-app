@@ -28,6 +28,7 @@ export const ALLOWED_IDENTICAL_KEYS = new Set<string>([
   // Language picker labels (shown in the target language)
   'settings.languageEnglish',
   'settings.languageGerman',
+  'settings.languageTurkish',
   'settings.languageSystem',
 
   // Units and symbols
@@ -55,6 +56,16 @@ export const ALLOWED_IDENTICAL_KEYS = new Set<string>([
 
   // Brand
   'reports.appStoreBadgeLine2',
+  'family.join.codePlaceholder',
+  'sharing.joinCodePlaceholder',
+  'inbox.upcomingReminder',
+
+  // International product/status terms used in EN, DE, and TR
+  'family.premiumBadge',
+  'sharing.plusBadge',
+  'paywall.plusColumn',
+  'dashboard.trendsNormal',
+  'reports.review.dayStatusNormal',
 
   // Medical terms (latin/international)
   'pet.options.healthCondition.diabetes',

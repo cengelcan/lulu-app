@@ -12,7 +12,16 @@ export function flattenTranslations(
       continue;
     }
 
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        if (typeof item === 'string') {
+          result.set(`${path}[${index}]`, item);
+        }
+      });
+      continue;
+    }
+
+    if (value && typeof value === 'object') {
       for (const [nestedKey, nestedValue] of flattenTranslations(
         value as Record<string, unknown>,
         path

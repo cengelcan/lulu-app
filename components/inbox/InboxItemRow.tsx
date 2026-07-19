@@ -20,12 +20,12 @@ export function InboxItemRow({ item, showPetName, isLast = false, onPress }: Inb
   const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const accentColorToken = useThemeColor({}, 'accent');
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
   const warningColor = useThemeColor({}, 'warning');
 
   const isUrgent = item.priority === 'urgent';
-  const accentColor = isUrgent ? warningColor : brandAccentColor;
+  const accentColor = isUrgent ? warningColor : accentColorToken;
   const iconBackground = isUrgent ? `${warningColor}22` : brandAccentSoft;
   const title = t(item.titleKey, item.titleParams);
   const subtitle = item.subtitleKey ? t(item.subtitleKey, item.subtitleParams) : null;
@@ -55,19 +55,15 @@ export function InboxItemRow({ item, showPetName, isLast = false, onPress }: Inb
           <ThemedText
             lightColor={accentColor}
             darkColor={accentColor}
-            style={styles.petName}
-            numberOfLines={1}>
+            style={styles.petName}>
             {item.petName}
           </ThemedText>
         ) : null}
-        <ThemedText type="defaultSemiBold" numberOfLines={2}>
-          {title}
-        </ThemedText>
+        <ThemedText type="defaultSemiBold">{title}</ThemedText>
         {item.actorDisplayName && item.source === 'family' ? (
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
-            numberOfLines={1}
             style={styles.actorName}>
             {item.actorDisplayName}
           </ThemedText>
@@ -76,7 +72,6 @@ export function InboxItemRow({ item, showPetName, isLast = false, onPress }: Inb
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
-            numberOfLines={2}
             style={styles.subtitle}>
             {subtitle}
           </ThemedText>

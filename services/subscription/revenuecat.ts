@@ -6,6 +6,7 @@ import type {
 } from 'react-native-purchases';
 
 import {
+  LEGACY_SUBSCRIPTION_PRODUCT_IDS,
   REVENUECAT_ENTITLEMENT_PLUS,
   SUBSCRIPTION_PRODUCT_IDS,
 } from '@/constants/subscription';
@@ -96,16 +97,26 @@ export function isNativePurchasesModuleLinked(): boolean {
   return Boolean(NativeModules.RNPurchases);
 }
 
+function getRevenueCatApiKey(): string | undefined {
+  const useTestStore =
+    __DEV__ && process.env.EXPO_PUBLIC_REVENUECAT_USE_TEST_STORE === 'true';
+
+  return useTestStore
+    ? process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY
+    : process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
+}
+
 export function isRevenueCatAvailable(): boolean {
   return (
     Platform.OS === 'ios' &&
-    Boolean(process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY) &&
+    Boolean(getRevenueCatApiKey()) &&
     isNativePurchasesModuleLinked()
   );
 }
 
 export async function configureRevenueCat(): Promise<boolean> {
-  if (!process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY) {
+  const apiKey = getRevenueCatApiKey();
+  if (!apiKey) {
     return false;
   }
 
@@ -128,8 +139,6 @@ export async function configureRevenueCat(): Promise<boolean> {
   if (configurePromise) {
     return configurePromise;
   }
-
-  const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY!;
 
   configurePromise = (async () => {
     try {
@@ -162,8 +171,12 @@ function resolvePlanKind(productId: string | undefined): PlusPlanKind {
     return 'unknown';
   }
 
-  if (productId === SUBSCRIPTION_PRODUCT_IDS.weekly) {
+  if (productId === LEGACY_SUBSCRIPTION_PRODUCT_IDS.weekly) {
     return 'weekly';
+  }
+
+  if (productId === SUBSCRIPTION_PRODUCT_IDS.monthly) {
+    return 'monthly';
   }
 
   if (productId === SUBSCRIPTION_PRODUCT_IDS.yearly) {

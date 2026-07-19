@@ -1,4 +1,4 @@
-export type ResolvedLanguage = 'en' | 'de';
+export type ResolvedLanguage = 'en' | 'de' | 'tr';
 
 /** Stored user preference — `system` follows the device locale. */
 export type AppLanguagePreference = 'system' | ResolvedLanguage;
@@ -15,10 +15,12 @@ export const APP_LANGUAGE_PREFERENCE_LABELS: Record<AppLanguagePreference, strin
   system: 'System',
   en: 'English',
   de: 'Deutsch',
+  tr: 'Türkçe',
 };
 
 /** @deprecated Use APP_LANGUAGE_PREFERENCE_LABELS. */
 export const APP_LANGUAGE_LABELS: Record<ResolvedLanguage, string> = {
   en: 'English',
   de: 'Deutsch',
+  tr: 'Türkçe',
 };

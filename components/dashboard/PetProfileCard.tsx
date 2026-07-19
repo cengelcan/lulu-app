@@ -1,69 +1,33 @@
-import { useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { useTranslation } from '@/hooks/use-translation';
-import type { CheckIn } from '@/types/check-in';
 import type { Pet } from '@/types/pet';
-import { getAbnormalCheckInFields } from '@/utils/check-in';
-
-type HealthBadgeProps = {
-  variant: 'healthy' | 'attention';
-};
-
-function HealthBadge({ variant }: HealthBadgeProps) {
-  const { t } = useTranslation();
-  const successColor = useThemeColor({}, 'success');
-  const warningColor = useThemeColor({}, 'warning');
-  const isHealthy = variant === 'healthy';
-  const accentColor = isHealthy ? successColor : warningColor;
-
-  return (
-    <View style={[styles.badge, { backgroundColor: `${accentColor}22`, borderColor: `${accentColor}55` }]}>
-      <View style={[styles.badgeDot, { backgroundColor: accentColor }]} />
-      <ThemedText
-        lightColor={accentColor}
-        darkColor={accentColor}
-        style={styles.badgeLabel}>
-        {isHealthy ? t('dashboard.healthy') : t('dashboard.attention')}
-      </ThemedText>
-    </View>
-  );
-}
 
 type PetProfileCardProps = {
   pet: Pet;
-  todayCheckIn: CheckIn | null;
   onPress: () => void;
 };
 
 export function PetProfileCard({
   pet,
-  todayCheckIn,
   onPress,
 }: PetProfileCardProps) {
   const { t } = useTranslation();
+  const { fontScale } = useWindowDimensions();
   const { displayPetBreed, displayPetSpecies } = usePetDisplay();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const breedLabel = pet.breed?.trim()
     ? displayPetBreed(pet.breed)
     : displayPetSpecies(pet.species);
-
-  const healthBadge = useMemo(() => {
-    if (!todayCheckIn) {
-      return null;
-    }
-
-    const abnormalFields = getAbnormalCheckInFields(todayCheckIn);
-    return abnormalFields.length === 0 ? 'healthy' : 'attention';
-  }, [todayCheckIn]);
 
   const handlePress = () => {
     if (process.env.EXPO_OS === 'ios') {
@@ -82,22 +46,21 @@ export function PetProfileCard({
         <View style={styles.topRow}>
           <PetAvatar photoUri={pet.photoUri} size={56} />
           <View style={styles.info}>
-            <ThemedText type="defaultSemiBold" style={styles.petName} numberOfLines={1}>
+            <ThemedText
+              type="defaultSemiBold"
+              style={styles.petName}
+              numberOfLines={fontScale >= 1.4 ? undefined : 1}>
               {pet.name}
             </ThemedText>
             <ThemedText
               lightColor={textSecondaryColor}
               darkColor={textSecondaryColor}
               style={styles.breed}
-              numberOfLines={1}>
+              numberOfLines={fontScale >= 1.4 ? undefined : 1}>
               {breedLabel}
             </ThemedText>
           </View>
-          {healthBadge ? (
-            <View style={styles.badgeSlot}>
-              <HealthBadge variant={healthBadge} />
-            </View>
-          ) : null}
+          <IconSymbol name="chevron.right" size={20} color={textSecondaryColor} />
         </View>
       </Card>
     </Pressable>
@@ -115,33 +78,11 @@ const styles = StyleSheet.create({
     gap: 2,
     minWidth: 0,
   },
-  badgeSlot: {
-    flexShrink: 0,
-    paddingTop: 2,
-  },
   petName: {
     ...Typography.bodySemiBold,
     fontSize: 17,
   },
   breed: {
     ...Typography.caption,
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xxs,
-    borderRadius: Radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xxs,
-  },
-  badgeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: Radius.full,
-  },
-  badgeLabel: {
-    ...Typography.caption,
-    fontWeight: '600',
   },
 });

@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -23,7 +24,7 @@ export function JoinRemindersCard({ petName }: JoinRemindersCardProps) {
   const saveReminderTime = useNotificationStore((state) => state.saveReminderTime);
 
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const accentColor = useThemeColor({}, 'accent');
 
   const [isEnabling, setIsEnabling] = useState(false);
 
@@ -73,7 +74,7 @@ export function JoinRemindersCard({ petName }: JoinRemindersCardProps) {
           disabled={isEnabling}
         />
         <Pressable accessibilityRole="button" onPress={handleNotNow} style={styles.notNow}>
-          <ThemedText lightColor={brandAccentColor} darkColor={brandAccentColor}>
+          <ThemedText lightColor={accentColor} darkColor={accentColor}>
             {t('dashboard.joinReminders.notNow')}
           </ThemedText>
         </Pressable>
@@ -95,6 +96,8 @@ const styles = StyleSheet.create({
   },
   notNow: {
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: AccessibilityTokens.minimumTouchTarget,
     paddingVertical: Spacing.xs,
   },
 });

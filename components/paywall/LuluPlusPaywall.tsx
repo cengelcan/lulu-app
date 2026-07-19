@@ -2,7 +2,6 @@ import * as Haptics from 'expo-haptics';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Linking,
   Modal,
   Platform,
@@ -10,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import type { PurchasesPackage } from 'react-native-purchases';
@@ -17,8 +17,11 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { LuluLogo } from '@/components/LuluLogo';
 import { BrandGradientFill } from '@/components/ui/BrandGradient';
+import { ContentState } from '@/components/ui/content-state';
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
-import { LEGAL_URLS } from '@/constants/legal';
+import { getLegalUrls } from '@/constants/legal';
+import { LayoutTokens } from '@/constants/layout';
+import { getPaywallLayout } from '@/constants/paywall-layout';
 import {
   SUBSCRIPTION_PRODUCT_IDS,
   SUBSCRIPTION_PREVIEW_PRICES,
@@ -31,6 +34,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { isRevenueCatAvailable } from '@/services/subscription/revenuecat';
 import { useSubscriptionStore } from '@/stores/subscription.store';
 import { useUserStore } from '@/stores/user.store';
+import { buildPaywallPlanCopy } from '@/utils/paywall-billing';
 import { translateError } from '@/utils/translate-error';
 
 const APP_STORE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscriptions';
@@ -45,15 +49,13 @@ type PlanVisual = {
 type PlanOption = {
   id: SubscriptionProductId;
   titleKey: string;
-  subtitleKey: string;
   visual: PlanVisual;
 };
 
 const PLAN_OPTIONS: PlanOption[] = [
   {
-    id: SUBSCRIPTION_PRODUCT_IDS.weekly,
-    titleKey: 'paywall.planWeeklyTitle',
-    subtitleKey: 'paywall.trialWeekly',
+    id: SUBSCRIPTION_PRODUCT_IDS.monthly,
+    titleKey: 'paywall.planMonthlyTitle',
     visual: {
       icon: 'crown.fill',
     },
@@ -61,7 +63,6 @@ const PLAN_OPTIONS: PlanOption[] = [
   {
     id: SUBSCRIPTION_PRODUCT_IDS.yearly,
     titleKey: 'paywall.planYearlyTitle',
-    subtitleKey: 'paywall.trialYearly',
     visual: {
       icon: 'star.fill',
       badgeKey: 'paywall.planMostPopular',
@@ -71,7 +72,6 @@ const PLAN_OPTIONS: PlanOption[] = [
   {
     id: SUBSCRIPTION_PRODUCT_IDS.lifetime,
     titleKey: 'paywall.planLifetimeTitle',
-    subtitleKey: 'paywall.lifetimePayOnce',
     visual: {
       icon: 'gift.fill',
       badgeKey: 'paywall.planOneTimePayment',
@@ -113,6 +113,7 @@ type FeatureTileProps = {
   iconColor: string;
   textColor: string;
   textSecondaryColor: string;
+  expanded: boolean;
 };
 
 function FeatureTile({
@@ -122,9 +123,10 @@ function FeatureTile({
   iconColor,
   textColor,
   textSecondaryColor,
+  expanded,
 }: FeatureTileProps) {
   return (
-    <View style={styles.featureTile}>
+    <View style={[styles.featureTile, expanded && styles.featureTileStacked]}>
       <IconSymbol name={icon} size={20} color={iconColor} style={styles.featureIcon} />
       <View style={styles.featureCopy}>
         <Text
@@ -151,6 +153,7 @@ type PlanCardProps = {
   subtitle: string;
   badge?: string;
   selected: boolean;
+  expanded: boolean;
   onPress: () => void;
   visual: PlanVisual;
   brandAccentColor: string;
@@ -168,6 +171,7 @@ function PlanCard({
   subtitle,
   badge,
   selected,
+  expanded,
   onPress,
   visual,
   brandAccentColor,
@@ -180,6 +184,7 @@ function PlanCard({
   return (
     <Pressable
       accessibilityRole="radio"
+      accessibilityLabel={[badge, title, price, period, subtitle].filter(Boolean).join('. ')}
       accessibilityState={{ selected }}
       onPress={onPress}
       style={[
@@ -189,13 +194,13 @@ function PlanCard({
           backgroundColor: selected ? brandAccentSoftColor : surfaceColor,
         },
         selected && styles.planCardSelected,
+        expanded && styles.planCardExpanded,
       ]}>
       {badge ? (
         <View style={[styles.planBadge, { backgroundColor: brandAccentSoftColor }]}>
           <Text
             allowFontScaling
-            maxFontSizeMultiplier={1.2}
-            numberOfLines={1}
+            maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
             style={[styles.planBadgeText, { color: brandAccentColor }]}>
             {badge}
           </Text>
@@ -208,24 +213,22 @@ function PlanCard({
 
       <Text
         allowFontScaling
-        maxFontSizeMultiplier={1.3}
-        numberOfLines={1}
+        maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
         style={[styles.planTitle, { color: textColor }]}>
         {title}
       </Text>
 
       <Text
         allowFontScaling
-        maxFontSizeMultiplier={1.25}
-        numberOfLines={1}
+        maxFontSizeMultiplier={Typography.bodySemiBold.maxFontSizeMultiplier}
+        selectable
         style={[styles.planPrice, { color: textColor }]}>
         {price}
       </Text>
       {period ? (
         <Text
           allowFontScaling
-          maxFontSizeMultiplier={1.25}
-          numberOfLines={1}
+          maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
           style={[styles.planPeriod, { color: textSecondaryColor }]}>
           {period}
         </Text>
@@ -233,8 +236,7 @@ function PlanCard({
 
       <Text
         allowFontScaling
-        maxFontSizeMultiplier={1.3}
-        numberOfLines={2}
+        maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
         style={[styles.planSubtitle, { color: textSecondaryColor }]}>
         {subtitle}
       </Text>
@@ -255,11 +257,12 @@ type TrustBadgeProps = {
   label: string;
   iconColor: string;
   textSecondaryColor: string;
+  expanded: boolean;
 };
 
-function TrustBadge({ icon, label, iconColor, textSecondaryColor }: TrustBadgeProps) {
+function TrustBadge({ icon, label, iconColor, textSecondaryColor, expanded }: TrustBadgeProps) {
   return (
-    <View style={styles.trustBadge}>
+    <View style={[styles.trustBadge, expanded && styles.trustBadgeStacked]}>
       <IconSymbol name={icon} size={18} color={iconColor} />
       <Text
         allowFontScaling
@@ -277,12 +280,16 @@ export function LuluPlusPaywallContent({
   previewMode = false,
   initialSelectedPlan = SUBSCRIPTION_PRODUCT_IDS.yearly,
 }: LuluPlusPaywallContentProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const legalUrls = getLegalUrls(language);
   const insets = useSafeAreaInsets();
+  const { fontScale, width } = useWindowDimensions();
+  const paywallLayout = getPaywallLayout(width, fontScale);
 
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surfaceElevated');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const accentColor = useThemeColor({}, 'accent');
   const brandAccentLightColor = useThemeColor({}, 'brandAccentLight');
   const brandAccentSoftColor = useThemeColor({}, 'brandAccentSoft');
   const textColor = useThemeColor({}, 'text');
@@ -299,10 +306,6 @@ export function LuluPlusPaywallContent({
   const restorePurchases = useSubscriptionStore((state) => state.restorePurchases);
 
   const [selectedPlanId, setSelectedPlanId] = useState<SubscriptionProductId>(initialSelectedPlan);
-
-  useEffect(() => {
-    setSelectedPlanId(initialSelectedPlan);
-  }, [initialSelectedPlan]);
 
   useEffect(() => {
     if (!previewMode) {
@@ -382,34 +385,17 @@ export function LuluPlusPaywallContent({
     }
   };
 
-  const primaryCtaTitle = useMemo(() => {
-    if (isPlusActive) {
-      return t('paywall.manageSubscription');
-    }
-
-    switch (selectedPlanId) {
-      case SUBSCRIPTION_PRODUCT_IDS.weekly:
-        return t('paywall.ctaTrial3Day');
-      case SUBSCRIPTION_PRODUCT_IDS.yearly:
-        return t('paywall.ctaTrial7Day');
-      case SUBSCRIPTION_PRODUCT_IDS.lifetime:
-        return t('paywall.ctaLifetime');
-      default:
-        return t('paywall.subscribeCta');
-    }
-  }, [isPlusActive, selectedPlanId, t]);
-
   const getPlanPricing = (planId: SubscriptionProductId, pkg: PurchasesPackage | null) => {
-    const usePreviewPrice = previewMode || showMockPlans || __DEV__ || !pkg;
+    const usePreviewPrice = previewMode || showMockPlans || !pkg;
     const amount = usePreviewPrice
       ? SUBSCRIPTION_PREVIEW_PRICES[planId]
       : pkg!.product.priceString;
 
     switch (planId) {
-      case SUBSCRIPTION_PRODUCT_IDS.weekly:
+      case SUBSCRIPTION_PRODUCT_IDS.monthly:
         return {
           price: amount,
-          period: t('paywall.pricePerWeek'),
+          period: t('paywall.pricePerMonth'),
         };
       case SUBSCRIPTION_PRODUCT_IDS.yearly:
         return {
@@ -424,6 +410,12 @@ export function LuluPlusPaywallContent({
     }
   };
 
+  const selectedPricing = getPlanPricing(selectedPlanId, selectedPackage);
+  const selectedPlanCopy = buildPaywallPlanCopy(selectedPlanId, selectedPricing.price, t);
+  const primaryCtaTitle = isPlusActive
+    ? t('paywall.manageSubscription')
+    : selectedPlanCopy.cta;
+
   const renderPlans = () => {
     if (isPlusActive) {
       return null;
@@ -431,38 +423,31 @@ export function LuluPlusPaywallContent({
 
     if (!previewMode && isLoading && packages.length === 0) {
       return (
-        <View style={styles.plansLoading}>
-          <ActivityIndicator color={brandAccentColor} />
-          <Text allowFontScaling style={[styles.plansLoadingLabel, { color: textSecondaryColor }]}>
-            {t('paywall.loadingPlans')}
-          </Text>
-        </View>
+        <ContentState
+          kind="loading"
+          accessibilityLabel={t('paywall.loadingPlans')}
+          style={styles.plansLoading}
+        />
       );
     }
 
     if (!showMockPlans && packages.length === 0) {
       return (
-        <View style={styles.plansUnavailableBlock}>
-          <Text allowFontScaling style={[styles.plansUnavailable, { color: textSecondaryColor }]}>
-            {translateError(t, subscriptionError) ?? t('paywall.plansUnavailable')}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => void loadOfferings()}
-            style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
-            <Text allowFontScaling style={[styles.retryPlans, { color: brandAccentColor }]}>
-              {t('common.tryAgain')}
-            </Text>
-          </Pressable>
-        </View>
+        <ContentState
+          kind="error"
+          message={translateError(t, subscriptionError) ?? t('paywall.plansUnavailable')}
+          actionLabel={t('common.tryAgain')}
+          onActionPress={() => void loadOfferings()}
+        />
       );
     }
 
     return (
-      <View style={styles.plansRow}>
+      <View style={[styles.plansRow, paywallLayout.stackPlans && styles.plansRowStacked]}>
         {PLAN_OPTIONS.map((plan) => {
           const pkg = findPackage(packages, plan.id);
           const pricing = getPlanPricing(plan.id, pkg);
+          const planCopy = buildPaywallPlanCopy(plan.id, pricing.price, t);
           const badge = plan.visual.badgeKey ? t(plan.visual.badgeKey) : undefined;
 
           return (
@@ -471,12 +456,13 @@ export function LuluPlusPaywallContent({
               title={t(plan.titleKey)}
               price={pricing.price}
               period={pricing.period}
-              subtitle={t(plan.subtitleKey)}
+              subtitle={planCopy.subtitle}
               badge={badge}
               selected={selectedPlanId === plan.id}
+              expanded={paywallLayout.stackPlans}
               onPress={() => setSelectedPlanId(plan.id)}
               visual={plan.visual}
-              brandAccentColor={brandAccentColor}
+              brandAccentColor={accentColor}
               brandAccentSoftColor={brandAccentSoftColor}
               surfaceColor={surfaceColor}
               textColor={textColor}
@@ -505,6 +491,7 @@ export function LuluPlusPaywallContent({
 
         <ScrollView
           style={styles.scroll}
+          contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
@@ -555,7 +542,11 @@ export function LuluPlusPaywallContent({
                 {t('paywall.featuresTitleAfter')}
               </Text>
 
-              <View style={styles.featureGrid}>
+              <View
+                style={[
+                  styles.featureGrid,
+                  paywallLayout.stackFeatures && styles.featureGridStacked,
+                ]}>
                 {LULU_PLUS_FEATURES.map((feature) => (
                   <FeatureTile
                     key={feature.titleKey}
@@ -565,6 +556,7 @@ export function LuluPlusPaywallContent({
                     iconColor={feature.iconColor}
                     textColor={textColor}
                     textSecondaryColor={textSecondaryColor}
+                    expanded={paywallLayout.stackFeatures}
                   />
                 ))}
               </View>
@@ -572,24 +564,31 @@ export function LuluPlusPaywallContent({
 
             {!isPlusActive ? <View style={styles.plansSection}>{renderPlans()}</View> : null}
 
-            <View style={styles.trustRow}>
+            <View
+              style={[
+                styles.trustRow,
+                paywallLayout.stackTrustBadges && styles.trustRowStacked,
+              ]}>
               <TrustBadge
                 icon="shield.fill"
                 label={t('paywall.trustSecure')}
-                iconColor={brandAccentColor}
+                iconColor={accentColor}
                 textSecondaryColor={textSecondaryColor}
+                expanded={paywallLayout.stackTrustBadges}
               />
               <TrustBadge
                 icon="arrow.clockwise"
                 label={t('paywall.trustCancel')}
                 iconColor={Palette.brandAccentDark}
                 textSecondaryColor={textSecondaryColor}
+                expanded={paywallLayout.stackTrustBadges}
               />
               <TrustBadge
                 icon="heart.fill"
                 label={t('paywall.trustLoved')}
                 iconColor={Palette.badgePink}
                 textSecondaryColor={textSecondaryColor}
+                expanded={paywallLayout.stackTrustBadges}
               />
             </View>
 
@@ -601,33 +600,40 @@ export function LuluPlusPaywallContent({
             </Text>
 
             <View style={styles.footerLinks}>
-              <Pressable accessibilityRole="link" onPress={() => void openLegalUrl(LEGAL_URLS.terms)}>
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => void openLegalUrl(legalUrls.terms)}
+                style={styles.footerLinkPressable}>
                 <Text
                   allowFontScaling
                   maxFontSizeMultiplier={1.3}
-                  style={[styles.footerLink, { color: brandAccentColor }]}>
+                  style={[styles.footerLink, { color: accentColor }]}>
                   {t('profile.terms')}
                 </Text>
               </Pressable>
               <Text style={[styles.footerLinkDivider, { color: textSecondaryColor }]}>·</Text>
               <Pressable
                 accessibilityRole="link"
-                onPress={() => void openLegalUrl(LEGAL_URLS.privacyPolicy)}>
+                onPress={() => void openLegalUrl(legalUrls.privacyPolicy)}
+                style={styles.footerLinkPressable}>
                 <Text
                   allowFontScaling
                   maxFontSizeMultiplier={1.3}
-                  style={[styles.footerLink, { color: brandAccentColor }]}>
+                  style={[styles.footerLink, { color: accentColor }]}>
                   {t('profile.privacyPolicy')}
                 </Text>
               </Pressable>
               {!isPlusActive ? (
                 <>
                   <Text style={[styles.footerLinkDivider, { color: textSecondaryColor }]}>·</Text>
-                  <Pressable accessibilityRole="button" onPress={() => void handleRestore()}>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => void handleRestore()}
+                    style={styles.footerLinkPressable}>
                     <Text
                       allowFontScaling
                       maxFontSizeMultiplier={1.3}
-                      style={[styles.footerLink, { color: brandAccentColor }]}>
+                      style={[styles.footerLink, { color: accentColor }]}>
                       {t('paywall.restorePurchases')}
                     </Text>
                   </Pressable>
@@ -646,12 +652,29 @@ export function LuluPlusPaywallContent({
             },
           ]}>
           {subscriptionError && !previewMode && packages.length > 0 ? (
-            <Text allowFontScaling style={[styles.purchaseError, { color: textSecondaryColor }]}>
+            <Text
+              accessibilityLiveRegion="assertive"
+              allowFontScaling
+              selectable
+              style={[styles.purchaseError, { color: textColor }]}>
               {translateError(t, subscriptionError)}
             </Text>
           ) : null}
+          {!isPlusActive ? (
+            <Text
+              selectable
+              allowFontScaling
+              maxFontSizeMultiplier={1.4}
+              style={[styles.billingDisclosure, { color: textSecondaryColor }]}>
+              {selectedPlanCopy.disclosure}
+            </Text>
+          ) : null}
           <Pressable
+            accessibilityLabel={primaryCtaTitle}
             accessibilityRole="button"
+            accessibilityState={{
+              disabled: !isPlusActive && !previewMode && (!canPurchase || isLoading),
+            }}
             disabled={!isPlusActive && !previewMode && (!canPurchase || isLoading)}
             onPress={() => void handlePrimaryPress()}
             style={({ pressed }) => [
@@ -718,6 +741,9 @@ const styles = StyleSheet.create({
   },
   heroCopy: {
     alignItems: 'center',
+    width: '100%',
+    maxWidth: LayoutTokens.readingContentMaxWidth,
+    alignSelf: 'center',
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xxs,
     paddingBottom: Spacing.sm,
@@ -754,11 +780,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   body: {
+    width: '100%',
+    maxWidth: LayoutTokens.readingContentMaxWidth,
+    alignSelf: 'center',
     paddingHorizontal: Spacing.lg,
     gap: Spacing.lg,
   },
   featuresCard: {
     borderRadius: Radius.xl,
+    borderCurve: 'continuous',
     padding: Spacing.lg,
     gap: Spacing.md,
     borderWidth: StyleSheet.hairlineWidth,
@@ -772,11 +802,17 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.md,
   },
+  featureGridStacked: {
+    flexDirection: 'column',
+  },
   featureTile: {
     width: '47%',
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: Spacing.xs,
+  },
+  featureTileStacked: {
+    width: '100%',
   },
   featureIcon: {
     marginTop: 1,
@@ -801,27 +837,11 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     alignItems: 'stretch',
   },
+  plansRowStacked: {
+    flexDirection: 'column',
+  },
   plansLoading: {
-    alignItems: 'center',
-    gap: Spacing.sm,
-    paddingVertical: Spacing.md,
-  },
-  plansLoadingLabel: {
-    ...Typography.body,
-    textAlign: 'center',
-  },
-  plansUnavailable: {
-    ...Typography.body,
-    textAlign: 'center',
-  },
-  plansUnavailableBlock: {
-    alignItems: 'center',
-    gap: Spacing.sm,
-    paddingVertical: Spacing.md,
-  },
-  retryPlans: {
-    ...Typography.body,
-    fontWeight: '600',
+    minHeight: 120,
   },
   purchaseError: {
     ...Typography.caption,
@@ -831,6 +851,7 @@ const styles = StyleSheet.create({
   planCard: {
     flex: 1,
     borderRadius: Radius.lg,
+    borderCurve: 'continuous',
     borderWidth: 1.5,
     padding: Spacing.sm,
     alignItems: 'center',
@@ -839,6 +860,11 @@ const styles = StyleSheet.create({
   },
   planCardSelected: {
     borderWidth: 2.5,
+  },
+  planCardExpanded: {
+    flex: 0,
+    width: '100%',
+    minHeight: 0,
   },
   planBadge: {
     borderRadius: Radius.pill,
@@ -894,10 +920,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: Spacing.sm,
   },
+  trustRowStacked: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+  },
   trustBadge: {
     flex: 1,
     alignItems: 'center',
     gap: Spacing.xxs,
+  },
+  trustBadgeStacked: {
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   trustLabel: {
     fontSize: 11,
@@ -922,12 +956,22 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     fontWeight: '600',
   },
+  footerLinkPressable: {
+    minHeight: 44,
+    justifyContent: 'center',
+  },
   footerLinkDivider: {},
   footer: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
+    gap: Spacing.sm,
+  },
+  billingDisclosure: {
+    ...Typography.caption,
+    textAlign: 'center',
+    lineHeight: 17,
   },
   ctaButton: {
     minHeight: 56,

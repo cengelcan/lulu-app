@@ -18,7 +18,7 @@ export function RecordNotesField({ value, onChangeText, isOverLimit }: RecordNot
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
-  const primaryColor = useThemeColor({}, 'primary');
+  const alertColor = useThemeColor({}, 'alert');
 
   return (
     <View style={styles.field}>
@@ -41,7 +41,7 @@ export function RecordNotesField({ value, onChangeText, isOverLimit }: RecordNot
           {
             color: textColor,
             backgroundColor: surfaceColor,
-            borderColor: isOverLimit ? primaryColor : borderColor,
+            borderColor: isOverLimit ? alertColor : borderColor,
           },
         ]}
         textAlignVertical="top"
@@ -49,8 +49,10 @@ export function RecordNotesField({ value, onChangeText, isOverLimit }: RecordNot
         onChangeText={onChangeText}
       />
       <ThemedText
-        lightColor={isOverLimit ? primaryColor : textSecondaryColor}
-        darkColor={isOverLimit ? primaryColor : textSecondaryColor}
+        accessibilityLiveRegion={isOverLimit ? 'assertive' : undefined}
+        lightColor={isOverLimit ? alertColor : textSecondaryColor}
+        darkColor={isOverLimit ? alertColor : textSecondaryColor}
+        selectable
         style={styles.counter}>
         {value.length} / {PET_RECORD_NOTES_MAX_LENGTH}
       </ThemedText>

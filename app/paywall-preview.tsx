@@ -4,7 +4,7 @@ import { LuluPlusPaywallContent } from '@/components/paywall/LuluPlusPaywall';
 import { SUBSCRIPTION_PRODUCT_IDS, type SubscriptionProductId } from '@/constants/subscription';
 
 const PLAN_PARAM_MAP = {
-  weekly: SUBSCRIPTION_PRODUCT_IDS.weekly,
+  monthly: SUBSCRIPTION_PRODUCT_IDS.monthly,
   yearly: SUBSCRIPTION_PRODUCT_IDS.yearly,
   lifetime: SUBSCRIPTION_PRODUCT_IDS.lifetime,
 } as const satisfies Record<string, SubscriptionProductId>;
@@ -23,7 +23,8 @@ function resolveInitialPlan(plan?: string | string[]): SubscriptionProductId {
  * Dev-only full-screen paywall for App Store review screenshots.
  *
  * Routes:
- * - /paywall-preview              → weekly selected
+ * - /paywall-preview              → yearly selected
+ * - /paywall-preview?plan=monthly
  * - /paywall-preview?plan=yearly
  * - /paywall-preview?plan=lifetime
  */

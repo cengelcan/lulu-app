@@ -6,6 +6,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { LULU_PLUS_FEATURES } from '@/constants/plus-features';
 import { useTranslation } from '@/hooks/use-translation';
@@ -150,7 +151,11 @@ export function LuluPlusCard() {
       end={GRADIENT_END}
       style={styles.card}>
         <View style={styles.header}>
-          <ThemedText type="subtitle" lightColor={Palette.onDark} darkColor={Palette.onDark}>
+          <ThemedText
+            accessibilityRole="header"
+            type="subtitle"
+            lightColor={Palette.onDark}
+            darkColor={Palette.onDark}>
             {t('profile.luluPlus')}
           </ThemedText>
           <IconSymbol name="crown.fill" size={24} color={Palette.onDark} />
@@ -160,6 +165,7 @@ export function LuluPlusCard() {
           <View style={styles.activeContent}>
             <Text
               allowFontScaling
+              selectable
               maxFontSizeMultiplier={Typography.body.maxFontSizeMultiplier}
               style={styles.description}>
               {t('profile.luluPlusActiveStatus')}
@@ -169,6 +175,7 @@ export function LuluPlusCard() {
               <View style={styles.planPill}>
                 <Text
                   allowFontScaling
+                  selectable
                   maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
                   style={styles.planPillLabel}>
                   {planLabel}
@@ -180,6 +187,7 @@ export function LuluPlusCard() {
               <Text
                 key={line}
                 allowFontScaling
+                selectable
                 maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
                 style={styles.detailLine}>
                 {line}
@@ -223,6 +231,7 @@ export function LuluPlusCard() {
 const styles = StyleSheet.create({
   card: {
     borderRadius: Radius.lg,
+    borderCurve: 'continuous',
     padding: Spacing.md,
     gap: Spacing.sm,
   },
@@ -272,7 +281,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cta: {
-    minHeight: 48,
+    minHeight: AccessibilityTokens.comfortableTouchTarget,
     marginTop: Spacing.xs,
     borderRadius: Radius.md,
     backgroundColor: Palette.brandAccentLight,

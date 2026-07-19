@@ -13,6 +13,8 @@ type QuickActionItemProps = {
   icon: IconSymbolName;
   iconTint?: 'primary' | 'warning';
   locked?: boolean;
+  lockedLabel?: string;
+  expanded?: boolean;
   onPress: () => void;
 };
 
@@ -22,16 +24,18 @@ export function QuickActionItem({
   icon,
   iconTint = 'primary',
   locked = false,
+  lockedLabel,
+  expanded = false,
   onPress,
 }: QuickActionItemProps) {
   const warningColor = useThemeColor({}, 'warning');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const accentColorToken = useThemeColor({}, 'accent');
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
 
-  const accentColor = iconTint === 'warning' ? warningColor : brandAccentColor;
+  const accentColor = iconTint === 'warning' ? warningColor : accentColorToken;
   const iconBackground = iconTint === 'warning' ? `${warningColor}1A` : brandAccentSoft;
 
   const handlePress = () => {
@@ -42,10 +46,11 @@ export function QuickActionItem({
   };
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, expanded ? styles.wrapperExpanded : null]}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${label}, ${subtitle}`}
+        accessibilityLabel={[label, subtitle, locked ? lockedLabel : null].filter(Boolean).join('. ')}
+        accessibilityHint={locked ? lockedLabel : undefined}
         onPress={handlePress}
         style={({ pressed }) => [
           styles.item,
@@ -84,6 +89,10 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     position: 'relative',
+  },
+  wrapperExpanded: {
+    flex: 0,
+    width: '100%',
   },
   lockBadge: {
     position: 'absolute',

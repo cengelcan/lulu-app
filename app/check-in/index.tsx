@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CheckInDatePicker, CheckInHeader } from '@/components/check-in/CheckInHeader';
@@ -9,11 +9,13 @@ import { CheckInProgressCard } from '@/components/check-in/CheckInProgressCard';
 import { DailyEssentialsCard } from '@/components/check-in/DailyEssentialsCard';
 import { ThemedText } from '@/components/themed-text';
 import { BrandGradientFill } from '@/components/ui/BrandGradient';
+import { ContentState } from '@/components/ui/content-state';
 import { HeaderIconButton } from '@/components/ui/HeaderIconButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES, CHECK_IN_NOTES_MAX_LENGTH } from '@/constants/check-in';
 import { CheckInTheme } from '@/constants/check-in-theme';
+import { getScreenHorizontalPadding, LayoutTokens } from '@/constants/layout';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Radius, Spacing, Typography, Palette } from '@/constants/theme';
 import { useAndroidBackHandler } from '@/hooks/use-android-back-handler';
@@ -59,6 +61,7 @@ function getTodayDateString(): string {
 export default function CheckInScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { t } = useTranslation();
   const { date: dateParam, fromSetup: fromSetupParam } = useLocalSearchParams<{
     date?: string | string[];
@@ -87,9 +90,9 @@ export default function CheckInScreen() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
 
-  const primaryColor = useThemeColor({}, 'primary');
+  const alertColor = useThemeColor({}, 'alert');
   const primaryTextColor = useThemeColor({}, 'primaryText');
-  const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const horizontalPadding = getScreenHorizontalPadding(width);
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
   const rawFromSetupParam = Array.isArray(fromSetupParam) ? fromSetupParam[0] : fromSetupParam;
@@ -176,10 +179,13 @@ export default function CheckInScreen() {
 
   useEffect(() => {
     if (existingCheckIn) {
+      // Form state intentionally rehydrates when the selected date resolves to a stored check-in.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       prefillFromCheckIn(existingCheckIn);
       return;
     }
 
+    // A date without a stored check-in must start from a clean controlled form.
     resetForm();
   }, [existingCheckIn, prefillFromCheckIn, resetForm, selectedDate]);
 
@@ -378,7 +384,7 @@ export default function CheckInScreen() {
           edges={['bottom']}
           contentStyle={styles.centered}
           style={{ backgroundColor: CheckInTheme.background }}>
-          <ActivityIndicator color={primaryColor} size="large" />
+          <ContentState accessibilityLabel={t('common.loading')} kind="loading" />
         </ScreenContainer>
       </>
     );
@@ -427,8 +433,10 @@ export default function CheckInScreen() {
 
           {errorMessage ? (
             <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
+              accessibilityLiveRegion="assertive"
+              lightColor={alertColor}
+              darkColor={alertColor}
+              selectable
               style={styles.error}>
               {errorMessage}
             </ThemedText>
@@ -444,32 +452,42 @@ export default function CheckInScreen() {
             backgroundColor: CheckInTheme.background,
           },
         ]}>
-        <Pressable
-          accessibilityRole="button"
-          disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly}
-          onPress={() => void handleSave()}
-          style={({ pressed }) => [
-            styles.saveButton,
-            {
-              opacity:
-                !isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly
-                  ? 0.45
-                  : pressed
-                    ? 0.85
-                    : 1,
-            },
-          ]}>
-          <BrandGradientFill />
-          <View style={styles.saveIconCircle}>
-            <IconSymbol name="checkmark" size={16} color={Palette.brandGradientEnd} />
-          </View>
-          <ThemedText
-            lightColor={primaryTextColor}
-            darkColor={primaryTextColor}
-            style={styles.saveLabel}>
-            {saveButtonTitle}
-          </ThemedText>
-        </Pressable>
+        <View style={[styles.footerContent, { paddingHorizontal: horizontalPadding }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{
+              disabled:
+                !isFormComplete ||
+                checkInIsLoading ||
+                isFutureDate ||
+                isNotesOverLimit ||
+                isReadOnly,
+            }}
+            disabled={!isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly}
+            onPress={() => void handleSave()}
+            style={({ pressed }) => [
+              styles.saveButton,
+              {
+                opacity:
+                  !isFormComplete || checkInIsLoading || isFutureDate || isNotesOverLimit || isReadOnly
+                    ? 0.45
+                    : pressed
+                      ? 0.85
+                      : 1,
+              },
+            ]}>
+            <BrandGradientFill />
+            <View style={styles.saveIconCircle}>
+              <IconSymbol name="checkmark" size={16} color={Palette.brandGradientEnd} />
+            </View>
+            <ThemedText
+              lightColor={primaryTextColor}
+              darkColor={primaryTextColor}
+              style={styles.saveLabel}>
+              {saveButtonTitle}
+            </ThemedText>
+          </Pressable>
+        </View>
       </View>
 
       <CheckInDatePicker
@@ -504,10 +522,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(255,255,255,0.08)',
+  },
+  footerContent: {
+    width: '100%',
+    maxWidth: LayoutTokens.readingContentMaxWidth,
+    alignSelf: 'center',
   },
   saveButton: {
     minHeight: 52,

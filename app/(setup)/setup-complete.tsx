@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { SetupCompleteHero } from '@/components/setup/SetupCompleteHero';
 import { SetupCompletePetCard } from '@/components/setup/SetupCompletePetCard';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { ContentState } from '@/components/ui/content-state';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -15,7 +16,6 @@ import { usePetStore } from '@/stores/pet.store';
 export default function SetupCompleteScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const pet = usePetStore((state) => state.pet);
@@ -39,7 +39,7 @@ export default function SetupCompleteScreen() {
   if (isLoading || !pet) {
     return (
       <ScreenContainer contentStyle={styles.centered}>
-        <ActivityIndicator color={primaryColor} size="large" />
+        <ContentState accessibilityLabel={t('common.loading')} kind="loading" />
       </ScreenContainer>
     );
   }

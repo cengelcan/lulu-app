@@ -9,6 +9,7 @@ import { ReminderListRow } from '@/components/reminders/ReminderListRow';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -20,10 +21,16 @@ import type { PetReminder } from '@/types/pet-reminder';
 const REMINDER_ACCENT = Palette.badgeViolet;
 
 type UpcomingRemindersSectionProps = {
+  excludedReminderId?: string;
+  referenceDate?: Date;
   reminders: PetReminder[];
 };
 
-export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSectionProps) {
+export function UpcomingRemindersSection({
+  excludedReminderId,
+  referenceDate,
+  reminders,
+}: UpcomingRemindersSectionProps) {
   const router = useRouter();
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
@@ -33,7 +40,9 @@ export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSection
   const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
 
   const upcoming = buildUpcomingReminders(reminders, locale, t, {
+    excludeReminderIds: excludedReminderId ? [excludedReminderId] : undefined,
     limit: 3,
+    referenceDate,
   });
 
   const handleSeeAll = () => {
@@ -48,7 +57,11 @@ export function UpcomingRemindersSection({ reminders }: UpcomingRemindersSection
   };
 
   if (upcoming.length === 0) {
-    if (hasOverdueReminders(reminders)) {
+    if (excludedReminderId) {
+      return null;
+    }
+
+    if (hasOverdueReminders(reminders, referenceDate)) {
       return null;
     }
 
@@ -197,7 +210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: Spacing.xxs,
-    minHeight: 40,
+    minHeight: AccessibilityTokens.minimumTouchTarget,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     marginTop: Spacing.xxs,

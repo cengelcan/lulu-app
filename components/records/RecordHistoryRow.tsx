@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, useColorScheme, View } from 'react-native';
+import { Pressable, StyleSheet, useColorScheme, useWindowDimensions, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
@@ -29,6 +29,8 @@ export function RecordHistoryRow({
   isLast = false,
 }: RecordHistoryRowProps) {
   const colorScheme = useColorScheme();
+  const { fontScale } = useWindowDimensions();
+  const usesLargeText = fontScale >= 1.4;
   const isDark = colorScheme === 'dark';
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
@@ -50,6 +52,7 @@ export function RecordHistoryRow({
       onPress={handlePress}
       style={({ pressed }) => [
         styles.row,
+        usesLargeText ? styles.rowLargeText : null,
         !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: borderColor },
         { opacity: pressed ? 0.7 : 1 },
       ]}>
@@ -57,13 +60,13 @@ export function RecordHistoryRow({
         <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
       </View>
       <View style={styles.textWrap}>
-        <ThemedText type="defaultSemiBold" numberOfLines={1}>
+        <ThemedText type="defaultSemiBold" numberOfLines={usesLargeText ? undefined : 1}>
           {title}
         </ThemedText>
         <ThemedText
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
-          numberOfLines={1}
+          numberOfLines={usesLargeText ? undefined : 1}
           style={styles.subtitle}>
           {subtitle}
         </ThemedText>
@@ -71,7 +74,7 @@ export function RecordHistoryRow({
       <ThemedText
         lightColor={textSecondaryColor}
         darkColor={textSecondaryColor}
-        style={styles.date}>
+        style={[styles.date, usesLargeText ? styles.dateLargeText : null]}>
         {dateLabel}
       </ThemedText>
       <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
@@ -87,6 +90,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     gap: Spacing.md,
+  },
+  rowLargeText: {
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
   },
   iconBox: {
     width: ICON_BOX_SIZE,
@@ -107,5 +114,9 @@ const styles = StyleSheet.create({
   date: {
     ...Typography.caption,
     flexShrink: 0,
+  },
+  dateLargeText: {
+    flexBasis: '100%',
+    marginLeft: ICON_BOX_SIZE + Spacing.md,
   },
 });

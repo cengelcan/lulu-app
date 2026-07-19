@@ -7,6 +7,8 @@ export type Translations = {
     cancel: string;
     save: string;
     tryAgain: string;
+    loading: string;
+    requiresLuluPlus: string;
     of: string;
     ok: string;
     continue: string;
@@ -30,9 +32,27 @@ export type Translations = {
   };
   tabs: {
     home: string;
+    care: string;
     myPets: string;
     family: string;
     profile: string;
+  };
+  care: {
+    title: string;
+    subtitle: string;
+    shortcutsTitle: string;
+    checkIn: string;
+    checkInDescription: string;
+    reminders: string;
+    remindersDescription: string;
+    records: string;
+    recordsDescription: string;
+    timelineTitle: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    loadingTimeline: string;
+    familyManagement: string;
+    familyManagementHint: string;
   };
   settings: {
     title: string;
@@ -47,6 +67,7 @@ export type Translations = {
     languageSystem: string;
     languageEnglish: string;
     languageGerman: string;
+    languageTurkish: string;
   };
   welcome: {
     appName: string;
@@ -321,12 +342,43 @@ export type Translations = {
     upcomingReminders: string;
     overdueReminders: string;
     seeAllReminders: string;
+    seeAllRecords: string;
     remindersOff: string;
     notificationsDisabled: string;
     enableInSettings: string;
     noReminderScheduled: string;
     memorialTitle: string;
     memorialMessage: string;
+    today: {
+      title: string;
+      overdueMedicationTitle: string;
+      overdueMedicationMessage: string;
+      reviewMedication: string;
+      overdueReminderTitle: string;
+      overdueReminderMessage: string;
+      reviewReminder: string;
+      checkInTitle: string;
+      checkInMessage: string;
+      upcomingTitle: string;
+      upcomingMessage: string;
+      viewReminder: string;
+      completeTitle: string;
+      completeMessage: string;
+    };
+    healthOverview: {
+      title: string;
+      normalTitle: string;
+      normalMessage: string;
+      attentionTitle: string;
+      attentionMessage: string;
+      insufficientTitle: string;
+      insufficientMessage: string;
+      lastCheckIn: string;
+      noCheckIn: string;
+      latestWeight: string;
+      noWeight: string;
+      viewRecords: string;
+    };
     quickActions: string;
     reports: string;
     reportsSubtitle: string;
@@ -865,6 +917,7 @@ export type Translations = {
     luluPlusDescription: string;
     luluPlusActiveStatus: string;
     luluPlusPlanWeekly: string;
+    luluPlusPlanMonthly: string;
     luluPlusPlanYearly: string;
     luluPlusPlanLifetime: string;
     luluPlusTrialEndsToday: string;
@@ -942,23 +995,24 @@ export type Translations = {
     smartRemindersDescription: string;
     trendsTitle: string;
     trendsDescription: string;
-    planWeeklyTitle: string;
+    planMonthlyTitle: string;
     planYearlyTitle: string;
     planLifetimeTitle: string;
     planBestValue: string;
     planMostPopular: string;
     planOneTimePayment: string;
     planSavePercent: string;
-    trialWeekly: string;
-    trialYearly: string;
+    renewsMonthly: string;
+    renewsYearly: string;
     lifetimeOneTime: string;
     lifetimePayOnce: string;
-    pricePerWeek: string;
+    billingMonthlyDisclosure: string;
+    billingYearlyDisclosure: string;
+    billingLifetimeDisclosure: string;
+    pricePerMonth: string;
     pricePerYear: string;
     cancelAnytime: string;
     subscribeCta: string;
-    ctaTrial3Day: string;
-    ctaTrial7Day: string;
     ctaLifetime: string;
     restore: string;
     restorePurchases: string;
@@ -1095,6 +1149,7 @@ export type Translations = {
     notAuthenticated: string;
     revenueCatUnavailable: string;
     subscriptionPlansUnavailable: string;
+    subscriptionPurchaseFailed: string;
     subscriptionEntitlementMissing: string;
     petReadOnly: string;
     saveReminderTime: string;

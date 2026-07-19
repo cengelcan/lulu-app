@@ -16,6 +16,7 @@ import { getCheckInReminderContentForDate } from '@/services/notifications/conte
 import { ensureNotificationHandlerConfigured } from '@/services/notifications/handler';
 import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { resolvePetPhotoAttachment } from '@/services/notifications/pet-photo-attachment';
+import { scheduleWithAttachmentFallback } from '@/services/notifications/schedule-with-attachment-fallback';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
 import { getActivePet } from '@/storage/pet.storage';
 import {
@@ -98,7 +99,6 @@ async function scheduleCheckInReminders(
   pet: CheckInSchedulePet,
   language: Awaited<ReturnType<typeof getAppLanguage>>
 ): Promise<void> {
-  const photoAttachment = await resolvePetPhotoAttachment(pet.photoUri);
   const triggerDates = buildUpcomingCheckInTriggerDates(
     reminderTime,
     CHECK_IN_REMINDER_SCHEDULE_HORIZON_DAYS
@@ -107,6 +107,8 @@ async function scheduleCheckInReminders(
   await Promise.all(
     triggerDates.map(async (triggerDate) => {
       const dateKey = formatCheckInReminderDateKey(triggerDate);
+      const notificationId = getCheckInReminderNotificationId(dateKey);
+      const photoAttachment = await resolvePetPhotoAttachment(pet.photoUri, notificationId);
       const { title, body } = getCheckInReminderContentForDate(
         pet.name,
         pet.id,
@@ -114,8 +116,8 @@ async function scheduleCheckInReminders(
         language
       );
 
-      await Notifications.scheduleNotificationAsync({
-        identifier: getCheckInReminderNotificationId(dateKey),
+      await scheduleWithAttachmentFallback(Notifications, {
+        identifier: notificationId,
         content: {
           title,
           body,

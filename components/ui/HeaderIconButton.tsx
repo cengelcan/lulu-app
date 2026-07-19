@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Radius } from '@/constants/theme';
+import { AccessibilityTokens } from '@/constants/accessibility';
 
 type HeaderIconButtonProps = {
   accessibilityLabel: string;
@@ -39,8 +40,8 @@ export function HeaderIconButton({
 
 const styles = StyleSheet.create({
   button: {
-    width: 36,
-    height: 36,
+    width: AccessibilityTokens.minimumTouchTarget,
+    height: AccessibilityTokens.minimumTouchTarget,
     borderRadius: Radius.full,
     borderWidth: 1,
     alignItems: 'center',

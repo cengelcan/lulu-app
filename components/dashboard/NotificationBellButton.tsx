@@ -5,6 +5,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
 import { InboxSheet } from '@/components/inbox/InboxSheet';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Radius } from '@/constants/theme';
 import { useInbox } from '@/hooks/use-inbox';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -83,8 +84,8 @@ export function NotificationBellButton() {
 
 const styles = StyleSheet.create({
   bellButton: {
-    width: 40,
-    height: 40,
+    width: AccessibilityTokens.minimumTouchTarget,
+    height: AccessibilityTokens.minimumTouchTarget,
     alignItems: 'center',
     justifyContent: 'center',
   },

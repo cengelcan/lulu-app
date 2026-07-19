@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
@@ -8,10 +8,12 @@ import { ReportDocumentPreview } from '@/components/reports/ReportDocumentPrevie
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { ContentState } from '@/components/ui/content-state';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES } from '@/constants/check-in';
+import { getScreenHorizontalPadding, LayoutTokens } from '@/constants/layout';
 import { RECORD_TYPES } from '@/constants/record-types';
 import {
   createDefaultReportDataSelection,
@@ -20,6 +22,7 @@ import {
   REPORT_RECORD_DATA_KEYS,
   REPORT_RANGE_PRESETS,
 } from '@/constants/reports';
+import { shouldStackReportActions } from '@/constants/reports-layout';
 import { Spacing, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { usePlusFeature } from '@/hooks/use-plus-feature';
@@ -64,6 +67,9 @@ export function ReportsWizardContent() {
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
   const petDisplay = usePetDisplay();
+  const { fontScale, width } = useWindowDimensions();
+  const stackActions = shouldStackReportActions(width, fontScale);
+  const horizontalPadding = getScreenHorizontalPadding(width);
 
   const pet = usePetStore((state) => state.pet);
   const loadPet = usePetStore((state) => state.loadPet);
@@ -86,6 +92,7 @@ export function ReportsWizardContent() {
     usePlusFeature('pdfExport');
 
   const primaryColor = useThemeColor({}, 'primary');
+  const alertColor = useThemeColor({}, 'alert');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
@@ -241,12 +248,6 @@ export function ReportsWizardContent() {
     }
   }, [locale, pet, petDisplay, range, selection, t]);
 
-  useEffect(() => {
-    if (step === 'review') {
-      void loadReview();
-    }
-  }, [loadReview, step]);
-
   const handleNext = () => {
     setValidationError(null);
 
@@ -267,6 +268,7 @@ export function ReportsWizardContent() {
       }
 
       setStep('review');
+      void loadReview();
     }
   };
 
@@ -338,7 +340,7 @@ export function ReportsWizardContent() {
   if (!pet) {
     return (
       <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
-        <ThemedText style={styles.message}>{t('reports.noPet')}</ThemedText>
+        <ContentState kind="empty" message={t('reports.noPet')} />
       </ScreenContainer>
     );
   }
@@ -356,7 +358,9 @@ export function ReportsWizardContent() {
               total: WIZARD_STEPS.length,
             })}
           </ThemedText>
-          <ThemedText type="subtitle">{t('reports.steps.reviewTitle')}</ThemedText>
+          <ThemedText accessibilityRole="header" type="subtitle">
+            {t('reports.steps.reviewTitle')}
+          </ThemedText>
           <ThemedText
             lightColor={textSecondaryColor}
             darkColor={textSecondaryColor}
@@ -365,9 +369,11 @@ export function ReportsWizardContent() {
           </ThemedText>
 
           {isLoadingReview ? (
-            <View style={styles.centered}>
-              <ActivityIndicator color={primaryColor} size="large" />
-            </View>
+            <ContentState
+              accessibilityLabel={`${t('common.loading')}. ${t('reports.steps.reviewTitle')}`}
+              kind="loading"
+              style={styles.centered}
+            />
           ) : previewContent && petSummary ? (
             <ReportDocumentPreview
               content={previewContent}
@@ -383,10 +389,17 @@ export function ReportsWizardContent() {
               qrCodeDataUri={exportAssets?.qrCodeDataUri ?? null}
               summary={summary}
             />
+          ) : validationError ? (
+            <ContentState kind="error" message={validationError} />
           ) : null}
 
-          {validationError ? (
-            <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.error}>
+          {validationError && previewContent ? (
+            <ThemedText
+              accessibilityLiveRegion="assertive"
+              lightColor={alertColor}
+              darkColor={alertColor}
+              selectable
+              style={styles.error}>
               {validationError}
             </ThemedText>
           ) : null}
@@ -395,12 +408,14 @@ export function ReportsWizardContent() {
         </ScreenContainer>
 
         <View style={[styles.shareFooter, { backgroundColor: surfaceColor, borderTopColor: borderColor }]}>
-          <Button
-            title={t('reports.shareReport')}
-            disabled={isExporting || isLoadingReview || !previewContent || previewContent.isEmpty}
-            trailingIcon={!canExportPdf ? <PlusLockButtonIcon /> : undefined}
-            onPress={() => void handleShareReport()}
-          />
+          <View style={[styles.shareFooterContent, { paddingHorizontal: horizontalPadding }]}>
+            <Button
+              title={t('reports.shareReport')}
+              disabled={isExporting || isLoadingReview || !previewContent || previewContent.isEmpty}
+              trailingIcon={!canExportPdf ? <PlusLockButtonIcon /> : undefined}
+              onPress={() => void handleShareReport()}
+            />
+          </View>
         </View>
       </View>
     );
@@ -420,7 +435,9 @@ export function ReportsWizardContent() {
 
       {step === 'range' ? (
         <>
-          <ThemedText type="subtitle">{t('reports.steps.rangeTitle')}</ThemedText>
+          <ThemedText accessibilityRole="header" type="subtitle">
+            {t('reports.steps.rangeTitle')}
+          </ThemedText>
           <GroupedSection title={t('reports.range.sectionTitle')}>
             <View style={styles.sectionBody}>
               {REPORT_RANGE_PRESETS.map((preset) => (
@@ -467,6 +484,7 @@ export function ReportsWizardContent() {
             <ThemedText
               lightColor={textSecondaryColor}
               darkColor={textSecondaryColor}
+              selectable
               style={styles.rangeHint}>
               {resolvedRangeLabel}
             </ThemedText>
@@ -476,7 +494,9 @@ export function ReportsWizardContent() {
 
       {step === 'data' ? (
         <>
-          <ThemedText type="subtitle">{t('reports.steps.dataTitle')}</ThemedText>
+          <ThemedText accessibilityRole="header" type="subtitle">
+            {t('reports.steps.dataTitle')}
+          </ThemedText>
           <GroupedSection title={t('reports.data.checkInsSection')}>
             {REPORT_CHECK_IN_DATA_KEYS.map((key, index) => {
               const label =
@@ -518,16 +538,30 @@ export function ReportsWizardContent() {
       ) : null}
 
       {validationError ? (
-        <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.error}>
+        <ThemedText
+          accessibilityLiveRegion="assertive"
+          lightColor={alertColor}
+          darkColor={alertColor}
+          selectable
+          style={styles.error}>
           {validationError}
         </ThemedText>
       ) : null}
 
-      <View style={styles.actions}>
+      <View style={[styles.actions, stackActions && styles.actionsStacked]}>
         {step !== 'range' ? (
-          <Button title={t('reports.back')} variant="secondary" onPress={handleBack} style={styles.actionButton} />
+          <Button
+            title={t('reports.back')}
+            variant="secondary"
+            onPress={handleBack}
+            style={[styles.actionButton, stackActions && styles.actionButtonStacked]}
+          />
         ) : null}
-        <Button title={t('reports.next')} onPress={handleNext} style={styles.actionButton} />
+        <Button
+          title={t('reports.next')}
+          onPress={handleNext}
+          style={[styles.actionButton, stackActions && styles.actionButtonStacked]}
+        />
       </View>
     </ScreenContainer>
   );
@@ -548,9 +582,13 @@ const styles = StyleSheet.create({
   },
   shareFooter: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.lg,
+  },
+  shareFooterContent: {
+    width: '100%',
+    maxWidth: LayoutTokens.readingContentMaxWidth,
+    alignSelf: 'center',
   },
   content: {
     gap: Spacing.lg,
@@ -579,10 +617,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.xxl,
   },
-  message: {
-    ...Typography.body,
-    textAlign: 'center',
-  },
   error: {
     ...Typography.body,
     textAlign: 'center',
@@ -591,7 +625,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.sm,
   },
+  actionsStacked: {
+    flexDirection: 'column',
+  },
   actionButton: {
     flex: 1,
+  },
+  actionButtonStacked: {
+    flex: 0,
+    width: '100%',
   },
 });

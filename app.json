@@ -2,11 +2,11 @@
   "expo": {
     "name": "Lulu",
     "slug": "lulu-app",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "luluapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
       "buildNumber": "3",
@@ -63,7 +63,15 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "expo-localization",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": ["en", "de", "tr"],
+            "android": ["en", "de", "tr"]
+          }
+        }
+      ],
       "expo-secure-store",
       "expo-apple-authentication",
       "expo-font",

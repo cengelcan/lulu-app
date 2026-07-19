@@ -1,8 +1,9 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -23,9 +24,11 @@ export function DashboardSectionHeader({
   actionLabel,
   onActionPress,
 }: DashboardSectionHeaderProps) {
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const { fontScale } = useWindowDimensions();
+  const usesLargeText = fontScale >= 1.4;
+  const accentColorToken = useThemeColor({}, 'accent');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const accentColor = iconColor ?? brandAccentColor;
+  const accentColor = iconColor ?? accentColorToken;
 
   const handleActionPress = () => {
     if (!onActionPress) {
@@ -40,10 +43,10 @@ export function DashboardSectionHeader({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.titleRow}>
+    <View style={[styles.container, usesLargeText ? styles.containerLargeText : null]}>
+      <View style={[styles.titleRow, usesLargeText ? styles.titleRowLargeText : null]}>
         {icon ? <IconSymbol name={icon} size={18} color={accentColor} /> : null}
-        <ThemedText type="defaultSemiBold" style={styles.title}>
+        <ThemedText accessibilityRole="header" type="defaultSemiBold" style={styles.title}>
           {title}
         </ThemedText>
       </View>
@@ -51,8 +54,7 @@ export function DashboardSectionHeader({
         <ThemedText
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
-          style={styles.detail}
-          numberOfLines={1}>
+          style={styles.detail}>
           {detailLabel}
         </ThemedText>
       ) : null}
@@ -62,10 +64,10 @@ export function DashboardSectionHeader({
           accessibilityLabel={actionLabel}
           hitSlop={8}
           onPress={handleActionPress}
-          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
+          style={({ pressed }) => [styles.actionButton, { opacity: pressed ? 0.7 : 1 }]}>
           <ThemedText
-            lightColor={brandAccentColor}
-            darkColor={brandAccentColor}
+            lightColor={accentColorToken}
+            darkColor={accentColorToken}
             style={styles.action}>
             {actionLabel}
           </ThemedText>
@@ -82,11 +84,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: Spacing.sm,
   },
+  containerLargeText: {
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+  },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
     flex: 1,
+  },
+  titleRowLargeText: {
+    flexBasis: '100%',
   },
   title: {
     ...Typography.titleSmall,
@@ -94,6 +103,10 @@ const styles = StyleSheet.create({
   action: {
     ...Typography.caption,
     fontWeight: '600',
+  },
+  actionButton: {
+    minHeight: AccessibilityTokens.minimumTouchTarget,
+    justifyContent: 'center',
   },
   detail: {
     ...Typography.caption,

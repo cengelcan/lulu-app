@@ -1,37 +1,26 @@
 import type { Href } from 'expo-router';
 import * as ExpoLinking from 'expo-linking';
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { setPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
 import { setOnboardingCompleted } from '@/storage/prefs.storage';
 import { setUserSetupPath } from '@/storage/setup-path.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { useUserStore } from '@/stores/user.store';
-import { parseFamilyCodeFromUrl } from '@/utils/sharing/family-code';
+import { resolveFamilyJoinIntent } from '@/utils/sharing/family-join-intent';
 
 async function handleJoinUrl(
-  url: string,
-  isAuthenticated: boolean,
+  code: string,
+  route: Href,
   navigate: (href: Href) => void
 ): Promise<void> {
-  const code = parseFamilyCodeFromUrl(url);
-
-  if (!code) {
-    return;
-  }
-
   await setPendingFamilyJoinCode(code);
   await setUserSetupPath('join_family');
   await setOnboardingCompleted(true);
   useOnboardingStore.setState({ hasCompletedOnboarding: true });
 
-  if (isAuthenticated) {
-    navigate(`/join-family?code=${code}` as Href);
-    return;
-  }
-
-  navigate(`/(auth)?joinCode=${code}` as Href);
+  navigate(route);
 }
 
 export function useJoinDeepLink(): void {
@@ -39,24 +28,45 @@ export function useJoinDeepLink(): void {
   const linkingUrl = ExpoLinking.useLinkingURL();
   const authStatus = useUserStore((state) => state.authStatus);
   const isAuthenticated = authStatus === 'authenticated';
+  const processedIntents = useRef(new Set<string>());
+
+  const processUrl = useCallback(
+    async (url: string) => {
+      const intent = resolveFamilyJoinIntent(url, isAuthenticated);
+
+      if (!intent || processedIntents.current.has(intent.processingKey)) {
+        return;
+      }
+
+      processedIntents.current.add(intent.processingKey);
+
+      try {
+        await handleJoinUrl(intent.code, intent.route, router.push);
+      } catch (error) {
+        processedIntents.current.delete(intent.processingKey);
+        console.warn('[family] Failed to process join deep link', error);
+      }
+    },
+    [isAuthenticated, router]
+  );
 
   useEffect(() => {
     if (linkingUrl) {
-      void handleJoinUrl(linkingUrl, isAuthenticated, router.push);
+      void processUrl(linkingUrl);
     }
-  }, [isAuthenticated, linkingUrl, router]);
+  }, [linkingUrl, processUrl]);
 
   useEffect(() => {
     void ExpoLinking.getInitialURL().then((url) => {
       if (url) {
-        void handleJoinUrl(url, isAuthenticated, router.push);
+        void processUrl(url);
       }
     });
 
     const subscription = ExpoLinking.addEventListener('url', ({ url }) => {
-      void handleJoinUrl(url, isAuthenticated, router.push);
+      void processUrl(url);
     });
 
     return () => subscription.remove();
-  }, [isAuthenticated, router]);
+  }, [processUrl]);
 }

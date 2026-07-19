@@ -19,6 +19,7 @@ import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { ContentState } from '@/components/ui/content-state';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { HeaderIconButton } from '@/components/ui/HeaderIconButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -213,6 +214,7 @@ export default function EditPetScreen() {
   }, [router]);
 
   const primaryColor = useThemeColor({}, 'primary');
+  const alertColor = useThemeColor({}, 'alert');
   const textColor = useThemeColor({}, 'text');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -293,6 +295,8 @@ export default function EditPetScreen() {
       return;
     }
 
+    // Controlled edit fields intentionally rehydrate after the requested pet finishes loading.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSpecies(pet.species);
     setBreed(pet.breed ?? null);
     setName(pet.name);
@@ -572,7 +576,7 @@ export default function EditPetScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <ScreenContainer edges={['bottom']} contentStyle={styles.centered}>
-          <ActivityIndicator color={primaryColor} size="large" />
+          <ContentState accessibilityLabel={t('common.loading')} kind="loading" />
         </ScreenContainer>
         {deleteTarget ? (
           <DeletePetConfirmModal
@@ -862,8 +866,10 @@ export default function EditPetScreen() {
 
         {errorMessage ? (
           <ThemedText
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
+            accessibilityLiveRegion="assertive"
+            lightColor={alertColor}
+            darkColor={alertColor}
+            selectable
             style={styles.error}>
             {errorMessage}
           </ThemedText>

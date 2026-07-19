@@ -7,5 +7,9 @@ export function resolveLanguageCode(
     return 'de';
   }
 
+  if (languageCode?.toLowerCase() === 'tr') {
+    return 'tr';
+  }
+
   return 'en';
 }

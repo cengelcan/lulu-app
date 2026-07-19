@@ -3,11 +3,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  FadeInDown,
+  FadeOutUp,
+  LinearTransition,
+  ReduceMotion,
+} from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePetSetupGuideDismiss } from '@/hooks/use-pet-setup-guide-dismiss';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -16,6 +24,7 @@ import type { PetRecord } from '@/types/pet-record';
 import {
   getPetSetupGuideProgress,
   getPetSetupGuideTasks,
+  getVisiblePetSetupGuideTasks,
   shouldShowPetSetupGuide,
   type PetSetupGuideTask,
   type PetSetupGuideTaskId,
@@ -42,7 +51,7 @@ type SetupGuideTaskRowProps = {
 };
 
 function SetupGuideTaskRow({ label, isCompleted, onPress }: SetupGuideTaskRowProps) {
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const accentColor = useThemeColor({}, 'accent');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   return (
@@ -56,14 +65,14 @@ function SetupGuideTaskRow({ label, isCompleted, onPress }: SetupGuideTaskRowPro
         style={[
           styles.taskIndicator,
           isCompleted
-            ? { backgroundColor: brandAccentColor, borderColor: brandAccentColor }
-            : { backgroundColor: 'transparent', borderColor: brandAccentColor },
+            ? { backgroundColor: accentColor, borderColor: accentColor }
+            : { backgroundColor: 'transparent', borderColor: accentColor },
         ]}>
         {isCompleted ? <IconSymbol name="checkmark" size={10} color={Palette.onDark} /> : null}
       </View>
       <ThemedText
-        lightColor={isCompleted ? textSecondaryColor : brandAccentColor}
-        darkColor={isCompleted ? textSecondaryColor : brandAccentColor}
+        lightColor={isCompleted ? textSecondaryColor : accentColor}
+        darkColor={isCompleted ? textSecondaryColor : accentColor}
         style={[styles.taskLabel, isCompleted && styles.taskLabelCompleted]}>
         {label}
       </ThemedText>
@@ -91,6 +100,7 @@ export function PetSetupGuideCard({ pet, hasTodayCheckIn, records }: PetSetupGui
     [hasTodayCheckIn, pet, records]
   );
   const progress = useMemo(() => getPetSetupGuideProgress(tasks), [tasks]);
+  const visibleTasks = useMemo(() => getVisiblePetSetupGuideTasks(tasks), [tasks]);
   const isVisible = useMemo(
     () => !isLoading && shouldShowPetSetupGuide(tasks, isDismissed, pet.status === 'deceased'),
     [isDismissed, isLoading, pet.status, tasks]
@@ -124,9 +134,13 @@ export function PetSetupGuideCard({ pet, hasTodayCheckIn, records }: PetSetupGui
   const petIcon = pet.species === 'dog' ? DOG_ICON : CAT_ICON;
 
   return (
+    <Animated.View
+      entering={FadeInDown.duration(220).reduceMotion(ReduceMotion.System)}
+      exiting={FadeOutUp.duration(180).reduceMotion(ReduceMotion.System)}
+      layout={LinearTransition.duration(220).reduceMotion(ReduceMotion.System)}>
     <LinearGradient colors={[...gradientColors]} style={styles.card}>
       <View style={styles.header}>
-        <ThemedText type="subtitle" style={styles.title}>
+        <ThemedText accessibilityRole="header" type="subtitle" style={styles.title}>
           {t('dashboard.setupGuide.title', { name: pet.name })}
         </ThemedText>
         <Pressable
@@ -138,12 +152,14 @@ export function PetSetupGuideCard({ pet, hasTodayCheckIn, records }: PetSetupGui
             { backgroundColor: surfaceElevatedColor },
             pressed && styles.hideButtonPressed,
           ]}>
-          <Text
+          <ThemedText
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
             allowFontScaling
             maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
             style={styles.hideButtonLabel}>
             {t('dashboard.setupGuide.hide')}
-          </Text>
+          </ThemedText>
         </Pressable>
       </View>
 
@@ -165,7 +181,7 @@ export function PetSetupGuideCard({ pet, hasTodayCheckIn, records }: PetSetupGui
 
       <View style={styles.contentRow}>
         <View style={styles.taskList}>
-          {tasks.map((task) => (
+          {visibleTasks.map((task) => (
             <SetupGuideTaskRow
               key={task.id}
               label={t(TASK_LABEL_KEYS[task.id])}
@@ -176,6 +192,7 @@ export function PetSetupGuideCard({ pet, hasTodayCheckIn, records }: PetSetupGui
         </View>
 
         <Image
+          accessible={false}
           accessibilityIgnoresInvertColors
           contentFit="contain"
           source={petIcon}
@@ -190,12 +207,14 @@ export function PetSetupGuideCard({ pet, hasTodayCheckIn, records }: PetSetupGui
         {t('dashboard.setupGuide.hint')}
       </ThemedText>
     </LinearGradient>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     borderRadius: Radius.lg,
+    borderCurve: 'continuous',
     padding: Spacing.md,
     gap: Spacing.sm,
     overflow: 'hidden',
@@ -213,7 +232,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xxs,
-    minHeight: 28,
+    minHeight: AccessibilityTokens.minimumTouchTarget,
     justifyContent: 'center',
   },
   hideButtonPressed: {
@@ -221,7 +240,6 @@ const styles = StyleSheet.create({
   },
   hideButtonLabel: {
     ...Typography.caption,
-    color: Palette.muted,
     fontWeight: '600',
   },
   progressTrack: {
@@ -250,7 +268,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    minHeight: 28,
+    minHeight: AccessibilityTokens.minimumTouchTarget,
   },
   taskIndicator: {
     width: 20,

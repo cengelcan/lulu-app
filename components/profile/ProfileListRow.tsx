@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -10,6 +11,7 @@ type ProfileListRowIconName =
   | 'star.fill'
   | 'square.and.arrow.up'
   | 'camera.fill'
+  | 'person.2.fill'
   | 'chevron.right'
   | 'arrow.up.right';
 
@@ -22,6 +24,7 @@ type ProfileListRowProps = {
   showExternalIcon?: boolean;
   isLast?: boolean;
   disabled?: boolean;
+  accessibilityHint?: string;
 };
 
 export function ProfileListRow({
@@ -33,6 +36,7 @@ export function ProfileListRow({
   showExternalIcon = false,
   isLast = false,
   disabled = false,
+  accessibilityHint,
 }: ProfileListRowProps) {
   const textColor = useThemeColor({}, destructive ? 'alert' : 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -55,6 +59,8 @@ export function ProfileListRow({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={handlePress}
       style={({ pressed }) => [
@@ -85,7 +91,7 @@ export function ProfileListRow({
 
 const styles = StyleSheet.create({
   row: {
-    minHeight: 48,
+    minHeight: AccessibilityTokens.comfortableTouchTarget,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,

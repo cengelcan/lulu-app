@@ -1,61 +1,42 @@
 import type { IconSymbolName } from '@/components/ui/icon-symbol';
+import {
+  LULU_PLUS_BENEFITS,
+  type PlusBenefitTitleKey,
+} from '@/constants/plus-benefits';
 import { Palette } from '@/constants/theme';
 
-export type PlusFeatureConfig = {
+type PlusFeatureVisual = {
   icon: IconSymbolName;
-  titleKey:
-    | 'paywall.trendsTitle'
-    | 'paywall.smartRemindersTitle'
-    | 'paywall.advancedReportsTitle'
-    | 'paywall.familySharingTitle'
-    | 'paywall.longerHistoryTitle'
-    | 'paywall.multiplePetsTitle';
-  descriptionKey:
-    | 'paywall.trendsDescription'
-    | 'paywall.smartRemindersDescription'
-    | 'paywall.advancedReportsDescription'
-    | 'paywall.familySharingDescription'
-    | 'paywall.longerHistoryDescription'
-    | 'paywall.multiplePetsDescription';
   iconColor: string;
 };
 
-/** Shared Lulu Plus benefit list — keep profile card and paywall in sync. */
-export const LULU_PLUS_FEATURES: PlusFeatureConfig[] = [
-  {
-    icon: 'chart.line.uptrend.xyaxis',
-    titleKey: 'paywall.trendsTitle',
-    descriptionKey: 'paywall.trendsDescription',
-    iconColor: Palette.badgeViolet,
-  },
-  {
+export type PlusFeatureConfig = (typeof LULU_PLUS_BENEFITS)[number] & PlusFeatureVisual;
+
+const PLUS_FEATURE_VISUALS: Record<PlusBenefitTitleKey, PlusFeatureVisual> = {
+  'paywall.smartRemindersTitle': {
     icon: 'calendar.badge.checkmark',
-    titleKey: 'paywall.smartRemindersTitle',
-    descriptionKey: 'paywall.smartRemindersDescription',
     iconColor: Palette.badgeOrange,
   },
-  {
+  'paywall.advancedReportsTitle': {
     icon: 'doc.text.fill',
-    titleKey: 'paywall.advancedReportsTitle',
-    descriptionKey: 'paywall.advancedReportsDescription',
     iconColor: Palette.brandAccent,
   },
-  {
+  'paywall.familySharingTitle': {
     icon: 'person.2.fill',
-    titleKey: 'paywall.familySharingTitle',
-    descriptionKey: 'paywall.familySharingDescription',
     iconColor: Palette.badgePink,
   },
-  {
+  'paywall.longerHistoryTitle': {
     icon: 'clock.fill',
-    titleKey: 'paywall.longerHistoryTitle',
-    descriptionKey: 'paywall.longerHistoryDescription',
     iconColor: Palette.brandAccentDark,
   },
-  {
+  'paywall.multiplePetsTitle': {
     icon: 'pawprint.fill',
-    titleKey: 'paywall.multiplePetsTitle',
-    descriptionKey: 'paywall.multiplePetsDescription',
     iconColor: Palette.badgeEmerald,
   },
-];
+};
+
+/** Shared Lulu Plus benefit list — keep profile card and paywall in sync. */
+export const LULU_PLUS_FEATURES: PlusFeatureConfig[] = LULU_PLUS_BENEFITS.map((benefit) => ({
+  ...benefit,
+  ...PLUS_FEATURE_VISUALS[benefit.titleKey],
+}));

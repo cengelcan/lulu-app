@@ -12,6 +12,7 @@ import { useFamilyPlusAccess } from '@/hooks/use-family-plus';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useSharingStore } from '@/stores/sharing.store';
+import { resolveFamilyNavigationView } from '@/utils/family/family-navigation';
 import { translateError } from '@/utils/translate-error';
 
 type FamilyTabScreenProps = {
@@ -41,7 +42,12 @@ export function FamilyTabScreen({ edges = ['top', 'bottom'] }: FamilyTabScreenPr
   );
 
   const activeGroup = familyGroup ?? memberFamilyGroup;
-  const isOwner = Boolean(familyGroup);
+  const navigationView = resolveFamilyNavigationView({
+    hasOwnerGroup: Boolean(familyGroup),
+    hasMemberGroup: Boolean(memberFamilyGroup),
+    canUseFamilySharing,
+  });
+  const isOwner = navigationView === 'active_owner';
 
   return (
     <ScreenContainer scrollable edges={edges} contentStyle={styles.content}>
@@ -53,7 +59,7 @@ export function FamilyTabScreen({ edges = ['top', 'bottom'] }: FamilyTabScreenPr
         <View style={styles.loading}>
           <ActivityIndicator color={primaryColor} size="large" />
         </View>
-      ) : activeGroup ? (
+      ) : activeGroup && (navigationView === 'active_owner' || navigationView === 'active_member') ? (
         <FamilyActiveContent
           familyGroup={activeGroup}
           members={members}
@@ -61,7 +67,7 @@ export function FamilyTabScreen({ edges = ['top', 'bottom'] }: FamilyTabScreenPr
           isOwner={isOwner}
           ownerDisplayName={familyOwnerDisplayName}
         />
-      ) : canUseFamilySharing ? (
+      ) : navigationView === 'setup' ? (
         <FamilyEmptyContent />
       ) : (
         <FamilyFreeUpsellContent />

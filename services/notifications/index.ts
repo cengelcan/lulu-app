@@ -2,6 +2,7 @@ export { configureNotificationHandler, ensureNotificationHandlerConfigured } fro
 export {
   getNotificationLaunchRoute,
   getRouteFromNotificationResponse,
+  normalizeNotificationRoute,
 } from '@/services/notifications/response';
 export { resolveStoredNotificationPermission } from '@/services/notifications/permission-status';
 export {

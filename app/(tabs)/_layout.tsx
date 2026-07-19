@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { MAIN_TABS } from '@/constants/main-tabs';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
@@ -24,32 +25,25 @@ export default function TabLayout() {
           borderTopColor: borderColor,
         },
       }}>
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: t('tabs.home'),
-          tabBarIcon: ({ color }) => <IconSymbol name="house.fill" size={24} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="my-pets"
-        options={{
-          title: t('tabs.myPets'),
-          tabBarIcon: ({ color }) => <IconSymbol name="pawprint.fill" size={24} color={color} />,
-        }}
-      />
+      {MAIN_TABS.map((tab) => {
+        const label = t(tab.labelKey);
+
+        return (
+          <Tabs.Screen
+            key={tab.name}
+            name={tab.name}
+            options={{
+              title: label,
+              tabBarAccessibilityLabel: label,
+              tabBarIcon: ({ color }) => <IconSymbol name={tab.icon} size={24} color={color} />,
+            }}
+          />
+        );
+      })}
       <Tabs.Screen
         name="family"
         options={{
-          title: t('tabs.family'),
-          tabBarIcon: ({ color }) => <IconSymbol name="person.2.fill" size={24} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: t('tabs.profile'),
-          tabBarIcon: ({ color }) => <IconSymbol name="person.fill" size={24} color={color} />,
+          href: null,
         }}
       />
     </Tabs>

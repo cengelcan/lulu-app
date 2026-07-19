@@ -1,5 +1,7 @@
 import { Platform } from 'react-native';
 
+export { BrandGradientTokens, Colors, Palette, type ThemeColor } from './theme-colors';
+
 /**
  * Design tokens — Cal.com-inspired monochrome system (see design.md).
  *
@@ -10,109 +12,6 @@ import { Platform } from 'react-native';
  * carried by weight 600 + negative letter-spacing, per design.md's Inter/Cal
  * Sans substitute guidance.
  */
-export const Palette = {
-  ink: '#111111',
-  inkActive: '#242424',
-  body: '#374151',
-  muted: '#6b7280',
-  mutedSoft: '#898989',
-  hairline: '#e5e7eb',
-  hairlineSoft: '#f3f4f6',
-  canvas: '#ffffff',
-  surfaceSoft: '#f8f9fa',
-  surfaceCard: '#f5f5f5',
-  surfaceStrong: '#e5e7eb',
-  surfaceDark: '#101010',
-  surfaceDarkElevated: '#1a1a1a',
-  onDark: '#ffffff',
-  onDarkSoft: '#a1a1aa',
-  brandAccent: '#A998D6',
-  brandAccentLight: '#B8A8E8',
-  brandAccentDark: '#7362A8',
-  brandGradientStart: '#A17EF5',
-  brandGradientEnd: '#625BEB',
-  brandAccentSoft: 'rgba(169,152,214,0.12)',
-  brandAccentBorder: 'rgba(169,152,214,0.35)',
-  brandAccentGlow: 'rgba(169,152,214,0.25)',
-  success: '#10b981',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  badgeOrange: '#fb923c',
-  badgePink: '#ec4899',
-  badgeViolet: '#8b5cf6',
-  badgeEmerald: '#34d399',
-} as const;
-
-/** Horizontal brand CTA gradient — lighter lavender left, deeper indigo right. */
-export const BrandGradientTokens = {
-  colors: [Palette.brandGradientStart, Palette.brandGradientEnd] as const,
-  start: { x: 0, y: 0.5 },
-  end: { x: 1, y: 0.5 },
-} as const;
-
-export const Colors = {
-  light: {
-    text: Palette.ink,
-    textSecondary: Palette.muted,
-    textTertiary: Palette.mutedSoft,
-    background: Palette.canvas,
-    surface: Palette.surfaceCard,
-    surfaceElevated: Palette.canvas,
-    surfaceSoft: Palette.surfaceSoft,
-    primary: Palette.ink,
-    primaryActive: Palette.inkActive,
-    primaryText: Palette.onDark,
-    secondary: Palette.surfaceStrong,
-    secondaryText: Palette.ink,
-    border: Palette.hairline,
-    borderSoft: Palette.hairlineSoft,
-    tint: Palette.ink,
-    icon: Palette.muted,
-    accent: Palette.brandAccent,
-    brandAccent: Palette.brandAccent,
-    brandAccentLight: Palette.brandAccentLight,
-    brandAccentSoft: Palette.brandAccentSoft,
-    brandAccentBorder: Palette.brandAccentBorder,
-    brandAccentGlow: Palette.brandAccentGlow,
-    success: Palette.success,
-    warning: Palette.warning,
-    alert: Palette.error,
-    tabIconDefault: Palette.muted,
-    tabIconSelected: Palette.brandAccent,
-  },
-  dark: {
-    text: Palette.onDark,
-    textSecondary: Palette.onDarkSoft,
-    textTertiary: '#71717a',
-    background: Palette.surfaceDark,
-    surface: Palette.surfaceDarkElevated,
-    surfaceElevated: '#242424',
-    surfaceSoft: '#161616',
-    primary: Palette.onDark,
-    primaryActive: '#e4e4e7',
-    primaryText: Palette.ink,
-    secondary: '#242424',
-    secondaryText: Palette.onDark,
-    border: '#2a2a2a',
-    borderSoft: '#202020',
-    tint: Palette.onDark,
-    icon: Palette.onDarkSoft,
-    accent: Palette.brandAccent,
-    brandAccent: Palette.brandAccent,
-    brandAccentLight: Palette.brandAccentLight,
-    brandAccentSoft: Palette.brandAccentSoft,
-    brandAccentBorder: Palette.brandAccentBorder,
-    brandAccentGlow: Palette.brandAccentGlow,
-    success: Palette.success,
-    warning: Palette.warning,
-    alert: Palette.error,
-    tabIconDefault: Palette.onDarkSoft,
-    tabIconSelected: Palette.brandAccent,
-  },
-} as const;
-
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
 /** 4px base unit — design.md spacing scale. */
 export const Spacing = {
   xxs: 4,
@@ -204,7 +103,7 @@ export const Typography = {
     lineHeight: 20,
     fontWeight: '600' as const,
     letterSpacing: 0,
-    maxFontSizeMultiplier: 1.5,
+    maxFontSizeMultiplier: 2,
   },
 } as const;
 

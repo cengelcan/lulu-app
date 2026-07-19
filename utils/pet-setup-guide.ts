@@ -46,6 +46,13 @@ export function getPetSetupGuideProgress(tasks: PetSetupGuideTask[]): number {
   return Math.round((completedCount / tasks.length) * 100);
 }
 
+export function getVisiblePetSetupGuideTasks(
+  tasks: PetSetupGuideTask[],
+  limit: number = 3
+): PetSetupGuideTask[] {
+  return tasks.filter((task) => !task.isCompleted).slice(0, Math.max(0, limit));
+}
+
 export function isPetSetupGuideComplete(tasks: PetSetupGuideTask[]): boolean {
   return tasks.every((task) => task.isCompleted);
 }

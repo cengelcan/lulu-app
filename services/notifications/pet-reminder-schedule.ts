@@ -10,6 +10,7 @@ import { getPetReminderNotificationContent } from '@/services/notifications/cont
 import { ensureNotificationHandlerConfigured } from '@/services/notifications/handler';
 import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { resolvePetPhotoAttachment } from '@/services/notifications/pet-photo-attachment';
+import { scheduleWithAttachmentFallback } from '@/services/notifications/schedule-with-attachment-fallback';
 import { hasNotificationPermission } from '@/services/notifications/permissions';
 import { getActivePet } from '@/storage/pet.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
@@ -64,12 +65,13 @@ async function schedulePetReminderNotification(
     return;
   }
 
-  const photoAttachment = await resolvePetPhotoAttachment(pet.photoUri);
+  const notificationId = getPetReminderNotificationId(reminder.id);
+  const photoAttachment = await resolvePetPhotoAttachment(pet.photoUri, notificationId);
   const { title, body } = getPetReminderNotificationContent(reminder, pet.name, language);
   const route = getReminderFormRoute(reminder.type, reminder.id);
 
-  await Notifications.scheduleNotificationAsync({
-    identifier: getPetReminderNotificationId(reminder.id),
+  await scheduleWithAttachmentFallback(Notifications, {
+    identifier: notificationId,
     content: {
       title,
       body,

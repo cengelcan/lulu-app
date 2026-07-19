@@ -21,6 +21,7 @@ export function InboxSectionView({ section, showPetName, onItemPress }: InboxSec
   return (
     <View style={styles.section}>
       <ThemedText
+        accessibilityRole="header"
         lightColor={textSecondaryColor}
         darkColor={textSecondaryColor}
         style={styles.title}>

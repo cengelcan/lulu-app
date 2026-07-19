@@ -17,6 +17,10 @@ export function isIntroOrTrialPeriod(
   }
 
   // RC iOS native enum: NORMAL = 0, INTRO = 1, TRIAL = 2
+  if (normalized === 'NORMAL' || periodType === 0) {
+    return false;
+  }
+
   if (periodType === 1 || periodType === 2) {
     return true;
   }
@@ -39,7 +43,8 @@ function isLikelyIntroductoryBillingPeriod(
   }
 
   const periodDays = periodMs / (1000 * 60 * 60 * 24);
-  const fullCycleDays = planKind === 'weekly' ? 7 : planKind === 'yearly' ? 365 : 0;
+  const fullCycleDays =
+    planKind === 'weekly' ? 7 : planKind === 'monthly' ? 30.5 : planKind === 'yearly' ? 365 : 0;
 
   if (fullCycleDays === 0) {
     return false;
@@ -67,7 +72,7 @@ export function getTrialDaysRemaining(expiresAt: string): number {
   return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
 }
 
-/** After trial ends, when the next paid renewal is expected (yearly → +1 year, weekly → +1 week). */
+/** After trial ends, when the next paid renewal is expected for the selected billing cycle. */
 export function projectNextRenewalDate(
   currentPeriodEndsAt: string,
   planKind: PlusPlanKind
@@ -83,6 +88,19 @@ export function projectNextRenewalDate(
     case 'weekly':
       nextRenewal.setDate(nextRenewal.getDate() + 7);
       return nextRenewal;
+    case 'monthly':
+      {
+        const renewalDay = nextRenewal.getDate();
+        nextRenewal.setDate(1);
+        nextRenewal.setMonth(nextRenewal.getMonth() + 1);
+        const lastDayOfRenewalMonth = new Date(
+          nextRenewal.getFullYear(),
+          nextRenewal.getMonth() + 1,
+          0
+        ).getDate();
+        nextRenewal.setDate(Math.min(renewalDay, lastDayOfRenewalMonth));
+      }
+      return nextRenewal;
     case 'yearly':
       nextRenewal.setFullYear(nextRenewal.getFullYear() + 1);
       return nextRenewal;
@@ -95,6 +113,8 @@ export function getPlanLabelKey(planKind: PlusPlanKind): string | null {
   switch (planKind) {
     case 'weekly':
       return 'profile.luluPlusPlanWeekly';
+    case 'monthly':
+      return 'profile.luluPlusPlanMonthly';
     case 'yearly':
       return 'profile.luluPlusPlanYearly';
     case 'lifetime':

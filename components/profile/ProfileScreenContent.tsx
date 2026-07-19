@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
 import { CommunityCard } from '@/components/profile/CommunityCard';
+import { FamilyManagementCard } from '@/components/profile/FamilyManagementCard';
 import { LegalCard } from '@/components/profile/LegalCard';
 import { LuluPlusCard } from '@/components/profile/LuluPlusCard';
 import { UserCard } from '@/components/profile/UserCard';
@@ -36,12 +37,14 @@ export function ProfileScreenContent({ edges = ['top', 'bottom'] }: ProfileScree
     <ScreenContainer scrollable edges={edges} contentStyle={styles.content}>
       <View style={styles.body}>
         <UserCard />
+        <FamilyManagementCard />
         <LuluPlusCard />
         <CommunityCard />
         <LegalCard />
         <ThemedText
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
+          selectable
           style={styles.version}>
           {t('profile.version', { version })}
         </ThemedText>

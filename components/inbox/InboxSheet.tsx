@@ -5,6 +5,7 @@ import { InboxSectionView } from '@/components/inbox/InboxSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AccessibilityTokens } from '@/constants/accessibility';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -53,7 +54,7 @@ export function InboxSheet({
           accessibilityLabel={t('common.cancel')}
           hitSlop={8}
           onPress={onClose}
-          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
+          style={({ pressed }) => [styles.closeButton, { opacity: pressed ? 0.7 : 1 }]}>
           <IconSymbol name="xmark.circle" size={24} color={textSecondaryColor} />
         </Pressable>
       </View>
@@ -77,7 +78,9 @@ export function InboxSheet({
           </ThemedText>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.content}>
           {sections.map((section) => (
             <InboxSectionView
               key={section.category}
@@ -107,6 +110,12 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.titleSmall,
+  },
+  closeButton: {
+    width: AccessibilityTokens.minimumTouchTarget,
+    height: AccessibilityTokens.minimumTouchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   content: {
     padding: Spacing.lg,

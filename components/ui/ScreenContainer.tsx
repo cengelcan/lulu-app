@@ -1,7 +1,15 @@
-import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { Spacing } from '@/constants/theme';
+import { getScreenHorizontalPadding, LayoutTokens } from '@/constants/layout';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 type ScreenContainerProps = {
@@ -10,6 +18,7 @@ type ScreenContainerProps = {
   contentStyle?: StyleProp<ViewStyle>;
   scrollable?: boolean;
   edges?: Edge[];
+  maxContentWidth?: number;
 };
 
 export function ScreenContainer({
@@ -18,18 +27,26 @@ export function ScreenContainer({
   contentStyle,
   scrollable = false,
   edges = ['top', 'bottom'],
+  maxContentWidth = LayoutTokens.readingContentMaxWidth,
 }: ScreenContainerProps) {
+  const { width } = useWindowDimensions();
   const backgroundColor = useThemeColor({}, 'background');
+  const horizontalPadding = getScreenHorizontalPadding(width);
+  const responsiveContentStyle = {
+    maxWidth: maxContentWidth,
+    paddingHorizontal: horizontalPadding,
+  } as const;
 
   const content = scrollable ? (
     <ScrollView
-      contentContainerStyle={[styles.scrollContent, contentStyle]}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={[styles.scrollContent, responsiveContentStyle, contentStyle]}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}>
       {children}
     </ScrollView>
   ) : (
-    <View style={[styles.content, contentStyle]}>{children}</View>
+    <View style={[styles.content, responsiveContentStyle, contentStyle]}>{children}</View>
   );
 
   return (
@@ -45,12 +62,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: Spacing.lg,
+    width: '100%',
+    alignSelf: 'center',
     paddingVertical: Spacing.md,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: Spacing.lg,
+    width: '100%',
+    alignSelf: 'center',
     paddingVertical: Spacing.md,
   },
 });

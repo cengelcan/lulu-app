@@ -1,7 +1,7 @@
 import { HeaderBackButton } from "expo-router/react-navigation";
 import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { RecordNotesField } from '@/components/records/RecordNotesField';
@@ -9,6 +9,7 @@ import { ReminderRecurrenceField } from '@/components/reminders/ReminderRecurren
 import { ReminderTypeFields } from '@/components/reminders/ReminderTypeFields';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { ContentState } from '@/components/ui/content-state';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
@@ -91,6 +92,7 @@ export default function ReminderFormScreen() {
   const [isSnoozing, setIsSnoozing] = useState(false);
 
   const primaryColor = useThemeColor({}, 'primary');
+  const alertColor = useThemeColor({}, 'alert');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const leaveForm = useCallback(() => {
@@ -141,17 +143,7 @@ export default function ReminderFormScreen() {
   }, [reminderType, router]);
 
   useEffect(() => {
-    if (!reminderType) {
-      return;
-    }
-
-    setMetadata(createDefaultReminderMetadata(reminderType));
-    setValidationError(null);
-  }, [reminderType]);
-
-  useEffect(() => {
     if (!reminderId || !reminderType) {
-      setIsHydrating(false);
       return;
     }
 
@@ -279,7 +271,7 @@ export default function ReminderFormScreen() {
     leaveForm,
     metadata,
     notes,
-    pet?.id,
+    pet,
     pets,
     recurrence,
     reminderType,
@@ -303,7 +295,7 @@ export default function ReminderFormScreen() {
     } finally {
       setIsCompleting(false);
     }
-  }, [completeReminder, isCompleted, isReadOnly, leaveForm, pet?.id, reminderId, t]);
+  }, [completeReminder, isCompleted, isReadOnly, leaveForm, pet, reminderId, t]);
 
   const handleSkip = useCallback(() => {
     if (!reminderId || !pet?.id || isReadOnly || isCompleted || isSkipped) {
@@ -331,7 +323,7 @@ export default function ReminderFormScreen() {
         },
       },
     ]);
-  }, [isCompleted, isReadOnly, isSkipped, leaveForm, pet?.id, reminderId, skipReminder, t]);
+  }, [isCompleted, isReadOnly, isSkipped, leaveForm, pet, reminderId, skipReminder, t]);
 
   const handleSnooze = useCallback(async () => {
     if (!reminderId || !pet?.id || isReadOnly || isCompleted || isSkipped) {
@@ -356,7 +348,7 @@ export default function ReminderFormScreen() {
     isReadOnly,
     isSkipped,
     leaveForm,
-    pet?.id,
+    pet,
     reminderId,
     snoozeReminder,
     t,
@@ -384,7 +376,7 @@ export default function ReminderFormScreen() {
         },
       },
     ]);
-  }, [deleteReminder, isReadOnly, leaveForm, pet?.id, reminderId, t]);
+  }, [deleteReminder, isReadOnly, leaveForm, pet, reminderId, t]);
 
   if (!reminderType) {
     return null;
@@ -405,9 +397,11 @@ export default function ReminderFormScreen() {
       />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         {isHydrating ? (
-          <View style={styles.centered}>
-            <ActivityIndicator color={primaryColor} size="large" />
-          </View>
+          <ContentState
+            accessibilityLabel={`${t('common.loading')}. ${screenTitle}`}
+            kind="loading"
+            style={styles.centered}
+          />
         ) : (
           <>
             {typeDefinition ? (
@@ -492,7 +486,12 @@ export default function ReminderFormScreen() {
             </GroupedSection>
 
             {validationError ? (
-              <ThemedText lightColor={primaryColor} darkColor={primaryColor} style={styles.error}>
+              <ThemedText
+                accessibilityLiveRegion="assertive"
+                lightColor={alertColor}
+                darkColor={alertColor}
+                selectable
+                style={styles.error}>
                 {validationError}
               </ThemedText>
             ) : null}

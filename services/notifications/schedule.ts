@@ -3,10 +3,10 @@ import { Platform } from 'react-native';
 import {
   ALL_CHECK_IN_REMINDER_NOTIFICATION_IDS,
   ANDROID_CHECK_IN_CHANNEL_ID,
-  CHECK_IN_NOTIFICATION_DATA,
   CHECK_IN_REMINDER_NOTIFICATION_ID_PREFIX,
   CHECK_IN_REMINDER_SCHEDULE_HORIZON_DAYS,
   CHECK_IN_REMINDER_SOUND,
+  getCheckInNotificationData,
   getCheckInReminderNotificationId,
 } from '@/services/notifications/constants';
 import {
@@ -122,7 +122,7 @@ async function scheduleCheckInReminders(
           title,
           body,
           sound: CHECK_IN_REMINDER_SOUND,
-          data: { ...CHECK_IN_NOTIFICATION_DATA },
+          data: getCheckInNotificationData(dateKey),
           ...(Platform.OS === 'android' ? { channelId: ANDROID_CHECK_IN_CHANNEL_ID } : {}),
           ...(Platform.OS === 'ios' && photoAttachment
             ? { attachments: [photoAttachment] }

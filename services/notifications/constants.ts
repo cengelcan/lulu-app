@@ -9,6 +9,19 @@ export const CHECK_IN_NOTIFICATION_DATA = {
   deepLink: CHECK_IN_DEEP_LINK,
 } as const;
 
+export function getCheckInRoute(dateKey: string): `/check-in?date=${string}` {
+  return `/check-in?date=${encodeURIComponent(dateKey)}`;
+}
+
+export function getCheckInNotificationData(dateKey: string) {
+  const route = getCheckInRoute(dateKey);
+
+  return {
+    route,
+    deepLink: `${CHECK_IN_DEEP_LINK}?date=${encodeURIComponent(dateKey)}`,
+  } as const;
+}
+
 export const CHECK_IN_REMINDER_NOTIFICATION_ID = 'pet-health-check-in-reminder';
 
 export const CHECK_IN_REMINDER_NOTIFICATION_ID_PREFIX = 'pet-health-check-in-reminder';

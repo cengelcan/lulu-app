@@ -179,6 +179,7 @@ describe('buildPersonalActionItems via buildInboxItems', () => {
     assert.ok(actionItems);
     assert.equal(actionItems.length, 1);
     assert.equal(actionItems[0]?.kind, 'missed_check_in_today');
+    assert.equal(actionItems[0]?.route, `/check-in?date=${TODAY_KEY}`);
   });
 
   it('shows yesterday missed check-in only when today exists', () => {
@@ -192,6 +193,7 @@ describe('buildPersonalActionItems via buildInboxItems', () => {
     assert.ok(actionItems);
     assert.equal(actionItems.length, 1);
     assert.equal(actionItems[0]?.kind, 'missed_check_in_yesterday');
+    assert.equal(actionItems[0]?.route, `/check-in?date=${YESTERDAY_KEY}`);
   });
 
   it('excludes deceased pets', () => {

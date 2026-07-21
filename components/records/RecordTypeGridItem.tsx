@@ -26,6 +26,7 @@ export function RecordTypeGridItem({
 
   const iconBoxBackground = isDark ? backgroundColor : `${backgroundColor}22`;
   const iconColor = isDark ? Palette.onDark : backgroundColor;
+  const labelLineCount = label.trim().includes(' ') ? 2 : 1;
 
   const handlePress = () => {
     if (process.env.EXPO_OS === 'ios') {
@@ -51,7 +52,11 @@ export function RecordTypeGridItem({
         ]}>
         <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
       </View>
-      <ThemedText style={styles.label}>
+      <ThemedText
+        adjustsFontSizeToFit
+        minimumFontScale={0.75}
+        numberOfLines={labelLineCount}
+        style={styles.label}>
         {label}
       </ThemedText>
     </Pressable>

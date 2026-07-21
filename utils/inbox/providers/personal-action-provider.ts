@@ -1,6 +1,7 @@
 import type { Href } from 'expo-router';
 
 import { addDays } from '@/services/notifications/date';
+import { getCheckInRoute } from '@/services/notifications/constants';
 import type { InboxItem, InboxProvider, InboxProviderInput, InboxTranslateFn } from '@/types/inbox';
 import type { Pet } from '@/types/pet';
 import type { PetReminder } from '@/types/pet-reminder';
@@ -11,7 +12,6 @@ import {
   buildUpcomingReminders,
 } from '@/utils/upcoming-reminders';
 
-const CHECK_IN_ROUTE = '/check-in' as Href;
 const SETTINGS_ROUTE = '/settings' as Href;
 
 function getActivePets(pets: Pet[]): Pet[] {
@@ -45,7 +45,7 @@ function buildMissedCheckInItems(
         petName: pet.name,
         titleKey: 'inbox.missedCheckInToday',
         titleParams: { name: pet.name },
-        route: CHECK_IN_ROUTE,
+        route: getCheckInRoute(todayKey) as Href,
         sortAt: referenceDate.toISOString(),
         createdAt: referenceDate.toISOString(),
       });
@@ -54,8 +54,8 @@ function buildMissedCheckInItems(
 
     const hasYesterday = hasCheckInOnDate(checkIns, pet.id, yesterdayKey);
     if (!hasYesterday) {
-    const yesterdayDate = addDays(new Date(referenceDate), -1);
-    yesterdayDate.setHours(0, 0, 0, 0);
+      const yesterdayDate = addDays(new Date(referenceDate), -1);
+      yesterdayDate.setHours(0, 0, 0, 0);
       items.push({
         id: `missed_check_in_yesterday:${pet.id}`,
         source: 'personal',
@@ -66,7 +66,7 @@ function buildMissedCheckInItems(
         petName: pet.name,
         titleKey: 'inbox.missedCheckInYesterday',
         titleParams: { name: pet.name },
-        route: CHECK_IN_ROUTE,
+        route: getCheckInRoute(yesterdayKey) as Href,
         sortAt: yesterdayDate.toISOString(),
         createdAt: yesterdayDate.toISOString(),
       });

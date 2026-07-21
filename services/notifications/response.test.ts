@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
+import { getCheckInNotificationData } from '@/services/notifications/constants';
 import {
   getRouteFromNotificationResponse,
   normalizeNotificationRoute,
@@ -21,6 +22,10 @@ function buildResponse(route?: unknown) {
 describe('normalizeNotificationRoute', () => {
   it('preserves current check-in, reminder and record targets', () => {
     assert.equal(normalizeNotificationRoute('/check-in'), '/check-in');
+    assert.equal(
+      normalizeNotificationRoute('/check-in?date=2026-07-20'),
+      '/check-in?date=2026-07-20'
+    );
     assert.equal(
       normalizeNotificationRoute('/reminders/rabies?id=reminder-1'),
       '/reminders/rabies?id=reminder-1'
@@ -48,5 +53,14 @@ describe('getRouteFromNotificationResponse', () => {
 
   it('returns null when there is no response', () => {
     assert.equal(getRouteFromNotificationResponse(null), null);
+  });
+});
+
+describe('getCheckInNotificationData', () => {
+  it('keeps the scheduled check-in date in both navigation targets', () => {
+    assert.deepEqual(getCheckInNotificationData('2026-07-20'), {
+      route: '/check-in?date=2026-07-20',
+      deepLink: 'luluapp://check-in?date=2026-07-20',
+    });
   });
 });

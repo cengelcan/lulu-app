@@ -462,7 +462,7 @@ export function LuluPlusPaywallContent({
               expanded={paywallLayout.stackPlans}
               onPress={() => setSelectedPlanId(plan.id)}
               visual={plan.visual}
-              brandAccentColor={accentColor}
+              brandAccentColor={brandAccentColor}
               brandAccentSoftColor={brandAccentSoftColor}
               surfaceColor={surfaceColor}
               textColor={textColor}

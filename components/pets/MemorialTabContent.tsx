@@ -135,10 +135,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   headerBackground: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   headerOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   headerContent: {
     alignItems: 'center',

@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     marginVertical: Spacing.md,
   },
   outerRing: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     opacity: 0.6,
   },
   innerCircle: {

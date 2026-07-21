@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   safeArea: {
     flex: 1,

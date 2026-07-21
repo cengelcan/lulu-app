@@ -216,6 +216,6 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   loadingIndicator: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
 });

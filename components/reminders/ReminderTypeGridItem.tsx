@@ -30,7 +30,6 @@ export function ReminderTypeGridItem({
 
   const iconBoxBackground = isDark ? backgroundColor : `${backgroundColor}22`;
   const iconColor = isDark ? Palette.onDark : backgroundColor;
-  const labelLineCount = label.trim().includes(' ') ? 2 : 1;
 
   const handlePress = () => {
     if (process.env.EXPO_OS === 'ios') {
@@ -58,11 +57,7 @@ export function ReminderTypeGridItem({
           <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
         </View>
         <View style={styles.bannerText}>
-          <ThemedText
-            adjustsFontSizeToFit
-            minimumFontScale={0.75}
-            style={styles.bannerLabel}
-            numberOfLines={1}>
+          <ThemedText style={styles.bannerLabel} numberOfLines={2}>
             {label}
           </ThemedText>
           {subtitle ? (
@@ -92,11 +87,7 @@ export function ReminderTypeGridItem({
         ]}>
         <IconSymbol name={icon} size={ICON_SIZE} color={iconColor} />
       </View>
-      <ThemedText
-        adjustsFontSizeToFit
-        minimumFontScale={0.75}
-        style={styles.label}
-        numberOfLines={labelLineCount}>
+      <ThemedText style={styles.label} numberOfLines={2}>
         {label}
       </ThemedText>
     </Pressable>
@@ -136,6 +127,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...Typography.caption,
+    minHeight: Typography.caption.lineHeight * 2,
     textAlign: 'center',
     fontWeight: '600',
   },

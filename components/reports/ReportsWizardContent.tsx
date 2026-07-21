@@ -13,6 +13,7 @@ import { DatePickerField } from '@/components/ui/DatePickerField';
 import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES } from '@/constants/check-in';
+import { REPORT_BRAND_COLOR } from '@/constants/branding';
 import { getScreenHorizontalPadding, LayoutTokens } from '@/constants/layout';
 import { RECORD_TYPES } from '@/constants/record-types';
 import {
@@ -91,7 +92,6 @@ export function ReportsWizardContent() {
   const { allowed: canExportPdf, requestAccess } =
     usePlusFeature('pdfExport');
 
-  const primaryColor = useThemeColor({}, 'primary');
   const alertColor = useThemeColor({}, 'alert');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -312,7 +312,7 @@ export function ReportsWizardContent() {
         formatPageLabel,
         photoDataUri,
         qrCodeDataUri,
-        primaryColor,
+        primaryColor: REPORT_BRAND_COLOR,
         summary,
       });
 
@@ -384,7 +384,7 @@ export function ReportsWizardContent() {
               shellLabels={shellLabels}
               language={language}
               pet={petSummary}
-              primaryColor={primaryColor}
+              primaryColor={REPORT_BRAND_COLOR}
               photoDataUri={exportAssets?.photoDataUri ?? null}
               qrCodeDataUri={exportAssets?.qrCodeDataUri ?? null}
               summary={summary}

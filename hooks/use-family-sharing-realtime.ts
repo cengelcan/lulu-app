@@ -8,9 +8,9 @@ import { useUserStore } from '@/stores/user.store';
 const DEBOUNCE_MS = 400;
 
 /**
- * Subscribes to pet_memberships changes over Supabase Realtime. RLS ensures
- * members only see their own rows and owners see memberships on their pets.
- * Debounced pulls keep the local cache in sync without logout/login.
+ * Subscribes to family membership and reminder changes over Supabase Realtime.
+ * RLS ensures users only receive rows for pets they can access. Debounced pulls
+ * refresh the local cache and rebuild this device's notification schedule.
  */
 export function useFamilySharingRealtime() {
   const authStatus = useUserStore((state) => state.authStatus);
@@ -50,13 +50,24 @@ export function useFamilySharingRealtime() {
     };
 
     const channel = supabase
-      .channel(`pet-memberships:${userId}`)
+      .channel(`family-care:${userId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'pet_memberships',
+        },
+        () => {
+          scheduleRefresh();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pet_reminders',
         },
         () => {
           scheduleRefresh();

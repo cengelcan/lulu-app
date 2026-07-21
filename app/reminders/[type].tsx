@@ -58,11 +58,21 @@ function normalizeOptionalText(value: string): string | null {
 export default function ReminderFormScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { type: typeParam, id: idParam } = useLocalSearchParams<{ type?: string; id?: string | string[] }>();
+  const { type: typeParam, id: idParam, fromNotification: fromNotificationParam } =
+    useLocalSearchParams<{
+      type?: string;
+      id?: string | string[];
+      fromNotification?: string | string[];
+    }>();
 
   const rawType = Array.isArray(typeParam) ? typeParam[0] : typeParam;
   const reminderType = rawType ? resolveReminderTypeId(rawType) : null;
   const reminderId = Array.isArray(idParam) ? idParam[0] : idParam;
+  const rawFromNotificationParam = Array.isArray(fromNotificationParam)
+    ? fromNotificationParam[0]
+    : fromNotificationParam;
+  const isFromNotification =
+    rawFromNotificationParam === '1' || rawFromNotificationParam === 'true';
 
   const pet = usePetStore((state) => state.pet);
   const pets = usePetStore((state) => state.pets);
@@ -96,13 +106,18 @@ export default function ReminderFormScreen() {
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const leaveForm = useCallback(() => {
+    if (isFromNotification) {
+      router.replace('/reminders' as Href);
+      return;
+    }
+
     if (router.canGoBack()) {
       router.back();
       return;
     }
 
     router.replace('/reminders' as Href);
-  }, [router]);
+  }, [isFromNotification, router]);
 
   const headerLeft = useCallback(
     () => (

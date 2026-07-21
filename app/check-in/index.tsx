@@ -63,9 +63,14 @@ export default function CheckInScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { t } = useTranslation();
-  const { date: dateParam, fromSetup: fromSetupParam } = useLocalSearchParams<{
+  const {
+    date: dateParam,
+    fromSetup: fromSetupParam,
+    fromNotification: fromNotificationParam,
+  } = useLocalSearchParams<{
     date?: string | string[];
     fromSetup?: string | string[];
+    fromNotification?: string | string[];
   }>();
 
   const pet = usePetStore((state) => state.pet);
@@ -96,7 +101,26 @@ export default function CheckInScreen() {
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
   const rawFromSetupParam = Array.isArray(fromSetupParam) ? fromSetupParam[0] : fromSetupParam;
+  const rawFromNotificationParam = Array.isArray(fromNotificationParam)
+    ? fromNotificationParam[0]
+    : fromNotificationParam;
   const isFromSetup = rawFromSetupParam === '1' || rawFromSetupParam === 'true';
+  const isFromNotification =
+    rawFromNotificationParam === '1' || rawFromNotificationParam === 'true';
+
+  const leaveCheckIn = useCallback(() => {
+    if (isFromNotification) {
+      router.replace('/(tabs)/home');
+      return;
+    }
+
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace('/(tabs)/home');
+  }, [isFromNotification, router]);
 
   useAndroidBackHandler(
     useCallback(() => isFromSetup, [isFromSetup])
@@ -361,7 +385,7 @@ export default function CheckInScreen() {
             <HeaderIconButton
               accessibilityLabel={t('common.back')}
               borderColor={CheckInTheme.headerButtonBorder}
-              onPress={() => router.back()}>
+              onPress={leaveCheckIn}>
               <IconSymbol name="chevron.left" size={18} color="#FFFFFF" />
             </HeaderIconButton>
           ),
@@ -369,7 +393,7 @@ export default function CheckInScreen() {
       headerLeftContainerStyle: { paddingLeft: Spacing.md },
       headerRightContainerStyle: { paddingRight: Spacing.md },
     }),
-    [headerRight, isFromSetup, router, t]
+    [headerRight, isFromSetup, leaveCheckIn, t]
   );
 
   if (petIsLoading || !pet) {

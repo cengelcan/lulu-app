@@ -47,8 +47,23 @@ describe('normalizeNotificationRoute', () => {
 
 describe('getRouteFromNotificationResponse', () => {
   it('falls back to check-in when notification data has no safe route', () => {
-    assert.equal(getRouteFromNotificationResponse(buildResponse()), '/check-in');
-    assert.equal(getRouteFromNotificationResponse(buildResponse('/unknown')), '/check-in');
+    assert.equal(
+      getRouteFromNotificationResponse(buildResponse()),
+      '/check-in?fromNotification=1'
+    );
+    assert.equal(
+      getRouteFromNotificationResponse(buildResponse('/unknown')),
+      '/check-in?fromNotification=1'
+    );
+  });
+
+  it('marks an existing query route as notification-originated', () => {
+    assert.equal(
+      getRouteFromNotificationResponse(
+        buildResponse('/reminders/rabies?id=reminder-1')
+      ),
+      '/reminders/rabies?id=reminder-1&fromNotification=1'
+    );
   });
 
   it('returns null when there is no response', () => {

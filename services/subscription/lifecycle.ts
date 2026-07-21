@@ -4,6 +4,7 @@ import {
   isRevenueCatAvailable,
   logInRevenueCat,
   subscribeToRevenueCatUpdates,
+  syncRevenueCatPurchases,
   teardownRevenueCat,
 } from '@/services/subscription/revenuecat';
 import { type PlusStatus } from '@/services/subscription/plus-status';
@@ -55,9 +56,17 @@ async function initializeSubscriptionInner(
 
   if (configured) {
     try {
-      await logInRevenueCat(userId, { email: options?.email });
+      const loginStatus = await logInRevenueCat(userId, { email: options?.email });
+
+      // A fresh install can have a new local StoreKit receipt cache even when
+      // the same authenticated RevenueCat user owns an active subscription.
+      // Reconcile it silently once during this user's initialization so Plus
+      // does not depend on opening the paywall and tapping Restore Purchases.
+      if (!loginStatus.isPlusActive) {
+        await syncRevenueCatPurchases();
+      }
     } catch (error) {
-      console.warn('RevenueCat logIn failed', error);
+      console.warn('RevenueCat login or purchase sync failed', error);
     }
 
     unsubscribeRevenueCat = subscribeToRevenueCatUpdates((status) => {

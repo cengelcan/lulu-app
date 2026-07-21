@@ -4,10 +4,22 @@ import { escapeHtml } from '@/utils/html';
 type PetInfoCardParams = {
   pet: ReportPetSummary;
   petPhotoHtml: string;
+  qrCodeDataUri: string | null;
   labels: ReportDocumentLabels;
+  qrCodeAlt: string;
 };
 
-export function renderPetInfoCard({ pet, petPhotoHtml, labels }: PetInfoCardParams): string {
+export function renderPetInfoCard({
+  pet,
+  petPhotoHtml,
+  qrCodeDataUri,
+  labels,
+  qrCodeAlt,
+}: PetInfoCardParams): string {
+  const qrCodeHtml = qrCodeDataUri
+    ? `<img class="report-qr" src="${qrCodeDataUri}" alt="${escapeHtml(qrCodeAlt)}" />`
+    : '';
+
   return `
     <section class="pet-info-card">
       <div class="pet-info-header">
@@ -16,6 +28,7 @@ export function renderPetInfoCard({ pet, petPhotoHtml, labels }: PetInfoCardPara
           <h1 class="pet-name">${escapeHtml(pet.name)}</h1>
           <p class="pet-breed-line">${escapeHtml(pet.speciesLabel)} · ${escapeHtml(pet.breedLabel)}</p>
         </div>
+        ${qrCodeHtml}
       </div>
       <div class="pet-detail-grid">
         <div class="pet-detail-cell">

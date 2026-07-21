@@ -26,6 +26,19 @@ const SAFE_NOTIFICATION_TAB_ROUTES = new Set([
   '/(tabs)/family',
 ]);
 
+export const NOTIFICATION_ORIGIN_PARAM = 'fromNotification';
+
+function markNotificationRoute(route: Href): Href {
+  const value = String(route);
+  const [pathAndQuery, hash] = value.split('#', 2);
+  const separator = pathAndQuery.includes('?') ? '&' : '?';
+  const markedRoute = `${pathAndQuery}${separator}${NOTIFICATION_ORIGIN_PARAM}=1${
+    hash ? `#${hash}` : ''
+  }`;
+
+  return markedRoute as Href;
+}
+
 export function normalizeNotificationRoute(value: unknown): Href | null {
   if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) {
     return null;
@@ -61,5 +74,5 @@ export function getRouteFromNotificationResponse(
   const data = response.notification.request.content.data as { route?: unknown } | null | undefined;
   const route = normalizeNotificationRoute(data?.route);
 
-  return route ?? CHECK_IN_ROUTE;
+  return markNotificationRoute(route ?? CHECK_IN_ROUTE);
 }

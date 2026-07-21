@@ -1,6 +1,8 @@
 import { APP_STORE_LISTING_URL, SHARE_URL } from '@/constants/social';
+import { Palette } from '@/constants/theme';
 
 export const REPORT_APP_NAME = 'Lulu';
+export const REPORT_BRAND_COLOR = Palette.brandGradientEnd;
 export const REPORT_APP_URL = SHARE_URL;
 export const REPORT_SITE_LABEL = 'lulu.com';
 export const REPORT_SITE_URL = 'https://lulu.com';

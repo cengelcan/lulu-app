@@ -121,9 +121,6 @@ export function buildReportStyles({ primaryColor, forScreen = false }: ReportSty
         background: #fff;
         flex-shrink: 0;
       }
-      .report-qr-placeholder {
-        background: rgba(255, 255, 255, 0.25);
-      }
       .report-page-body {
         position: absolute;
         top: ${REPORT_HEADER_HEIGHT}px;

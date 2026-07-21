@@ -3,30 +3,17 @@ import type { ReportShellLabels } from '@/types/report';
 import { escapeHtml } from '@/utils/html';
 
 type ReportHeaderParams = {
-  qrCodeHtml: string;
   appStoreBadgeHtml?: string;
 };
 
-export function renderReportHeader({ qrCodeHtml, appStoreBadgeHtml = '' }: ReportHeaderParams): string {
+export function renderReportHeader({ appStoreBadgeHtml = '' }: ReportHeaderParams): string {
   return `
     <header class="report-header">
       <p class="report-header-brand">${escapeHtml(REPORT_APP_NAME)}</p>
       <div class="report-header-actions">
         ${appStoreBadgeHtml}
-        ${qrCodeHtml}
       </div>
     </header>`;
-}
-
-export function renderQrCodeHtml(
-  qrCodeDataUri: string | null,
-  qrCodeAlt: string
-): string {
-  if (qrCodeDataUri) {
-    return `<img class="report-qr" src="${qrCodeDataUri}" alt="${escapeHtml(qrCodeAlt)}" />`;
-  }
-
-  return `<div class="report-qr report-qr-placeholder" aria-hidden="true"></div>`;
 }
 
 export function renderAppStoreBadgeHtml(

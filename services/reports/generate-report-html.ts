@@ -2,7 +2,6 @@ import { renderDailyObservationSection } from '@/services/reports/html/component
 import { renderReportFooter } from '@/services/reports/html/components/report-footer';
 import {
   renderAppStoreBadgeHtml,
-  renderQrCodeHtml,
   renderReportHeader,
 } from '@/services/reports/html/components/report-header';
 import { renderPetInfoCard, renderPetPhotoHtml } from '@/services/reports/html/components/pet-info-card';
@@ -20,6 +19,7 @@ import type {
 } from '@/types/report';
 import type { ResolvedLanguage } from '@/types/language';
 import { escapeHtml } from '@/utils/html';
+import { REPORT_BRAND_COLOR } from '@/constants/branding';
 
 type GenerateReportHtmlParams = {
   pet: ReportPetSummary;
@@ -54,13 +54,12 @@ export function generateReportHtml({
   formatPageLabel,
   photoDataUri = null,
   qrCodeDataUri = null,
-  primaryColor = '#6B8F71',
+  primaryColor = REPORT_BRAND_COLOR,
   showAppStoreBadge = false,
   summary = null,
   mode = 'print',
 }: GenerateReportHtmlParams): string {
   const petPhotoHtml = renderPetPhotoHtml(pet.name, photoDataUri);
-  const qrCodeHtml = renderQrCodeHtml(qrCodeDataUri, shellLabels.qrCodeAlt);
   const appStoreBadgeHtml = renderAppStoreBadgeHtml(showAppStoreBadge, shellLabels);
 
   const hasSummary = Boolean(summary && summary.lines.length > 0);
@@ -74,7 +73,17 @@ export function generateReportHtml({
       const pageBody = page.showEmpty
         ? `<p class="empty-message">${escapeHtml(labels.empty)}</p>`
         : `
-        ${page.includePetCard ? renderPetInfoCard({ pet, petPhotoHtml, labels }) : ''}
+        ${
+          page.includePetCard
+            ? renderPetInfoCard({
+                pet,
+                petPhotoHtml,
+                qrCodeDataUri,
+                labels,
+                qrCodeAlt: shellLabels.qrCodeAlt,
+              })
+            : ''
+        }
         ${page.includeSummary && summary ? renderReportSummary({ summary, labels }) : ''}
         ${renderDailyObservationSection({
           checkIns: page.checkIns,
@@ -93,7 +102,7 @@ export function generateReportHtml({
       return `
       <div class="report-page">
         <div class="report-sheet">
-          ${renderReportHeader({ qrCodeHtml, appStoreBadgeHtml })}
+          ${renderReportHeader({ appStoreBadgeHtml })}
           <div class="report-page-body">${pageBody}</div>
           ${renderReportFooter({
             generatedAtLabel,

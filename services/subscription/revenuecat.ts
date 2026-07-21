@@ -114,7 +114,7 @@ export function isRevenueCatAvailable(): boolean {
   );
 }
 
-export async function configureRevenueCat(): Promise<boolean> {
+export async function configureRevenueCat(appUserId?: string): Promise<boolean> {
   const apiKey = getRevenueCatApiKey();
   if (!apiKey) {
     return false;
@@ -152,8 +152,9 @@ export async function configureRevenueCat(): Promise<boolean> {
         Purchases.setLogLevel(LOG_LEVEL.INFO);
       }
 
-      Purchases.configure({ apiKey });
+      Purchases.configure({ apiKey, appUserID: appUserId });
       configured = true;
+      loggedInUserId = appUserId ?? null;
       return true;
     } catch (error) {
       console.warn('[RevenueCat] configure failed', error);
@@ -314,20 +315,6 @@ export async function restoreRevenueCatPurchases(): Promise<PlusStatus> {
   return getPlusStatusFromCustomerInfo(customerInfo);
 }
 
-/**
- * Silently reconciles the current App Store receipt after a reinstall.
- * Unlike restorePurchases, this does not present App Store sign-in UI.
- */
-export async function syncRevenueCatPurchases(): Promise<PlusStatus> {
-  const Purchases = await loadPurchasesModule();
-  if (!Purchases) {
-    return { isPlusActive: false, plusExpiresAt: null, subscription: null };
-  }
-
-  const { customerInfo } = await Purchases.syncPurchasesForResult();
-  return getPlusStatusFromCustomerInfo(customerInfo);
-}
-
 export function subscribeToRevenueCatUpdates(onUpdate: (status: PlusStatus) => void): () => void {
   if (!configured || !purchasesModule) {
     return () => {};
@@ -368,7 +355,6 @@ export async function teardownRevenueCat(): Promise<void> {
       } catch {
         // Anonymous session after logout is fine.
       }
-      configured = false;
       loggedInUserId = null;
     }
   });

@@ -3,12 +3,16 @@ import {
   fetchRevenueCatPlusStatus,
   isRevenueCatAvailable,
   logInRevenueCat,
+  restoreRevenueCatPurchases,
   subscribeToRevenueCatUpdates,
-  syncRevenueCatPurchases,
   teardownRevenueCat,
 } from '@/services/subscription/revenuecat';
 import { type PlusStatus } from '@/services/subscription/plus-status';
 import { resolvePlusStatusForUser } from '@/services/sync/subscription-sync';
+import {
+  hasAttemptedSubscriptionRecovery,
+  markSubscriptionRecoveryAttempted,
+} from '@/storage/prefs.storage';
 
 let unsubscribeRevenueCat: (() => void) | null = null;
 let activeUserId: string | null = null;
@@ -52,18 +56,21 @@ async function initializeSubscriptionInner(
   activeUserId = userId;
   initializedForUserId = userId;
 
-  const configured = await configureRevenueCat();
+  const configured = await configureRevenueCat(userId);
 
   if (configured) {
     try {
       const loginStatus = await logInRevenueCat(userId, { email: options?.email });
 
-      // A fresh install can have a new local StoreKit receipt cache even when
-      // the same authenticated RevenueCat user owns an active subscription.
-      // Reconcile it silently once during this user's initialization so Plus
-      // does not depend on opening the paywall and tapping Restore Purchases.
-      if (!loginStatus.isPlusActive) {
-        await syncRevenueCatPurchases();
+      // Existing subscriptions can temporarily be detached from the local
+      // StoreKit receipt after reinstall. Perform the same recovery as the
+      // Restore Purchases button once per user and installation.
+      if (
+        !loginStatus.isPlusActive &&
+        !(await hasAttemptedSubscriptionRecovery(userId))
+      ) {
+        await restoreRevenueCatPurchases();
+        await markSubscriptionRecoveryAttempted(userId);
       }
     } catch (error) {
       console.warn('RevenueCat login or purchase sync failed', error);
@@ -131,7 +138,7 @@ export async function ensureRevenueCatSession(
     return false;
   }
 
-  const configured = await configureRevenueCat();
+  const configured = await configureRevenueCat(userId);
   if (!configured) {
     return false;
   }

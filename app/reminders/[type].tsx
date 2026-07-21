@@ -107,7 +107,7 @@ export default function ReminderFormScreen() {
 
   const leaveForm = useCallback(() => {
     if (isFromNotification) {
-      router.replace('/reminders' as Href);
+      router.replace('/reminders?fromNotification=1' as Href);
       return;
     }
 

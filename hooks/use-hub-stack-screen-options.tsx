@@ -1,5 +1,5 @@
 import { HeaderBackButton } from 'expo-router/react-navigation';
-import type { NativeStackNavigationOptions } from 'expo-router';
+import type { Href, NativeStackNavigationOptions } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
 
@@ -11,7 +11,10 @@ import { useThemeColor } from '@/hooks/use-theme-color';
  * The default back button is hidden on the first screen of a nested stack, so we
  * render one that pops the parent navigator.
  */
-export function useHubStackScreenOptions(title: string): NativeStackNavigationOptions {
+export function useHubStackScreenOptions(
+  title: string,
+  fallbackRoute?: Href
+): NativeStackNavigationOptions {
   const router = useRouter();
   const primaryColor = useThemeColor({}, 'primary');
 
@@ -20,10 +23,22 @@ export function useHubStackScreenOptions(title: string): NativeStackNavigationOp
       <HeaderBackButton
         displayMode="minimal"
         tintColor={primaryColor}
-        onPress={() => router.back()}
+        onPress={() => {
+          if (fallbackRoute) {
+            router.replace(fallbackRoute);
+            return;
+          }
+
+          if (router.canGoBack()) {
+            router.back();
+            return;
+          }
+
+          router.replace('/(tabs)/care');
+        }}
       />
     ),
-    [primaryColor, router]
+    [fallbackRoute, primaryColor, router]
   );
 
   return useMemo(

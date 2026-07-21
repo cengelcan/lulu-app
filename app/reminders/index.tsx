@@ -1,5 +1,5 @@
 import type { Href } from 'expo-router';
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -43,6 +43,9 @@ const COMPLETED_PREVIEW_LIMIT = 3;
 
 export default function RemindersScreen() {
   const router = useRouter();
+  const { fromNotification: fromNotificationParam } = useLocalSearchParams<{
+    fromNotification?: string | string[];
+  }>();
   const [referenceNow, setReferenceNow] = useState(() => new Date());
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
@@ -103,7 +106,15 @@ export default function RemindersScreen() {
 
   const completedPreview = completedReminders.slice(0, COMPLETED_PREVIEW_LIMIT);
   const isReadOnly = pet ? !canWritePetCareData(pet) : false;
-  const screenOptions = useHubStackScreenOptions(t('reminders.title'));
+  const rawFromNotificationParam = Array.isArray(fromNotificationParam)
+    ? fromNotificationParam[0]
+    : fromNotificationParam;
+  const isFromNotification =
+    rawFromNotificationParam === '1' || rawFromNotificationParam === 'true';
+  const screenOptions = useHubStackScreenOptions(
+    t('reminders.title'),
+    isFromNotification ? '/(tabs)/care' : undefined
+  );
 
   const handleTypePress = (type: ReminderTypeId) => {
     router.push(getReminderFormRoute(type) as Href);

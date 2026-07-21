@@ -161,13 +161,15 @@ export const usePetReminderStore = create<PetReminderState>((set, get) => ({
       const completedAt = new Date().toISOString();
       const record = reminderToRecord(reminder, completedAt);
 
-      await usePetRecordStore.getState().createRecord(record);
+      if (record) {
+        await usePetRecordStore.getState().createRecord(record);
+      }
 
       const completedReminder: PetReminder = {
         ...reminder,
         status: 'completed',
         completedAt,
-        recordId: record.id,
+        recordId: record?.id ?? null,
         updatedAt: completedAt,
       };
 

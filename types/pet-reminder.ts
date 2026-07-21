@@ -55,7 +55,7 @@ type BasePetReminder = {
   status: ReminderStatus;
   completedAt?: string | null;
   skippedAt?: string | null;
-  /** Set when completed — links to the auto-created health record. */
+  /** Set when a typed care reminder creates a health record on completion. */
   recordId?: string | null;
   createdAt: string;
   updatedAt: string;

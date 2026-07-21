@@ -1,6 +1,5 @@
 import type { PetReminder } from '@/types/pet-reminder';
 import type { PetRecord, RecordTypeId } from '@/types/pet-record';
-import { createDefaultMetadata } from '@/types/pet-record';
 
 function createRecordId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -11,10 +10,13 @@ function createRecordId(): string {
 }
 
 /**
- * Converts a completed reminder into a health record.
- * Custom reminders become vet_visit records with the title as the visit reason.
+ * Converts a completed care reminder into a health record. Custom reminders
+ * are general tasks, so completing one does not create a clinical record.
  */
-export function reminderToRecord(reminder: PetReminder, completedAt: string): PetRecord {
+export function reminderToRecord(
+  reminder: PetReminder,
+  completedAt: string
+): PetRecord | null {
   const base = {
     id: createRecordId(),
     petId: reminder.petId,
@@ -64,14 +66,7 @@ export function reminderToRecord(reminder: PetReminder, completedAt: string): Pe
         },
       };
     case 'custom':
-      return {
-        ...base,
-        type: 'vet_visit',
-        metadata: {
-          clinicName: null,
-          reason: reminder.metadata.title.trim(),
-        },
-      };
+      return null;
   }
 }
 

@@ -17,6 +17,7 @@ import {
   removeCurrentUserId,
   removeNotificationPermission,
   removePetReminderNotificationsEnabled,
+  removeSubscriptionRecoveryAttempts,
   setOnboardingCompleted,
 } from '@/storage/prefs.storage';
 import { clearLastStoreReviewPromptAt, clearUserProfile } from '@/storage/user.storage';
@@ -49,6 +50,7 @@ export async function deleteAllLocalData(): Promise<void> {
     removeAppAppearance(),
     removeAppLanguage(),
     removeNotificationPermission(),
+    removeSubscriptionRecoveryAttempts(),
     clearUserProfile(),
     clearLastStoreReviewPromptAt(),
     clearDismissedInboxItems(),

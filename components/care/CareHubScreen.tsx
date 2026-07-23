@@ -87,8 +87,14 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
             title={t('care.records')}
             description={t('care.recordsDescription')}
             icon="doc.text.fill"
-            isLast
             onPress={() => router.push('/records')}
+          />
+          <CareShortcutRow
+            title={t('care.prepareVetVisit')}
+            description={t('care.prepareVetVisitDescription')}
+            icon="cross.case.fill"
+            isLast
+            onPress={() => router.push('/vet-visit' as Href)}
           />
         </Card>
       </View>

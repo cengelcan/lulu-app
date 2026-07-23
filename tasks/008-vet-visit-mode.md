@@ -4,14 +4,14 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | Backlog |
+| Durum | In Progress |
 | Öncelik | P0 |
 | Hedef sürüm | v1.4 |
 | Task türü | Plus / Sağlık / Raporlama |
 | Tahmini efor | XL |
 | Ürün katmanı | Plus; hazırlık önizlemesi Free olabilir |
 | Bağımlılıklar | 002, 006 |
-| Son güncelleme | 2026-07-15 |
+| Son güncelleme | 2026-07-23 |
 
 ## Bağlam ve problem
 
@@ -31,9 +31,9 @@ Lulu check-in, kilo, kayıt, hatırlatıcı ve PDF verisine sahip; fakat bu par�
 
 ### Ziyaret öncesi
 
-- [ ] Tarih aralığı: 7/30/90 gün/custom.
-- [ ] Check-in değişimleri, kilo, belirtiler, aktif ilaçlar ve son kayıtlar.
-- [ ] Kullanıcının veterinere soruları ve gözlem notları.
+- [x] Tarih aralığı: 7/30/90 gün/custom.
+- [x] Check-in değişimleri, kilo, belirtiler, aktif ilaçlar ve son kayıtlar.
+- [x] Kullanıcının veterinere soruları ve gözlem notları.
 - [ ] Otomatik özet düzenlenebilir; kaynak satırlarına geri gidilebilir.
 - [ ] PDF ve ekranda “Visit Brief”.
 
@@ -82,8 +82,8 @@ Lulu check-in, kilo, kayıt, hatırlatıcı ve PDF verisine sahip; fakat bu par�
 
 ### Faz 1 — Deterministik Visit Brief
 
-- [ ] Model, wizard ve veri seçimi.
-- [ ] Kaynak bağlantılı özet.
+- [x] Model, wizard ve veri seçimi. — Care Hub girişli wizard ve deterministik seçim sözleşmesi tamam.
+- [x] Kaynak bağlantılı özet. — Her otomatik madde kaynak kimlikleri ve uygulama içi rotalarla üretiliyor.
 - [ ] Mevcut PDF altyapısı ile export.
 
 ### Faz 2 — Outcome ve follow-up
@@ -108,7 +108,7 @@ Lulu check-in, kilo, kayıt, hatırlatıcı ve PDF verisine sahip; fakat bu par�
 ## Açık sorular
 
 - [ ] Visit Brief Free önizlemesi ne kadar ayrıntılı?
-- [ ] AI özet ilk sürümde gerekli mi?
+- [x] AI özet ilk sürümde gerekli mi? — Hayır; ilk sürüm yalnız deterministik ve kaynak bağlantılı.
 - [ ] Veteriner sonucu bağımsız record türü mü, visit entity mi?
 
 ## Test planı
@@ -117,6 +117,15 @@ Lulu check-in, kilo, kayıt, hatırlatıcı ve PDF verisine sahip; fakat bu par�
 - Golden dataset: deterministik özet/PDF; AI eklenirse doğruluk ve hallucination eval'i.
 - Entegrasyon: medication, reminder, timeline, belge ve aile yetkileri.
 - Manuel: EN/DE PDF, paylaşım, offline hazırlık, iPad ve erişilebilirlik.
+
+### Mevcut manuel kontrol
+
+- [ ] Care Hub → “Veteriner Görüşmesine Hazırlan” ekranı açılıyor.
+- [ ] 7/30/90 gün ve özel tarih aralığı seçimleri doğru çalışıyor.
+- [ ] Check-In, ilaç ve sağlık kaydı seçimleri özet içeriğini doğru değiştiriyor.
+- [ ] Her satıra yazılan soru önizlemede ayrı madde olarak görünüyor.
+- [ ] Kaynak kayıt satırları ilgili Check-In, ilaç veya sağlık kaydını açıyor.
+- [ ] Eşleşen veri olmayan aralık dürüst boş durum gösteriyor.
 
 ## Definition of Done
 

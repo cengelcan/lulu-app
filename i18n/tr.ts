@@ -51,7 +51,9 @@ export const tr: Translations = {
     "loadingTimeline": "Bakım zaman akışı yükleniyor",
     "familyActivity": "Tüm aile aktivitelerini gör",
     "familyManagement": "Aile ve Paylaşım",
-    "familyManagementHint": "Aile paylaşımını ve üye yönetimini açar"
+    "familyManagementHint": "Aile paylaşımını ve üye yönetimini açar",
+    "prepareVetVisit": "Veteriner Görüşmesine Hazırlan",
+    "prepareVetVisitDescription": "Kaynaklara bağlı, odaklanmış bir görüşme özeti hazırla"
   },
   "familyActivity": {
     "title": "Aile Aktivitesi",
@@ -68,6 +70,39 @@ export const tr: Translations = {
     "noFilterResultsDescription": "Pet veya aile üyesi filtresini değiştirmeyi dene.",
     "loadMore": "Önceki aktiviteleri yükle",
     "unread": "Okunmamış aktivite"
+  },
+  "vetVisit": {
+    "title": "Veteriner Görüşme Özeti",
+    "intro": "Bu görüşme için önemli olanları seç. Lulu mevcut kayıtlarını tıbbi yorum eklemeden düzenler.",
+    "rangeTitle": "Tarih aralığı",
+    "sectionsTitle": "Özete dahil et",
+    "questionsTitle": "Veterinere sorulacaklar",
+    "questionsPlaceholder": "Her satıra bir soru yaz",
+    "questionsHint": "İsteğe bağlı. Boş olmayan her satır ayrı bir soru olur.",
+    "buildBrief": "Görüşme Özetini Hazırla",
+    "editBrief": "Özeti Düzenle",
+    "highlightsTitle": "Görüşmede öne çıkanlar",
+    "sourcesTitle": "Kaynak kayıtlar",
+    "noDataTitle": "Eşleşen kayıt yok",
+    "noDataDescription": "Daha geniş bir tarih aralığı seç, başka bir bölümü dahil et veya soru ekle.",
+    "disclaimer": "Bu özet kayıtlarını düzenler; veteriner değerlendirmesinin yerine geçmez.",
+    "checkIns": "Günlük Check-In'ler",
+    "medications": "Aktif ilaçlar",
+    "records": "Sağlık kayıtları",
+    "loading": "Görüşme özeti hazırlanıyor",
+    "sources": {
+      "checkIn": "Günlük kontrol",
+      "medication": "İlaç · {{name}}",
+      "record": "Kayıt: {{type}}"
+    },
+    "brief": {
+      "observedDays": "{{count}} check-in günü incelendi",
+      "attentionDays": "{{count}} günde görüşülmesi gereken değişiklik görüldü",
+      "noAttentionDays": "Bu dönemde belirgin bir check-in değişikliği görülmedi",
+      "recentRecords": "{{count}} sağlık kaydı dahil edildi",
+      "latestWeight": "Son kaydedilen ağırlık: {{value}} {{unit}}",
+      "activeMedications": "Aktif ilaçlar: {{medications}}"
+    }
   },
   "settings": {
     "title": "Ayarlar",

@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from 'expo-router';
+import { type Href, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { CareShortcutRow } from '@/components/care/CareShortcutRow';
 import { InboxSectionView } from '@/components/inbox/InboxSection';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ContentState } from '@/components/ui/content-state';
 import { LayoutTokens } from '@/constants/layout';
@@ -71,6 +72,12 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
             onPress={() => router.push('/check-in')}
           />
           <CareShortcutRow
+            title={t('medications.title')}
+            description={t('medications.description')}
+            icon="pills.fill"
+            onPress={() => router.push('/medications' as Href)}
+          />
+          <CareShortcutRow
             title={t('care.reminders')}
             description={t('care.remindersDescription')}
             icon="bell.fill"
@@ -94,6 +101,11 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
           style={styles.sectionTitle}>
           {t('care.timelineTitle')}
         </ThemedText>
+        <Button
+          title={t('care.familyActivity')}
+          variant="secondary"
+          onPress={() => router.push('/family-activity' as Href)}
+        />
 
         {isLoading ? (
           <ContentState

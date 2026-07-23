@@ -45,14 +45,33 @@ export type ActivityEventType =
   | 'check_in_updated'
   | 'record_created'
   | 'reminder_completed'
+  | 'dose_taken'
+  | 'dose_skipped'
+  | 'dose_snoozed'
+  | 'medication_refilled'
+  | 'sharing_updated'
   | 'invite_accepted'
   | 'member_left';
 
 export type ActivityEvent = {
   id: string;
+  familyId?: string | null;
   petId: string;
   actorUserId: string;
   eventType: ActivityEventType;
+  entityId?: string | null;
   metadata: Record<string, unknown>;
+  metadataVersion: number;
+  occurredAt: string;
   createdAt: string;
+};
+
+export type ActivityEventCursor = {
+  occurredAt: string;
+  id: string;
+};
+
+export type ActivityEventPage = {
+  events: ActivityEvent[];
+  nextCursor: ActivityEventCursor | null;
 };

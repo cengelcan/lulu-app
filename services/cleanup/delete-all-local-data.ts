@@ -1,5 +1,7 @@
-import { cancelCheckInReminder, cancelAllPetReminderNotifications } from '@/services/notifications';
+import { cancelCheckInReminder, cancelAllMedicationDoseNotifications, cancelAllPetReminderNotifications } from '@/services/notifications';
 import * as checkInStorage from '@/storage/check-in.storage';
+import * as activityEventStorage from '@/storage/activity-event.storage';
+import * as medicationStorage from '@/storage/medication.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
@@ -15,6 +17,8 @@ import {
   removeAppLanguage,
   removeCheckInReminderTime,
   removeCurrentUserId,
+  removeFamilyActivityDigestEnabled,
+  removeFamilyActivityReadState,
   removeNotificationPermission,
   removePetReminderNotificationsEnabled,
   removeSubscriptionRecoveryAttempts,
@@ -23,6 +27,7 @@ import {
 import { clearLastStoreReviewPromptAt, clearUserProfile } from '@/storage/user.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useLanguageStore } from '@/stores/language.store';
+import { useMedicationStore } from '@/stores/medication.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
@@ -36,6 +41,9 @@ import { resolveLanguagePreference } from '@/utils/resolve-language-preference';
 export async function deleteAllLocalData(): Promise<void> {
   await cancelCheckInReminder();
   await cancelAllPetReminderNotifications();
+  await cancelAllMedicationDoseNotifications();
+  await activityEventStorage.deleteAllActivityEvents();
+  await medicationStorage.deleteAllMedicationData();
   await petReminderStorage.deleteAllPetReminders();
   await petRecordStorage.deleteAllPetRecords();
   await checkInStorage.deleteAllCheckIns();
@@ -45,6 +53,8 @@ export async function deleteAllLocalData(): Promise<void> {
     removeActivePetId(),
     setOnboardingCompleted(false),
     removeCurrentUserId(),
+    removeFamilyActivityDigestEnabled(),
+    removeFamilyActivityReadState(),
     removeCheckInReminderTime(),
     removePetReminderNotificationsEnabled(),
     removeAppAppearance(),
@@ -84,6 +94,12 @@ export function resetAppStoresAfterDataDeletion(): void {
     isLoading: false,
     error: null,
   });
+  useMedicationStore.setState({
+    bundles: [],
+    doses: [],
+    isLoading: false,
+    error: null,
+  });
   useOnboardingStore.setState({
     hasCompletedOnboarding: false,
     isLoading: false,
@@ -93,6 +109,7 @@ export function resetAppStoresAfterDataDeletion(): void {
     reminderTime: null,
     permission: null,
     petReminderNotificationsEnabled: true,
+    familyActivityDigestEnabled: false,
     isLoading: false,
     error: null,
   });

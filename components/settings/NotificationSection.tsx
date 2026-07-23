@@ -16,10 +16,12 @@ type NotificationSectionProps = {
   permission: NotificationPermissionStatus | null;
   reminderTime: ReminderTime | null;
   petReminderNotificationsEnabled: boolean;
+  familyActivityDigestEnabled: boolean;
   isLoading: boolean;
   error: string | null;
   onToggleCheckIn: (enabled: boolean) => void;
   onTogglePetReminders: (enabled: boolean) => void;
+  onToggleFamilyActivityDigest: (enabled: boolean) => void;
   onTimeChange: (time: ReminderTime) => void;
 };
 
@@ -27,10 +29,12 @@ export function NotificationSection({
   permission,
   reminderTime,
   petReminderNotificationsEnabled,
+  familyActivityDigestEnabled,
   isLoading,
   error,
   onToggleCheckIn,
   onTogglePetReminders,
+  onToggleFamilyActivityDigest,
   onTimeChange,
 }: NotificationSectionProps) {
   const { t } = useTranslation();
@@ -70,6 +74,12 @@ export function NotificationSection({
           value={petReminderNotificationsEnabled}
           disabled={toggleDisabled}
           onValueChange={onTogglePetReminders}
+        />
+        <SettingsToggleRow
+          label={t('settings.familyActivityDigest')}
+          value={familyActivityDigestEnabled}
+          disabled={toggleDisabled}
+          onValueChange={onToggleFamilyActivityDigest}
           isLast
         />
       </GroupedSection>

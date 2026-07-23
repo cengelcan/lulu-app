@@ -97,6 +97,7 @@ export async function pushPetReminder(userId: string, reminder: PetReminder): Pr
       id: `reminder-${reminder.id}-completed`,
       petId: reminder.petId,
       eventType: 'reminder_completed',
+      entityId: reminder.id,
       metadata: { type: reminder.type },
     });
   }

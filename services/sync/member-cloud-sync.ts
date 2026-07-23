@@ -4,21 +4,25 @@ import {
   fetchOwnerFamilyGroup,
 } from '@/services/sharing/family-sharing';
 import { syncPetReminderNotificationSchedule } from '@/services/notifications/pet-reminder-schedule';
+import { syncMedicationDoseNotificationSchedule } from '@/services/notifications/medication-dose-schedule';
 import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
+import { pullMedicationIntoLocal } from '@/services/sync/medication-sync';
 import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
 import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
 import { withCloudDataSyncLock } from '@/services/sync/sync-lock';
 
 async function refreshPetCareStores(petId: string): Promise<void> {
-  const [{ useCheckInStore }, { usePetRecordStore }, { usePetReminderStore }] = await Promise.all([
+  const [{ useCheckInStore }, { useMedicationStore }, { usePetRecordStore }, { usePetReminderStore }] = await Promise.all([
     import('@/stores/check-in.store'),
+    import('@/stores/medication.store'),
     import('@/stores/pet-record.store'),
     import('@/stores/pet-reminder.store'),
   ]);
 
   await Promise.all([
     useCheckInStore.getState().loadCheckIns(petId),
+    useMedicationStore.getState().loadPlans(petId),
     usePetRecordStore.getState().loadRecords(petId),
     usePetReminderStore.getState().loadReminders(petId),
   ]);
@@ -51,11 +55,15 @@ async function pullAccessibleDataIntoLocal(userId: string): Promise<void> {
   await pullCheckInsIntoLocal(userId);
   await pullPetRecordsIntoLocal(userId);
   await pullPetRemindersIntoLocal(userId);
+  await pullMedicationIntoLocal(userId);
   await usePetStore.getState().loadPets();
   await reconcileActivePetAfterPull(previousActivePetId);
+  const { useFamilyActivityStore } = await import('@/stores/family-activity.store');
+  await useFamilyActivityStore.getState().refresh();
 
   try {
     await syncPetReminderNotificationSchedule();
+    await syncMedicationDoseNotificationSchedule();
   } catch (error) {
     console.warn('Failed to sync pet reminder notifications after cloud pull', error);
   }

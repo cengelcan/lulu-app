@@ -51,14 +51,32 @@ export type Translations = {
     emptyTitle: string;
     emptyDescription: string;
     loadingTimeline: string;
+    familyActivity: string;
     familyManagement: string;
     familyManagementHint: string;
+  };
+  familyActivity: {
+    title: string;
+    description: string;
+    loading: string;
+    offline: string;
+    petFilter: string;
+    actorFilter: string;
+    allPets: string;
+    everyone: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    noFilterResults: string;
+    noFilterResultsDescription: string;
+    loadMore: string;
+    unread: string;
   };
   settings: {
     title: string;
     notifications: string;
     dailyCheckInReminder: string;
     petReminderNotifications: string;
+    familyActivityDigest: string;
     reminderTime: string;
     notificationsDisabledFooter: string;
     openSettings: string;
@@ -493,6 +511,14 @@ export type Translations = {
     data: {
       checkInsSection: string;
       recordsSection: string;
+      medicationsSection: string;
+      medicationDoses: string;
+    };
+    medicationDose: {
+      title: string;
+      taken: string;
+      skipped: string;
+      missed: string;
     };
     preview: {
       petSection: string;
@@ -632,6 +658,26 @@ export type Translations = {
       testResult: string;
     };
   };
+  medications: {
+    title: string; description: string; addPlan: string; editPlan: string;
+    emptyTitle: string; emptyDescription: string; active: string; past: string;
+    todayDoses: string; emptyDoses: string;
+    save: string; saveFailed: string; archive: string; archiveTitle: string; archiveMessage: string;
+    actions: { take: string; skip: string; snooze: string };
+    status: { scheduled: string; taken: string; skipped: string; missed: string; snoozed: string };
+    doseActionFailed: string;
+    inventory: {
+      title: string; description: string; plusDescription: string; unlock: string;
+      remaining: string; threshold: string; stock: string; lowStock: string;
+    };
+    fields: {
+      name: string; namePlaceholder: string; form: string; formPlaceholder: string;
+      dosage: string; dosagePlaceholder: string; unit: string; unitPlaceholder: string;
+      instructions: string; instructionsPlaceholder: string; startsOn: string; endsOn: string;
+      time: string; prn: string; prnDescription: string;
+    };
+    validation: { nameRequired: string; dosageRequired: string; unitRequired: string; dateRange: string };
+  };
   reminders: {
     title: string;
     empty: string;
@@ -735,8 +781,12 @@ export type Translations = {
     reminderTitle: string;
     reminderBodies: [string, string, string, string, string];
     petReminderBody: string;
+    medicationDoseTitle: string;
+    medicationDoseBody: string;
     channelCheckIn: string;
     channelPetReminders: string;
+    channelMedicationDoses: string;
+    channelFamilyActivity: string;
   };
   inbox: {
     title: string;
@@ -762,6 +812,11 @@ export type Translations = {
       check_in_updated: string;
       record_created: string;
       reminder_completed: string;
+      dose_taken: string;
+      dose_skipped: string;
+      dose_snoozed: string;
+      medication_refilled: string;
+      sharing_updated: string;
       invite_accepted: string;
       member_left: string;
     };
@@ -1155,6 +1210,7 @@ export type Translations = {
     saveReminderTime: string;
     saveNotificationPermission: string;
     savePetReminderNotifications: string;
+    saveFamilyActivityDigest: string;
     loadOnboardingStatus: string;
     saveOnboardingStatus: string;
     onboardingUnavailable: string;

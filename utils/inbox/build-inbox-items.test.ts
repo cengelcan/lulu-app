@@ -118,6 +118,29 @@ function createInput(overrides: Partial<InboxProviderInput> = {}): InboxProvider
 }
 
 describe('buildInboxItems', () => {
+  it('adds family medication dose activity with an actor and deep link', () => {
+    const sections = buildInboxItems(createInput({
+      currentUserId: 'owner-1',
+      actorDisplayNames: new Map([['member-1', 'Alex']]),
+      activityEvents: [{
+        id: 'dose-event-1', petId: 'pet-1', actorUserId: 'member-1',
+        eventType: 'dose_taken', metadata: { doseId: 'dose-1' },
+        metadataVersion: 1,
+        occurredAt: '2026-06-23T11:00:00.000Z',
+        createdAt: '2026-06-23T11:00:00.000Z',
+      }],
+      checkIns: [
+        createCheckIn({ date: TODAY_KEY }),
+        createCheckIn({ id: 'check-in-yesterday', date: YESTERDAY_KEY }),
+      ],
+    }));
+
+    const activity = sections.find((section) => section.category === 'activity')?.items[0];
+    assert.equal(activity?.kind, 'family_dose_taken');
+    assert.equal(activity?.actorDisplayName, 'Alex');
+    assert.deepEqual(activity?.route, { pathname: '/medications', params: { doseId: 'dose-1' } });
+  });
+
   it('returns empty sections when there is nothing actionable', () => {
     const sections = buildInboxItems(
       createInput({

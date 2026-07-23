@@ -25,10 +25,14 @@ export function InboxItemRow({ item, showPetName, isLast = false, onPress }: Inb
   const warningColor = useThemeColor({}, 'warning');
 
   const isUrgent = item.priority === 'urgent';
-  const accentColor = isUrgent ? warningColor : accentColorToken;
-  const iconBackground = isUrgent ? `${warningColor}22` : brandAccentSoft;
+  const isImportantActivity =
+    item.source === 'family' && item.category === 'activity' && item.priority === 'normal';
+  const usesWarningAccent = isUrgent || isImportantActivity;
+  const accentColor = usesWarningAccent ? warningColor : accentColorToken;
+  const iconBackground = usesWarningAccent ? `${warningColor}22` : brandAccentSoft;
   const title = t(item.titleKey, item.titleParams);
-  const subtitle = item.subtitleKey ? t(item.subtitleKey, item.subtitleParams) : null;
+  const subtitle = item.subtitleText ??
+    (item.subtitleKey ? t(item.subtitleKey, item.subtitleParams) : null);
 
   const handlePress = () => {
     if (process.env.EXPO_OS === 'ios') {
@@ -51,6 +55,12 @@ export function InboxItemRow({ item, showPetName, isLast = false, onPress }: Inb
         <IconSymbol name={getInboxItemIcon(item.kind)} size={20} color={accentColor} />
       </View>
       <View style={styles.textWrap}>
+        {item.isUnread ? (
+          <View
+            accessibilityLabel={t('familyActivity.unread')}
+            style={[styles.unreadDot, { backgroundColor: accentColor }]}
+          />
+        ) : null}
         {showPetName && item.petName ? (
           <ThemedText
             lightColor={accentColor}
@@ -103,6 +113,14 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
     minWidth: 0,
+  },
+  unreadDot: {
+    position: 'absolute',
+    right: 0,
+    top: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   petName: {
     ...Typography.caption,

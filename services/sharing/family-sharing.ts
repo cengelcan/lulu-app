@@ -456,6 +456,7 @@ export async function logActivityEvent(input: {
   id: string;
   petId: string;
   eventType: string;
+  entityId?: string | null;
   metadata?: Record<string, unknown>;
 }): Promise<void> {
   const { error } = await supabase.rpc('log_activity_event', {
@@ -463,6 +464,8 @@ export async function logActivityEvent(input: {
     p_pet_id: input.petId,
     p_event_type: input.eventType,
     p_metadata: input.metadata ?? {},
+    p_entity_id: input.entityId ?? null,
+    p_metadata_version: 1,
   });
 
   if (error) {

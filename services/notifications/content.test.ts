@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import {
   getCheckInReminderContent,
   getCheckInReminderContentForDate,
+  getMedicationDoseNotificationContent,
   getPetReminderNotificationContent,
 } from '@/services/notifications/content';
 import {
@@ -11,6 +12,7 @@ import {
   pickCheckInReminderVariantIndex,
 } from '@/services/notifications/check-in-reminder-variants';
 import type { PetReminder } from '@/types/pet-reminder';
+import type { MedicationPlan } from '@/types/medication';
 
 function createVaccineReminder(): PetReminder {
   return {
@@ -98,5 +100,22 @@ describe('getPetReminderNotificationContent', () => {
     assert.equal(title, 'Vaccine');
     assert.match(body, /Luna/);
     assert.match(body, /Vaccine/);
+  });
+});
+
+describe('getMedicationDoseNotificationContent', () => {
+  const plan: MedicationPlan = {
+    id: 'plan-1', petId: 'pet-1', name: 'Metronidazole', dosage: '2', unit: 'ml',
+    startsOn: '2026-07-22', timezone: 'Europe/Berlin', isPrn: false, status: 'active',
+    createdAt: '2026-07-22T00:00:00.000Z', updatedAt: '2026-07-22T00:00:00.000Z',
+  };
+
+  it('keeps medication, dose and pet name in localized content', () => {
+    const english = getMedicationDoseNotificationContent(plan, 'Luna', 'en');
+    const german = getMedicationDoseNotificationContent(plan, 'Luna', 'de');
+    assert.match(english.title, /Metronidazole/);
+    assert.match(english.body, /2 ml/);
+    assert.match(german.body, /Luna/);
+    assert.notEqual(english.body, german.body);
   });
 });

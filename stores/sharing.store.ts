@@ -16,6 +16,7 @@ import {
   fetchOwnerFamilyGroup,
   fetchProfileDisplayName,
   leaveFamilyGroup,
+  logActivityEvent,
   previewFamilyJoin,
   removeFamilyMember,
   rotateFamilyCode,
@@ -276,7 +277,20 @@ export const useSharingStore = create<SharingState>((set, get) => ({
       }
     }
 
+    const previousPetIds = new Set(get().sharedPetIds);
     await updateFamilyGroupPets(group.id, petIds);
+    const changedAt = Date.now();
+    for (const petId of petIds) {
+      if (!previousPetIds.has(petId)) {
+        void logActivityEvent({
+          id: `sharing-updated-${group.id}-${petId}-${changedAt}`,
+          petId,
+          eventType: 'sharing_updated',
+          entityId: petId,
+          metadata: { familyGroupId: group.id },
+        });
+      }
+    }
     set({ sharedPetIds: petIds });
     await get().loadOwnerFamilySharing();
   },

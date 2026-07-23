@@ -2,6 +2,11 @@ import { useEffect, useRef } from 'react';
 
 import { supabase } from '@/lib/supabase';
 import { waitForBootstrap } from '@/services/bootstrap/bootstrap-gate';
+import {
+  fromRemoteActivityEventRow,
+  type RemoteActivityEventRow,
+} from '@/services/sharing/activity-events-sync';
+import { useFamilyActivityStore } from '@/stores/family-activity.store';
 import { useSharingStore } from '@/stores/sharing.store';
 import { useUserStore } from '@/stores/user.store';
 
@@ -71,6 +76,36 @@ export function useFamilySharingRealtime() {
         },
         () => {
           scheduleRefresh();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'medication_plans' },
+        scheduleRefresh
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'medication_schedules' },
+        scheduleRefresh
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'medication_doses' },
+        scheduleRefresh
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'medication_inventory' },
+        scheduleRefresh
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'activity_events' },
+        (payload) => {
+          const row = payload.new as RemoteActivityEventRow;
+          void useFamilyActivityStore
+            .getState()
+            .mergeRealtimeEvent(fromRemoteActivityEventRow(row));
         }
       )
       .subscribe();

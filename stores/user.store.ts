@@ -11,6 +11,7 @@ import {
   signOutUser,
   signUpWithEmail as authSignUpWithEmail,
 } from '@/services/auth';
+import { unregisterFamilyActivityPushToken } from '@/services/notifications/push-registration';
 import { wipeUserScopedData } from '@/services/cleanup/wipe-user-scoped-data';
 import { resetUserScopedStores } from '@/services/cleanup/reset-user-scoped-stores';
 import {
@@ -19,6 +20,7 @@ import {
   teardownSubscription,
 } from '@/services/subscription/lifecycle';
 import { pullCheckInsIntoLocal } from '@/services/sync/check-ins-sync';
+import { pullMedicationIntoLocal } from '@/services/sync/medication-sync';
 import { deletePetPhotoFiles, pullPetsIntoLocal } from '@/services/sync/pets-sync';
 import { requireAuthenticatedUserId } from '@/services/sync/require-authenticated-user-id';
 import {
@@ -127,6 +129,7 @@ async function syncUserDataFromCloud(): Promise<void> {
       await pullCheckInsIntoLocal(userId);
       await pullPetRecordsIntoLocal(userId);
       await pullPetRemindersIntoLocal(userId);
+      await pullMedicationIntoLocal(userId);
       const profile = await pullProfileIntoLocal(userId);
       useUserStore.setState({
         displayName: profile.displayName,
@@ -303,6 +306,11 @@ export const useUserStore = create<UserState>((set, get) => ({
     set({ error: null });
 
     try {
+      try {
+        await unregisterFamilyActivityPushToken();
+      } catch (error) {
+        console.warn('Failed to unregister push token during sign out', error);
+      }
       await signOutUser();
     } finally {
       await teardownSubscription();

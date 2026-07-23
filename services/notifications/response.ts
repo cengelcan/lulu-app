@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 
 import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { getRouteFromNotificationResponse } from '@/services/notifications/response-route';
+import { handleMedicationDoseNotificationAction } from '@/services/notifications/medication-dose-response';
 
 export {
   getRouteFromNotificationResponse,
@@ -21,6 +22,7 @@ export async function getNotificationLaunchRoute(): Promise<Href | null> {
     }
 
     const response = await Notifications.getLastNotificationResponseAsync();
+    await handleMedicationDoseNotificationAction(response);
     const route = getRouteFromNotificationResponse(response);
 
     if (route) {

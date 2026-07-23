@@ -26,6 +26,11 @@ export type InboxItemKind =
   | 'family_check_in_updated'
   | 'family_record_created'
   | 'family_reminder_completed'
+  | 'family_dose_taken'
+  | 'family_dose_skipped'
+  | 'family_dose_snoozed'
+  | 'family_medication_refilled'
+  | 'family_sharing_updated'
   | 'family_invite_sent'
   | 'family_invite_accepted'
   | 'family_member_left';
@@ -44,11 +49,13 @@ export type InboxItem = {
   titleParams?: Record<string, string>;
   subtitleKey?: string;
   subtitleParams?: Record<string, string>;
+  subtitleText?: string;
   route: Href;
   sortAt: string;
   createdAt: string;
   actorUserId?: string;
   actorDisplayName?: string;
+  isUnread?: boolean;
 };
 
 export type InboxSection = {

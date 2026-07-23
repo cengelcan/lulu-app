@@ -4,8 +4,11 @@ import { translate } from '@/i18n';
 import {
   ANDROID_CHECK_IN_CHANNEL_ID,
   ANDROID_PET_REMINDER_CHANNEL_ID,
+  ANDROID_MEDICATION_DOSE_CHANNEL_ID,
+  ANDROID_FAMILY_ACTIVITY_CHANNEL_ID,
   CHECK_IN_REMINDER_SOUND,
   PET_REMINDER_REMINDER_SOUND,
+  MEDICATION_DOSE_NOTIFICATION_SOUND,
 } from '@/services/notifications/constants';
 import { getExpoNotificationsModule } from '@/services/notifications/expo-notifications-module';
 import { ensureNotificationHandlerConfigured } from '@/services/notifications/handler';
@@ -36,6 +39,17 @@ export async function ensureAndroidNotificationChannels(
     name: translate(language, 'notifications.channelPetReminders'),
     importance: Notifications.AndroidImportance.DEFAULT,
     sound: PET_REMINDER_REMINDER_SOUND,
+  });
+
+  await Notifications.setNotificationChannelAsync(ANDROID_MEDICATION_DOSE_CHANNEL_ID, {
+    name: translate(language, 'notifications.channelMedicationDoses'),
+    importance: Notifications.AndroidImportance.HIGH,
+    sound: MEDICATION_DOSE_NOTIFICATION_SOUND,
+  });
+
+  await Notifications.setNotificationChannelAsync(ANDROID_FAMILY_ACTIVITY_CHANNEL_ID, {
+    name: translate(language, 'notifications.channelFamilyActivity'),
+    importance: Notifications.AndroidImportance.DEFAULT,
   });
 }
 

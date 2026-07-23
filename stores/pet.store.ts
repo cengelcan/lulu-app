@@ -2,6 +2,8 @@ import { create } from 'zustand';
 
 import {
   cancelCheckInReminder,
+  cancelAllMedicationDoseNotifications,
+  syncMedicationDoseNotificationSchedule,
   syncCheckInReminderSchedule,
   syncPetReminderNotificationSchedule,
 } from '@/services/notifications';
@@ -107,6 +109,7 @@ export const usePetStore = create<PetState>((set, get) => ({
         await useCheckInStore.getState().loadCheckIns(pet.id);
         await syncCheckInReminderSchedule({ petName: pet.name });
         await syncPetReminderNotificationSchedule();
+        await syncMedicationDoseNotificationSchedule();
       }
     } catch (error) {
       set({
@@ -138,6 +141,7 @@ export const usePetStore = create<PetState>((set, get) => ({
         await syncCheckInReminderSchedule({ petName: pet.name });
       }
       await syncPetReminderNotificationSchedule();
+      await syncMedicationDoseNotificationSchedule();
     } catch (error) {
       set({ error: getStoreErrorKey(error, 'errors.switchPet') });
       throw error;
@@ -273,10 +277,12 @@ export const usePetStore = create<PetState>((set, get) => ({
           await get().setActivePet(nextActive.id);
         } else {
           await cancelCheckInReminder();
+          await cancelAllMedicationDoseNotifications();
         }
       } else if (status === 'active' && wasActive) {
         await syncCheckInReminderSchedule({ petName: updated.name });
         await syncPetReminderNotificationSchedule();
+        await syncMedicationDoseNotificationSchedule();
       }
     } catch (error) {
       set({

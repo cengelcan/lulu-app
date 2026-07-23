@@ -200,6 +200,29 @@ export async function removePetReminderNotificationsEnabled(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.petReminderNotificationsEnabled);
 }
 
+export async function getFamilyActivityDigestEnabled(): Promise<boolean> {
+  return (await AsyncStorage.getItem(StorageKeys.familyActivityDigestEnabled)) === 'true';
+}
+
+export async function setFamilyActivityDigestEnabled(enabled: boolean): Promise<void> {
+  await AsyncStorage.setItem(
+    StorageKeys.familyActivityDigestEnabled,
+    enabled ? 'true' : 'false'
+  );
+}
+
+export async function removeFamilyActivityDigestEnabled(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.familyActivityDigestEnabled);
+}
+
+export async function getExpoPushToken(): Promise<string | null> {
+  return AsyncStorage.getItem(StorageKeys.expoPushToken);
+}
+
+export async function setExpoPushToken(token: string): Promise<void> {
+  await AsyncStorage.setItem(StorageKeys.expoPushToken, token);
+}
+
 export async function getActivePetId(): Promise<string | null> {
   return AsyncStorage.getItem(StorageKeys.activePetId);
 }
@@ -210,6 +233,33 @@ export async function setActivePetId(petId: string): Promise<void> {
 
 export async function removeActivePetId(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.activePetId);
+}
+
+type FamilyActivityReadMap = Record<string, string>;
+
+async function getFamilyActivityReadMap(): Promise<FamilyActivityReadMap> {
+  const value = await AsyncStorage.getItem(StorageKeys.familyActivityLastReadAt);
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' ? parsed as FamilyActivityReadMap : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function getFamilyActivityLastReadAt(userId: string): Promise<string | null> {
+  return (await getFamilyActivityReadMap())[userId] ?? null;
+}
+
+export async function setFamilyActivityLastReadAt(userId: string, value: string): Promise<void> {
+  const map = await getFamilyActivityReadMap();
+  map[userId] = value;
+  await AsyncStorage.setItem(StorageKeys.familyActivityLastReadAt, JSON.stringify(map));
+}
+
+export async function removeFamilyActivityReadState(): Promise<void> {
+  await AsyncStorage.removeItem(StorageKeys.familyActivityLastReadAt);
 }
 
 type PetSetupGuideDismissedMap = Record<string, true>;

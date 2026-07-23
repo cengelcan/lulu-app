@@ -49,14 +49,32 @@ export const tr: Translations = {
     "emptyTitle": "Her şey tamam",
     "emptyDescription": "Yaklaşan bakımlar ve aile aktiviteleri burada görünecek.",
     "loadingTimeline": "Bakım zaman akışı yükleniyor",
+    "familyActivity": "Tüm aile aktivitelerini gör",
     "familyManagement": "Aile ve Paylaşım",
     "familyManagementHint": "Aile paylaşımını ve üye yönetimini açar"
+  },
+  "familyActivity": {
+    "title": "Aile Aktivitesi",
+    "description": "Aile içinde her bakım görevini kimin yaptığını gör.",
+    "loading": "Aile aktiviteleri yükleniyor",
+    "offline": "Çevrimdışısın. Bu cihaza kaydedilmiş son aktiviteler gösteriliyor.",
+    "petFilter": "Hayvan",
+    "actorFilter": "Aile üyesi",
+    "allPets": "Tüm petler",
+    "everyone": "Herkes",
+    "emptyTitle": "Henüz aile aktivitesi yok",
+    "emptyDescription": "Ortak bakım işlemleri burada görünecek.",
+    "noFilterResults": "Eşleşen aktivite yok",
+    "noFilterResultsDescription": "Pet veya aile üyesi filtresini değiştirmeyi dene.",
+    "loadMore": "Önceki aktiviteleri yükle",
+    "unread": "Okunmamış aktivite"
   },
   "settings": {
     "title": "Ayarlar",
     "notifications": "BİLDİRİMLER",
     "dailyCheckInReminder": "Günlük Check-In Hatırlatıcısı",
     "petReminderNotifications": "Hatırlatıcı Bildirimleri",
+    "familyActivityDigest": "Aile Aktivitesi Özeti",
     "reminderTime": "Hatırlatma Saati",
     "notificationsDisabledFooter": "Bildirimler sistem ayarlarında kapalı.",
     "openSettings": "Ayarları Aç",
@@ -555,7 +573,15 @@ export const tr: Translations = {
     },
     "data": {
       "checkInsSection": "Daily Check-In verileri",
-      "recordsSection": "Kayıtlar"
+      "recordsSection": "Kayıtlar",
+      "medicationsSection": "İlaçlar",
+      "medicationDoses": "Doz geçmişi"
+    },
+    "medicationDose": {
+      "title": "İlaç dozu",
+      "taken": "{{medication}} · {{dose}} {{unit}} verildi",
+      "skipped": "{{medication}} · {{dose}} {{unit}} atlandı",
+      "missed": "{{medication}} · {{dose}} {{unit}} kaçırıldı"
     },
     "preview": {
       "petSection": "Pet özeti",
@@ -695,6 +721,38 @@ export const tr: Translations = {
       "testResult": "Tetkik"
     }
   },
+  "medications": {
+    "title": "İlaç Planları", "description": "Aktif tedavileri ve doz programlarını yönet.",
+    "addPlan": "İlaç Planı Ekle", "editPlan": "İlaç Planını Düzenle",
+    "emptyTitle": "Aktif ilaç planı yok",
+    "emptyDescription": "İlaç talimatlarını ve zamanlamayı birlikte tutmak için tedavi planı oluştur.",
+    "active": "Aktif tedaviler", "past": "Geçmiş tedaviler", "todayDoses": "Bugünün dozları",
+    "emptyDoses": "Bugün için planlanmış doz yok.", "save": "Planı Kaydet",
+    "saveFailed": "İlaç planı kaydedilemedi. Lütfen tekrar dene.", "archive": "Tedaviyi Bitir",
+    "archiveTitle": "Bu tedavi bitsin mi?",
+    "archiveMessage": "Plan ve doz geçmişi, geçmiş tedavi olarak erişilebilir kalacak.",
+    "actions": { "take": "Verildi", "skip": "Atla", "snooze": "30 dk ertele" },
+    "status": { "scheduled": "Planlandı", "taken": "Verildi", "skipped": "Atlandı", "missed": "Kaçırıldı", "snoozed": "Ertelendi" },
+    "doseActionFailed": "Doz güncellenemedi. Lütfen tekrar dene.",
+    "inventory": {
+      "title": "İlaç stoğu", "description": "Stoğu kalan doz olarak takip et. Verilen dozlar otomatik düşer.",
+      "plusDescription": "Stok takibi ve azalan stok uyarıları Lulu Plus ile kullanılabilir.",
+      "unlock": "Lulu Plus ile Aç", "remaining": "Kalan doz", "threshold": "Az stok uyarı sınırı",
+      "stock": "{{count}} doz kaldı", "lowStock": "Stok azalıyor · {{count}} doz kaldı"
+    },
+    "fields": {
+      "name": "İlaç adı", "namePlaceholder": "örn. Metronidazol", "form": "İlaç formu",
+      "formPlaceholder": "örn. tablet, sıvı", "dosage": "Doz", "dosagePlaceholder": "örn. 1/2",
+      "unit": "Birim", "unitPlaceholder": "örn. tablet, ml, mg", "instructions": "Talimatlar",
+      "instructionsPlaceholder": "Veterinerin verdiği talimatları kaydet.", "startsOn": "Başlangıç tarihi",
+      "endsOn": "Bitiş tarihi", "time": "Doz saati", "prn": "Gerektiğinde (PRN)",
+      "prnDescription": "Sabit günlük doz programı oluşturma."
+    },
+    "validation": {
+      "nameRequired": "İlaç adı gerekli.", "dosageRequired": "Doz gerekli.",
+      "unitRequired": "Birim gerekli.", "dateRange": "Bitiş tarihi başlangıç tarihinden önce olamaz."
+    }
+  },
   "reminders": {
     "title": "Hatırlatıcılar",
     "empty": "Henüz hatırlatıcı yok. Bakım görevlerini takip etmek için bir tane oluştur.",
@@ -804,8 +862,12 @@ export const tr: Translations = {
       "{{name}} ile ilgili küçük değişiklikleri kaydetme zamanı."
     ],
     "petReminderBody": "{{name}} için {{title}} zamanı geldi",
+    "medicationDoseTitle": "{{medication}} dozu",
+    "medicationDoseBody": "{{name}} için {{dose}} {{unit}} ver",
     "channelCheckIn": "Check-in hatırlatıcıları",
-    "channelPetReminders": "Pet hatırlatıcıları"
+    "channelPetReminders": "Pet hatırlatıcıları",
+    "channelMedicationDoses": "İlaç dozları",
+    "channelFamilyActivity": "Aile aktivitesi"
   },
   "inbox": {
     "title": "Bildirimler",
@@ -831,6 +893,11 @@ export const tr: Translations = {
       "check_in_updated": "{{actor}}, {{name}} için check-in’i güncelledi",
       "record_created": "{{actor}}, {{name}} için bir kayıt ekledi",
       "reminder_completed": "{{actor}}, {{name}} için bir hatırlatıcıyı tamamladı",
+      "dose_taken": "{{actor}}, {{name}} için ilaç dozunu verdi",
+      "dose_skipped": "{{actor}}, {{name}} için ilaç dozunu atladı",
+      "dose_snoozed": "{{actor}}, {{name}} için ilaç dozunu erteledi",
+      "medication_refilled": "{{actor}}, {{name}} için ilaç stoğunu güncelledi",
+      "sharing_updated": "{{actor}}, {{name}} adlı peti aileyle paylaştı",
       "invite_accepted": "{{actor}} ailene katıldı",
       "member_left": "{{actor}} ailenden ayrıldı"
     }
@@ -1063,7 +1130,7 @@ export const tr: Translations = {
     "familySharingTitle": "Aile Paylaşımı",
     "familySharingDescription": "Ailenle birlikte ilgilen.",
     "smartRemindersTitle": "Sınırsız Hatırlatıcı",
-    "smartRemindersDescription": "Her ay sınırsız hatırlatıcı oluştur.",
+    "smartRemindersDescription": "Sınırsız hatırlatıcı ve ilaç stoğu takibi.",
     "trendsTitle": "Gelişmiş Bilgiler",
     "trendsDescription": "Eğilimler ve sağlık örüntüleri.",
     "planMonthlyTitle": "Aylık",
@@ -1271,6 +1338,7 @@ export const tr: Translations = {
     "saveReminderTime": "Hatırlatma saati kaydedilemedi. Lütfen tekrar dene.",
     "saveNotificationPermission": "Bildirim izni kaydedilemedi. Lütfen tekrar dene.",
     "savePetReminderNotifications": "Pet hatırlatıcı bildirimleri kaydedilemedi. Lütfen tekrar dene.",
+    "saveFamilyActivityDigest": "Aile aktivitesi özeti tercihi kaydedilemedi. Lütfen tekrar dene.",
     "loadOnboardingStatus": "Başlangıç durumu yüklenemedi. Lütfen tekrar dene.",
     "saveOnboardingStatus": "Başlangıç durumu kaydedilemedi. Lütfen tekrar dene.",
     "onboardingUnavailable": "Başlangıç durumu kullanılamıyor.",

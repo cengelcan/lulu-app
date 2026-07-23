@@ -35,7 +35,9 @@ export function renderRecordsTimeline({
                 <div class="record-time-col">${escapeHtml(entry.time)}</div>
                 <div class="record-card">
                   <div class="record-title-row">
-                    <span class="record-icon">${escapeHtml(getRecordTypeEmoji(entry.typeId))}</span>
+                    <span class="record-icon">${escapeHtml(
+                      entry.emoji ?? getRecordTypeEmoji(entry.typeId as Exclude<typeof entry.typeId, 'medicationDose'>)
+                    )}</span>
                     <strong class="record-type">${escapeHtml(entry.typeLabel)}</strong>
                   </div>
                   <div class="record-detail">${escapeHtml(entry.detail)}</div>

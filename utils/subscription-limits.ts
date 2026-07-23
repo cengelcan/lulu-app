@@ -82,6 +82,7 @@ export function evaluatePlusFeature(feature: PlusFeature, context: PlusFeatureCo
       return context.ownedActivePetCount < FREE_ACTIVE_PET_LIMIT;
     case 'familySharing':
     case 'pdfExport':
+    case 'medicationInventory':
       return plus;
     case 'unlimitedRecords':
       return plus || context.recordsThisMonth < FREE_RECORDS_PER_MONTH;

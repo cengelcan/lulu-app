@@ -61,3 +61,19 @@ export function getPetReminderNotificationId(reminderId: string): string {
 export function isPetReminderNotificationId(identifier: string): boolean {
   return identifier.startsWith(PET_REMINDER_NOTIFICATION_ID_PREFIX);
 }
+
+export const MEDICATION_DOSE_NOTIFICATION_ID_PREFIX = 'medication-dose-';
+export const ANDROID_MEDICATION_DOSE_CHANNEL_ID = 'medication-doses-v1';
+export const ANDROID_FAMILY_ACTIVITY_CHANNEL_ID = 'family-activity-v1';
+export const MEDICATION_DOSE_NOTIFICATION_SOUND = 'bell_ring.wav';
+export const MEDICATION_DOSE_CATEGORY_ID = 'medication-dose-actions-v1';
+export const MEDICATION_DOSE_ACTION_TAKE = 'medication-dose-take';
+export const MEDICATION_DOSE_ACTION_SNOOZE = 'medication-dose-snooze';
+
+export function getMedicationDoseNotificationId(doseId: string): string {
+  return `${MEDICATION_DOSE_NOTIFICATION_ID_PREFIX}${doseId}`;
+}
+
+export function isMedicationDoseNotificationId(identifier: string): boolean {
+  return identifier.startsWith(MEDICATION_DOSE_NOTIFICATION_ID_PREFIX);
+}

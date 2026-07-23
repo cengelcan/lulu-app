@@ -1,11 +1,15 @@
 import { type Href, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { getNotificationLaunchRoute, syncCheckInReminderSchedule, syncPetReminderNotificationSchedule } from '@/services/notifications';
+import { getNotificationLaunchRoute, syncCheckInReminderSchedule, syncMedicationDoseNotificationSchedule, syncPetReminderNotificationSchedule } from '@/services/notifications';
 import { beginBootstrap, completeBootstrap } from '@/services/bootstrap/bootstrap-gate';
+import { saveRemoteFamilyActivityDigestEnabled } from '@/services/notifications/family-activity-digest-preference';
+import { registerFamilyActivityPushToken } from '@/services/notifications/push-registration';
 import { getPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
+import { useNotificationStore } from '@/stores/notification.store';
+import { useLanguageStore } from '@/stores/language.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
@@ -77,11 +81,30 @@ export function useBootstrap() {
     await Promise.all([loadOnboardingStatus(), initializeAuth()]);
     await loadPet();
 
+    if (useUserStore.getState().authStatus === 'authenticated') {
+      await useNotificationStore.getState().loadNotificationSettings();
+      if (useNotificationStore.getState().familyActivityDigestEnabled) {
+        try {
+          const userId = useUserStore.getState().userId;
+          const language = useLanguageStore.getState().resolvedLanguage;
+          await Promise.all([
+            registerFamilyActivityPushToken(),
+            userId
+              ? saveRemoteFamilyActivityDigestEnabled(userId, true, language)
+              : Promise.resolve(),
+          ]);
+        } catch (registrationError) {
+          console.warn('Failed to refresh family activity push token', registrationError);
+        }
+      }
+    }
+
     const { pet } = usePetStore.getState();
 
     if (pet) {
       await syncCheckInReminderSchedule({ petName: pet.name });
       await syncPetReminderNotificationSchedule();
+      await syncMedicationDoseNotificationSchedule();
     }
 
     const onboardingError = useOnboardingStore.getState().error;

@@ -36,6 +36,7 @@ import { exportReportPdf } from '@/services/reports/export-report-pdf';
 import { generateReportHtml } from '@/services/reports/generate-report-html';
 import * as checkInStorage from '@/storage/check-in.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
+import * as medicationStorage from '@/storage/medication.storage';
 import { usePetStore } from '@/stores/pet.store';
 import { canViewReports } from '@/utils/pet-access';
 import type {
@@ -212,9 +213,14 @@ export function ReportsWizardContent() {
     setValidationError(null);
 
     try {
-      const [checkIns, records] = await Promise.all([
+      const resolvedRange = resolveReportDateRange(range);
+      const [checkIns, records, medicationPlans, medicationDoses] = await Promise.all([
         checkInStorage.getCheckInsByPetId(pet.id),
         petRecordStorage.getPetRecordsByPetId(pet.id),
+        medicationStorage.getMedicationPlansByPetId(pet.id),
+        medicationStorage.getMedicationDosesByPetId(
+          pet.id, resolvedRange.startDate, resolvedRange.endDate
+        ),
       ]);
 
       const nextPetSummary = buildReportPetSummary(pet, records, {
@@ -230,6 +236,8 @@ export function ReportsWizardContent() {
         selection,
         checkIns,
         records,
+        medicationPlans,
+        medicationDoses,
         t,
         locale,
       });
@@ -533,6 +541,17 @@ export function ReportsWizardContent() {
                 />
               );
             })}
+          </GroupedSection>
+          <GroupedSection title={t('reports.data.medicationsSection')}>
+            <ReportCheckboxRow
+              label={t('reports.data.medicationDoses')}
+              selected={selection.medications}
+              isLast
+              onPress={() => {
+                setValidationError(null);
+                setSelection((current) => ({ ...current, medications: !current.medications }));
+              }}
+            />
           </GroupedSection>
         </>
       ) : null}

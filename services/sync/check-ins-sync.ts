@@ -183,6 +183,7 @@ export async function pushCheckIn(
     id: `check-in-${checkIn.id}`,
     petId: checkIn.petId,
     eventType: activityEventType,
+    entityId: checkIn.id,
     metadata: { date: checkIn.date },
   });
 }

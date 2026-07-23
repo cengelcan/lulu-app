@@ -13,6 +13,7 @@ export type ReportRecordDataKey = RecordTypeId;
 export type ReportDataSelection = {
   checkIn: Record<ReportCheckInDataKey, boolean>;
   records: Record<ReportRecordDataKey, boolean>;
+  medications: boolean;
 };
 
 export type ReportDateRange = {
@@ -38,7 +39,8 @@ export type ReportCheckInEntry = {
 export type ReportRecordEntry = {
   date: string;
   time: string;
-  typeId: RecordTypeId;
+  typeId: RecordTypeId | 'medicationDose';
+  emoji?: string;
   icon: IconSymbolName;
   typeLabel: string;
   detail: string;

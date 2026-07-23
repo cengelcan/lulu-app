@@ -15,6 +15,10 @@ export {
   syncPetReminderNotificationSchedule,
 } from '@/services/notifications/pet-reminder-schedule';
 export {
+  cancelAllMedicationDoseNotifications,
+  syncMedicationDoseNotificationSchedule,
+} from '@/services/notifications/medication-dose-schedule';
+export {
   cancelCheckInReminder,
   syncCheckInReminderSchedule,
 } from '@/services/notifications/schedule';

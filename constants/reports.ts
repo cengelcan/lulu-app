@@ -34,11 +34,11 @@ export function createDefaultReportDataSelection(): ReportDataSelection {
     records[key] = true;
   }
 
-  return { checkIn, records };
+  return { checkIn, records, medications: true };
 }
 
 export function hasAnyReportDataSelection(selection: ReportDataSelection): boolean {
   const hasCheckIn = Object.values(selection.checkIn).some(Boolean);
   const hasRecords = Object.values(selection.records).some(Boolean);
-  return hasCheckIn || hasRecords;
+  return hasCheckIn || hasRecords || selection.medications;
 }

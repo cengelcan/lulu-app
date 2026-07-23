@@ -16,6 +16,8 @@ const SAFE_NOTIFICATION_ROUTE_PREFIXES = [
   '/check-in',
   '/records',
   '/reminders',
+  '/medications',
+  '/family-activity',
 ] as const;
 
 const SAFE_NOTIFICATION_TAB_ROUTES = new Set([

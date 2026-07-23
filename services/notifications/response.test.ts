@@ -31,6 +31,11 @@ describe('normalizeNotificationRoute', () => {
       '/reminders/rabies?id=reminder-1'
     );
     assert.equal(normalizeNotificationRoute('/records/weight?id=record-1'), '/records/weight?id=record-1');
+    assert.equal(
+      normalizeNotificationRoute('/medications?doseId=dose-1'),
+      '/medications?doseId=dose-1'
+    );
+    assert.equal(normalizeNotificationRoute('/family-activity'), '/family-activity');
   });
 
   it('maps the legacy family entry to the hidden management route', () => {

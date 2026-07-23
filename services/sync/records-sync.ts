@@ -78,6 +78,7 @@ export async function pushPetRecord(userId: string, record: PetRecord): Promise<
     id: `record-${record.id}`,
     petId: record.petId,
     eventType: 'record_created',
+    entityId: record.id,
     metadata: { type: record.type },
   });
 }

@@ -4,14 +4,14 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | Backlog |
+| Durum | In Progress |
 | Öncelik | P0 |
 | Hedef sürüm | v1.3 |
 | Task türü | Sağlık / Plus / Bildirim |
 | Tahmini efor | XL |
 | Ürün katmanı | Her ikisi; gelişmiş özellikler Plus |
 | Bağımlılıklar | 001 |
-| Son güncelleme | 2026-07-15 |
+| Son güncelleme | 2026-07-22 |
 
 ## Bağlam ve problem
 
@@ -94,21 +94,21 @@ Kullanıcının daha önce kaydettiği ilaç ve doz geçmişi abonelik bittiğin
 
 ### Faz 1 — Model ve CRUD
 
-- [ ] Schema, migration, RLS ve local storage.
-- [ ] Plan oluşturma/düzenleme/archive.
-- [ ] Schedule engine unit testleri.
+- [x] Schema, migration, RLS ve local storage. — Plan, schedule ve dose tabloları; cihaz cache'i, cloud sync ve family realtime yenilemesi eklendi. Supabase migration production'a ayrıca uygulanacak.
+- [x] Plan oluşturma/düzenleme/archive. — Care Hub'dan açılan ilaç planı listesi ve günlük/PRN plan formu eklendi; tedaviyi silmek yerine geçmişte tutan bitirme akışı kullanılıyor.
+- [x] Schedule engine unit testleri. — Daily, weekly/custom interval, plan/schedule tarih sınırları, PRN ve DST offset değişimi kapsandı.
 
 ### Faz 2 — Doz deneyimi
 
-- [ ] Today dose listesi.
-- [ ] Taken/skipped/snooze akışları.
-- [ ] Notification actions ve deep link.
+- [x] Today dose listesi. — Bugünün dozları ilaç planı ve saat bilgisiyle gösteriliyor; geciken dozlar görünür biçimde işaretleniyor.
+- [x] Taken/skipped/snooze akışları. — Yerel durum anında güncelleniyor; tamamlayan aktör saklanıyor ve sunucu geçişi eşzamanlı çakışmalara karşı atomik.
+- [x] Notification actions ve deep link. — 14 günlük kayan bildirim ufku, güvenli medication route'u ve bildirimden Verildi/30 dk ertele aksiyonları eklendi.
 
 ### Faz 3 — Plus ve family
 
-- [ ] Actor timeline, conflict prevention.
-- [ ] Inventory/refill.
-- [ ] PDF/Vet Visit entegrasyonu.
+- [x] Actor timeline, conflict prevention. — Doz ve stok hareketleri aktör bilgisiyle Family Activity/Inbox akışına bağlandı; sunucu geçişi satır kilidiyle idempotent.
+- [x] Inventory/refill. — Plus stok alanı, düşük stok eşiği, verilen dozda atomik eksiltme ve realtime senkronizasyon eklendi.
+- [x] PDF/Vet Visit entegrasyonu. — Verilen/atlanan/kaçırılan dozlar rapor sihirbazında ayrı seçilebilir veteriner zaman akışı verisi oldu.
 
 ## Kabul kriterleri
 
@@ -130,6 +130,13 @@ Kullanıcının daha önce kaydettiği ilaç ve doz geçmişi abonelik bittiğin
 - Entegrasyon: notification action, offline queue, realtime family sync ve idempotency.
 - Yetki: owner/member/çıkarılmış üye ve memorial pet senaryoları.
 - Manuel: gerçek cihaz bildirimleri, Dynamic Type, VoiceOver, EN/DE ve gizli lock-screen.
+
+### Yayın öncesi manuel kontrol listesi
+
+- [x] Simülatör — Family üyesi bildirime dokunup dozu “Verildi” yaptı; ana hesapta aktör hareketi, doz durumu ve stok `10 → 9` realtime olarak doğru güncellendi.
+- [x] Simülatör — İlaç doz geçmişi rapor önizlemesinde doğru göründü.
+- [ ] İki eşzamanlı fiziksel cihaz veya simülatör — Aynı doza iki hesaptan aynı anda “Verildi” işlemi uygulanacak; stok yalnızca bir azalmalı ve tek doz hareketi oluşmalı.
+- [ ] Fiziksel cihaz — Kilit ekranı bildirimi, bildirim aksiyonları ve uygulama tamamen kapalıyken teslimat doğrulanacak.
 
 ## Definition of Done
 

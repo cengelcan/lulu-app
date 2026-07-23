@@ -10,12 +10,16 @@ export function resetUserScopedStores(): void {
     require('@/stores/check-in.store') as typeof import('@/stores/check-in.store');
   const { usePetRecordStore } =
     require('@/stores/pet-record.store') as typeof import('@/stores/pet-record.store');
+  const { useMedicationStore } =
+    require('@/stores/medication.store') as typeof import('@/stores/medication.store');
   const { usePetReminderStore } =
     require('@/stores/pet-reminder.store') as typeof import('@/stores/pet-reminder.store');
   const { useNotificationStore } =
     require('@/stores/notification.store') as typeof import('@/stores/notification.store');
   const { useSharingStore } =
     require('@/stores/sharing.store') as typeof import('@/stores/sharing.store');
+  const { useFamilyActivityStore } =
+    require('@/stores/family-activity.store') as typeof import('@/stores/family-activity.store');
 
   usePetStore.setState({
     pets: [],
@@ -40,7 +44,16 @@ export function resetUserScopedStores(): void {
     isLoading: false,
     error: null,
   });
-  useNotificationStore.setState({ reminderTime: null });
+  useMedicationStore.setState({
+    bundles: [],
+    doses: [],
+    isLoading: false,
+    error: null,
+  });
+  useNotificationStore.setState({
+    reminderTime: null,
+    familyActivityDigestEnabled: false,
+  });
   useSharingStore.setState({
     familyGroup: null,
     memberFamilyGroup: null,
@@ -52,4 +65,5 @@ export function resetUserScopedStores(): void {
     isLoading: false,
     error: null,
   });
+  useFamilyActivityStore.getState().clear();
 }

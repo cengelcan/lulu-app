@@ -2,3 +2,6 @@
 
 [functions.revenuecat-webhook]
 verify_jwt = false
+
+[functions.family-activity-digest]
+verify_jwt = false

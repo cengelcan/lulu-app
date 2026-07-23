@@ -15,7 +15,7 @@ let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 14;
+const CURRENT_SCHEMA_VERSION = 17;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -244,6 +244,126 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     version = 14;
     await setSchemaVersion(db, version);
   }
+
+  if (version < 15) {
+    await ensureMedicationTrackingTables(db);
+    version = 15;
+    await setSchemaVersion(db, version);
+  }
+
+  if (version < 16) {
+    await ensureMedicationInventoryTable(db);
+    version = 16;
+    await setSchemaVersion(db, version);
+  }
+
+  if (version < 17) {
+    await ensureActivityEventCacheTable(db);
+    version = 17;
+    await setSchemaVersion(db, version);
+  }
+}
+
+async function ensureActivityEventCacheTable(db: SQLite.SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS activity_events_cache (
+      id TEXT PRIMARY KEY NOT NULL,
+      family_id TEXT,
+      pet_id TEXT NOT NULL,
+      actor_user_id TEXT NOT NULL,
+      event_type TEXT NOT NULL,
+      entity_id TEXT,
+      metadata TEXT NOT NULL DEFAULT '{}',
+      metadata_version INTEGER NOT NULL DEFAULT 1,
+      occurred_at TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_activity_events_cache_occurred
+      ON activity_events_cache (occurred_at DESC, id DESC);
+    CREATE INDEX IF NOT EXISTS idx_activity_events_cache_pet
+      ON activity_events_cache (pet_id, occurred_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_activity_events_cache_actor
+      ON activity_events_cache (actor_user_id, occurred_at DESC);
+  `);
+}
+
+async function ensureMedicationInventoryTable(db: SQLite.SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS medication_inventory (
+      plan_id TEXT PRIMARY KEY NOT NULL,
+      pet_id TEXT NOT NULL,
+      remaining_doses INTEGER NOT NULL DEFAULT 0 CHECK (remaining_doses >= 0),
+      refill_threshold INTEGER NOT NULL DEFAULT 3 CHECK (refill_threshold >= 0),
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (plan_id) REFERENCES medication_plans (id) ON DELETE CASCADE,
+      FOREIGN KEY (pet_id) REFERENCES pets (id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_medication_inventory_pet ON medication_inventory (pet_id);
+  `);
+}
+
+async function ensureMedicationTrackingTables(db: SQLite.SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS medication_plans (
+      id TEXT PRIMARY KEY NOT NULL,
+      pet_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      form TEXT,
+      dosage TEXT NOT NULL,
+      unit TEXT NOT NULL,
+      instructions TEXT,
+      starts_on TEXT NOT NULL,
+      ends_on TEXT,
+      timezone TEXT NOT NULL,
+      is_prn INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (pet_id) REFERENCES pets (id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS medication_schedules (
+      id TEXT PRIMARY KEY NOT NULL,
+      plan_id TEXT NOT NULL,
+      frequency TEXT NOT NULL,
+      interval_value INTEGER NOT NULL DEFAULT 1,
+      weekdays TEXT NOT NULL DEFAULT '[]',
+      times TEXT NOT NULL DEFAULT '[]',
+      effective_from TEXT NOT NULL,
+      effective_to TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (plan_id) REFERENCES medication_plans (id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS medication_doses (
+      id TEXT PRIMARY KEY NOT NULL,
+      plan_id TEXT NOT NULL,
+      schedule_id TEXT,
+      pet_id TEXT NOT NULL,
+      scheduled_at TEXT NOT NULL,
+      local_date TEXT NOT NULL,
+      local_time TEXT NOT NULL,
+      timezone TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'scheduled',
+      completed_at TEXT,
+      actor_user_id TEXT,
+      note TEXT,
+      snoozed_until TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (plan_id) REFERENCES medication_plans (id) ON DELETE CASCADE,
+      FOREIGN KEY (schedule_id) REFERENCES medication_schedules (id) ON DELETE SET NULL,
+      FOREIGN KEY (pet_id) REFERENCES pets (id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_medication_plans_pet_status ON medication_plans (pet_id, status);
+    CREATE INDEX IF NOT EXISTS idx_medication_schedules_plan ON medication_schedules (plan_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_medication_doses_plan_scheduled ON medication_doses (plan_id, scheduled_at);
+    CREATE INDEX IF NOT EXISTS idx_medication_doses_pet_status_scheduled ON medication_doses (pet_id, status, scheduled_at);
+  `);
 }
 
 async function ensurePetSharingColumns(db: SQLite.SQLiteDatabase): Promise<void> {

@@ -9,6 +9,7 @@ import type {
 } from '@/types/report';
 import type { CheckIn, CheckInCategory } from '@/types/check-in';
 import type { PetRecord, RecordTypeId } from '@/types/pet-record';
+import type { MedicationDose, MedicationPlan } from '@/types/medication';
 import { getRecordSummary, getRecordTypeLabelKey } from '@/utils/pet-record-display';
 import { isDateWithinRange, resolveReportDateRange } from '@/utils/report-range';
 
@@ -19,6 +20,8 @@ type BuildReportPreviewParams = {
   selection: ReportDataSelection;
   checkIns: CheckIn[];
   records: PetRecord[];
+  medicationDoses?: MedicationDose[];
+  medicationPlans?: MedicationPlan[];
   t: TranslateFn;
   locale: string;
 };
@@ -73,6 +76,8 @@ export function buildReportPreviewContent({
   selection,
   checkIns,
   records,
+  medicationDoses = [],
+  medicationPlans = [],
   t,
   locale,
 }: BuildReportPreviewParams): ReportPreviewContent {
@@ -113,7 +118,7 @@ export function buildReportPreviewContent({
     })
     .filter((entry) => entry !== null);
 
-  const recordEntries = filteredRecords
+  const recordEntries: ReportRecordEntry[] = filteredRecords
     .filter((record) => selection.records[record.type as RecordTypeId])
     .map((record) => {
       const typeDefinition = RECORD_TYPES.find((type) => type.id === record.type);
@@ -128,6 +133,30 @@ export function buildReportPreviewContent({
         notes: record.notes?.trim() ? record.notes.trim() : null,
       };
     });
+
+  if (selection.medications) {
+    const plansById = new Map(medicationPlans.map((plan) => [plan.id, plan]));
+    for (const dose of medicationDoses) {
+      if (!isDateWithinRange(dose.localDate, startDate, endDate)) continue;
+      if (!['taken', 'skipped', 'missed'].includes(dose.status)) continue;
+      const plan = plansById.get(dose.planId);
+      if (!plan) continue;
+      recordEntries.push({
+        date: dose.localDate,
+        time: formatRecordTime(dose.completedAt ?? dose.scheduledAt, locale),
+        typeId: 'medicationDose',
+        icon: 'pills.fill',
+        emoji: '💊',
+        typeLabel: t('reports.medicationDose.title'),
+        detail: t(`reports.medicationDose.${dose.status}`, {
+          medication: plan.name,
+          dose: plan.dosage,
+          unit: plan.unit,
+        }),
+        notes: dose.note?.trim() ? dose.note.trim() : null,
+      });
+    }
+  }
 
   const recordGroups = groupRecordsByDate(recordEntries);
 

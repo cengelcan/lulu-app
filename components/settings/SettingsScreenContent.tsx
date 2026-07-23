@@ -32,6 +32,12 @@ export function SettingsScreenContent({
   const petReminderNotificationsEnabled = useNotificationStore(
     (state) => state.petReminderNotificationsEnabled
   );
+  const familyActivityDigestEnabled = useNotificationStore(
+    (state) => state.familyActivityDigestEnabled
+  );
+  const saveFamilyActivityDigestEnabled = useNotificationStore(
+    (state) => state.saveFamilyActivityDigestEnabled
+  );
   const clearError = useNotificationStore((state) => state.clearError);
 
   const languagePreference = useLanguageStore((state) => state.languagePreference);
@@ -75,6 +81,16 @@ export function SettingsScreenContent({
     }
   };
 
+  const handleToggleFamilyActivityDigest = async (enabled: boolean) => {
+    clearError();
+
+    try {
+      await saveFamilyActivityDigestEnabled(enabled);
+    } catch {
+      // Store sets error state.
+    }
+  };
+
   const handleLanguageSelect = (nextLanguage: typeof languagePreference) => {
     void saveLanguage(nextLanguage);
   };
@@ -92,10 +108,14 @@ export function SettingsScreenContent({
               permission={permission}
               reminderTime={reminderTime}
               petReminderNotificationsEnabled={petReminderNotificationsEnabled}
+              familyActivityDigestEnabled={familyActivityDigestEnabled}
               isLoading={isLoading}
               error={storeError}
               onToggleCheckIn={(enabled) => void handleToggleCheckIn(enabled)}
               onTogglePetReminders={(enabled) => void handleTogglePetReminders(enabled)}
+              onToggleFamilyActivityDigest={(enabled) =>
+                void handleToggleFamilyActivityDigest(enabled)
+              }
               onTimeChange={(time) => void handleTimeChange(time)}
             />
             <LanguageSection language={languagePreference} onSelect={handleLanguageSelect} />

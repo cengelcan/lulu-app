@@ -1,10 +1,16 @@
-import { cancelCheckInReminder, cancelAllPetReminderNotifications } from '@/services/notifications';
+import { cancelCheckInReminder, cancelAllMedicationDoseNotifications, cancelAllPetReminderNotifications } from '@/services/notifications';
 import * as checkInStorage from '@/storage/check-in.storage';
+import * as activityEventStorage from '@/storage/activity-event.storage';
+import * as medicationStorage from '@/storage/medication.storage';
 import { clearPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
-import { removeActivePetId, removeCheckInReminderTime } from '@/storage/prefs.storage';
+import {
+  removeActivePetId,
+  removeCheckInReminderTime,
+  removeFamilyActivityDigestEnabled,
+} from '@/storage/prefs.storage';
 import { clearUserSetupPath } from '@/storage/setup-path.storage';
 import { clearUserProfile } from '@/storage/user.storage';
 
@@ -17,6 +23,9 @@ import { clearUserProfile } from '@/storage/user.storage';
 export async function wipeUserScopedData(): Promise<void> {
   await cancelCheckInReminder();
   await cancelAllPetReminderNotifications();
+  await cancelAllMedicationDoseNotifications();
+  await activityEventStorage.deleteAllActivityEvents();
+  await medicationStorage.deleteAllMedicationData();
   await petReminderStorage.deleteAllPetReminders();
   await petRecordStorage.deleteAllPetRecords();
   await checkInStorage.deleteAllCheckIns();
@@ -25,6 +34,7 @@ export async function wipeUserScopedData(): Promise<void> {
   await Promise.all([
     removeActivePetId(),
     removeCheckInReminderTime(),
+    removeFamilyActivityDigestEnabled(),
     clearUserProfile(),
     clearUserSetupPath(),
     clearPendingFamilyJoinCode(),

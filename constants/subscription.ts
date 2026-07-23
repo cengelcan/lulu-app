@@ -54,6 +54,7 @@ export type PlusFeature =
   | 'multiplePets'
   | 'familySharing'
   | 'pdfExport'
+  | 'medicationInventory'
   | 'unlimitedReminders'
   | 'unlimitedRecords';
 

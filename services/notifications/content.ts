@@ -1,6 +1,7 @@
 import { getTranslations, translate } from '@/i18n';
 import type { ResolvedLanguage } from '@/types/language';
 import type { PetReminder } from '@/types/pet-reminder';
+import type { MedicationPlan } from '@/types/medication';
 import { getReminderTitle } from '@/utils/pet-reminder-display';
 
 import {
@@ -16,6 +17,21 @@ function applyTranslationParams(
     const value = params[key];
     return value !== undefined ? String(value) : `{{${key}}}`;
   });
+}
+
+export function getMedicationDoseNotificationContent(
+  plan: MedicationPlan,
+  petName: string,
+  language: ResolvedLanguage = 'en'
+): { title: string; body: string } {
+  return {
+    title: translate(language, 'notifications.medicationDoseTitle', { medication: plan.name }),
+    body: translate(language, 'notifications.medicationDoseBody', {
+      name: petName,
+      dose: plan.dosage,
+      unit: plan.unit,
+    }),
+  };
 }
 
 function getCheckInReminderBodies(language: ResolvedLanguage): readonly string[] {

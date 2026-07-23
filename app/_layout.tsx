@@ -39,10 +39,12 @@ export default function RootLayout() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="family-sharing" />
         <Stack.Screen name="family" />
+        <Stack.Screen name="family-activity" />
         <Stack.Screen name="join-family" />
         <Stack.Screen name="reports" />
         <Stack.Screen name="records" />
         <Stack.Screen name="reminders" />
+        <Stack.Screen name="medications" />
         <Stack.Screen
           name="paywall"
           options={{

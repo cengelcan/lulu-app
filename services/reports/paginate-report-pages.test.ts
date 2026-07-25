@@ -76,17 +76,6 @@ describe('paginateReportContent', () => {
     }
   });
 
-  it('can continue an existing document without repeating the pet card', () => {
-    const pages = paginateReportContent(makeContent([makeDay('2026-06-01')]), {
-      hasSummary: true,
-      includePetCard: false,
-    });
-
-    assert.ok(pages.length > 0);
-    assert.equal(pages.some((page) => page.includePetCard), false);
-    assert.equal(pages[0].includeSummary, true);
-  });
-
   it('shows the daily observations heading once', () => {
     const days = Array.from({ length: 40 }, (_, index) =>
       makeDay(`2026-06-${String((index % 28) + 1).padStart(2, '0')}`)

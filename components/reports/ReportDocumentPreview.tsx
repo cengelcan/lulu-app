@@ -15,8 +15,6 @@ import type {
   ReportSummary,
 } from '@/types/report';
 import type { ResolvedLanguage } from '@/types/language';
-import type { VisitBrief, VisitBriefDocumentLabels } from '@/types/vet-visit';
-import { paginateVisitPrep } from '@/services/reports/html/components/visit-prep';
 
 type ReportDocumentPreviewProps = {
   pet: ReportPetSummary;
@@ -31,8 +29,6 @@ type ReportDocumentPreviewProps = {
   photoDataUri?: string | null;
   qrCodeDataUri?: string | null;
   summary?: ReportSummary | null;
-  visitBrief?: VisitBrief | null;
-  visitLabels?: VisitBriefDocumentLabels | null;
 };
 
 /** Posts the rendered document height (in 612px-viewport CSS pixels) back to RN. */
@@ -65,21 +61,14 @@ export function ReportDocumentPreview({
   photoDataUri = null,
   qrCodeDataUri = null,
   summary = null,
-  visitBrief = null,
-  visitLabels = null,
 }: ReportDocumentPreviewProps) {
   const [containerWidth, setContainerWidth] = useState(0);
 
   const hasSummary = Boolean(summary && summary.lines.length > 0);
 
   const totalPages = useMemo(
-    () =>
-      (visitBrief && visitLabels ? paginateVisitPrep(visitBrief).length : 0) +
-      paginateReportContent(content, {
-        hasSummary,
-        includePetCard: !(visitBrief && visitLabels),
-      }).length,
-    [content, hasSummary, visitBrief, visitLabels]
+    () => paginateReportContent(content, { hasSummary }).length,
+    [content, hasSummary]
   );
 
   const estimatedContentHeight = useMemo(
@@ -104,8 +93,6 @@ export function ReportDocumentPreview({
         qrCodeDataUri,
         primaryColor,
         summary,
-        visitBrief,
-        visitLabels,
         mode: 'screen',
       }),
     [
@@ -121,8 +108,6 @@ export function ReportDocumentPreview({
       qrCodeDataUri,
       shellLabels,
       summary,
-      visitBrief,
-      visitLabels,
     ]
   );
 

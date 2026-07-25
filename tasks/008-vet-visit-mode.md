@@ -4,7 +4,7 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | Ürün yönü onaylandı; uygulama kapsamı hazırlanıyor |
+| Durum | Faz 1 uygulandı; Faz 2 bekliyor |
 | Öncelik | P0 |
 | Hedef sürüm | v1.4 |
 | Task türü | Plus / Sağlık / Bakım iş akışı |
@@ -60,13 +60,13 @@ aksiyonlarını unutmamak zorunda. Lulu bu süreci bugün uçtan uca bağlamıyo
 
 ### Ziyaret öncesi
 
-- [ ] Randevu tarihi ve saati.
-- [ ] Klinik/veteriner seçimi veya serbest metin girişi.
-- [ ] Görüşme nedeni.
-- [ ] Sıralanabilir soru listesi.
-- [ ] Hazırlık ilerlemesi ve yaklaşan görüşmenin Care Hub'da gösterilmesi.
-- [ ] İsteğe bağlı Sağlık Raporu ekleme; yalnız tarih aralığı değiştirilebilir.
-- [ ] Sağlık Raporu oluşturma/düzenleme mevcut rapor akışına yönlendirir.
+- [x] Randevu tarihi ve saati.
+- [x] Klinik/veteriner seçimi veya serbest metin girişi.
+- [x] Görüşme nedeni.
+- [x] Sıralanabilir soru listesi.
+- [x] Hazırlık ilerlemesi ve yaklaşan görüşmenin Care Hub'da gösterilmesi.
+- [x] İsteğe bağlı Sağlık Raporu ekleme; yalnız tarih aralığı değiştirilebilir.
+- [x] Sağlık Raporu oluşturma/düzenleme mevcut rapor akışına yönlendirir.
 
 ### Görüşme sırasında
 
@@ -124,10 +124,10 @@ Uygulama kodundan önce kesinleştirilecek başlangıç sözleşmesi:
 
 ### Faz 1 — Hazırlık Workspace'i
 
-- [ ] Veri modeli ve local/cloud saklama sözleşmesi.
-- [ ] Randevu, provider, neden ve soru CRUD akışı.
-- [ ] Care Hub yaklaşan görüşme kartı ve hazırlık durumu.
-- [ ] Mevcut Sağlık Raporu'nu isteğe bağlı bağlama.
+- [x] Veri modeli ve local/cloud saklama sözleşmesi.
+- [x] Randevu, provider, neden ve soru CRUD akışı.
+- [x] Care Hub yaklaşan görüşme kartı ve hazırlık durumu.
+- [x] Mevcut Sağlık Raporu'nu isteğe bağlı bağlama.
 
 ### Faz 2 — Görüşme ve sonuç
 
@@ -161,12 +161,17 @@ Uygulama kodundan önce kesinleştirilecek başlangıç sözleşmesi:
 
 ## Açık sorular
 
-- [ ] Vet Visit entity'si hangi local/cloud storage sözleşmesini kullanacak?
 - [ ] Free kullanıcı kaç aktif/tamamlanmış görüşme saklayabilecek?
-- [ ] Provider Directory ile bağlantı Faz 1 için zorunlu mu?
 - [ ] Aile rollerinde kim düzenleyebilir, kim yalnız görüntüleyebilir?
-- [ ] Sağlık Raporu görüşmeye canlı referans mı yoksa tarih aralığı referansı mı
-  olarak bağlanacak?
+
+### Çözülen teknik kararlar
+
+- Vet Visit, mevcut mimariyle uyumlu biçimde SQLite local-first cache ve
+  Supabase aile erişimli bulut kaynağı kullanır.
+- Provider Directory Faz 1 için zorunlu değildir; `provider_id` ileriye dönük
+  tutulur ve bugün serbest metin `provider_name` kullanılır.
+- Sağlık Raporu snapshot olarak çoğaltılmaz; görüşmede tarih aralığı referansı
+  tutulur ve mevcut rapor akışı bu aralıkla açılır.
 
 ## Test planı
 

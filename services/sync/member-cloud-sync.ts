@@ -10,14 +10,16 @@ import { pullMedicationIntoLocal } from '@/services/sync/medication-sync';
 import { pullPetsIntoLocal } from '@/services/sync/pets-sync';
 import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
+import { pullVetVisitsIntoLocal } from '@/services/sync/vet-visits-sync';
 import { withCloudDataSyncLock } from '@/services/sync/sync-lock';
 
 async function refreshPetCareStores(petId: string): Promise<void> {
-  const [{ useCheckInStore }, { useMedicationStore }, { usePetRecordStore }, { usePetReminderStore }] = await Promise.all([
+  const [{ useCheckInStore }, { useMedicationStore }, { usePetRecordStore }, { usePetReminderStore }, { useVetVisitStore }] = await Promise.all([
     import('@/stores/check-in.store'),
     import('@/stores/medication.store'),
     import('@/stores/pet-record.store'),
     import('@/stores/pet-reminder.store'),
+    import('@/stores/vet-visit.store'),
   ]);
 
   await Promise.all([
@@ -25,6 +27,7 @@ async function refreshPetCareStores(petId: string): Promise<void> {
     useMedicationStore.getState().loadPlans(petId),
     usePetRecordStore.getState().loadRecords(petId),
     usePetReminderStore.getState().loadReminders(petId),
+    useVetVisitStore.getState().loadVisits(petId),
   ]);
 }
 
@@ -56,6 +59,7 @@ async function pullAccessibleDataIntoLocal(userId: string): Promise<void> {
   await pullPetRecordsIntoLocal(userId);
   await pullPetRemindersIntoLocal(userId);
   await pullMedicationIntoLocal(userId);
+  await pullVetVisitsIntoLocal(userId);
   await usePetStore.getState().loadPets();
   await reconcileActivePetAfterPull(previousActivePetId);
   const { useFamilyActivityStore } = await import('@/stores/family-activity.store');

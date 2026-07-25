@@ -5,6 +5,7 @@ import * as medicationStorage from '@/storage/medication.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
+import * as vetVisitStorage from '@/storage/vet-visit.storage';
 import { clearDismissedInboxItems } from '@/storage/inbox-dismissed.storage';
 import {
   clearJoinRemindersPromptState,
@@ -46,6 +47,7 @@ export async function deleteAllLocalData(): Promise<void> {
   await medicationStorage.deleteAllMedicationData();
   await petReminderStorage.deleteAllPetReminders();
   await petRecordStorage.deleteAllPetRecords();
+  await vetVisitStorage.deleteAllVetVisits();
   await checkInStorage.deleteAllCheckIns();
   await petStorage.deleteAllPets();
 

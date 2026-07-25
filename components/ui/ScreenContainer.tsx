@@ -19,6 +19,7 @@ type ScreenContainerProps = {
   scrollable?: boolean;
   edges?: Edge[];
   maxContentWidth?: number;
+  footer?: React.ReactNode;
 };
 
 export function ScreenContainer({
@@ -28,6 +29,7 @@ export function ScreenContainer({
   scrollable = false,
   edges = ['top', 'bottom'],
   maxContentWidth = LayoutTokens.readingContentMaxWidth,
+  footer,
 }: ScreenContainerProps) {
   const { width } = useWindowDimensions();
   const backgroundColor = useThemeColor({}, 'background');
@@ -39,6 +41,7 @@ export function ScreenContainer({
 
   const content = scrollable ? (
     <ScrollView
+      style={styles.scroll}
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={[styles.scrollContent, responsiveContentStyle, contentStyle]}
       keyboardShouldPersistTaps="handled"
@@ -49,9 +52,14 @@ export function ScreenContainer({
     <View style={[styles.content, responsiveContentStyle, contentStyle]}>{children}</View>
   );
 
+  const footerContent = footer ? (
+    <View style={[styles.footer, responsiveContentStyle]}>{footer}</View>
+  ) : null;
+
   return (
     <SafeAreaView edges={edges} style={[styles.container, { backgroundColor }, style]}>
       {content}
+      {footerContent}
     </SafeAreaView>
   );
 }
@@ -66,10 +74,19 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingVertical: Spacing.md,
   },
+  scroll: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
     width: '100%',
     alignSelf: 'center',
     paddingVertical: Spacing.md,
+  },
+  footer: {
+    width: '100%',
+    alignSelf: 'center',
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.sm,
   },
 });

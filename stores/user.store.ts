@@ -31,6 +31,7 @@ import {
 } from '@/services/sync/profile-sync';
 import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
+import { pullVetVisitsIntoLocal } from '@/services/sync/vet-visits-sync';
 import { withCloudDataSyncLock } from '@/services/sync/sync-lock';
 import { getCurrentUserId, setCurrentUserId, removeCurrentUserId } from '@/storage/prefs.storage';
 import { getUserProfile, setUserProfile } from '@/storage/user.storage';
@@ -130,6 +131,7 @@ async function syncUserDataFromCloud(): Promise<void> {
       await pullPetRecordsIntoLocal(userId);
       await pullPetRemindersIntoLocal(userId);
       await pullMedicationIntoLocal(userId);
+      await pullVetVisitsIntoLocal(userId);
       const profile = await pullProfileIntoLocal(userId);
       useUserStore.setState({
         displayName: profile.displayName,

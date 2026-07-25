@@ -15,7 +15,7 @@ let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 17;
+const CURRENT_SCHEMA_VERSION = 18;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -262,6 +262,52 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     version = 17;
     await setSchemaVersion(db, version);
   }
+
+  if (version < 18) {
+    await ensureVetVisitWorkspaceTables(db);
+    version = 18;
+    await setSchemaVersion(db, version);
+  }
+}
+
+async function ensureVetVisitWorkspaceTables(db: SQLite.SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS vet_visits (
+      id TEXT PRIMARY KEY NOT NULL,
+      pet_id TEXT NOT NULL,
+      scheduled_at TEXT NOT NULL,
+      provider_id TEXT,
+      provider_name TEXT,
+      reason TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'planned',
+      health_report_start_date TEXT,
+      health_report_end_date TEXT,
+      started_at TEXT,
+      completed_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (pet_id) REFERENCES pets (id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS vet_visit_questions (
+      id TEXT PRIMARY KEY NOT NULL,
+      visit_id TEXT NOT NULL,
+      text TEXT NOT NULL,
+      answer TEXT,
+      is_answered INTEGER NOT NULL DEFAULT 0,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (visit_id) REFERENCES vet_visits (id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_vet_visits_pet_scheduled
+      ON vet_visits (pet_id, scheduled_at ASC);
+    CREATE INDEX IF NOT EXISTS idx_vet_visits_pet_status
+      ON vet_visits (pet_id, status);
+    CREATE INDEX IF NOT EXISTS idx_vet_visit_questions_visit_order
+      ON vet_visit_questions (visit_id, sort_order ASC);
+  `);
 }
 
 async function ensureActivityEventCacheTable(db: SQLite.SQLiteDatabase): Promise<void> {

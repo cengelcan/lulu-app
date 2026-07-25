@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { ReportCheckboxRow } from '@/components/reports/ReportCheckboxRow';
@@ -66,6 +66,12 @@ function getStepIndex(step: ReportWizardStep): number {
 
 export function ReportsWizardContent() {
   const router = useRouter();
+  const { startDate: rawStartDate, endDate: rawEndDate } = useLocalSearchParams<{
+    startDate?: string | string[];
+    endDate?: string | string[];
+  }>();
+  const initialStartDate = Array.isArray(rawStartDate) ? rawStartDate[0] : rawStartDate;
+  const initialEndDate = Array.isArray(rawEndDate) ? rawEndDate[0] : rawEndDate;
   const { t, language } = useTranslation();
   const locale = getLocaleTag(language);
   const petDisplay = usePetDisplay();
@@ -77,10 +83,11 @@ export function ReportsWizardContent() {
   const loadPet = usePetStore((state) => state.loadPet);
 
   const [step, setStep] = useState<ReportWizardStep>('range');
-  const [range, setRange] = useState<ReportDateRange>(() => ({
-    preset: '30d',
-    ...getPresetDateRange('30d'),
-  }));
+  const [range, setRange] = useState<ReportDateRange>(() =>
+    initialStartDate && initialEndDate
+      ? { preset: 'custom', startDate: initialStartDate, endDate: initialEndDate }
+      : { preset: '30d', ...getPresetDateRange('30d') }
+  );
   const [selection, setSelection] = useState<ReportDataSelection>(createDefaultReportDataSelection);
   const [petSummary, setPetSummary] = useState<ReportPetSummary | null>(null);
   const [previewContent, setPreviewContent] = useState<ReportPreviewContent | null>(null);

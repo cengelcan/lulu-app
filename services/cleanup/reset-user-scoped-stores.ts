@@ -20,6 +20,8 @@ export function resetUserScopedStores(): void {
     require('@/stores/sharing.store') as typeof import('@/stores/sharing.store');
   const { useFamilyActivityStore } =
     require('@/stores/family-activity.store') as typeof import('@/stores/family-activity.store');
+  const { useVetVisitStore } =
+    require('@/stores/vet-visit.store') as typeof import('@/stores/vet-visit.store');
 
   usePetStore.setState({
     pets: [],
@@ -50,6 +52,7 @@ export function resetUserScopedStores(): void {
     isLoading: false,
     error: null,
   });
+  useVetVisitStore.setState({ bundles: [], isLoading: false, error: null });
   useNotificationStore.setState({
     reminderTime: null,
     familyActivityDigestEnabled: false,

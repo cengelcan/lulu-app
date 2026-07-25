@@ -1,5 +1,5 @@
 import { type Href, useFocusEffect, useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
@@ -15,8 +15,12 @@ import { Spacing, Typography } from '@/constants/theme';
 import { useInbox } from '@/hooks/use-inbox';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { usePetStore } from '@/stores/pet.store';
+import { useVetVisitStore } from '@/stores/vet-visit.store';
 import type { InboxItem } from '@/types/inbox';
+import { getLocaleTag } from '@/utils/locale';
 import { translateError } from '@/utils/translate-error';
+import { getUpcomingVetVisit, getVetVisitPreparationProgress } from '@/utils/vet-visit';
 
 type CareHubScreenProps = {
   edges?: Edge[];
@@ -24,15 +28,27 @@ type CareHubScreenProps = {
 
 export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps) {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { sections, showPetName, isLoading, error, refresh } = useInbox();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const pet = usePetStore((state) => state.pet);
+  const vetVisitBundles = useVetVisitStore((state) => state.bundles);
+  const loadVetVisits = useVetVisitStore((state) => state.loadVisits);
 
   useFocusEffect(
     useCallback(() => {
       void refresh();
-    }, [refresh])
+      if (pet?.id) void loadVetVisits(pet.id);
+    }, [loadVetVisits, pet, refresh])
   );
+
+  const upcomingVetVisit = useMemo(
+    () => getUpcomingVetVisit(vetVisitBundles.filter(({ visit }) => visit.petId === pet?.id)),
+    [pet, vetVisitBundles]
+  );
+  const preparationProgress = upcomingVetVisit
+    ? getVetVisitPreparationProgress(upcomingVetVisit)
+    : null;
 
   const handleItemPress = (item: InboxItem) => {
     router.push(item.route);
@@ -55,6 +71,32 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
           {t('care.subtitle')}
         </ThemedText>
       </View>
+
+      {upcomingVetVisit ? (
+        <View style={styles.section} testID="care-upcoming-vet-visit">
+          <ThemedText
+            accessibilityRole="header"
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.sectionTitle}>
+            {t('vetVisits.upcomingTitle')}
+          </ThemedText>
+          <Card style={styles.upcomingCard}>
+            <ThemedText type="defaultSemiBold">
+              {new Date(upcomingVetVisit.visit.scheduledAt).toLocaleString(getLocaleTag(language), {
+                dateStyle: 'medium', timeStyle: 'short',
+              })}
+            </ThemedText>
+            <ThemedText lightColor={textSecondaryColor} darkColor={textSecondaryColor} style={Typography.caption}>
+              {preparationProgress?.completed === preparationProgress?.total
+                ? t('vetVisits.ready')
+                : t('vetVisits.preparationProgress', preparationProgress ?? { completed: 0, total: 3 })}
+            </ThemedText>
+            <Button title={t('common.edit')} variant="secondary"
+              onPress={() => router.push(`/vet-visits/${upcomingVetVisit.visit.id}` as Href)} />
+          </Card>
+        </View>
+      ) : null}
 
       <View style={styles.section} testID="care-shortcuts">
         <ThemedText
@@ -82,6 +124,12 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
             description={t('care.remindersDescription')}
             icon="bell.fill"
             onPress={() => router.push('/reminders')}
+          />
+          <CareShortcutRow
+            title={t('vetVisits.prepare')}
+            description={t('vetVisits.prepareDescription')}
+            icon="calendar.badge.checkmark"
+            onPress={() => router.push('/vet-visits' as Href)}
           />
           <CareShortcutRow
             title={t('care.records')}
@@ -175,6 +223,9 @@ const styles = StyleSheet.create({
     padding: 0,
     gap: 0,
     overflow: 'hidden',
+  },
+  upcomingCard: {
+    gap: Spacing.sm,
   },
   timelineSections: {
     gap: Spacing.lg,

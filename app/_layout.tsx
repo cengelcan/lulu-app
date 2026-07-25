@@ -45,6 +45,7 @@ export default function RootLayout() {
         <Stack.Screen name="records" />
         <Stack.Screen name="reminders" />
         <Stack.Screen name="medications" />
+        <Stack.Screen name="vet-visits" />
         <Stack.Screen
           name="paywall"
           options={{

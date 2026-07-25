@@ -55,6 +55,7 @@ export type PlusFeature =
   | 'familySharing'
   | 'pdfExport'
   | 'medicationInventory'
+  | 'vetVisitWorkspace'
   | 'unlimitedReminders'
   | 'unlimitedRecords';
 

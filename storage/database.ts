@@ -15,7 +15,7 @@ let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 19;
+const CURRENT_SCHEMA_VERSION = 20;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -273,6 +273,29 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     await ensureVetVisitSessionTables(db);
     version = 19;
     await setSchemaVersion(db, version);
+  }
+
+  if (version < 20) {
+    await ensureVetVisitFollowUpColumns(db);
+    version = 20;
+    await setSchemaVersion(db, version);
+  }
+}
+
+async function ensureVetVisitFollowUpColumns(db: SQLite.SQLiteDatabase): Promise<void> {
+  const visitColumns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(vet_visits)');
+  if (!visitColumns.some((column) => column.name === 'created_by_user_id')) {
+    await db.execAsync('ALTER TABLE vet_visits ADD COLUMN created_by_user_id TEXT;');
+  }
+
+  const outcomeColumns = await db.getAllAsync<{ name: string }>(
+    'PRAGMA table_info(vet_visit_outcomes)'
+  );
+  if (!outcomeColumns.some((column) => column.name === 'follow_up_reminder_id')) {
+    await db.execAsync('ALTER TABLE vet_visit_outcomes ADD COLUMN follow_up_reminder_id TEXT;');
+  }
+  if (!outcomeColumns.some((column) => column.name === 'medication_plan_id')) {
+    await db.execAsync('ALTER TABLE vet_visit_outcomes ADD COLUMN medication_plan_id TEXT;');
   }
 }
 

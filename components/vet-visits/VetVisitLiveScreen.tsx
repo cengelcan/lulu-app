@@ -12,9 +12,13 @@ import { Spacing, Typography } from '@/constants/theme';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { trackVetVisitEvent } from '@/services/analytics/vet-visit';
 import * as vetVisitStorage from '@/storage/vet-visit.storage';
+import { usePetStore } from '@/stores/pet.store';
+import { useUserStore } from '@/stores/user.store';
 import { useVetVisitStore } from '@/stores/vet-visit.store';
 import type { VetVisitBundle, VetVisitQuestion } from '@/types/vet-visit';
+import { canWriteVetVisit } from '@/utils/pet-access';
 import { startVetVisit } from '@/utils/vet-visit';
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -24,6 +28,8 @@ export function VetVisitLiveScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const saveVisit = useVetVisitStore((state) => state.saveVisit);
+  const pet = usePetStore((state) => state.pet);
+  const userId = useUserStore((state) => state.userId);
   const [bundle, setBundle] = useState<VetVisitBundle | null>(null);
   const [questions, setQuestions] = useState<VetVisitQuestion[]>([]);
   const [generalNotes, setGeneralNotes] = useState('');
@@ -32,6 +38,7 @@ export function VetVisitLiveScreen() {
   const secondary = useThemeColor({}, 'textSecondary');
   const accent = useThemeColor({}, 'accent');
   const screenOptions = useHubStackScreenOptions(t('vetVisits.liveTitle'), '/vet-visits' as Href);
+  const isReadOnly = Boolean(bundle && pet && !canWriteVetVisit(pet, bundle.visit, userId));
 
   useEffect(() => {
     if (!id) return;
@@ -39,10 +46,14 @@ export function VetVisitLiveScreen() {
     void (async () => {
       const stored = await vetVisitStorage.getVetVisitBundle(id);
       if (!stored || cancelled) return;
-      const active = stored.visit.status === 'planned'
+      const canWrite = pet ? canWriteVetVisit(pet, stored.visit, userId) : false;
+      const active = stored.visit.status === 'planned' && canWrite
         ? startVetVisit(stored, new Date().toISOString())
         : stored;
-      if (active !== stored) await saveVisit(active);
+      if (active !== stored) {
+        await saveVisit(active);
+        void trackVetVisitEvent('visit_started', 'live');
+      }
       if (cancelled) return;
       setBundle(active);
       setQuestions(active.questions);
@@ -51,10 +62,10 @@ export function VetVisitLiveScreen() {
       setSaveState('saved');
     })();
     return () => { cancelled = true; };
-  }, [id, saveVisit]);
+  }, [id, pet, saveVisit, userId]);
 
   useEffect(() => {
-    if (!bundle || !hasLoaded.current) return;
+    if (!bundle || !hasLoaded.current || isReadOnly) return;
     setSaveState('saving');
     const timer = setTimeout(() => {
       const updatedAt = new Date().toISOString();
@@ -65,7 +76,7 @@ export function VetVisitLiveScreen() {
       }).then(() => setSaveState('saved')).catch(() => setSaveState('error'));
     }, 600);
     return () => clearTimeout(timer);
-  }, [bundle, generalNotes, questions, saveVisit]);
+  }, [bundle, generalNotes, isReadOnly, questions, saveVisit]);
 
   const updateQuestion = (idToUpdate: string, patch: Partial<VetVisitQuestion>) => {
     setQuestions((current) => current.map((question) =>
@@ -74,7 +85,7 @@ export function VetVisitLiveScreen() {
   };
 
   const handleFinish = async () => {
-    if (!bundle) return;
+    if (!bundle || isReadOnly) return;
     const updatedAt = new Date().toISOString();
     setSaveState('saving');
     try {
@@ -93,8 +104,8 @@ export function VetVisitLiveScreen() {
     <>
       <Stack.Screen options={screenOptions} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}
-        footer={<Button title={t('vetVisits.finishVisit')} disabled={!bundle || saveState === 'saving'}
-          onPress={() => void handleFinish()} />}>
+        footer={isReadOnly ? undefined : <Button title={t('vetVisits.finishVisit')}
+          disabled={!bundle || saveState === 'saving'} onPress={() => void handleFinish()} />}>
         <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.body}>
           {t('vetVisits.liveDescription')}
         </ThemedText>
@@ -114,22 +125,27 @@ export function VetVisitLiveScreen() {
                       {question.text}
                     </ThemedText>
                     <Switch accessibilityLabel={`${question.text}. ${t('vetVisits.answered')}`}
+                      disabled={isReadOnly}
                       value={question.isAnswered}
                       onValueChange={(isAnswered) => updateQuestion(question.id, { isAnswered })} />
                   </View>
                   <RecordTextField label={t('vetVisits.answerNote')} value={question.answer ?? ''}
                     onChangeText={(answer) => updateQuestion(question.id, { answer: answer || null })}
-                    placeholder={t('vetVisits.answerPlaceholder')} multiline maxLength={500} optional />
+                    placeholder={t('vetVisits.answerPlaceholder')} multiline maxLength={500} optional
+                    editable={!isReadOnly} />
                 </View>
               ))}
             </GroupedSection>
             <GroupedSection title={t('vetVisits.quickNotes')} cardStyle={styles.formCard}>
               <RecordTextField label={t('vetVisits.quickNotes')} value={generalNotes}
                 onChangeText={setGeneralNotes} placeholder={t('vetVisits.quickNotesPlaceholder')}
-                multiline maxLength={1500} optional />
+                multiline maxLength={1500} optional editable={!isReadOnly} />
             </GroupedSection>
           </>
         )}
+        {isReadOnly ? <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.body}>
+          {t('vetVisits.sharedVisitReadOnly')}
+        </ThemedText> : null}
         <ThemedText accessibilityLiveRegion="polite"
           lightColor={saveState === 'error' ? undefined : saveState === 'saved' ? accent : secondary}
           darkColor={saveState === 'error' ? undefined : saveState === 'saved' ? accent : secondary}

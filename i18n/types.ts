@@ -113,10 +113,22 @@ export type Translations = {
     nextVisit: string;
     addNextVisit: string;
     completeVisit: string;
+    saveOutcome: string;
     completeFailed: string;
     summaryRequired: string;
     pastTitle: string;
     inProgress: string;
+    followUpActions: string;
+    followUpDescription: string;
+    createReminder: string;
+    openReminder: string;
+    followUpReminderTitle: string;
+    createMedicationPlan: string;
+    openMedicationPlan: string;
+    chooseExistingMedicationPlan: string;
+    chooseMedicationPlanDescription: string;
+    followUpLinkFailed: string;
+    sharedVisitReadOnly: string;
   };
   familyActivity: {
     title: string;
@@ -1105,6 +1117,8 @@ export type Translations = {
     legalRenewal: string;
     advancedReportsTitle: string;
     advancedReportsDescription: string;
+    vetVisitWorkspaceTitle: string;
+    vetVisitWorkspaceDescription: string;
     longerHistoryTitle: string;
     longerHistoryDescription: string;
     multiplePetsTitle: string;

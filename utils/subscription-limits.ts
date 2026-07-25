@@ -1,13 +1,15 @@
 import {
-  FREE_ACTIVE_PET_LIMIT,
-  FREE_RECORDS_PER_MONTH,
-  FREE_REMINDERS_PER_MONTH,
-  PLUS_ACTIVE_PET_CAP,
-  PLUS_DEV_BYPASS,
   type PlusFeature,
 } from '@/constants/subscription';
 import { getDatabase } from '@/storage/database';
 import type { Pet } from '@/types/pet';
+import {
+  evaluatePlusFeature,
+  isPlusEntitled,
+  type PlusFeatureContext,
+} from '@/utils/subscription-feature-evaluation';
+
+export { evaluatePlusFeature, isPlusEntitled, type PlusFeatureContext };
 
 export function getCalendarMonthBoundsIso(referenceDate = new Date()): {
   start: string;
@@ -58,39 +60,6 @@ export async function countOwnedRemindersCreatedThisMonth(): Promise<number> {
   );
 
   return row?.count ?? 0;
-}
-
-export function isPlusEntitled(isPlusActive: boolean): boolean {
-  return isPlusActive || PLUS_DEV_BYPASS;
-}
-
-export type PlusFeatureContext = {
-  isPlusActive: boolean;
-  ownedActivePetCount: number;
-  recordsThisMonth: number;
-  remindersThisMonth: number;
-};
-
-export function evaluatePlusFeature(feature: PlusFeature, context: PlusFeatureContext): boolean {
-  const plus = isPlusEntitled(context.isPlusActive);
-
-  switch (feature) {
-    case 'multiplePets':
-      if (plus) {
-        return context.ownedActivePetCount < PLUS_ACTIVE_PET_CAP;
-      }
-      return context.ownedActivePetCount < FREE_ACTIVE_PET_LIMIT;
-    case 'familySharing':
-    case 'pdfExport':
-    case 'medicationInventory':
-      return plus;
-    case 'unlimitedRecords':
-      return plus || context.recordsThisMonth < FREE_RECORDS_PER_MONTH;
-    case 'unlimitedReminders':
-      return plus || context.remindersThisMonth < FREE_REMINDERS_PER_MONTH;
-    default:
-      return plus;
-  }
 }
 
 export async function buildPlusFeatureContext(

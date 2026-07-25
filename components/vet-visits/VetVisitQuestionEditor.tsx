@@ -15,10 +15,11 @@ type Props = {
   onMoveUp: () => void;
   onMoveDown: () => void;
   onRemove: () => void;
+  disabled?: boolean;
 };
 
 export function VetVisitQuestionEditor({
-  index, value, canMoveUp, canMoveDown, onChange, onMoveUp, onMoveDown, onRemove,
+  index, value, canMoveUp, canMoveDown, onChange, onMoveUp, onMoveDown, onRemove, disabled = false,
 }: Props) {
   const { t } = useTranslation();
   const borderColor = useThemeColor({}, 'border');
@@ -46,11 +47,12 @@ export function VetVisitQuestionEditor({
         placeholder={t('vetVisits.questionPlaceholder')}
         multiline
         maxLength={300}
+        editable={!disabled}
       />
       <View style={styles.actions}>
-        {action(t('vetVisits.moveUp'), 'arrow.up', onMoveUp, !canMoveUp)}
-        {action(t('vetVisits.moveDown'), 'arrow.down', onMoveDown, !canMoveDown)}
-        {action(t('vetVisits.removeQuestion'), 'xmark', onRemove)}
+        {action(t('vetVisits.moveUp'), 'arrow.up', onMoveUp, disabled || !canMoveUp)}
+        {action(t('vetVisits.moveDown'), 'arrow.down', onMoveDown, disabled || !canMoveDown)}
+        {action(t('vetVisits.removeQuestion'), 'xmark', onRemove, disabled)}
       </View>
     </View>
   );

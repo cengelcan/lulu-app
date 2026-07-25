@@ -12,14 +12,19 @@ import { Spacing, Typography } from '@/constants/theme';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { linkFollowUpToVetVisit } from '@/services/vet-visits/link-follow-up';
 import { useMedicationStore } from '@/stores/medication.store';
 import { usePetStore } from '@/stores/pet.store';
 import { formatLocalDate } from '@/utils/date';
 
 export function MedicationPlansScreen() {
   const router = useRouter();
-  const { doseId: rawDoseId } = useLocalSearchParams<{ doseId?: string | string[] }>();
+  const { doseId: rawDoseId, sourceVisitId: rawSourceVisitId } = useLocalSearchParams<{
+    doseId?: string | string[];
+    sourceVisitId?: string | string[];
+  }>();
   const doseId = Array.isArray(rawDoseId) ? rawDoseId[0] : rawDoseId;
+  const sourceVisitId = Array.isArray(rawSourceVisitId) ? rawSourceVisitId[0] : rawSourceVisitId;
   const { t } = useTranslation();
   const pet = usePetStore((state) => state.pet);
   const loadPet = usePetStore((state) => state.loadPet);
@@ -32,6 +37,7 @@ export function MedicationPlansScreen() {
   const skipDose = useMedicationStore((state) => state.skipDose);
   const snoozeDose = useMedicationStore((state) => state.snoozeDose);
   const [busyDoseId, setBusyDoseId] = useState<string | null>(null);
+  const [selectingPlanId, setSelectingPlanId] = useState<string | null>(null);
   const [doseError, setDoseError] = useState<string | null>(null);
   const [referenceNow] = useState(() => Date.now());
   const secondary = useThemeColor({}, 'textSecondary');
@@ -58,30 +64,49 @@ export function MedicationPlansScreen() {
     finally { setBusyDoseId(null); }
   };
 
+  const handlePlanPress = async (planId: string) => {
+    if (!sourceVisitId) {
+      router.push(`/medications/${planId}` as Href);
+      return;
+    }
+    setSelectingPlanId(planId); setDoseError(null);
+    try {
+      await linkFollowUpToVetVisit(sourceVisitId, 'medication', planId);
+      router.replace(`/vet-visits/outcome/${sourceVisitId}` as Href);
+    } catch {
+      setDoseError(t('vetVisits.followUpLinkFailed'));
+    } finally {
+      setSelectingPlanId(null);
+    }
+  };
+
   return (
     <>
       <Stack.Screen options={screenOptions} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={{ gap: Spacing.lg }}>
         <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.body}>
-          {t('medications.description')}
+          {sourceVisitId ? t('vetVisits.chooseMedicationPlanDescription') : t('medications.description')}
         </ThemedText>
-        <Button title={t('medications.addPlan')} onPress={() => router.push('/medications/new' as Href)} />
-        {doses.length > 0 ? (
-          <GroupedSection title={t('medications.todayDoses')} cardStyle={{ gap: Spacing.xs }}>
-            {doses.map((dose) => {
-              const plan = planById.get(dose.planId);
-              return plan ? <MedicationDoseRow key={dose.id} dose={dose} plan={plan} referenceNow={referenceNow}
-                highlighted={dose.id === doseId} busy={busyDoseId === dose.id}
-                onTake={() => void runDoseAction(dose.id, takeDose)}
-                onSkip={() => void runDoseAction(dose.id, skipDose)}
-                onSnooze={() => void runDoseAction(dose.id, snoozeDose)} /> : null;
-            })}
-          </GroupedSection>
-        ) : !isLoading && active.length > 0 ? (
-          <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.caption}>
-            {t('medications.emptyDoses')}
-          </ThemedText>
-        ) : null}
+        <Button title={t('medications.addPlan')} onPress={() => router.push({
+          pathname: '/medications/[id]',
+          params: sourceVisitId ? { id: 'new', sourceVisitId } : { id: 'new' },
+        })} />
+        {!sourceVisitId ? (doses.length > 0 ? (
+            <GroupedSection title={t('medications.todayDoses')} cardStyle={{ gap: Spacing.xs }}>
+              {doses.map((dose) => {
+                const plan = planById.get(dose.planId);
+                return plan ? <MedicationDoseRow key={dose.id} dose={dose} plan={plan} referenceNow={referenceNow}
+                  highlighted={dose.id === doseId} busy={busyDoseId === dose.id}
+                  onTake={() => void runDoseAction(dose.id, takeDose)}
+                  onSkip={() => void runDoseAction(dose.id, skipDose)}
+                  onSnooze={() => void runDoseAction(dose.id, snoozeDose)} /> : null;
+              })}
+            </GroupedSection>
+          ) : !isLoading && active.length > 0 ? (
+            <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.caption}>
+              {t('medications.emptyDoses')}
+            </ThemedText>
+          ) : null) : null}
         {doseError ? <ThemedText accessibilityRole="alert" selectable>{doseError}</ThemedText> : null}
         {isLoading && bundles.length === 0 ? (
           <ContentState kind="loading" accessibilityLabel={t('common.loading')} />
@@ -91,13 +116,15 @@ export function MedicationPlansScreen() {
         ) : (
           <GroupedSection title={t('medications.active')}>
             {active.map(({ plan, inventory }, index) => <MedicationPlanRow key={plan.id} plan={plan} inventory={inventory}
-              isLast={index === active.length - 1} onPress={() => router.push(`/medications/${plan.id}` as Href)} />)}
+              isLast={index === active.length - 1}
+              onPress={() => { if (!selectingPlanId) void handlePlanPress(plan.id); }} />)}
           </GroupedSection>
         )}
         {past.length > 0 ? (
           <GroupedSection title={t('medications.past')}>
             {past.map(({ plan, inventory }, index) => <MedicationPlanRow key={plan.id} plan={plan} inventory={inventory}
-              isLast={index === past.length - 1} onPress={() => router.push(`/medications/${plan.id}` as Href)} />)}
+              isLast={index === past.length - 1}
+              onPress={() => { if (!selectingPlanId) void handlePlanPress(plan.id); }} />)}
           </GroupedSection>
         ) : null}
       </ScreenContainer>

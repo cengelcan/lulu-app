@@ -83,6 +83,7 @@ export function FamilyActivityScreen() {
       pets,
       checkIns: [],
       reminders: [],
+      vetVisits: [],
       permission: null,
       dismissedIds: new Set(),
       referenceDate: new Date(),

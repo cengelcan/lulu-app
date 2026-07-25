@@ -3,6 +3,7 @@ export type VetVisitStatus = 'planned' | 'in_progress' | 'completed' | 'cancelle
 export type VetVisit = {
   id: string;
   petId: string;
+  createdByUserId: string | null;
   scheduledAt: string;
   providerId: string | null;
   providerName: string | null;
@@ -22,6 +23,8 @@ export type VetVisitOutcome = {
   userEnteredSummary: string;
   treatmentNotes: string | null;
   nextVisitAt: string | null;
+  followUpReminderId: string | null;
+  medicationPlanId: string | null;
   createdAt: string;
   updatedAt: string;
 };

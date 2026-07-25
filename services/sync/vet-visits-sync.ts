@@ -12,7 +12,8 @@ type RemoteVisitRow = {
 };
 type RemoteOutcomeRow = {
   visit_id: string; user_entered_summary: string; treatment_notes: string | null;
-  next_visit_at: string | null; created_at: string; updated_at: string;
+  next_visit_at: string | null; follow_up_reminder_id: string | null;
+  medication_plan_id: string | null; created_at: string; updated_at: string;
 };
 type RemoteQuestionRow = {
   id: string; visit_id: string; text: string; answer: string | null; is_answered: boolean;
@@ -22,7 +23,8 @@ type RemoteQuestionRow = {
 function toVisitRow(bundle: VetVisitBundle, userId: string): Record<string, unknown> {
   const visit = bundle.visit;
   return {
-    id: visit.id, user_id: userId, pet_id: visit.petId, scheduled_at: visit.scheduledAt,
+    id: visit.id, user_id: visit.createdByUserId ?? userId, pet_id: visit.petId,
+    scheduled_at: visit.scheduledAt,
     provider_id: visit.providerId, provider_name: visit.providerName, reason: visit.reason,
     general_notes: visit.generalNotes,
     status: visit.status, health_report_start_date: visit.healthReportStartDate,
@@ -35,6 +37,8 @@ function toOutcomeRow(outcome: VetVisitOutcome): Record<string, unknown> {
   return {
     visit_id: outcome.visitId, user_entered_summary: outcome.userEnteredSummary,
     treatment_notes: outcome.treatmentNotes, next_visit_at: outcome.nextVisitAt,
+    follow_up_reminder_id: outcome.followUpReminderId,
+    medication_plan_id: outcome.medicationPlanId,
     created_at: outcome.createdAt, updated_at: outcome.updatedAt,
   };
 }
@@ -55,7 +59,7 @@ function fromRows(
   const outcome = outcomes.find((item) => item.visit_id === row.id);
   return {
     visit: {
-      id: row.id, petId: row.pet_id, scheduledAt: row.scheduled_at,
+      id: row.id, petId: row.pet_id, createdByUserId: row.user_id, scheduledAt: row.scheduled_at,
       providerId: row.provider_id, providerName: row.provider_name, reason: row.reason,
       generalNotes: row.general_notes,
       status: row.status as VetVisitStatus,
@@ -74,6 +78,8 @@ function fromRows(
     outcome: outcome ? {
       visitId: outcome.visit_id, userEnteredSummary: outcome.user_entered_summary,
       treatmentNotes: outcome.treatment_notes, nextVisitAt: outcome.next_visit_at,
+      followUpReminderId: outcome.follow_up_reminder_id,
+      medicationPlanId: outcome.medication_plan_id,
       createdAt: outcome.created_at, updatedAt: outcome.updated_at,
     } : null,
   };

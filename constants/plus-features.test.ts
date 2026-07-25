@@ -5,6 +5,7 @@ import { LULU_PLUS_BENEFITS } from '@/constants/plus-benefits';
 import { de } from '@/i18n/de';
 import { en } from '@/i18n/en';
 import { tr } from '@/i18n/tr';
+import { evaluatePlusFeature } from '@/utils/subscription-feature-evaluation';
 
 describe('LULU_PLUS_BENEFITS', () => {
   it('lists only currently enforced Plus benefits', () => {
@@ -13,6 +14,7 @@ describe('LULU_PLUS_BENEFITS', () => {
       [
         'paywall.smartRemindersTitle',
         'paywall.advancedReportsTitle',
+        'paywall.vetVisitWorkspaceTitle',
         'paywall.familySharingTitle',
         'paywall.longerHistoryTitle',
         'paywall.multiplePetsTitle',
@@ -25,5 +27,11 @@ describe('LULU_PLUS_BENEFITS', () => {
       assert.match(catalog.paywall.multiplePetsDescription, /10/);
       assert.match(catalog.paywall.plusPetLimit, /10/);
     }
+  });
+
+  it('gates new Vet Visit workspaces to Plus', () => {
+    const base = { ownedActivePetCount: 1, recordsThisMonth: 0, remindersThisMonth: 0 };
+    assert.equal(evaluatePlusFeature('vetVisitWorkspace', { ...base, isPlusActive: false }), false);
+    assert.equal(evaluatePlusFeature('vetVisitWorkspace', { ...base, isPlusActive: true }), true);
   });
 });

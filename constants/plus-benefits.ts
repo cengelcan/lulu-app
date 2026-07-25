@@ -8,6 +8,10 @@ export const LULU_PLUS_BENEFITS = [
     descriptionKey: 'paywall.advancedReportsDescription',
   },
   {
+    titleKey: 'paywall.vetVisitWorkspaceTitle',
+    descriptionKey: 'paywall.vetVisitWorkspaceDescription',
+  },
+  {
     titleKey: 'paywall.familySharingTitle',
     descriptionKey: 'paywall.familySharingDescription',
   },

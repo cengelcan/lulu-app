@@ -4,7 +4,7 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | Faz 1–2 uygulandı; Faz 3 bekliyor |
+| Durum | Faz 1–3 uygulandı; yayın öncesi manuel QA bekliyor |
 | Öncelik | P0 |
 | Hedef sürüm | v1.4 |
 | Task türü | Plus / Sağlık / Bakım iş akışı |
@@ -80,8 +80,8 @@ aksiyonlarını unutmamak zorunda. Lulu bu süreci bugün uçtan uca bağlamıyo
 - [x] Kullanıcı tarafından girilen görüşme sonucu ve notlar.
 - [x] Tedavi/ilaç değişikliği notu.
 - [x] Sonraki kontrol tarihi.
-- [ ] Tek dokunuşla reminder oluşturma.
-- [ ] Tek dokunuşla medication plan oluşturma veya mevcut planı açma.
+- [x] Tek dokunuşla reminder oluşturma.
+- [x] Tek dokunuşla medication plan oluşturma veya mevcut planı açma.
 - [x] Tamamlanan görüşmenin pet timeline'ında gösterilmesi.
 
 ### Kapsam dışı
@@ -137,19 +137,19 @@ Uygulama kodundan önce kesinleştirilecek başlangıç sözleşmesi:
 
 ### Faz 3 — Follow-up otomasyonu
 
-- [ ] Reminder oluşturma.
-- [ ] Medication plan oluşturma/güncelleme.
-- [ ] Analytics, Plus gating ve aile rolü politikası.
+- [x] Reminder oluşturma.
+- [x] Medication plan oluşturma/güncelleme.
+- [x] Analytics, Plus gating ve aile rolü politikası.
 
 ## Kabul kriterleri
 
-- [ ] Uygulamada “Visit highlights” veya ikinci Vet Visit raporu bulunmuyor.
-- [ ] Kullanıcı sağlık verisi türlerini Vet Visit içinde yeniden seçmiyor.
-- [ ] Kullanıcı yaklaşan görüşmeyi Care Hub'da görebiliyor.
-- [ ] Sorular görüşme sırasında tamamlanıp yanıt/not alabiliyor.
-- [ ] Sonuçtan reminder ve medication aksiyonları oluşturulabiliyor.
-- [ ] Ana aşama aksiyonu küçük ekran ve uzun içerikte erişilebilir kalıyor.
-- [ ] Shared member yalnız rolünün izin verdiği görüşmeleri görebiliyor.
+- [x] Uygulamada “Visit highlights” veya ikinci Vet Visit raporu bulunmuyor.
+- [x] Kullanıcı sağlık verisi türlerini Vet Visit içinde yeniden seçmiyor.
+- [x] Kullanıcı yaklaşan görüşmeyi Care Hub'da görebiliyor.
+- [x] Sorular görüşme sırasında tamamlanıp yanıt/not alabiliyor.
+- [x] Sonuçtan reminder ve medication aksiyonları oluşturulabiliyor.
+- [x] Ana aşama aksiyonu küçük ekran ve uzun içerikte erişilebilir kalıyor.
+- [x] Shared member yalnız rolünün izin verdiği görüşmeleri görebiliyor.
 - [ ] EN/DE/TR, offline taslak, büyük metin ve VoiceOver/TalkBack doğrulanıyor.
 
 ## Başarı ölçütleri
@@ -161,8 +161,8 @@ Uygulama kodundan önce kesinleştirilecek başlangıç sözleşmesi:
 
 ## Açık sorular
 
-- [ ] Free kullanıcı kaç aktif/tamamlanmış görüşme saklayabilecek?
-- [ ] Aile rollerinde kim düzenleyebilir, kim yalnız görüntüleyebilir?
+- [x] Free kullanıcı kaç aktif/tamamlanmış görüşme saklayabilecek? — Yeni Workspace oluşturma Plus'tır; abonelik sona erse de mevcut görüşmeler okunabilir.
+- [x] Aile rollerinde kim düzenleyebilir, kim yalnız görüntüleyebilir? — Owner tüm görüşmeleri, member yalnız kendi oluşturduklarını düzenler; erişilebilir diğer görüşmeler salt okunurdur.
 
 ### Çözülen teknik kararlar
 
@@ -172,6 +172,10 @@ Uygulama kodundan önce kesinleştirilecek başlangıç sözleşmesi:
   tutulur ve bugün serbest metin `provider_name` kullanılır.
 - Sağlık Raporu snapshot olarak çoğaltılmaz; görüşmede tarih aralığı referansı
   tutulur ve mevcut rapor akışı bu aralıkla açılır.
+- Follow-up reminder ve medication plan kimlikleri outcome üzerinde tutulur;
+  içerik kopyalanmaz ve silinen hedef referansı `null` olur.
+- Analytics yalnız event adı, giriş yüzeyi ve follow-up türünü taşır; pet/visit
+  kimliği, klinik adı, soru, yanıt veya sağlık metni göndermez.
 
 ## Test planı
 

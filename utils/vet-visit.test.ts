@@ -7,6 +7,7 @@ import {
   getUpcomingVetVisit,
   getVetVisitPreparationProgress,
   completeVetVisit,
+  linkVetVisitFollowUp,
   startVetVisit,
   splitVetVisitDateTime,
 } from '@/utils/vet-visit';
@@ -14,7 +15,8 @@ import {
 function bundle(id: string, scheduledAt: string, reason = 'Routine exam'): VetVisitBundle {
   return {
     visit: {
-      id, petId: 'pet-1', scheduledAt, providerId: null, providerName: null, reason, generalNotes: null,
+      id, petId: 'pet-1', createdByUserId: 'user-1', scheduledAt,
+      providerId: null, providerName: null, reason, generalNotes: null,
       status: 'planned', healthReportStartDate: null, healthReportEndDate: null,
       startedAt: null, completedAt: null, createdAt: scheduledAt, updatedAt: scheduledAt,
     },
@@ -40,7 +42,8 @@ test('moves a visit through in-progress and completed states', () => {
 
   const outcome = {
     visitId: 'visit', userEnteredSummary: 'Routine exam completed', treatmentNotes: null,
-    nextVisitAt: null, createdAt: '2026-08-02T10:30:00.000Z', updatedAt: '2026-08-02T10:30:00.000Z',
+    nextVisitAt: null, followUpReminderId: null, medicationPlanId: null,
+    createdAt: '2026-08-02T10:30:00.000Z', updatedAt: '2026-08-02T10:30:00.000Z',
   };
   const completed = completeVetVisit(started, outcome, '2026-08-02T10:30:00.000Z');
   assert.equal(completed.visit.status, 'completed');
@@ -77,4 +80,20 @@ test('preparation progress requires schedule, reason, and a question', () => {
     isAnswered: false, sortOrder: 0, createdAt: visit.visit.createdAt, updatedAt: visit.visit.updatedAt,
   }];
   assert.deepEqual(getVetVisitPreparationProgress(visit), { completed: 3, total: 3 });
+});
+
+test('links reminder and medication follow-ups without replacing the other action', () => {
+  const completed = completeVetVisit(bundle('visit', '2026-08-02T10:00:00.000Z'), {
+    visitId: 'visit', userEnteredSummary: 'Follow-up needed', treatmentNotes: null,
+    nextVisitAt: null, followUpReminderId: null, medicationPlanId: null,
+    createdAt: '2026-08-02T10:30:00.000Z', updatedAt: '2026-08-02T10:30:00.000Z',
+  }, '2026-08-02T10:30:00.000Z');
+  const withReminder = linkVetVisitFollowUp(
+    completed, 'reminder', 'reminder-1', '2026-08-02T10:31:00.000Z'
+  );
+  const withMedication = linkVetVisitFollowUp(
+    withReminder, 'medication', 'plan-1', '2026-08-02T10:32:00.000Z'
+  );
+  assert.equal(withMedication.outcome?.followUpReminderId, 'reminder-1');
+  assert.equal(withMedication.outcome?.medicationPlanId, 'plan-1');
 });

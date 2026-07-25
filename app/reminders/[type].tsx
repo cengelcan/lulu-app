@@ -41,6 +41,9 @@ import { resolveReminderTypeId } from '@/utils/pet-reminder-normalize';
 import { validatePetReminderForm } from '@/utils/pet-reminder-validation';
 import { canUsePlusFeature } from '@/utils/subscription-limits';
 import { canWritePetCareData } from '@/utils/pet-access';
+import { linkFollowUpToVetVisit } from '@/services/vet-visits/link-follow-up';
+import * as vetVisitStorage from '@/storage/vet-visit.storage';
+import { splitVetVisitDateTime } from '@/utils/vet-visit';
 
 function createReminderId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -58,16 +61,21 @@ function normalizeOptionalText(value: string): string | null {
 export default function ReminderFormScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { type: typeParam, id: idParam, fromNotification: fromNotificationParam } =
+  const { type: typeParam, id: idParam, fromNotification: fromNotificationParam,
+    sourceVisitId: sourceVisitIdParam } =
     useLocalSearchParams<{
       type?: string;
       id?: string | string[];
       fromNotification?: string | string[];
+      sourceVisitId?: string | string[];
     }>();
 
   const rawType = Array.isArray(typeParam) ? typeParam[0] : typeParam;
   const reminderType = rawType ? resolveReminderTypeId(rawType) : null;
   const reminderId = Array.isArray(idParam) ? idParam[0] : idParam;
+  const sourceVisitId = Array.isArray(sourceVisitIdParam)
+    ? sourceVisitIdParam[0]
+    : sourceVisitIdParam;
   const rawFromNotificationParam = Array.isArray(fromNotificationParam)
     ? fromNotificationParam[0]
     : fromNotificationParam;
@@ -203,6 +211,26 @@ export default function ReminderFormScreen() {
     };
   }, [reminderId, reminderType, router]);
 
+  useEffect(() => {
+    if (!sourceVisitId || reminderId || reminderType !== 'vet_visit') return;
+    let cancelled = false;
+    void vetVisitStorage.getVetVisitBundle(sourceVisitId).then((bundle) => {
+      if (!bundle || cancelled) return;
+      const nextVisit = bundle.outcome?.nextVisitAt
+        ? splitVetVisitDateTime(bundle.outcome.nextVisitAt)
+        : null;
+      if (nextVisit) {
+        setDueDate(nextVisit.date);
+        setDueTime(nextVisit.time);
+      }
+      setMetadata({
+        title: t('vetVisits.followUpReminderTitle'),
+        clinicName: bundle.visit.providerName,
+      });
+    });
+    return () => { cancelled = true; };
+  }, [reminderId, reminderType, sourceVisitId, t]);
+
   const handleSave = useCallback(async () => {
     if (!reminderType || !pet?.id || isReadOnly || isCompleted) {
       return;
@@ -266,6 +294,9 @@ export default function ReminderFormScreen() {
         } as PetReminder;
 
         await createReminder(newReminder);
+        if (sourceVisitId) {
+          await linkFollowUpToVetVisit(sourceVisitId, 'reminder', newReminder.id);
+        }
       }
 
       leaveForm();
@@ -291,6 +322,7 @@ export default function ReminderFormScreen() {
     recurrence,
     reminderType,
     requestAccess,
+    sourceVisitId,
     t,
     updateReminder,
   ]);

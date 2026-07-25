@@ -14,6 +14,7 @@ type RecordTextFieldProps = {
   multiline?: boolean;
   keyboardType?: KeyboardTypeOptions;
   maxLength?: number;
+  editable?: boolean;
 };
 
 export function RecordTextField({
@@ -25,6 +26,7 @@ export function RecordTextField({
   multiline = false,
   keyboardType = 'default',
   maxLength,
+  editable = true,
 }: RecordTextFieldProps) {
   const { t } = useTranslation();
   const textColor = useThemeColor({}, 'text');
@@ -49,6 +51,7 @@ export function RecordTextField({
         accessibilityLabel={label}
         keyboardType={keyboardType}
         maxLength={maxLength}
+        editable={editable}
         multiline={multiline}
         placeholder={placeholder}
         placeholderTextColor={textSecondaryColor}

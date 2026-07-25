@@ -95,3 +95,23 @@ export function completeVetVisit(
     outcome,
   };
 }
+
+export function linkVetVisitFollowUp(
+  bundle: VetVisitBundle,
+  kind: 'reminder' | 'medication',
+  entityId: string,
+  updatedAt: string
+): VetVisitBundle {
+  if (!bundle.outcome) return bundle;
+
+  return {
+    ...bundle,
+    visit: { ...bundle.visit, updatedAt },
+    outcome: {
+      ...bundle.outcome,
+      followUpReminderId: kind === 'reminder' ? entityId : bundle.outcome.followUpReminderId,
+      medicationPlanId: kind === 'medication' ? entityId : bundle.outcome.medicationPlanId,
+      updatedAt,
+    },
+  };
+}

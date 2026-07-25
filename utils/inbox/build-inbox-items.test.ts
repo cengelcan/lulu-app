@@ -174,7 +174,8 @@ describe('buildInboxItems', () => {
       ],
       vetVisits: [{
         visit: {
-          id: 'visit-1', petId: 'pet-1', scheduledAt: '2026-06-22T10:00:00.000Z',
+          id: 'visit-1', petId: 'pet-1', createdByUserId: 'user-1',
+          scheduledAt: '2026-06-22T10:00:00.000Z',
           providerId: null, providerName: 'Lulu Vet', reason: 'Routine exam', generalNotes: null,
           status: 'completed', healthReportStartDate: null, healthReportEndDate: null,
           startedAt: '2026-06-22T10:00:00.000Z', completedAt: '2026-06-22T10:30:00.000Z',

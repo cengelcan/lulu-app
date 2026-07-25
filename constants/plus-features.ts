@@ -21,6 +21,10 @@ const PLUS_FEATURE_VISUALS: Record<PlusBenefitTitleKey, PlusFeatureVisual> = {
     icon: 'doc.text.fill',
     iconColor: Palette.brandAccent,
   },
+  'paywall.vetVisitWorkspaceTitle': {
+    icon: 'calendar.badge.checkmark',
+    iconColor: Palette.badgeEmerald,
+  },
   'paywall.familySharingTitle': {
     icon: 'person.2.fill',
     iconColor: Palette.badgePink,

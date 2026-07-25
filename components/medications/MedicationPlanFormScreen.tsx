@@ -14,7 +14,9 @@ import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
 import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { linkFollowUpToVetVisit } from '@/services/vet-visits/link-follow-up';
 import * as medicationStorage from '@/storage/medication.storage';
+import * as vetVisitStorage from '@/storage/vet-visit.storage';
 import { useMedicationStore } from '@/stores/medication.store';
 import { usePetStore } from '@/stores/pet.store';
 import type { MedicationPlanBundle } from '@/types/medication';
@@ -26,7 +28,7 @@ function createId(): string {
 }
 
 export function MedicationPlanFormScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, sourceVisitId } = useLocalSearchParams<{ id: string; sourceVisitId?: string }>();
   const router = useRouter();
   const { t } = useTranslation();
   const pet = usePetStore((state) => state.pet);
@@ -69,6 +71,17 @@ export function MedicationPlanFormScreen() {
     return () => { cancelled = true; };
   }, [id, isNew]);
 
+  useEffect(() => {
+    if (!isNew || !sourceVisitId) return;
+    let cancelled = false;
+    void vetVisitStorage.getVetVisitBundle(sourceVisitId).then((bundle) => {
+      if (!bundle || cancelled) return;
+      setInstructions(bundle.outcome?.treatmentNotes ?? '');
+      setStartsOn(formatLocalDate(new Date(bundle.visit.completedAt ?? Date.now())));
+    });
+    return () => { cancelled = true; };
+  }, [isNew, sourceVisitId]);
+
   const validationError = useMemo(() => {
     if (!name.trim()) return t('medications.validation.nameRequired');
     if (!dosage.trim()) return t('medications.validation.dosageRequired');
@@ -107,7 +120,12 @@ export function MedicationPlanFormScreen() {
           updatedAt: now,
         } : existing?.inventory ?? null,
       });
-      router.replace('/medications' as Href);
+      if (sourceVisitId) {
+        await linkFollowUpToVetVisit(sourceVisitId, 'medication', planId);
+        router.replace(`/vet-visits/outcome/${sourceVisitId}` as Href);
+      } else {
+        router.replace('/medications' as Href);
+      }
     } catch { setError(t('medications.saveFailed')); }
     finally { setSaving(false); }
   };

@@ -15,6 +15,7 @@ import { Spacing, Typography } from '@/constants/theme';
 import { useInbox } from '@/hooks/use-inbox';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { trackVetVisitEvent } from '@/services/analytics/vet-visit';
 import { usePetStore } from '@/stores/pet.store';
 import { useVetVisitStore } from '@/stores/vet-visit.store';
 import type { InboxItem } from '@/types/inbox';
@@ -94,9 +95,12 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
             </ThemedText>
             <Button title={upcomingVetVisit.visit.status === 'in_progress'
               ? t('vetVisits.continueVisit') : t('common.edit')} variant="secondary"
-              onPress={() => router.push((upcomingVetVisit.visit.status === 'in_progress'
-                ? `/vet-visits/live/${upcomingVetVisit.visit.id}`
-                : `/vet-visits/${upcomingVetVisit.visit.id}`) as Href)} />
+              onPress={() => {
+                void trackVetVisitEvent('workspace_opened', 'care');
+                router.push((upcomingVetVisit.visit.status === 'in_progress'
+                  ? `/vet-visits/live/${upcomingVetVisit.visit.id}`
+                  : `/vet-visits/${upcomingVetVisit.visit.id}`) as Href);
+              }} />
           </Card>
         </View>
       ) : null}
@@ -132,7 +136,10 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
             title={t('vetVisits.prepare')}
             description={t('vetVisits.prepareDescription')}
             icon="calendar.badge.checkmark"
-            onPress={() => router.push('/vet-visits' as Href)}
+            onPress={() => {
+              void trackVetVisitEvent('workspace_opened', 'care');
+              router.push('/vet-visits' as Href);
+            }}
           />
           <CareShortcutRow
             title={t('care.records')}

@@ -7,11 +7,21 @@ export type VetVisit = {
   providerId: string | null;
   providerName: string | null;
   reason: string;
+  generalNotes: string | null;
   status: VetVisitStatus;
   healthReportStartDate: string | null;
   healthReportEndDate: string | null;
   startedAt: string | null;
   completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type VetVisitOutcome = {
+  visitId: string;
+  userEnteredSummary: string;
+  treatmentNotes: string | null;
+  nextVisitAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -30,4 +40,5 @@ export type VetVisitQuestion = {
 export type VetVisitBundle = {
   visit: VetVisit;
   questions: VetVisitQuestion[];
+  outcome: VetVisitOutcome | null;
 };

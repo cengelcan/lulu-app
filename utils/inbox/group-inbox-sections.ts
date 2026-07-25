@@ -5,7 +5,7 @@ const SECTION_ORDER: InboxItemCategory[] = ['action_required', 'upcoming', 'acti
 const SECTION_TITLE_KEYS: Record<InboxItemCategory, string> = {
   action_required: 'inbox.sections.actionRequired',
   upcoming: 'inbox.sections.upcoming',
-  activity: 'inbox.sections.familyActivity',
+  activity: 'inbox.sections.activity',
 };
 
 export function groupInboxSections(items: InboxItem[]): InboxSection[] {

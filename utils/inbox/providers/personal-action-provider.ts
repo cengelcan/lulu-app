@@ -171,6 +171,36 @@ function buildPermissionDeniedItem(referenceDate: Date): InboxItem {
   };
 }
 
+function buildCompletedVetVisitItems(input: InboxProviderInput): InboxItem[] {
+  const petNameById = new Map(input.pets.map((pet) => [pet.id, pet.name]));
+  const cutoff = new Date(input.referenceDate);
+  cutoff.setDate(cutoff.getDate() - 30);
+
+  return input.vetVisits
+    .filter(({ visit }) =>
+      visit.status === 'completed' &&
+      Boolean(visit.completedAt) &&
+      new Date(visit.completedAt ?? 0).getTime() >= cutoff.getTime()
+    )
+    .map(({ visit }) => {
+      const petName = petNameById.get(visit.petId) ?? '';
+      return {
+        id: `completed_vet_visit:${visit.id}`,
+        source: 'personal',
+        category: 'activity',
+        kind: 'completed_vet_visit',
+        priority: 'low',
+        petId: visit.petId,
+        petName: petName || null,
+        titleKey: 'inbox.completedVetVisit',
+        titleParams: { name: petName },
+        route: `/vet-visits/outcome/${visit.id}` as Href,
+        sortAt: visit.completedAt ?? visit.updatedAt,
+        createdAt: visit.completedAt ?? visit.updatedAt,
+      } satisfies InboxItem;
+    });
+}
+
 export const buildPersonalActionItems: InboxProvider = (input) => {
   const activePets = getActivePets(input.pets);
   if (activePets.length === 0 && input.permission !== 'denied') {
@@ -206,6 +236,7 @@ export const buildPersonalActionItems: InboxProvider = (input) => {
       input.t,
       referenceDate
     ),
+    ...buildCompletedVetVisitItems(input),
   ];
 
   if (input.permission === 'denied') {

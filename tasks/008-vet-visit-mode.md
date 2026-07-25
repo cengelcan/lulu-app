@@ -4,7 +4,7 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | Faz 1 uygulandı; Faz 2 bekliyor |
+| Durum | Faz 1–2 uygulandı; Faz 3 bekliyor |
 | Öncelik | P0 |
 | Hedef sürüm | v1.4 |
 | Task türü | Plus / Sağlık / Bakım iş akışı |
@@ -70,19 +70,19 @@ aksiyonlarını unutmamak zorunda. Lulu bu süreci bugün uçtan uca bağlamıyo
 
 ### Görüşme sırasında
 
-- [ ] Soruları yanıtlandı olarak işaretleme.
-- [ ] Her soruya kısa yanıt/not ekleme.
-- [ ] Görüşme geneli için hızlı not.
-- [ ] İnternet olmadan çalışabilen taslak ve güvenli otomatik kayıt.
+- [x] Soruları yanıtlandı olarak işaretleme.
+- [x] Her soruya kısa yanıt/not ekleme.
+- [x] Görüşme geneli için hızlı not.
+- [x] İnternet olmadan çalışabilen taslak ve güvenli otomatik kayıt.
 
 ### Ziyaret sonrası
 
-- [ ] Kullanıcı tarafından girilen görüşme sonucu ve notlar.
-- [ ] Tedavi/ilaç değişikliği notu.
-- [ ] Sonraki kontrol tarihi.
+- [x] Kullanıcı tarafından girilen görüşme sonucu ve notlar.
+- [x] Tedavi/ilaç değişikliği notu.
+- [x] Sonraki kontrol tarihi.
 - [ ] Tek dokunuşla reminder oluşturma.
 - [ ] Tek dokunuşla medication plan oluşturma veya mevcut planı açma.
-- [ ] Tamamlanan görüşmenin pet timeline'ında gösterilmesi.
+- [x] Tamamlanan görüşmenin pet timeline'ında gösterilmesi.
 
 ### Kapsam dışı
 
@@ -131,9 +131,9 @@ Uygulama kodundan önce kesinleştirilecek başlangıç sözleşmesi:
 
 ### Faz 2 — Görüşme ve sonuç
 
-- [ ] Canlı görüşme modu, soru durumları ve hızlı notlar.
-- [ ] Outcome, tedavi değişikliği ve sonraki kontrol.
-- [ ] Timeline entegrasyonu.
+- [x] Canlı görüşme modu, soru durumları ve hızlı notlar.
+- [x] Outcome, tedavi değişikliği ve sonraki kontrol.
+- [x] Timeline entegrasyonu.
 
 ### Faz 3 — Follow-up otomasyonu
 

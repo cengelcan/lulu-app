@@ -1,5 +1,5 @@
 import type { ReminderTime } from '@/types/reminder';
-import type { VetVisitBundle, VetVisitQuestion } from '@/types/vet-visit';
+import type { VetVisitBundle, VetVisitOutcome, VetVisitQuestion } from '@/types/vet-visit';
 import { parseLocalDate } from '@/utils/date';
 
 export function createVetVisitId(): string {
@@ -42,6 +42,11 @@ export function getUpcomingVetVisit(
   bundles: VetVisitBundle[],
   referenceTime = Date.now()
 ): VetVisitBundle | null {
+  const active = bundles
+    .filter(({ visit }) => visit.status === 'in_progress')
+    .sort((a, b) => (b.visit.startedAt ?? '').localeCompare(a.visit.startedAt ?? ''))[0];
+  if (active) return active;
+
   return [...bundles]
     .filter(({ visit }) =>
       visit.status === 'planned' && new Date(visit.scheduledAt).getTime() >= referenceTime
@@ -59,4 +64,34 @@ export function getVetVisitPreparationProgress(bundle: VetVisitBundle): {
     bundle.questions.some((question) => question.text.trim().length > 0),
   ];
   return { completed: checks.filter(Boolean).length, total: checks.length };
+}
+
+export function startVetVisit(bundle: VetVisitBundle, startedAt: string): VetVisitBundle {
+  return {
+    ...bundle,
+    visit: {
+      ...bundle.visit,
+      status: 'in_progress',
+      startedAt: bundle.visit.startedAt ?? startedAt,
+      updatedAt: startedAt,
+    },
+  };
+}
+
+export function completeVetVisit(
+  bundle: VetVisitBundle,
+  outcome: VetVisitOutcome,
+  completedAt: string
+): VetVisitBundle {
+  return {
+    ...bundle,
+    visit: {
+      ...bundle.visit,
+      status: 'completed',
+      startedAt: bundle.visit.startedAt ?? completedAt,
+      completedAt,
+      updatedAt: completedAt,
+    },
+    outcome,
+  };
 }

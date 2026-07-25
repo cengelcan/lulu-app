@@ -6,17 +6,20 @@ import {
   combineVetVisitDateTime,
   getUpcomingVetVisit,
   getVetVisitPreparationProgress,
+  completeVetVisit,
+  startVetVisit,
   splitVetVisitDateTime,
 } from '@/utils/vet-visit';
 
 function bundle(id: string, scheduledAt: string, reason = 'Routine exam'): VetVisitBundle {
   return {
     visit: {
-      id, petId: 'pet-1', scheduledAt, providerId: null, providerName: null, reason,
+      id, petId: 'pet-1', scheduledAt, providerId: null, providerName: null, reason, generalNotes: null,
       status: 'planned', healthReportStartDate: null, healthReportEndDate: null,
       startedAt: null, completedAt: null, createdAt: scheduledAt, updatedAt: scheduledAt,
     },
     questions: [],
+    outcome: null,
   };
 }
 
@@ -29,6 +32,21 @@ test('combines and splits local appointment date and time', () => {
   });
 });
 
+test('moves a visit through in-progress and completed states', () => {
+  const planned = bundle('visit', '2026-08-02T10:00:00.000Z');
+  const started = startVetVisit(planned, '2026-08-02T10:05:00.000Z');
+  assert.equal(started.visit.status, 'in_progress');
+  assert.equal(started.visit.startedAt, '2026-08-02T10:05:00.000Z');
+
+  const outcome = {
+    visitId: 'visit', userEnteredSummary: 'Routine exam completed', treatmentNotes: null,
+    nextVisitAt: null, createdAt: '2026-08-02T10:30:00.000Z', updatedAt: '2026-08-02T10:30:00.000Z',
+  };
+  const completed = completeVetVisit(started, outcome, '2026-08-02T10:30:00.000Z');
+  assert.equal(completed.visit.status, 'completed');
+  assert.equal(completed.outcome?.userEnteredSummary, 'Routine exam completed');
+});
+
 test('selects the nearest future planned visit', () => {
   const visits = [
     bundle('later', '2026-08-03T10:00:00.000Z'),
@@ -36,6 +54,18 @@ test('selects the nearest future planned visit', () => {
     bundle('past', '2026-07-01T10:00:00.000Z'),
   ];
   assert.equal(getUpcomingVetVisit(visits, Date.parse('2026-07-25T10:00:00.000Z'))?.visit.id, 'next');
+});
+
+test('prefers an in-progress visit over a future planned visit', () => {
+  const planned = bundle('planned', '2026-08-02T10:00:00.000Z');
+  const active = startVetVisit(
+    bundle('active', '2026-07-25T10:00:00.000Z'),
+    '2026-07-25T10:05:00.000Z'
+  );
+  assert.equal(
+    getUpcomingVetVisit([planned, active], Date.parse('2026-07-25T10:00:00.000Z'))?.visit.id,
+    'active'
+  );
 });
 
 test('preparation progress requires schedule, reason, and a question', () => {

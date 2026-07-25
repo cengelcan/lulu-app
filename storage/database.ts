@@ -15,7 +15,7 @@ let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
  * idx_check_ins_pet_date until version 2 runs. If the unique constraint error
  * persists, delete the local pet_health_journal.db and restart the app.
  */
-const CURRENT_SCHEMA_VERSION = 18;
+const CURRENT_SCHEMA_VERSION = 19;
 
 const MIGRATION_001_SQL = `
 PRAGMA journal_mode = WAL;
@@ -268,6 +268,31 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     version = 18;
     await setSchemaVersion(db, version);
   }
+
+  if (version < 19) {
+    await ensureVetVisitSessionTables(db);
+    version = 19;
+    await setSchemaVersion(db, version);
+  }
+}
+
+async function ensureVetVisitSessionTables(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(vet_visits)');
+  if (!columns.some((column) => column.name === 'general_notes')) {
+    await db.execAsync('ALTER TABLE vet_visits ADD COLUMN general_notes TEXT;');
+  }
+
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS vet_visit_outcomes (
+      visit_id TEXT PRIMARY KEY NOT NULL,
+      user_entered_summary TEXT NOT NULL,
+      treatment_notes TEXT,
+      next_visit_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (visit_id) REFERENCES vet_visits (id) ON DELETE CASCADE
+    );
+  `);
 }
 
 async function ensureVetVisitWorkspaceTables(db: SQLite.SQLiteDatabase): Promise<void> {

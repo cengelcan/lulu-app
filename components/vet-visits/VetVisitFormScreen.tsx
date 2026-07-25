@@ -20,7 +20,7 @@ import { useVetVisitStore } from '@/stores/vet-visit.store';
 import type { ReminderTime } from '@/types/reminder';
 import type { VetVisitBundle } from '@/types/vet-visit';
 import { formatLocalDate, getTodayStart } from '@/utils/date';
-import { combineVetVisitDateTime, createVetVisitId, splitVetVisitDateTime } from '@/utils/vet-visit';
+import { combineVetVisitDateTime, createVetVisitId, splitVetVisitDateTime, startVetVisit } from '@/utils/vet-visit';
 
 type DraftQuestion = { id: string; text: string; createdAt: string };
 
@@ -94,7 +94,7 @@ export function VetVisitFormScreen() {
     return next;
   });
 
-  const handleSave = async () => {
+  const persistVisit = async (start = false) => {
     if (!pet?.id || validationError) { setError(validationError); return; }
     const scheduledAt = combineVetVisitDateTime(date, time);
     if (!scheduledAt) { setError(t('vetVisits.dateRequired')); return; }
@@ -103,11 +103,12 @@ export function VetVisitFormScreen() {
     const keptQuestions = questions.filter((question) => question.text.trim());
     setSaving(true); setError(null);
     try {
-      await saveVisit({
+      const bundle: VetVisitBundle = {
         visit: {
           id: visitId, petId: pet.id, scheduledAt,
           providerId: existing?.visit.providerId ?? null,
           providerName: providerName.trim() || null, reason: reason.trim(),
+          generalNotes: existing?.visit.generalNotes ?? null,
           status: existing?.visit.status ?? 'planned',
           healthReportStartDate: attachHealthReport ? reportStartDate : null,
           healthReportEndDate: attachHealthReport ? reportEndDate : null,
@@ -121,8 +122,15 @@ export function VetVisitFormScreen() {
           isAnswered: existing?.questions.find((item) => item.id === question.id)?.isAnswered ?? false,
           sortOrder: index, createdAt: question.createdAt, updatedAt: now,
         })),
-      });
-      router.replace('/vet-visits' as Href);
+        outcome: existing?.outcome ?? null,
+      };
+      const savedBundle = start ? startVetVisit(bundle, now) : bundle;
+      await saveVisit(savedBundle);
+      if (start) {
+        router.replace(`/vet-visits/live/${visitId}` as Href);
+      } else {
+        router.replace('/vet-visits' as Href);
+      }
     } catch { setError(t('vetVisits.saveFailed')); }
     finally { setSaving(false); }
   };
@@ -143,7 +151,7 @@ export function VetVisitFormScreen() {
       <Stack.Screen options={screenOptions} />
       <ScreenContainer
         scrollable edges={['bottom']} contentStyle={styles.content}
-        footer={<Button title={t('vetVisits.save')} disabled={saving} onPress={() => void handleSave()} />}>
+        footer={<Button title={t('vetVisits.save')} disabled={saving} onPress={() => void persistVisit()} />}>
         <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.body}>
           {t('vetVisits.description')}
         </ThemedText>
@@ -200,6 +208,14 @@ export function VetVisitFormScreen() {
             }])} />
         </GroupedSection>
         {error ? <ThemedText accessibilityRole="alert" style={styles.error}>{error}</ThemedText> : null}
+        {existing?.visit.status === 'planned' ? (
+          <Button title={t('vetVisits.startVisit')} disabled={saving}
+            onPress={() => void persistVisit(true)} />
+        ) : null}
+        {existing?.visit.status === 'in_progress' ? (
+          <Button title={t('vetVisits.continueVisit')}
+            onPress={() => router.push(`/vet-visits/live/${existing.visit.id}` as Href)} />
+        ) : null}
         {existing ? <Button title={t('common.delete')} variant="destructive" disabled={saving} onPress={handleDelete} /> : null}
       </ScreenContainer>
     </>

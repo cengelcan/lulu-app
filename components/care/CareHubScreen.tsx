@@ -92,8 +92,11 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
                 ? t('vetVisits.ready')
                 : t('vetVisits.preparationProgress', preparationProgress ?? { completed: 0, total: 3 })}
             </ThemedText>
-            <Button title={t('common.edit')} variant="secondary"
-              onPress={() => router.push(`/vet-visits/${upcomingVetVisit.visit.id}` as Href)} />
+            <Button title={upcomingVetVisit.visit.status === 'in_progress'
+              ? t('vetVisits.continueVisit') : t('common.edit')} variant="secondary"
+              onPress={() => router.push((upcomingVetVisit.visit.status === 'in_progress'
+                ? `/vet-visits/live/${upcomingVetVisit.visit.id}`
+                : `/vet-visits/${upcomingVetVisit.visit.id}`) as Href)} />
           </Card>
         </View>
       ) : null}

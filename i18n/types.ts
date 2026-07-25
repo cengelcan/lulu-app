@@ -91,6 +91,32 @@ export type Translations = {
     questionRequired: string;
     deleteTitle: string;
     deleteMessage: string;
+    startVisit: string;
+    continueVisit: string;
+    liveTitle: string;
+    liveDescription: string;
+    quickNotes: string;
+    quickNotesPlaceholder: string;
+    answerPlaceholder: string;
+    answerNote: string;
+    answered: string;
+    autoSaving: string;
+    savedOffline: string;
+    finishVisit: string;
+    outcomeTitle: string;
+    outcomeDescription: string;
+    userEnteredLabel: string;
+    summary: string;
+    summaryPlaceholder: string;
+    treatmentNotes: string;
+    treatmentNotesPlaceholder: string;
+    nextVisit: string;
+    addNextVisit: string;
+    completeVisit: string;
+    completeFailed: string;
+    summaryRequired: string;
+    pastTitle: string;
+    inProgress: string;
   };
   familyActivity: {
     title: string;
@@ -832,6 +858,7 @@ export type Translations = {
       actionRequired: string;
       upcoming: string;
       familyActivity: string;
+      activity: string;
     };
     missedCheckInToday: string;
     missedCheckInYesterday: string;
@@ -840,6 +867,7 @@ export type Translations = {
     reminderForPet: string;
     permissionDenied: string;
     permissionDeniedSubtitle: string;
+    completedVetVisit: string;
     a11y: {
       open: string;
       unreadCount: string;

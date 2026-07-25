@@ -8,6 +8,7 @@ import { getDismissedInboxItemIds } from '@/storage/inbox-dismissed.storage';
 import * as checkInStorage from '@/storage/check-in.storage';
 import * as petReminderStorage from '@/storage/pet-reminder.storage';
 import * as petStorage from '@/storage/pet.storage';
+import * as vetVisitStorage from '@/storage/vet-visit.storage';
 import { getNotificationPermission } from '@/storage/prefs.storage';
 import { useUserStore } from '@/stores/user.store';
 import type { InboxSection } from '@/types/inbox';
@@ -43,10 +44,11 @@ export function useInbox(): UseInboxResult {
     setError(null);
 
     try {
-      const [pets, checkIns, reminders, permission, dismissedIds] = await Promise.all([
+      const [pets, checkIns, reminders, vetVisits, permission, dismissedIds] = await Promise.all([
         petStorage.getPets(),
         checkInStorage.getAllCheckIns(),
         petReminderStorage.getAllPetReminders(),
+        vetVisitStorage.getAllVetVisitBundles(),
         getNotificationPermission(),
         getDismissedInboxItemIds(),
       ]);
@@ -71,6 +73,7 @@ export function useInbox(): UseInboxResult {
         pets,
         checkIns,
         reminders,
+        vetVisits,
         permission,
         dismissedIds,
         referenceDate: new Date(),

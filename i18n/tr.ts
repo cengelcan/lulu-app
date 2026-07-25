@@ -88,7 +88,33 @@ export const tr: Translations = {
     "reasonRequired": "Görüşme nedenini ekle.",
     "questionRequired": "Veterinere en az bir soru ekle.",
     "deleteTitle": "Veteriner görüşmesi silinsin mi?",
-    "deleteMessage": "Randevu ayrıntıları ve sorular kaldırılacak."
+    "deleteMessage": "Randevu ayrıntıları ve sorular kaldırılacak.",
+    "startVisit": "Görüşmeyi başlat",
+    "continueVisit": "Görüşmeye devam et",
+    "liveTitle": "Görüşme Sırasında",
+    "liveDescription": "Yanıtlanan soruları işaretle ve konuşurken kısa notlar al.",
+    "quickNotes": "Hızlı notlar",
+    "quickNotesPlaceholder": "Konuşmadan hatırlamak istediğin başka bir şey",
+    "answerPlaceholder": "Kısa yanıt veya not",
+    "answerNote": "Yanıt veya not",
+    "answered": "Yanıtlandı",
+    "autoSaving": "Kaydediliyor…",
+    "savedOffline": "Bu cihaza kaydedildi",
+    "finishVisit": "Görüşmeyi bitir",
+    "outcomeTitle": "Görüşme Sonucu",
+    "outcomeDescription": "Görüşme sonrasında anladıklarını kaydet. Bu bilgiler senin tarafından girilir; veterinerin klinik kaydı değildir.",
+    "userEnteredLabel": "Senin tarafından girildi",
+    "summary": "Sonuç özeti",
+    "summaryPlaceholder": "Görüşmenin sonucu neydi?",
+    "treatmentNotes": "Tedavi veya ilaç değişiklikleri",
+    "treatmentNotesPlaceholder": "Hatırlamak istediğin talimatlar veya değişiklikler",
+    "nextVisit": "Sonraki kontrol",
+    "addNextVisit": "Sonraki kontrol tarihini ekle",
+    "completeVisit": "Görüşmeyi tamamla",
+    "completeFailed": "Görüşme sonucu kaydedilemedi. Lütfen tekrar dene.",
+    "summaryRequired": "Kısa bir sonuç özeti ekle.",
+    "pastTitle": "Tamamlanan görüşmeler",
+    "inProgress": "Görüşme devam ediyor"
   },
   "familyActivity": {
     "title": "Aile Aktivitesi",
@@ -912,7 +938,8 @@ export const tr: Translations = {
     "sections": {
       "actionRequired": "İşlem gerekli",
       "upcoming": "Yaklaşanlar",
-      "familyActivity": "Aile etkinliği"
+      "familyActivity": "Aile etkinliği",
+      "activity": "Son aktiviteler"
     },
     "missedCheckInToday": "{{name}} bugün henüz check-in yapmadı.",
     "missedCheckInYesterday": "{{name}} dün check-in yapmadı.",
@@ -921,6 +948,7 @@ export const tr: Translations = {
     "reminderForPet": "{{name}} için",
     "permissionDenied": "Bildirimler kapalı.",
     "permissionDeniedSubtitle": "Hatırlatıcıları açmak için Ayarlar’a git.",
+    "completedVetVisit": "{{name}} için veteriner görüşmesi tamamlandı",
     "a11y": {
       "open": "Bildirimleri aç",
       "unreadCount": "{{count}} öğe ilgilenmeni bekliyor"

@@ -7,6 +7,7 @@ const INBOX_ITEM_ICONS: Record<InboxItemKind, IconSymbolName> = {
   overdue_reminder: 'exclamationmark.triangle',
   upcoming_reminder: 'calendar',
   notification_permission_denied: 'bell.fill',
+  completed_vet_visit: 'calendar.badge.checkmark',
   family_check_in_created: 'heart.fill',
   family_check_in_updated: 'heart.fill',
   family_record_created: 'doc.text.fill',

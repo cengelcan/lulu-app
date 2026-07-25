@@ -108,6 +108,7 @@ function createInput(overrides: Partial<InboxProviderInput> = {}): InboxProvider
     pets: [createPet()],
     checkIns: [],
     reminders: [],
+    vetVisits: [],
     permission: null,
     dismissedIds: new Set(),
     referenceDate: REFERENCE_DATE,
@@ -163,6 +164,29 @@ describe('buildInboxItems', () => {
     );
 
     assert.equal(sections.length, 0);
+  });
+
+  it('adds a completed vet visit to recent activity', () => {
+    const sections = buildInboxItems(createInput({
+      checkIns: [
+        createCheckIn({ date: TODAY_KEY }),
+        createCheckIn({ id: 'check-in-yesterday', date: YESTERDAY_KEY }),
+      ],
+      vetVisits: [{
+        visit: {
+          id: 'visit-1', petId: 'pet-1', scheduledAt: '2026-06-22T10:00:00.000Z',
+          providerId: null, providerName: 'Lulu Vet', reason: 'Routine exam', generalNotes: null,
+          status: 'completed', healthReportStartDate: null, healthReportEndDate: null,
+          startedAt: '2026-06-22T10:00:00.000Z', completedAt: '2026-06-22T10:30:00.000Z',
+          createdAt: '2026-06-20T10:00:00.000Z', updatedAt: '2026-06-22T10:30:00.000Z',
+        },
+        questions: [],
+        outcome: null,
+      }],
+    }));
+    const item = sections.find((section) => section.category === 'activity')?.items[0];
+    assert.equal(item?.kind, 'completed_vet_visit');
+    assert.equal(item?.route, '/vet-visits/outcome/visit-1');
   });
 
   it('sorts urgent items before normal items', () => {

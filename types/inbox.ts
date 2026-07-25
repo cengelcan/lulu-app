@@ -5,6 +5,7 @@ import type { ActivityEvent } from '@/types/sharing';
 import type { CheckIn } from '@/types/check-in';
 import type { Pet } from '@/types/pet';
 import type { PetReminder } from '@/types/pet-reminder';
+import type { VetVisitBundle } from '@/types/vet-visit';
 
 export type InboxTranslateFn = (
   key: string,
@@ -22,6 +23,7 @@ export type InboxItemKind =
   | 'overdue_reminder'
   | 'upcoming_reminder'
   | 'notification_permission_denied'
+  | 'completed_vet_visit'
   | 'family_check_in_created'
   | 'family_check_in_updated'
   | 'family_record_created'
@@ -68,6 +70,7 @@ export type InboxProviderInput = {
   pets: Pet[];
   checkIns: CheckIn[];
   reminders: PetReminder[];
+  vetVisits: VetVisitBundle[];
   permission: NotificationPermissionStatus | null;
   dismissedIds: Set<string>;
   referenceDate: Date;

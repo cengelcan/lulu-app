@@ -199,7 +199,13 @@ export async function updatePetReminder(reminder: PetReminder): Promise<void> {
 
 export async function deletePetReminder(id: string): Promise<void> {
   const db = await getDatabase();
-  await db.runAsync('DELETE FROM pet_reminders WHERE id = ?', id);
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      'UPDATE vet_visit_outcomes SET follow_up_reminder_id = NULL WHERE follow_up_reminder_id = ?',
+      id
+    );
+    await db.runAsync('DELETE FROM pet_reminders WHERE id = ?', id);
+  });
 }
 
 export async function deleteAllPetReminders(): Promise<void> {

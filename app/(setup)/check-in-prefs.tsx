@@ -22,20 +22,13 @@ export default function CheckInPrefsScreen() {
   const storeError = useNotificationStore((state) => state.error);
   const clearError = useNotificationStore((state) => state.clearError);
 
-  const [reminderTime, setReminderTime] = useState<ReminderTime>(
-    savedReminderTime ?? DEFAULT_REMINDER_TIME
-  );
+  const [reminderTimeOverride, setReminderTimeOverride] = useState<ReminderTime | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const reminderTime = reminderTimeOverride ?? savedReminderTime ?? DEFAULT_REMINDER_TIME;
 
   useEffect(() => {
     void loadNotificationSettings();
   }, [loadNotificationSettings]);
-
-  useEffect(() => {
-    if (savedReminderTime) {
-      setReminderTime(savedReminderTime);
-    }
-  }, [savedReminderTime]);
 
   const handleContinue = useCallback(async () => {
     clearError();
@@ -71,7 +64,7 @@ export default function CheckInPrefsScreen() {
       error={error ?? storeError}>
       <CheckInReminderPicker
         value={reminderTime}
-        onChange={setReminderTime}
+        onChange={setReminderTimeOverride}
         disabled={isLoading}
         presetsTitle={t('setup.checkInPrefs.presetsTitle')}
         morningLabel={t('setup.checkInPrefs.morning')}

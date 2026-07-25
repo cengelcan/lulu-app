@@ -74,15 +74,6 @@ export default function AuthScreen() {
   const [confirmEmailSent, setConfirmEmailSent] = useState(false);
 
   useEffect(() => {
-    const nextMode = resolveAuthMode(modeParam);
-    setMode(nextMode);
-
-    if (nextMode === 'signUp') {
-      setShowEmailForm(true);
-    }
-  }, [modeParam]);
-
-  useEffect(() => {
     const rawJoinCode = Array.isArray(joinCodeParam) ? joinCodeParam[0] : joinCodeParam;
 
     if (!rawJoinCode) {

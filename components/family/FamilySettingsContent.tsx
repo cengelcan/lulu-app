@@ -64,7 +64,7 @@ export function FamilySettingsContent() {
       if (familyGroup?.name) {
         setFamilyName(familyGroup.name);
       }
-    }, [familyGroup?.name])
+    }, [familyGroup])
   );
 
   const handleCopyCode = async () => {

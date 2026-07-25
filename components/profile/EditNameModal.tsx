@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -30,12 +30,6 @@ export function EditNameModal({
   const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
-
-  useEffect(() => {
-    if (visible) {
-      setValue(initialValue);
-    }
-  }, [visible, initialValue]);
 
   const handleSave = () => {
     onSave(value);

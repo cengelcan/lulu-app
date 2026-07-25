@@ -154,6 +154,7 @@ export function UserCard() {
       </View>
 
       <EditNameModal
+        key={`${isEditNameVisible}-${displayName ?? ''}`}
         visible={isEditNameVisible}
         initialValue={displayName ?? ''}
         isSaving={isSavingName}

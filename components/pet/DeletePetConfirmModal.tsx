@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -35,13 +35,17 @@ export function DeletePetConfirmModal({
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
 
-  useEffect(() => {
-    if (visible) {
-      setConfirmName('');
-    }
-  }, [visible, petName]);
-
   const isNameConfirmed = confirmName.trim() === petName.trim();
+
+  const handleCancel = () => {
+    setConfirmName('');
+    onCancel();
+  };
+
+  const handleConfirm = () => {
+    setConfirmName('');
+    onConfirm();
+  };
 
   return (
     <Modal
@@ -49,12 +53,12 @@ export function DeletePetConfirmModal({
       transparent
       visible={visible}
       onDismiss={onDismiss}
-      onRequestClose={onCancel}>
+      onRequestClose={handleCancel}>
       <Pressable
         accessibilityLabel={t('common.dismissDialog')}
         accessibilityRole="button"
         style={styles.backdrop}
-        onPress={onCancel}>
+        onPress={handleCancel}>
         <Pressable
           style={[styles.card, { backgroundColor: surfaceColor }]}
           onPress={(event) => event.stopPropagation()}>
@@ -96,7 +100,7 @@ export function DeletePetConfirmModal({
               title={t('common.cancel')}
               variant="secondary"
               disabled={isLoading}
-              onPress={onCancel}
+              onPress={handleCancel}
               style={styles.actionButton}
             />
             <Button
@@ -104,7 +108,7 @@ export function DeletePetConfirmModal({
               title={t('common.delete')}
               variant="destructive"
               disabled={isLoading || !isNameConfirmed}
-              onPress={onConfirm}
+              onPress={handleConfirm}
               style={styles.actionButton}
             />
           </View>

@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -52,12 +52,6 @@ export function BreedSearchField({
     () => breedOptions.find((option) => option.value === breed)?.label ?? '',
     [breed, breedOptions]
   );
-
-  useEffect(() => {
-    if (!focused) {
-      setQuery(selectedLabel);
-    }
-  }, [focused, selectedLabel]);
 
   const filteredOptions = useMemo(() => {
     const search = normalizeForSearch(focused ? query : selectedLabel);
@@ -155,7 +149,7 @@ export function BreedSearchField({
           placeholderTextColor={textSecondaryColor}
           returnKeyType="done"
           style={[styles.input, { color: textColor }]}
-          value={query}
+          value={focused ? query : selectedLabel}
           onBlur={handleBlur}
           onChangeText={handleChangeText}
           onFocus={handleFocus}

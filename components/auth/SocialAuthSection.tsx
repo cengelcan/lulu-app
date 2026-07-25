@@ -16,12 +16,9 @@ export function useAppleSignInAvailable(): boolean {
   const [isAvailable, setIsAvailable] = useState(Platform.OS === 'ios');
 
   useEffect(() => {
-    if (Platform.OS !== 'ios') {
-      setIsAvailable(false);
-      return;
+    if (Platform.OS === 'ios') {
+      void AppleAuthentication.isAvailableAsync().then(setIsAvailable);
     }
-
-    void AppleAuthentication.isAvailableAsync().then(setIsAvailable);
   }, []);
 
   return isAvailable;

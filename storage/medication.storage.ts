@@ -296,7 +296,13 @@ export async function getMedicationDosesByPetId(
 
 export async function deleteMedicationPlan(id: string): Promise<void> {
   const db = await getDatabase();
-  await db.runAsync('DELETE FROM medication_plans WHERE id = ?', id);
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      'UPDATE vet_visit_outcomes SET medication_plan_id = NULL WHERE medication_plan_id = ?',
+      id
+    );
+    await db.runAsync('DELETE FROM medication_plans WHERE id = ?', id);
+  });
 }
 
 export async function deleteAllMedicationData(): Promise<void> {

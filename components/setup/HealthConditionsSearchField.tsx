@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -58,12 +58,6 @@ export function HealthConditionsSearchField({
       .filter(Boolean)
       .join(', ');
   }, [healthConditions, healthOptions]);
-
-  useEffect(() => {
-    if (!focused) {
-      setQuery(selectedLabels);
-    }
-  }, [focused, selectedLabels]);
 
   const filteredOptions = useMemo(() => {
     const search = normalizeForSearch(focused ? query : selectedLabels);

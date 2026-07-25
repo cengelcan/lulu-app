@@ -44,7 +44,7 @@ export default function CompletedRemindersScreen() {
       }
 
       void loadReminders(pet.id);
-    }, [loadReminders, pet?.id])
+    }, [loadReminders, pet])
   );
 
   const completedReminders = useMemo(() => listCompletedReminders(reminders), [reminders]);

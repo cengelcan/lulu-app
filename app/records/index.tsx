@@ -57,7 +57,7 @@ export default function RecordsScreen() {
       }
 
       void loadRecords(pet.id);
-    }, [loadRecords, pet?.id])
+    }, [loadRecords, pet])
   );
 
   const handleRecordTypePress = (type: RecordTypeId) => {

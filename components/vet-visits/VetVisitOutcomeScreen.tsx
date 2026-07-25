@@ -55,8 +55,8 @@ export function VetVisitOutcomeScreen() {
       const split = stored.outcome?.nextVisitAt
         ? splitVetVisitDateTime(stored.outcome.nextVisitAt)
         : null;
+      setHasNextVisit(Boolean(split));
       if (split) {
-        setHasNextVisit(true);
         setNextVisitDate(split.date);
         setNextVisitTime(split.time);
       }
@@ -93,8 +93,12 @@ export function VetVisitOutcomeScreen() {
         visit: { ...completed.visit, updatedAt: now },
       };
       await saveVisit(saved);
-      setBundle(saved);
-      if (!wasCompleted) void trackVetVisitEvent('visit_completed', 'outcome');
+      if (wasCompleted) {
+        router.dismissTo('/vet-visits' as Href);
+      } else {
+        setBundle(saved);
+        void trackVetVisitEvent('visit_completed', 'outcome');
+      }
     } catch {
       setError(t('vetVisits.completeFailed'));
     } finally {

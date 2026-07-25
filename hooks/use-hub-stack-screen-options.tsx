@@ -24,17 +24,12 @@ export function useHubStackScreenOptions(
         displayMode="minimal"
         tintColor={primaryColor}
         onPress={() => {
-          if (fallbackRoute) {
-            router.replace(fallbackRoute);
-            return;
-          }
-
           if (router.canGoBack()) {
             router.back();
             return;
           }
 
-          router.replace('/(tabs)/care');
+          router.replace(fallbackRoute ?? '/(tabs)/care');
         }}
       />
     ),

@@ -61,11 +61,13 @@ describe('buildVisitBrief', () => {
       checkIns: [checkIn],
       records: [weightRecord],
       medicationPlans: [medication],
+      reason: '  Appetite change  ',
       questions: ['  Could this be related?  '],
       t,
     });
 
     assert.equal(brief.isEmpty, false);
+    assert.equal(brief.reason, 'Appetite change');
     assert.deepEqual(brief.questions, ['Could this be related?']);
     assert.ok(brief.items.some((item) => item.id === 'attention-days'));
     assert.ok(brief.items.some((item) => item.id === 'latest-weight'));
@@ -112,5 +114,6 @@ describe('buildVisitBrief', () => {
     assert.equal(brief.isEmpty, true);
     assert.deepEqual(brief.items, []);
     assert.deepEqual(brief.sources, []);
+    assert.equal(brief.reason, '');
   });
 });

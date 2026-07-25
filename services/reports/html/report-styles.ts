@@ -292,6 +292,116 @@ export function buildReportStyles({ primaryColor, forScreen = false }: ReportSty
       .summary-normal .summary-dot { background: #34c759; }
       .summary-alert { color: #b25000; }
       .summary-alert .summary-dot { background: #ff9500; }
+      .visit-prep {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .visit-prep h2 {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.2;
+      }
+      .visit-prep h3 {
+        margin: 2px 0 0;
+        color: #5c665e;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+      .visit-reason {
+        padding: 8px 10px;
+        border: 1px solid #e4e8e4;
+        border-radius: 8px;
+        background: #fbfcfb;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .visit-label {
+        display: block;
+        margin-bottom: 2px;
+        color: #69726b;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .visit-reason p,
+      .visit-highlight p,
+      .visit-question p {
+        margin: 0;
+      }
+      .visit-reason p {
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .visit-highlights,
+      .visit-questions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .visit-highlight,
+      .visit-question {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        padding: 7px 9px;
+        border: 1px solid #e4e8e4;
+        border-radius: 8px;
+        background: #ffffff;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .visit-highlight p,
+      .visit-question p {
+        font-size: 9.5px;
+        line-height: 1.25;
+      }
+      .visit-highlight small {
+        display: block;
+        margin-top: 2px;
+        color: #69726b;
+        font-size: 7px;
+        line-height: 1.25;
+      }
+      .visit-dot {
+        width: 6px;
+        height: 6px;
+        margin-top: 3px;
+        border-radius: 50%;
+        background: #8a948c;
+        flex-shrink: 0;
+      }
+      .visit-highlight-normal .visit-dot { background: #34c759; }
+      .visit-highlight-alert .visit-dot { background: #ff9500; }
+      .visit-question-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        color: #ffffff;
+        background: ${primaryColor};
+        font-size: 8px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .visit-disclaimer {
+        margin: 2px 0 0;
+        padding: 7px 9px;
+        border-radius: 7px;
+        color: #5c536f;
+        background: #f3f0fb;
+        font-size: 8px;
+        line-height: 1.25;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
       .section-heading {
         font-size: 13px;
         font-weight: 700;

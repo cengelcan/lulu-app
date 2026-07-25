@@ -79,6 +79,9 @@ export type Translations = {
     rangeTitle: string;
     sectionsTitle: string;
     questionsTitle: string;
+    reasonTitle: string;
+    reasonPlaceholder: string;
+    reasonHint: string;
     questionsPlaceholder: string;
     questionsHint: string;
     buildBrief: string;
@@ -92,6 +95,15 @@ export type Translations = {
     medications: string;
     records: string;
     loading: string;
+    sharePdf: string;
+    exportFailed: string;
+    exportFileName: string;
+    shareDialogTitle: string;
+    pdf: {
+      title: string;
+      reason: string;
+      sourceReferences: string;
+    };
     sources: {
       checkIn: string;
       medication: string;

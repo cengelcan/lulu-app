@@ -128,13 +128,15 @@ export function buildReportContentBlocks(
     checkIns: ReportCheckInEntry[];
     recordGroups: ReportRecordDayGroup[];
   },
-  options: { hasSummary?: boolean } = {}
+  options: { hasSummary?: boolean; includePetCard?: boolean } = {}
 ): ReportContentBlock[] {
+  const includePetCard = options.includePetCard ?? true;
+
   if (content.isEmpty) {
-    return [{ type: 'petCard' }];
+    return includePetCard ? [{ type: 'petCard' }] : [];
   }
 
-  const blocks: ReportContentBlock[] = [{ type: 'petCard' }];
+  const blocks: ReportContentBlock[] = includePetCard ? [{ type: 'petCard' }] : [];
 
   if (options.hasSummary) {
     blocks.push({ type: 'summary' });

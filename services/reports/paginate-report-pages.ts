@@ -222,9 +222,15 @@ function packBlocksIntoPages(blocks: ReportContentBlock[]): ReportPageSlice[] {
 
 export function paginateReportContent(
   content: ReportPreviewContent,
-  options: { hasSummary?: boolean } = {}
+  options: { hasSummary?: boolean; includePetCard?: boolean } = {}
 ): ReportPageSlice[] {
+  const includePetCard = options.includePetCard ?? true;
+
   if (content.isEmpty) {
+    if (!includePetCard) {
+      return [];
+    }
+
     return [
       {
         includePetCard: true,
@@ -242,6 +248,10 @@ export function paginateReportContent(
   const pages = packBlocksIntoPages(blocks);
 
   if (pages.length === 0) {
+    if (!includePetCard) {
+      return [];
+    }
+
     return [
       {
         includePetCard: true,

@@ -22,6 +22,7 @@ type BuildVisitBriefParams = {
   checkIns: CheckIn[];
   records: PetRecord[];
   medicationPlans: MedicationPlan[];
+  reason?: string;
   questions?: string[];
   t: TranslateFn;
 };
@@ -48,6 +49,7 @@ export function buildVisitBrief({
   checkIns,
   records,
   medicationPlans,
+  reason = '',
   questions = [],
   t,
 }: BuildVisitBriefParams): VisitBrief {
@@ -173,12 +175,14 @@ export function buildVisitBrief({
   }
 
   const normalizedQuestions = normalizeQuestions(questions);
+  const normalizedReason = reason.trim();
 
   return {
     range,
+    reason: normalizedReason,
     items,
     questions: normalizedQuestions,
     sources,
-    isEmpty: items.length === 0 && normalizedQuestions.length === 0,
+    isEmpty: items.length === 0 && normalizedQuestions.length === 0 && !normalizedReason,
   };
 }

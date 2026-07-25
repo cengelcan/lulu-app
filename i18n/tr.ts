@@ -77,6 +77,9 @@ export const tr: Translations = {
     "rangeTitle": "Tarih aralığı",
     "sectionsTitle": "Özete dahil et",
     "questionsTitle": "Veterinere sorulacaklar",
+    "reasonTitle": "Görüşme nedeni",
+    "reasonPlaceholder": "Bu görüşmede neyi konuşmak istiyorsun?",
+    "reasonHint": "İsteğe bağlı. Ana endişeyi veya görüşme hedefini kısaca yaz.",
     "questionsPlaceholder": "Her satıra bir soru yaz",
     "questionsHint": "İsteğe bağlı. Boş olmayan her satır ayrı bir soru olur.",
     "buildBrief": "Görüşme Özetini Hazırla",
@@ -90,6 +93,15 @@ export const tr: Translations = {
     "medications": "Aktif ilaçlar",
     "records": "Sağlık kayıtları",
     "loading": "Görüşme özeti hazırlanıyor",
+    "sharePdf": "PDF'i Paylaş",
+    "exportFailed": "Görüşme özeti PDF'i oluşturulamadı. Lütfen tekrar dene.",
+    "exportFileName": "Veteriner Görüşme Özeti",
+    "shareDialogTitle": "Görüşme özetini paylaş",
+    "pdf": {
+      "title": "Görüşme hazırlığı",
+      "reason": "Görüşme nedeni",
+      "sourceReferences": "Kaynak kayıtlar: {{sources}}"
+    },
     "sources": {
       "checkIn": "Günlük kontrol",
       "medication": "İlaç · {{name}}",

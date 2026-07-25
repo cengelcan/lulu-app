@@ -24,10 +24,20 @@ export type VisitBriefItem = {
 
 export type VisitBrief = {
   range: ReportDateRange;
+  reason: string;
   items: VisitBriefItem[];
   questions: string[];
   sources: VisitBriefSource[];
   isEmpty: boolean;
+};
+
+export type VisitBriefDocumentLabels = {
+  sectionTitle: string;
+  reason: string;
+  highlights: string;
+  questions: string;
+  disclaimer: string;
+  sourceReferences: string;
 };
 
 export const DEFAULT_VISIT_BRIEF_SELECTION: VisitBriefSelection = {

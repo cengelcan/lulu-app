@@ -1,126 +1,185 @@
-# 008 — Vet Visit Mode
+# 008 — Vet Visit Workspace
 
 ## Task özeti
 
 | Alan | Değer |
 |---|---|
-| Durum | Backlog |
+| Durum | Ürün yönü onaylandı; uygulama kapsamı hazırlanıyor |
 | Öncelik | P0 |
 | Hedef sürüm | v1.4 |
-| Task türü | Plus / Sağlık / Raporlama |
+| Task türü | Plus / Sağlık / Bakım iş akışı |
 | Tahmini efor | XL |
-| Ürün katmanı | Plus; hazırlık önizlemesi Free olabilir |
-| Bağımlılıklar | 002, 006 |
-| Son güncelleme | 2026-07-15 |
+| Ürün katmanı | Plus; Free sınırı ayrıca kararlaştırılacak |
+| Bağımlılıklar | 002, 006, 013 |
+| Son güncelleme | 2026-07-25 |
 
-## Bağlam ve problem
+## Son ürün kararı
 
-Lulu check-in, kilo, kayıt, hatırlatıcı ve PDF verisine sahip; fakat bu parçalar veteriner randevusu öncesi tek bir kullanıcı sonucuna dönüşmüyor. Kullanıcı klinikte tarihleri hatırlamak, belirtileri anlatmak ve sorularını unutmamak zorunda kalıyor.
+Vet Visit ayrı bir rapor ürünü değildir. Lulu'da tek rapor mevcut Sağlık
+Raporu olarak kalır. Plus değeri ikinci bir PDF'den değil; veteriner
+görüşmesinin öncesini, görüşme anını ve sonrasını birbirine bağlayan kalıcı bir
+Workspace akışından gelir.
+
+### Kaldırılan yaklaşım
+
+- “Visit highlights” kaldırıldı; mevcut sağlık verilerini tekrar eden otomatik
+  bir öne çıkanlar bölümü yapılmayacak.
+- Ayrı “Visit Brief” ekranı/PDF'i ve ikinci rapor önizlemesi yapılmayacak.
+- Kullanıcı Vet Visit içinde sağlık raporundaki tarih ve veri türü seçimlerini
+  tekrar yapmayacak.
+- Toplu “Source records” listesi varsayılan açık gösterilmeyecek.
+- Yeni ürün yönü kesinleşmeden geliştirilen eski wizard ve birleşik hazırlık PDF'i
+  2026-07-25 tarihinde revert edildi.
+
+## Problem
+
+Kullanıcı veteriner randevusundan önce neden gittiğini ve sorularını hazırlamak,
+görüşme sırasında yanıtları/notları takip etmek, sonrasında da ilaç ve kontrol
+aksiyonlarını unutmamak zorunda. Lulu bu süreci bugün uçtan uca bağlamıyor.
 
 ## Kullanıcı sonucu
 
-> Bir kullanıcı olarak veteriner randevusuna pet’imin son değişikliklerini, ilaçlarını ve sorularımı içeren düzenli bir özetle hazırlanmak istiyorum.
+> Bir kullanıcı olarak veteriner görüşmesini Lulu'da hazırlamak, görüşme
+> sırasında notlarımı takip etmek ve sonrasında yapılacak bakım işlerini doğrudan
+> planlamak istiyorum.
 
-## Başarı ölçütleri
+## Ürün ilkeleri
 
-- Başlatılan visit prep → tamamlanan rapor oranı.
-- Rapor paylaşma/kopyalama oranı.
-- Randevu sonrası follow-up ve reminder oluşturma oranı.
+- Sağlık Raporu tek rapor olarak kalır ve görüşmeye isteğe bağlı eklenir.
+- Workspace tıbbi yorum üretmez; kullanıcı girdisini ve mevcut bakım araçlarını
+  düzenler.
+- Kullanıcı aynı seçimi iki farklı yerde yapmak zorunda kalmaz.
+- Ana aksiyon uzun içeriğin altında kaybolmaz; bulunduğu aşamaya göre sabit ve
+  erişilebilir kalır.
+- Kaynak kayıtlar yalnız gerekli bağlamda açılır; merkezi ve uzun bir tekrar
+  listesi oluşturulmaz.
+- Görüşme sonucu ve tanı alanları veteriner kaydı iddiası taşımaz; açıkça
+  kullanıcı tarafından girilen bilgi olarak etiketlenir.
 
 ## Kapsam
 
 ### Ziyaret öncesi
 
-- [ ] Tarih aralığı: 7/30/90 gün/custom.
-- [ ] Check-in değişimleri, kilo, belirtiler, aktif ilaçlar ve son kayıtlar.
-- [ ] Kullanıcının veterinere soruları ve gözlem notları.
-- [ ] Otomatik özet düzenlenebilir; kaynak satırlarına geri gidilebilir.
-- [ ] PDF ve ekranda “Visit Brief”.
+- [ ] Randevu tarihi ve saati.
+- [ ] Klinik/veteriner seçimi veya serbest metin girişi.
+- [ ] Görüşme nedeni.
+- [ ] Sıralanabilir soru listesi.
+- [ ] Hazırlık ilerlemesi ve yaklaşan görüşmenin Care Hub'da gösterilmesi.
+- [ ] İsteğe bağlı Sağlık Raporu ekleme; yalnız tarih aralığı değiştirilebilir.
+- [ ] Sağlık Raporu oluşturma/düzenleme mevcut rapor akışına yönlendirir.
+
+### Görüşme sırasında
+
+- [ ] Soruları yanıtlandı olarak işaretleme.
+- [ ] Her soruya kısa yanıt/not ekleme.
+- [ ] Görüşme geneli için hızlı not.
+- [ ] İnternet olmadan çalışabilen taslak ve güvenli otomatik kayıt.
 
 ### Ziyaret sonrası
 
-- [ ] Klinik, veteriner, tarih, not, tanı olarak kullanıcı tarafından girilen bilgi.
-- [ ] Reçete/tedavi değişikliği ve sonraki kontrol tarihi.
-- [ ] Tek tap ile reminder/medication plan oluşturma.
+- [ ] Kullanıcı tarafından girilen görüşme sonucu ve notlar.
+- [ ] Tedavi/ilaç değişikliği notu.
+- [ ] Sonraki kontrol tarihi.
+- [ ] Tek dokunuşla reminder oluşturma.
+- [ ] Tek dokunuşla medication plan oluşturma veya mevcut planı açma.
+- [ ] Tamamlanan görüşmenin pet timeline'ında gösterilmesi.
 
 ### Kapsam dışı
 
 - Teşhis veya tedavi önerisi.
+- Otomatik “Visit highlights” veya AI özeti.
+- İkinci bir veteriner raporu/PDF tasarımı.
 - Veteriner adına resmi tıbbi kayıt oluşturma.
+- Klinik sistemleriyle çift yönlü entegrasyonun ilk sürümü.
 
-## UX akışı
+## Temel UX akışı
 
-1. Home/Care/Pet Profile → `Prepare for vet visit`.
-2. Tarih aralığı ve dahil edilecek bölümler.
-3. Lulu önemli değişiklikleri kaynaklarıyla özetler.
-4. Kullanıcı sorularını ekler ve önizlemeyi düzenler.
-5. Ekran/PDF/share.
-6. Ziyaret sonrası “Add outcome” ile follow-up.
+1. Care Hub → `Veteriner görüşmesi hazırla`.
+2. Kullanıcı randevu, klinik/veteriner, neden ve soruları kaydeder.
+3. İsterse mevcut Sağlık Raporu'nu görüşmeye ekler; veri türlerini yeniden seçmez.
+4. Care Hub yaklaşan görüşmeyi ve hazırlık durumunu gösterir.
+5. Görüşme sırasında sorular tamamlanır ve hızlı notlar alınır.
+6. Görüşme sonunda sonuç, tedavi değişikliği ve sonraki kontrol kaydedilir.
+7. Gerekli reminder/medication aksiyonları doğrudan oluşturulur.
 
-## Veri modeli
+## Önerilen veri modeli
 
-- `vet_visits`: pet, scheduled_at, provider_id, reason, status, completed_at.
-- `vet_visit_questions`: text, answered, order.
-- `vet_visit_summaries`: range, selected_sections, generated_at, version; hassas snapshot saklama kararı açık.
-- `vet_visit_outcomes`: user-entered diagnosis label, notes, next_visit_at.
-- Mevcut records/medications ile entity reference.
+Uygulama kodundan önce kesinleştirilecek başlangıç sözleşmesi:
 
-## Özetleme yaklaşımı
-
-- İlk sürüm deterministik: sayım, tarih, trend ve seçili kayıtları formatlar.
-- AI özeti daha sonra feature flag ile; her cümle kaynak veriye bağlanır.
-- Kullanıcı onayı olmadan rapora yeni tıbbi iddia eklenmez.
-
-## Gizlilik ve güvenlik
-
-- Paylaşım explicit kullanıcı aksiyonuyla başlar.
-- PDF geçici dosyaları paylaşım sonrası temizlenir.
-- AI kullanılırsa gönderilen alanlar ve retention açıkça açıklanır.
-- Her raporda “veteriner değerlendirmesinin yerine geçmez” sınırı.
+- `vet_visits`: pet, scheduled_at, provider_id/provider_name, reason, status,
+  started_at, completed_at, health_report_range.
+- `vet_visit_questions`: visit_id, text, answer, answered, sort_order.
+- `vet_visit_outcomes`: visit_id, user_entered_summary, treatment_notes,
+  next_visit_at.
+- Reminder, medication, provider ve pet record ilişkileri kimlik referanslarıyla
+  kurulur; hassas rapor snapshot'ı varsayılan olarak saklanmaz.
 
 ## Uygulama fazları
 
-### Faz 1 — Deterministik Visit Brief
+### Faz 0 — Eski yönü temizle
 
-- [ ] Model, wizard ve veri seçimi.
-- [ ] Kaynak bağlantılı özet.
-- [ ] Mevcut PDF altyapısı ile export.
+- [x] Eski Visit Brief wizard'ını ve Care Hub girişini kaldır.
+- [x] Visit highlights ve ikinci rapor/PDF geliştirmesini geri al.
+- [x] Task'ı Vet Visit Workspace kararına göre yeniden yaz.
 
-### Faz 2 — Outcome ve follow-up
+### Faz 1 — Hazırlık Workspace'i
 
-- [ ] Visit sonucu kaydı.
-- [ ] Medication/reminder oluşturma.
+- [ ] Veri modeli ve local/cloud saklama sözleşmesi.
+- [ ] Randevu, provider, neden ve soru CRUD akışı.
+- [ ] Care Hub yaklaşan görüşme kartı ve hazırlık durumu.
+- [ ] Mevcut Sağlık Raporu'nu isteğe bağlı bağlama.
+
+### Faz 2 — Görüşme ve sonuç
+
+- [ ] Canlı görüşme modu, soru durumları ve hızlı notlar.
+- [ ] Outcome, tedavi değişikliği ve sonraki kontrol.
 - [ ] Timeline entegrasyonu.
 
-### Faz 3 — Akıllı özet
+### Faz 3 — Follow-up otomasyonu
 
-- [ ] Feature flag, eval dataset ve güvenlik review.
-- [ ] Kaynak gösterimi ve hallucination guardrail.
+- [ ] Reminder oluşturma.
+- [ ] Medication plan oluşturma/güncelleme.
+- [ ] Analytics, Plus gating ve aile rolü politikası.
 
 ## Kabul kriterleri
 
-- [ ] Kullanıcı 30 günlük raporu beş dakikadan kısa sürede hazırlayabiliyor.
-- [ ] Her otomatik özet maddesi Lulu içindeki kaynak veriye izlenebilir.
-- [ ] Boş veri bölümleri raporda anlamsız başlık oluşturmaz.
-- [ ] PDF EN/DE ve locale tarih/birim formatlarına uyar.
-- [ ] Shared member yalnız rolünün izin verdiği raporu görür.
+- [ ] Uygulamada “Visit highlights” veya ikinci Vet Visit raporu bulunmuyor.
+- [ ] Kullanıcı sağlık verisi türlerini Vet Visit içinde yeniden seçmiyor.
+- [ ] Kullanıcı yaklaşan görüşmeyi Care Hub'da görebiliyor.
+- [ ] Sorular görüşme sırasında tamamlanıp yanıt/not alabiliyor.
+- [ ] Sonuçtan reminder ve medication aksiyonları oluşturulabiliyor.
+- [ ] Ana aşama aksiyonu küçük ekran ve uzun içerikte erişilebilir kalıyor.
+- [ ] Shared member yalnız rolünün izin verdiği görüşmeleri görebiliyor.
+- [ ] EN/DE/TR, offline taslak, büyük metin ve VoiceOver/TalkBack doğrulanıyor.
+
+## Başarı ölçütleri
+
+- Oluşturulan görüşme → tamamlanan görüşme oranı.
+- Görüşme öncesi en az bir soru ekleme oranı.
+- Görüşme sonrası reminder/medication oluşturma oranı.
+- Care Hub yaklaşan görüşme kartından Workspace'e dönüş oranı.
 
 ## Açık sorular
 
-- [ ] Visit Brief Free önizlemesi ne kadar ayrıntılı?
-- [ ] AI özet ilk sürümde gerekli mi?
-- [ ] Veteriner sonucu bağımsız record türü mü, visit entity mi?
+- [ ] Vet Visit entity'si hangi local/cloud storage sözleşmesini kullanacak?
+- [ ] Free kullanıcı kaç aktif/tamamlanmış görüşme saklayabilecek?
+- [ ] Provider Directory ile bağlantı Faz 1 için zorunlu mu?
+- [ ] Aile rollerinde kim düzenleyebilir, kim yalnız görüntüleyebilir?
+- [ ] Sağlık Raporu görüşmeye canlı referans mı yoksa tarih aralığı referansı mı
+  olarak bağlanacak?
 
 ## Test planı
 
-- Unit: tarih aralığı, bölüm seçimi, veri yetersizliği ve kaynak izlenebilirliği.
-- Golden dataset: deterministik özet/PDF; AI eklenirse doğruluk ve hallucination eval'i.
-- Entegrasyon: medication, reminder, timeline, belge ve aile yetkileri.
-- Manuel: EN/DE PDF, paylaşım, offline hazırlık, iPad ve erişilebilirlik.
+- Unit: visit durum geçişleri, soru sırası/durumu ve follow-up eşlemesi.
+- Entegrasyon: provider, reminder, medication, timeline ve aile yetkileri.
+- Manuel: offline taslak, uygulama kapanıp açılınca devam, uzun soru listesi,
+  küçük ekran, iPad, EN/DE/TR ve erişilebilirlik.
+- Gizlilik: kullanıcı girdisi etiketleri, paylaşım izinleri ve hesap değişiminde
+  veri izolasyonu.
 
 ## Definition of Done
 
-- Her özet maddesi kaynak kayda izlenebilir ve veri yetersizliği dürüstçe gösterilir.
-- PDF, outcome ve follow-up akışları uçtan uca test edildi.
-- Sağlık/gizlilik incelemesi, analytics ve feature flag tamamlandı.
-- EN/DE ve aile rolü QA onaylandı.
+- Öncesi, görüşme anı ve sonrası tek visit entity üzerinde uçtan uca çalışır.
+- İkinci rapor veya tekrar eden veri seçimleri yoktur.
+- Follow-up aksiyonları mevcut reminder/medication sistemine güvenli bağlanır.
+- Sağlık/gizlilik incelemesi, analytics, Plus gating ve aile rolü QA tamamlanır.

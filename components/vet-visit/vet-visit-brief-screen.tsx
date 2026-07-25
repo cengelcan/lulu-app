@@ -8,7 +8,6 @@ import { ReportCheckboxRow } from '@/components/reports/ReportCheckboxRow';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { ContentState } from '@/components/ui/content-state';
 import { DatePickerField } from '@/components/ui/DatePickerField';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -107,7 +106,6 @@ export function VetVisitBriefScreen() {
   const [exportAssets, setExportAssets] = useState<ReportExportAssets | null>(null);
   const [isBuilding, setIsBuilding] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [isSourcesExpanded, setIsSourcesExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const textColor = useThemeColor({}, 'text');
@@ -350,15 +348,7 @@ export function VetVisitBriefScreen() {
     const hasShareableContent = !brief.isEmpty || !previewContent.isEmpty;
 
     return (
-      <ScreenContent
-        footer={
-          <Button
-            title={t('vetVisit.sharePdf')}
-            disabled={isExporting || !hasShareableContent}
-            trailingIcon={!canExportPdf ? <PlusLockButtonIcon /> : undefined}
-            onPress={() => void sharePdf()}
-          />
-        }>
+      <ScreenContent>
         <View style={styles.intro}>
           <ThemedText type="subtitle">{t('reports.steps.reviewTitle')}</ThemedText>
           <ThemedText lightColor={textSecondaryColor} darkColor={textSecondaryColor}>
@@ -393,54 +383,33 @@ export function VetVisitBriefScreen() {
         )}
 
         {brief.sources.length > 0 ? (
-          <View style={styles.section}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ expanded: isSourcesExpanded }}
-              onPress={() => setIsSourcesExpanded((current) => !current)}
-              style={({ pressed }) => [styles.sourceDisclosure, { opacity: pressed ? 0.7 : 1 }]}>
-              <ThemedText
-                lightColor={textSecondaryColor}
-                darkColor={textSecondaryColor}
-                style={styles.sourceDisclosureLabel}>
-                {t('vetVisit.sourcesTitle')} ({brief.sources.length})
-              </ThemedText>
-              <IconSymbol
-                name={isSourcesExpanded ? 'chevron.up' : 'chevron.down'}
-                size={16}
-                color={textSecondaryColor}
-              />
-            </Pressable>
-            {isSourcesExpanded ? (
-              <Card style={styles.sourcesCard}>
-                {brief.sources.map((source, index) => (
-                  <Pressable
-                    key={source.id}
-                    accessibilityRole="button"
-                    onPress={() => router.push(source.route)}
-                    style={({ pressed }) => [
-                      styles.sourceRow,
-                      index < brief.sources.length - 1 && {
-                        borderBottomColor: borderColor,
-                        borderBottomWidth: StyleSheet.hairlineWidth,
-                      },
-                      { opacity: pressed ? 0.7 : 1 },
-                    ]}>
-                    <View style={styles.sourceCopy}>
-                      <ThemedText type="defaultSemiBold">{source.label}</ThemedText>
-                      <ThemedText
-                        lightColor={textSecondaryColor}
-                        darkColor={textSecondaryColor}
-                        style={styles.sourceDate}>
-                        {formatDate(source.date)}
-                      </ThemedText>
-                    </View>
-                    <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
-                  </Pressable>
-                ))}
-              </Card>
-            ) : null}
-          </View>
+          <GroupedSection title={t('vetVisit.sourcesTitle')}>
+            {brief.sources.map((source, index) => (
+              <Pressable
+                key={source.id}
+                accessibilityRole="button"
+                onPress={() => router.push(source.route)}
+                style={({ pressed }) => [
+                  styles.sourceRow,
+                  index < brief.sources.length - 1 && {
+                    borderBottomColor: borderColor,
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                  },
+                  { opacity: pressed ? 0.7 : 1 },
+                ]}>
+                <View style={styles.sourceCopy}>
+                  <ThemedText type="defaultSemiBold">{source.label}</ThemedText>
+                  <ThemedText
+                    lightColor={textSecondaryColor}
+                    darkColor={textSecondaryColor}
+                    style={styles.sourceDate}>
+                    {formatDate(source.date)}
+                  </ThemedText>
+                </View>
+                <IconSymbol name="chevron.right" size={16} color={textSecondaryColor} />
+              </Pressable>
+            ))}
+          </GroupedSection>
         ) : null}
 
         {error ? (
@@ -454,26 +423,18 @@ export function VetVisitBriefScreen() {
           </ThemedText>
         ) : null}
         <Button
-          title={t('vetVisit.editBrief')}
-          variant="secondary"
-          onPress={() => {
-            setIsSourcesExpanded(false);
-            setBrief(null);
-          }}
+          title={t('vetVisit.sharePdf')}
+          disabled={isExporting || !hasShareableContent}
+          trailingIcon={!canExportPdf ? <PlusLockButtonIcon /> : undefined}
+          onPress={() => void sharePdf()}
         />
+        <Button title={t('vetVisit.editBrief')} variant="secondary" onPress={() => setBrief(null)} />
       </ScreenContent>
     );
   }
 
   return (
-    <ScreenContent
-      footer={
-        <Button
-          title={t('vetVisit.buildBrief')}
-          disabled={isBuilding}
-          onPress={() => void buildBrief()}
-        />
-      }>
+    <ScreenContent>
       <View style={styles.intro}>
         <ThemedText lightColor={textSecondaryColor} darkColor={textSecondaryColor}>
           {t('vetVisit.intro')}
@@ -592,21 +553,19 @@ export function VetVisitBriefScreen() {
           {error}
         </ThemedText>
       ) : null}
+      <Button
+        title={t('vetVisit.buildBrief')}
+        disabled={isBuilding}
+        onPress={() => void buildBrief()}
+      />
     </ScreenContent>
   );
 }
 
-function ScreenContent({
-  children,
-  footer,
-}: {
-  children: React.ReactNode;
-  footer?: React.ReactNode;
-}) {
+function ScreenContent({ children }: { children: React.ReactNode }) {
   return (
     <ScreenContainer
       scrollable
-      footer={footer}
       edges={['bottom']}
       maxContentWidth={LayoutTokens.readingContentMaxWidth}
       contentStyle={styles.content}>
@@ -649,22 +608,4 @@ const styles = StyleSheet.create({
   },
   sourceCopy: { flex: 1, minWidth: 0, gap: 2 },
   sourceDate: { ...Typography.caption },
-  sourceDisclosure: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.xs,
-  },
-  sourceDisclosureLabel: {
-    ...Typography.caption,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  sourcesCard: {
-    padding: 0,
-    gap: 0,
-    overflow: 'hidden',
-  },
 });

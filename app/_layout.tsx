@@ -42,7 +42,6 @@ export default function RootLayout() {
         <Stack.Screen name="family-activity" />
         <Stack.Screen name="join-family" />
         <Stack.Screen name="reports" />
-        <Stack.Screen name="vet-visit" />
         <Stack.Screen name="records" />
         <Stack.Screen name="reminders" />
         <Stack.Screen name="medications" />

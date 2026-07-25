@@ -54,8 +54,6 @@ export type Translations = {
     familyActivity: string;
     familyManagement: string;
     familyManagementHint: string;
-    prepareVetVisit: string;
-    prepareVetVisitDescription: string;
   };
   familyActivity: {
     title: string;
@@ -72,39 +70,6 @@ export type Translations = {
     noFilterResultsDescription: string;
     loadMore: string;
     unread: string;
-  };
-  vetVisit: {
-    title: string;
-    intro: string;
-    rangeTitle: string;
-    sectionsTitle: string;
-    questionsTitle: string;
-    questionsPlaceholder: string;
-    questionsHint: string;
-    buildBrief: string;
-    editBrief: string;
-    highlightsTitle: string;
-    sourcesTitle: string;
-    noDataTitle: string;
-    noDataDescription: string;
-    disclaimer: string;
-    checkIns: string;
-    medications: string;
-    records: string;
-    loading: string;
-    sources: {
-      checkIn: string;
-      medication: string;
-      record: string;
-    };
-    brief: {
-      observedDays: string;
-      attentionDays: string;
-      noAttentionDays: string;
-      recentRecords: string;
-      latestWeight: string;
-      activeMedications: string;
-    };
   };
   settings: {
     title: string;

@@ -88,7 +88,7 @@ Lulu’nun monokrom + lavanta dili tutarlı ve sakin; ancak bazı ekranlar çok 
 
 ## Açık sorular
 
-- [ ] Light mode yeniden kullanıcı seçeneği olacak mı?
+- [x] Light mode yeniden kullanıcı seçeneği olacak mı? — Evet; `System / Light / Dark` tercihi ve tam ekran QA kapsamı task 015'e taşındı.
 - [ ] iPad regular width için sidebar kullanılacak mı?
 - [ ] Health status için kaç semantik renk gerekli?
 

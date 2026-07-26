@@ -6,12 +6,12 @@
 |---|---|
 | Durum | Faz 1–3 uygulandı; yayın öncesi manuel QA bekliyor |
 | Öncelik | P0 |
-| Hedef sürüm | v1.4 |
+| Hedef sürüm | v1.3 |
 | Task türü | Plus / Sağlık / Bakım iş akışı |
 | Tahmini efor | XL |
 | Ürün katmanı | Plus; Free sınırı ayrıca kararlaştırılacak |
 | Bağımlılıklar | 002, 006, 013 |
-| Son güncelleme | 2026-07-25 |
+| Son güncelleme | 2026-07-26 |
 
 ## Son ürün kararı
 

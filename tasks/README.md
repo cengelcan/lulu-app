@@ -34,7 +34,8 @@ Bu klasör ilk App Store yayını sonrasında ele alınacak ürün geliştirmele
 | 005 | [Paywall ve fiyatlandırma v2](./005-paywall-and-pricing-v2.md) | P1 | M | v1.2 | 001, 004 |
 | 006 | [İlaç ve doz takibi](./006-medication-and-dose-tracking.md) | P0 | XL | v1.3 | 001 |
 | 007 | [Family Activity Timeline](./007-family-activity-timeline.md) | P1 | L | v1.3 | 003, 006 |
-| 008 | [Vet Visit Mode](./008-vet-visit-mode.md) | P0 | XL | v1.4 | 006, 002 |
+| 008 | [Vet Visit Mode](./008-vet-visit-mode.md) | P0 | XL | v1.3 | 006, 002 |
+| 015 | [Deneyim temelleri ve kullanıcı tercihleri](./015-experience-foundations-and-preferences.md) | P1 | XL | v1.4 | 004, 008 |
 | 009 | [Belge tarama ve yapılandırılmış içe aktarma](./009-document-scan-and-import.md) | P1 | XL | v1.5 | 006, 008 |
 | 010 | [Gelişmiş ve açıklanabilir sağlık içgörüleri](./010-explainable-health-insights.md) | P1 | XL | v1.5 | 002, 006 |
 | 011 | [Health Passport ve acil durum paylaşımı](./011-health-passport-and-emergency-sharing.md) | P1 | L | v1.6 | 008 |

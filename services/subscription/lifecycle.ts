@@ -3,16 +3,11 @@ import {
   fetchRevenueCatPlusStatus,
   isRevenueCatAvailable,
   logInRevenueCat,
-  restoreRevenueCatPurchases,
   subscribeToRevenueCatUpdates,
   teardownRevenueCat,
 } from '@/services/subscription/revenuecat';
 import { type PlusStatus } from '@/services/subscription/plus-status';
 import { resolvePlusStatusForUser } from '@/services/sync/subscription-sync';
-import {
-  hasAttemptedSubscriptionRecovery,
-  markSubscriptionRecoveryAttempted,
-} from '@/storage/prefs.storage';
 
 let unsubscribeRevenueCat: (() => void) | null = null;
 let activeUserId: string | null = null;
@@ -60,18 +55,7 @@ async function initializeSubscriptionInner(
 
   if (configured) {
     try {
-      const loginStatus = await logInRevenueCat(userId, { email: options?.email });
-
-      // Existing subscriptions can temporarily be detached from the local
-      // StoreKit receipt after reinstall. Perform the same recovery as the
-      // Restore Purchases button once per user and installation.
-      if (
-        !loginStatus.isPlusActive &&
-        !(await hasAttemptedSubscriptionRecovery(userId))
-      ) {
-        await restoreRevenueCatPurchases();
-        await markSubscriptionRecoveryAttempted(userId);
-      }
+      await logInRevenueCat(userId, { email: options?.email });
     } catch (error) {
       console.warn('RevenueCat login or purchase sync failed', error);
     }

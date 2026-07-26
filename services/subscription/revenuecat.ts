@@ -17,6 +17,10 @@ import {
   type PlusSubscriptionDetails,
   resolvePlusStatus,
 } from '@/services/subscription/plus-status';
+import {
+  assertUserInitiatedSubscriptionRestore,
+  type SubscriptionRestoreOrigin,
+} from '@/services/subscription/restore-policy';
 import { isIntroOrTrialPeriod } from '@/utils/subscription-display';
 
 type PurchasesModule = typeof import('react-native-purchases').default;
@@ -305,7 +309,11 @@ export async function purchaseRevenueCatPackage(pkg: PurchasesPackage): Promise<
   return getPlusStatusFromCustomerInfo(customerInfo);
 }
 
-export async function restoreRevenueCatPurchases(): Promise<PlusStatus> {
+export async function restoreRevenueCatPurchases(
+  origin: SubscriptionRestoreOrigin
+): Promise<PlusStatus> {
+  assertUserInitiatedSubscriptionRestore(origin);
+
   const Purchases = await loadPurchasesModule();
   if (!Purchases) {
     return { isPlusActive: false, plusExpiresAt: null, subscription: null };

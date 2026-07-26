@@ -71,40 +71,6 @@ export async function removeCurrentUserId(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.currentUserId);
 }
 
-type SubscriptionRecoveryAttemptedUsers = Record<string, true>;
-
-async function getSubscriptionRecoveryAttemptedUsers(): Promise<SubscriptionRecoveryAttemptedUsers> {
-  const value = await AsyncStorage.getItem(StorageKeys.subscriptionRecoveryAttemptedUsers);
-  if (!value) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(value) as SubscriptionRecoveryAttemptedUsers;
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-export async function hasAttemptedSubscriptionRecovery(userId: string): Promise<boolean> {
-  const attemptedUsers = await getSubscriptionRecoveryAttemptedUsers();
-  return attemptedUsers[userId] === true;
-}
-
-export async function markSubscriptionRecoveryAttempted(userId: string): Promise<void> {
-  const attemptedUsers = await getSubscriptionRecoveryAttemptedUsers();
-  attemptedUsers[userId] = true;
-  await AsyncStorage.setItem(
-    StorageKeys.subscriptionRecoveryAttemptedUsers,
-    JSON.stringify(attemptedUsers)
-  );
-}
-
-export async function removeSubscriptionRecoveryAttempts(): Promise<void> {
-  await AsyncStorage.removeItem(StorageKeys.subscriptionRecoveryAttemptedUsers);
-}
-
 export async function getCheckInReminderTime(): Promise<ReminderTime> {
   const value = await AsyncStorage.getItem(StorageKeys.checkInReminderTime);
   if (value) {

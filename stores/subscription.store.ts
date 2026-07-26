@@ -103,7 +103,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const status = await restoreRevenueCatPurchases();
+      const status = await restoreRevenueCatPurchases('user_action');
       useUserStore.setState({
         isPlusActive: status.isPlusActive,
         plusExpiresAt: status.plusExpiresAt,

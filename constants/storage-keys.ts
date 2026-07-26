@@ -19,8 +19,6 @@ export const StorageKeys = {
   userSetupPath: '@pet_health_journal/user_setup_path',
   joinRemindersPromptPending: '@pet_health_journal/join_reminders_prompt_pending',
   joinRemindersPromptDismissed: '@pet_health_journal/join_reminders_prompt_dismissed',
-  subscriptionRecoveryAttemptedUsers:
-    '@pet_health_journal/subscription_recovery_attempted_users',
 } as const;
 
 export type StorageKey = (typeof StorageKeys)[keyof typeof StorageKeys];

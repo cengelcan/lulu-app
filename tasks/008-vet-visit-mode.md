@@ -4,14 +4,14 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | Faz 1–3 uygulandı; yayın öncesi manuel QA bekliyor |
+| Durum | Done |
 | Öncelik | P0 |
 | Hedef sürüm | v1.3 |
 | Task türü | Plus / Sağlık / Bakım iş akışı |
 | Tahmini efor | XL |
 | Ürün katmanı | Plus; Free sınırı ayrıca kararlaştırılacak |
 | Bağımlılıklar | 002, 006, 013 |
-| Son güncelleme | 2026-07-26 |
+| Son güncelleme | 2026-07-27 |
 
 ## Son ürün kararı
 
@@ -150,7 +150,7 @@ Uygulama kodundan önce kesinleştirilecek başlangıç sözleşmesi:
 - [x] Sonuçtan reminder ve medication aksiyonları oluşturulabiliyor.
 - [x] Ana aşama aksiyonu küçük ekran ve uzun içerikte erişilebilir kalıyor.
 - [x] Shared member yalnız rolünün izin verdiği görüşmeleri görebiliyor.
-- [ ] EN/DE/TR, offline taslak, büyük metin ve VoiceOver/TalkBack doğrulanıyor.
+- [x] EN/DE/TR, offline taslak, büyük metin ve VoiceOver/TalkBack doğrulanıyor.
 
 ## Başarı ölçütleri
 

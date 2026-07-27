@@ -37,6 +37,7 @@ export function VetVisitLiveScreen() {
   const hasLoaded = useRef(false);
   const secondary = useThemeColor({}, 'textSecondary');
   const accent = useThemeColor({}, 'accent');
+  const alertColor = useThemeColor({}, 'alert');
   const screenOptions = useHubStackScreenOptions(t('vetVisits.liveTitle'), '/vet-visits' as Href);
   const isReadOnly = Boolean(bundle && pet && !canWriteVetVisit(pet, bundle.visit, userId));
 
@@ -149,7 +150,10 @@ export function VetVisitLiveScreen() {
         <ThemedText accessibilityLiveRegion="polite"
           lightColor={saveState === 'error' ? undefined : saveState === 'saved' ? accent : secondary}
           darkColor={saveState === 'error' ? undefined : saveState === 'saved' ? accent : secondary}
-          style={[Typography.caption, saveState === 'error' && styles.error]}>
+          style={[
+            Typography.caption,
+            saveState === 'error' && { color: alertColor },
+          ]}>
           {saveState === 'saving' ? t('vetVisits.autoSaving')
             : saveState === 'error' ? t('vetVisits.saveFailed')
               : saveState === 'saved' ? t('vetVisits.savedOffline') : ''}
@@ -165,5 +169,4 @@ const styles = StyleSheet.create({
   question: { gap: Spacing.sm },
   questionHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   questionText: { flex: 1 },
-  error: { color: '#ef4444' },
 });

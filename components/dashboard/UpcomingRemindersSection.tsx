@@ -11,9 +11,9 @@ import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { AccessibilityTokens } from '@/constants/accessibility';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
-import { getLocaleTag } from '@/utils/locale';
 import { getReminderFormRoute } from '@/utils/pet-reminder-display';
 import { buildUpcomingReminders, hasOverdueReminders } from '@/utils/upcoming-reminders';
 import type { PetReminder } from '@/types/pet-reminder';
@@ -32,14 +32,14 @@ export function UpcomingRemindersSection({
   reminders,
 }: UpcomingRemindersSectionProps) {
   const router = useRouter();
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const titleColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
   const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
 
-  const upcoming = buildUpcomingReminders(reminders, locale, t, {
+  const upcoming = buildUpcomingReminders(reminders, regionalFormat, t, {
     excludeReminderIds: excludedReminderId ? [excludedReminderId] : undefined,
     limit: 3,
     referenceDate,

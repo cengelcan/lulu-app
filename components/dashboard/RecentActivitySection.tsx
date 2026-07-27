@@ -7,9 +7,10 @@ import { RecordHistoryRow } from '@/components/records/RecordHistoryRow';
 import { Card } from '@/components/ui/Card';
 import { RECORD_TYPES } from '@/constants/record-types';
 import { Spacing } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useTranslation } from '@/hooks/use-translation';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 import type { PetRecord } from '@/types/pet-record';
-import { getLocaleTag } from '@/utils/locale';
 import {
   formatRecordDate,
   getRecordFormRoute,
@@ -25,8 +26,11 @@ type RecentActivitySectionProps = {
 
 export function RecentActivitySection({ records }: RecentActivitySectionProps) {
   const router = useRouter();
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
+  const weightUnitPreference = useExperiencePreferencesStore(
+    (state) => state.preferences?.weightUnitPreference ?? 'kg'
+  );
   const recentRecords = records.slice(0, HOME_RECENT_RECORDS_LIMIT);
 
   if (recentRecords.length === 0) {
@@ -49,10 +53,10 @@ export function RecentActivitySection({ records }: RecentActivitySectionProps) {
             <RecordHistoryRow
               key={record.id}
               backgroundColor={definition?.backgroundColor ?? '#6b7280'}
-              dateLabel={formatRecordDate(record.date, locale)}
+              dateLabel={formatRecordDate(record.date, regionalFormat)}
               icon={definition?.icon ?? 'doc.text.fill'}
               isLast={index === recentRecords.length - 1}
-              subtitle={getRecordSummary(record, t)}
+              subtitle={getRecordSummary(record, t, weightUnitPreference, regionalFormat)}
               title={t(getRecordTypeLabelKey(record.type))}
               onPress={() => router.push(getRecordFormRoute(record.type, record.id) as Href)}
             />

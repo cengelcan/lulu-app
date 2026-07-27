@@ -8,11 +8,11 @@ import { GroupedSection } from '@/components/pet/GroupedSection';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Spacing } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
 import { usePetStore } from '@/stores/pet.store';
-import { getLocaleTag } from '@/utils/locale';
 import { getRecordFormRoute } from '@/utils/pet-record-display';
 import { getReminderTitle, getReminderTypeLabelKey } from '@/utils/pet-reminder-display';
 import { reminderTypeToRecordType } from '@/utils/reminder-to-record';
@@ -20,8 +20,8 @@ import { formatCompletedReminderDate, listCompletedReminders } from '@/utils/upc
 
 export default function CompletedRemindersScreen() {
   const router = useRouter();
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
 
   const pet = usePetStore((state) => state.pet);
   const loadPet = usePetStore((state) => state.loadPet);
@@ -77,7 +77,7 @@ export default function CompletedRemindersScreen() {
             {completedReminders.map((reminder, index) => (
               <CompletedReminderRow
                 key={reminder.id}
-                dateLabel={formatCompletedReminderDate(reminder.dueDate, locale)}
+                dateLabel={formatCompletedReminderDate(reminder.dueDate, regionalFormat)}
                 isLast={index === completedReminders.length - 1}
                 title={getReminderTitle(reminder, t)}
                 typeLabel={t(getReminderTypeLabelKey(reminder.type))}

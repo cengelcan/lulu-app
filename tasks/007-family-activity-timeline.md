@@ -4,18 +4,25 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | In Progress |
+| Durum | Done |
 | Öncelik | P1 |
 | Hedef sürüm | v1.3 |
 | Task türü | Plus / İşbirliği / Realtime |
 | Tahmini efor | L |
 | Ürün katmanı | Plus |
 | Bağımlılıklar | 003, 006 |
-| Son güncelleme | 2026-07-23 |
+| Son güncelleme | 2026-07-27 |
 
 ## Bağlam ve problem
 
 Aile paylaşımı ortak veriye erişim sağlıyor ancak bakım koordinasyonu görünür bir günlük deneyime dönüşmüyor. Kullanıcı kimin check-in yaptığını, ilacı verdiğini veya reminder tamamladığını tek akışta göremediğinde duplicate bakım ve iletişim yükü devam eder. Mevcut inbox activity altyapısı başlangıç noktasıdır.
+
+## Kapanış notu — 2026-07-27
+
+Timeline, filtreler, realtime/pagination birleştirme, medication event'leri,
+gizlilik korumalı push digest ve hesap izolasyonu v1.3 yayın turunda doğrulandı
+ve kabul edildi. Acknowledgement/yorum yeni bir özellik olarak sonraki ürün
+kapsamına bırakıldı.
 
 ## Kullanıcı sonucu
 
@@ -28,7 +35,7 @@ Aile paylaşımı ortak veriye erişim sağlıyor ancak bakım koordinasyonu gö
 - [x] Pet ve aktör filtreleri.
 - [x] Activity detail deep link.
 - [x] Read/unread ve önemli aksiyon ayrımı.
-- [ ] Basit acknowledgement/emoji sonraki faz için değerlendirilebilir.
+- [x] Basit acknowledgement/emoji sonraki faz için değerlendirilebilir.
 
 ### Kapsam dışı
 
@@ -81,17 +88,17 @@ Aile paylaşımı ortak veriye erişim sağlıyor ancak bakım koordinasyonu gö
 
 ## Kabul kriterleri
 
-- [ ] İki cihazda yapılan eylem diğerinde gerçek zamanlı ve tek kez görünür.
-- [ ] Family’den ayrılan kullanıcı timeline’a erişemez.
-- [ ] Offline event’ler bağlantı gelince doğru sırada birleşir.
-- [ ] Timeline hassas not veya tıbbi ayrıntıyı preview’da ifşa etmez.
-- [ ] EN/DE aktör ve zaman cümleleri dilbilgisel doğru.
+- [x] İki cihazda yapılan eylem diğerinde gerçek zamanlı ve tek kez görünür.
+- [x] Family’den ayrılan kullanıcı timeline’a erişemez.
+- [x] Offline event’ler bağlantı gelince doğru sırada birleşir.
+- [x] Timeline hassas not veya tıbbi ayrıntıyı preview’da ifşa etmez.
+- [x] EN/DE aktör ve zaman cümleleri dilbilgisel doğru.
 
 ## Açık sorular
 
-- [ ] Event saklama süresi ne kadar?
+- [x] Event saklama süresi ne kadar? — v1.3'te ayrı otomatik retention süresi uygulanmıyor; erişim aktif family üyeliği ve mevcut RLS kurallarıyla sınırlandırılıyor. Retention politikası ileride ayrı backend/gizlilik kararı olarak ele alınabilir.
 - [x] Family activity için push digest varsayılan mı opt-in mi? — Opt-in; kullanıcı Ayarlar’dan açıkça etkinleştirir.
-- [ ] Acknowledgement/yorum v1 kapsamında mı?
+- [x] Acknowledgement/yorum v1 kapsamında mı? — Hayır; v1.3 kapsamı dışında bırakıldı.
 
 ## Test planı
 
@@ -102,9 +109,9 @@ Aile paylaşımı ortak veriye erişim sağlıyor ancak bakım koordinasyonu gö
 
 ### Yayın öncesi kontrol listesi
 
-- [ ] İki eşzamanlı fiziksel cihaz veya simülatör — Alıcı hesapta “Aile Aktivitesi Özeti” açıkken diğer aile hesabı bakım aktivitesi oluşturacak; özet en geç 15 dakika içinde ulaşmalı ve bildirime dokununca Family Activity ekranı açılmalı.
-- [ ] Push önizlemesi — Bildirim başlığı ve gövdesi ilaç adı, pet adı, sağlık notu veya tıbbi ayrıntı içermemeli.
-- [ ] Hesap izolasyonu — Aynı kurulumda hesaptan çıkış yapıldığında önceki hesabın aile aktivitesi bildirimi artık gelmemeli.
+- [x] İki eşzamanlı fiziksel cihaz veya simülatör — Alıcı hesapta “Aile Aktivitesi Özeti” açıkken diğer aile hesabı bakım aktivitesi oluşturacak; özet en geç 15 dakika içinde ulaşmalı ve bildirime dokununca Family Activity ekranı açılmalı.
+- [x] Push önizlemesi — Bildirim başlığı ve gövdesi ilaç adı, pet adı, sağlık notu veya tıbbi ayrıntı içermemeli.
+- [x] Hesap izolasyonu — Aynı kurulumda hesaptan çıkış yapıldığında önceki hesabın aile aktivitesi bildirimi artık gelmemeli.
 
 ## Definition of Done
 

@@ -1,6 +1,6 @@
 import type { Href } from 'expo-router';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
@@ -19,6 +19,7 @@ import { usePlusFeature } from '@/hooks/use-plus-feature';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import * as petRecordStorage from '@/storage/pet-record.storage';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useUserStore } from '@/stores/user.store';
@@ -126,6 +127,11 @@ export default function RecordFormScreen() {
   const { allowed: canCreateRecord, requestAccess } =
     usePlusFeature('unlimitedRecords');
   const isPlusActive = useUserStore((state) => state.isPlusActive);
+  const weightUnitPreference = useExperiencePreferencesStore(
+    (state) => state.preferences?.weightUnitPreference ?? 'kg'
+  );
+  const preferencesHaveLoaded = useExperiencePreferencesStore((state) => state.hasLoaded);
+  const appliedWeightPreference = useRef(false);
 
   const [date, setDate] = useState(() => formatLocalDate(getTodayStart()));
   const [notes, setNotes] = useState('');
@@ -163,6 +169,23 @@ export default function RecordFormScreen() {
 
     router.replace('/records' as Href);
   }, [recordType, router]);
+
+  useEffect(() => {
+    if (
+      recordType !== 'weight' ||
+      recordId ||
+      !preferencesHaveLoaded ||
+      appliedWeightPreference.current
+    ) {
+      return;
+    }
+
+    appliedWeightPreference.current = true;
+    setMetadata((current) => ({
+      ...(current as PetRecordMetadataByType['weight']),
+      unit: weightUnitPreference,
+    }));
+  }, [preferencesHaveLoaded, recordId, recordType, weightUnitPreference]);
 
   useEffect(() => {
     if (!recordType) {

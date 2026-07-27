@@ -1,7 +1,14 @@
-import { StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  type TextProps,
+  type TextStyle,
+} from 'react-native';
 
 import { DEFAULT_MAX_FONT_SIZE_MULTIPLIER, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { getScaledLineHeight } from '@/utils/dynamic-type';
 
 type ThemedTextType =
   | 'default'
@@ -80,14 +87,29 @@ export function ThemedText({
   allowFontScaling = true,
   ...rest
 }: ThemedTextProps) {
+  const { fontScale } = useWindowDimensions();
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const linkColor = useThemeColor({}, 'accent');
+  const resolvedMaxFontSizeMultiplier = getMaxFontSizeMultiplier(type, maxFontSizeMultiplier);
+  const resolvedStyle = StyleSheet.flatten([getTypeStyle(type), style]);
+  const scaledLineHeight = getScaledLineHeight(
+    resolvedStyle?.lineHeight,
+    fontScale,
+    resolvedMaxFontSizeMultiplier
+  );
 
   return (
     <Text
       allowFontScaling={allowFontScaling}
-      maxFontSizeMultiplier={getMaxFontSizeMultiplier(type, maxFontSizeMultiplier)}
-      style={[{ color: type === 'link' ? linkColor : color }, getTypeStyle(type), style]}
+      maxFontSizeMultiplier={resolvedMaxFontSizeMultiplier}
+      style={[
+        { color: type === 'link' ? linkColor : color },
+        getTypeStyle(type),
+        style,
+        allowFontScaling && scaledLineHeight !== undefined
+          ? { lineHeight: scaledLineHeight }
+          : undefined,
+      ]}
       {...rest}
     />
   );

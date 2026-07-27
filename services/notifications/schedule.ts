@@ -26,6 +26,7 @@ import {
   type NotificationPermissionStatus,
 } from '@/storage/prefs.storage';
 import type { ReminderTime } from '@/types/reminder';
+import { loadNotificationCategoryPreferences } from '@/storage/experience-preferences.storage';
 
 type ExpoNotificationsModule = NonNullable<
   Awaited<ReturnType<typeof getExpoNotificationsModule>>
@@ -144,6 +145,7 @@ export async function syncCheckInReminderSchedule(input?: {
   petName?: string | null;
   petId?: string | null;
   petPhotoUri?: string | null;
+  enabled?: boolean | null;
 }): Promise<void> {
   if (Platform.OS === 'web') {
     return;
@@ -151,16 +153,18 @@ export async function syncCheckInReminderSchedule(input?: {
 
   await ensureNotificationHandlerConfigured();
 
-  const [reminderTime, permission, activePet, language] = await Promise.all([
+  const [reminderTime, permission, activePet, language, categories] = await Promise.all([
     input?.reminderTime !== undefined ? Promise.resolve(input.reminderTime) : getCheckInReminderTime(),
     input?.permission !== undefined ? Promise.resolve(input.permission) : getNotificationPermission(),
     getActivePet(),
     getAppLanguage(),
+    loadNotificationCategoryPreferences(),
   ]);
 
   await cancelCheckInReminder();
 
-  if (permission !== 'allowed') {
+  const enabled = input?.enabled ?? categories.dailyCheckIn;
+  if (!enabled || permission !== 'allowed') {
     return;
   }
 

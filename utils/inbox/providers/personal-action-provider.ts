@@ -5,6 +5,7 @@ import { getCheckInRoute } from '@/services/notifications/constants';
 import type { InboxItem, InboxProvider, InboxProviderInput, InboxTranslateFn } from '@/types/inbox';
 import type { Pet } from '@/types/pet';
 import type { PetReminder } from '@/types/pet-reminder';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import { formatLocalDate } from '@/utils/date';
 import { getReminderFormRoute } from '@/utils/pet-reminder-display';
 import {
@@ -86,11 +87,11 @@ function buildOverdueReminderItems(
   reminders: PetReminder[],
   reminderById: Map<string, PetReminder>,
   petNameById: Map<string, string>,
-  locale: string,
+  regionalFormat: RegionalFormatContext,
   t: InboxTranslateFn,
   referenceDate: Date
 ): InboxItem[] {
-  const overdue = buildOverdueReminders(reminders, locale, t, { referenceDate });
+  const overdue = buildOverdueReminders(reminders, regionalFormat, t, { referenceDate });
 
   return overdue.map((reminder) => {
     const sourceReminder = reminderById.get(reminder.reminderId);
@@ -119,11 +120,11 @@ function buildUpcomingReminderItems(
   reminders: PetReminder[],
   reminderById: Map<string, PetReminder>,
   petNameById: Map<string, string>,
-  locale: string,
+  regionalFormat: RegionalFormatContext,
   t: InboxTranslateFn,
   referenceDate: Date
 ): InboxItem[] {
-  const upcoming = buildUpcomingReminders(reminders, locale, t, {
+  const upcoming = buildUpcomingReminders(reminders, regionalFormat, t, {
     referenceDate,
     withinDays: 1,
   });
@@ -224,7 +225,7 @@ export const buildPersonalActionItems: InboxProvider = (input) => {
       activeReminders,
       reminderById,
       petNameById,
-      input.locale,
+      input.regionalFormat,
       input.t,
       referenceDate
     ),
@@ -232,7 +233,7 @@ export const buildPersonalActionItems: InboxProvider = (input) => {
       activeReminders,
       reminderById,
       petNameById,
-      input.locale,
+      input.regionalFormat,
       input.t,
       referenceDate
     ),

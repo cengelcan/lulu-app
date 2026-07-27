@@ -1,7 +1,9 @@
 import type { RecordTypeLabelKey } from '@/constants/record-types';
 import { RECORD_TYPES } from '@/constants/record-types';
-import type { PetRecord, RecordTypeId } from '@/types/pet-record';
-import { formatCheckInTitleDate } from '@/utils/date';
+import type { PetRecord, RecordTypeId, WeightUnit } from '@/types/pet-record';
+import { formatRegionalNumber, formatWeekdayDate } from '@/utils/formatters';
+import type { RegionalFormatContext } from '@/utils/regional-format';
+import { convertWeight, roundWeightForDisplay } from '@/utils/weight-unit';
 
 type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
 
@@ -14,11 +16,16 @@ export function getRecordTypeLabelKey(type: RecordTypeId): RecordTypeLabelKey {
   return definition.labelKey;
 }
 
-export function formatRecordDate(date: string, locale: string): string {
-  return formatCheckInTitleDate(date, locale);
+export function formatRecordDate(date: string, context: RegionalFormatContext): string {
+  return formatWeekdayDate(date, context);
 }
 
-export function getRecordSummary(record: PetRecord, t: TranslateFn): string {
+export function getRecordSummary(
+  record: PetRecord,
+  t: TranslateFn,
+  displayWeightUnit?: WeightUnit,
+  regionalFormat?: RegionalFormatContext
+): string {
   switch (record.type) {
     case 'vet_visit':
       return record.metadata.clinicName?.trim() || record.metadata.reason?.trim() || t('records.summary.vetVisit');
@@ -40,11 +47,18 @@ export function getRecordSummary(record: PetRecord, t: TranslateFn): string {
         ? `${name} · ${t(`records.severity.${record.metadata.severity}`)}`
         : name;
     }
-    case 'weight':
+    case 'weight': {
+      const unit = displayWeightUnit ?? record.metadata.unit;
+      const value = roundWeightForDisplay(
+        convertWeight(record.metadata.value, record.metadata.unit, unit)
+      );
       return t('records.summary.weightValue', {
-        value: record.metadata.value,
-        unit: t(`records.units.${record.metadata.unit}`),
+        value: regionalFormat
+          ? formatRegionalNumber(value, regionalFormat, { maximumFractionDigits: 1 })
+          : value,
+        unit: t(`records.units.${unit}`),
       });
+    }
     case 'operation': {
       const procedure = record.metadata.procedureName.trim();
       const clinic = record.metadata.clinicName?.trim();

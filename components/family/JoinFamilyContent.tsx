@@ -45,6 +45,7 @@ export function JoinFamilyContent({ showOwnerFallback = false }: JoinFamilyConte
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
+  const alertColor = useThemeColor({}, 'alert');
 
   useFocusEffect(
     useCallback(() => {
@@ -120,7 +121,11 @@ export function JoinFamilyContent({ showOwnerFallback = false }: JoinFamilyConte
           style={[styles.input, { color: textColor, borderColor, backgroundColor: surfaceColor }]}
         />
 
-        {error ? <ThemedText style={styles.error}>{translateError(t, error)}</ThemedText> : null}
+        {error ? (
+          <ThemedText style={[styles.error, { color: alertColor }]}>
+            {translateError(t, error)}
+          </ThemedText>
+        ) : null}
 
         <Button
           title={t('sharing.joinFamily')}
@@ -169,7 +174,6 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   error: {
-    color: '#FF6B6B',
     textAlign: 'center',
     ...Typography.caption,
   },

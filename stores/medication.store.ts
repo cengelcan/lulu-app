@@ -60,6 +60,14 @@ export const useMedicationStore = create<MedicationState>((set, get) => {
     await medicationStorage.updateMedicationDose(updated);
     if (status === 'taken') {
       await medicationStorage.decrementMedicationInventory(dose.planId, updated.updatedAt);
+      try {
+        const { notifyMedicationRefillIfNeeded } = await import(
+          '@/services/notifications/medication-refill'
+        );
+        await notifyMedicationRefillIfNeeded(dose.planId, dose.petId);
+      } catch (error) {
+        console.warn('Failed to deliver medication refill notification', error);
+      }
     }
     set({ doses: get().doses.map((item) => item.id === id ? updated : item) });
     if (useUserStore.getState().userId) {

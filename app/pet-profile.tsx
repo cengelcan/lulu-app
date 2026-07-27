@@ -1,15 +1,17 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useMemo } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { GroupedSection } from '@/components/pet/GroupedSection';
+import { HealthConditionChips } from '@/components/pet/HealthConditionChips';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ProfileDetailRow } from '@/components/pet/ProfileDetailRow';
 import { ThemedText } from '@/components/themed-text';
+import { Card } from '@/components/ui/Card';
 import { HeaderTextButton } from '@/components/ui/HeaderTextButton';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { usePetStore } from '@/stores/pet.store';
 import { STACK_BACK_ONLY_OPTIONS, HEADER_ACTION_CONTAINER_STYLE } from '@/constants/navigation';
@@ -19,6 +21,7 @@ import { canEditPetProfile } from '@/utils/pet-access';
 
 export default function PetProfileScreen() {
   const router = useRouter();
+  const { width, fontScale } = useWindowDimensions();
   const { id: idParam } = useLocalSearchParams<{ id?: string | string[] }>();
   const petId = useMemo(
     () => (Array.isArray(idParam) ? idParam[0] : idParam),
@@ -33,7 +36,7 @@ export default function PetProfileScreen() {
     displayPetSex,
     displayPetSpayNeuterStatus,
     displayPetDate,
-    displayHealthConditions,
+    getHealthConditionLabel,
   } = usePetDisplay();
   const pet = usePetStore((state) => state.pet);
   const isLoading = usePetStore((state) => state.isLoading);
@@ -42,6 +45,12 @@ export default function PetProfileScreen() {
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
+  const brandAccentBorder = useThemeColor({}, 'brandAccentBorder');
+  const successColor = useThemeColor({}, 'success');
+  const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
+  const stackHero = width < 360 || fontScale >= 1.4;
 
   useEffect(() => {
     if (petId) {
@@ -119,50 +128,93 @@ export default function PetProfileScreen() {
       <Stack.Screen options={screenOptions} />
       <ScreenContainer scrollable edges={['bottom']} contentStyle={styles.content}>
         <View style={styles.body}>
-          <View style={styles.header}>
-            <PetAvatar photoUri={pet.photoUri} size={96} />
-            <ThemedText type="title" style={styles.petName}>
-              {pet.name}
-            </ThemedText>
-            <ThemedText
-              lightColor={textSecondaryColor}
-              darkColor={textSecondaryColor}
-              style={styles.petType}>
-              {displayPetSpecies(pet.species)}
-            </ThemedText>
-          </View>
+          <Card style={[styles.heroCard, stackHero && styles.heroCardStacked]}>
+            <PetAvatar
+              photoUri={pet.photoUri}
+              species={pet.species}
+              size={96}
+              accentBorder
+            />
+            <View style={[styles.heroCopy, stackHero && styles.heroCopyStacked]}>
+              <ThemedText type="title" style={[styles.petName, stackHero && styles.centeredText]}>
+                {pet.name}
+              </ThemedText>
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                numberOfLines={2}
+                style={[styles.breedSummary, stackHero && styles.centeredText]}>
+                {displayPetBreed(pet.breed)} · {displayPetSpecies(pet.species)}
+              </ThemedText>
+              <View style={[styles.badges, stackHero && styles.badgesCentered]}>
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: brandAccentSoft, borderColor: brandAccentBorder },
+                  ]}>
+                  <ThemedText
+                    lightColor={brandAccentColor}
+                    darkColor={brandAccentColor}
+                    style={styles.badgeLabel}>
+                    {displayPetAgeGroup(pet.ageGroup)}
+                  </ThemedText>
+                </View>
+                <View
+                  style={[
+                    styles.badge,
+                    {
+                      backgroundColor: pet.status === 'active' ? surfaceSoftColor : brandAccentSoft,
+                      borderColor: pet.status === 'active' ? successColor : brandAccentBorder,
+                    },
+                  ]}>
+                  <ThemedText
+                    lightColor={pet.status === 'active' ? successColor : brandAccentColor}
+                    darkColor={pet.status === 'active' ? successColor : brandAccentColor}
+                    style={styles.badgeLabel}>
+                    {t(pet.status === 'active' ? 'pet.activeBadge' : 'pet.deceasedBadge')}
+                  </ThemedText>
+                </View>
+              </View>
+            </View>
+          </Card>
 
-          <GroupedSection title={t('pet.sections.basicInformation')}>
-            <ProfileDetailRow label={t('pet.fields.breed')} value={displayPetBreed(pet.breed)} />
+          <GroupedSection title={t('pet.sections.profile')}>
             <ProfileDetailRow label={t('pet.fields.color')} value={displayPetText(pet.color)} />
             <ProfileDetailRow label={t('pet.fields.sex')} value={displayPetSex(pet.sex)} />
-            <ProfileDetailRow
-              label={t('pet.fields.ageGroup')}
-              value={displayPetAgeGroup(pet.ageGroup)}
-              isLast
-            />
+            <ProfileDetailRow label={t('pet.fields.birthDate')} value={displayPetDate(pet.birthDate)} isLast />
           </GroupedSection>
 
-          <GroupedSection title={t('pet.sections.healthInformation')}>
+          <GroupedSection title={t('pet.sections.health')}>
             <ProfileDetailRow
               label={t('pet.fields.spayNeuter')}
               value={displayPetSpayNeuterStatus(pet.spayNeuterStatus)}
             />
-            <ProfileDetailRow label={t('pet.fields.birthDate')} value={displayPetDate(pet.birthDate)} />
-            <ProfileDetailRow
-              label={t('pet.fields.healthConditions')}
-              value={displayHealthConditions(pet.healthConditions)}
-              isLast
-            />
+            <View style={styles.healthConditions}>
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={styles.healthLabel}>
+                {t('pet.fields.healthConditions')}
+              </ThemedText>
+              <HealthConditionChips
+                conditions={pet.healthConditions}
+                getLabel={getHealthConditionLabel}
+              />
+            </View>
           </GroupedSection>
 
-          <GroupedSection title={t('pet.sections.additionalInformation')}>
+          <GroupedSection title={t('pet.sections.care')}>
             <ProfileDetailRow label={t('pet.fields.adoptionDate')} value={displayPetDate(pet.adoptionDate)} />
             <ProfileDetailRow label={t('pet.fields.microchip')} value={displayPetText(pet.microchipId)} isLast />
           </GroupedSection>
 
-          <GroupedSection title={t('pet.sections.owner')}>
-            <ProfileDetailRow label={t('pet.fields.ownerName')} value={displayPetText(pet.ownerName)} isLast />
+          <GroupedSection title={t('pet.sections.sharing')}>
+            <ProfileDetailRow label={t('pet.fields.ownerName')} value={displayPetText(pet.ownerName)} />
+            <ProfileDetailRow
+              label={t('pet.fields.access')}
+              value={t(pet.sharingRole === 'member' ? 'pet.sharedWithYou' : 'pet.ownerManaged')}
+              isLast
+            />
           </GroupedSection>
         </View>
       </ScreenContainer>
@@ -184,15 +236,59 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
+  heroCard: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.md,
+    padding: Spacing.lg,
+  },
+  heroCardStacked: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  heroCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: Spacing.xs,
   },
   petName: {
+    flexShrink: 1,
+  },
+  heroCopyStacked: {
+    alignItems: 'center',
+  },
+  centeredText: {
     textAlign: 'center',
   },
-  petType: {
+  breedSummary: {
     ...Typography.body,
-    textAlign: 'center',
+  },
+  badges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs,
+    marginTop: Spacing.xs,
+  },
+  badgesCentered: {
+    justifyContent: 'center',
+  },
+  badge: {
+    minHeight: 32,
+    justifyContent: 'center',
+    borderRadius: Radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xxs,
+  },
+  badgeLabel: {
+    ...Typography.caption,
+    fontWeight: '600',
+  },
+  healthConditions: {
+    gap: Spacing.sm,
+    padding: Spacing.md,
+  },
+  healthLabel: {
+    ...Typography.body,
   },
 });

@@ -101,6 +101,11 @@ export async function removeAppAppearance(): Promise<void> {
   await AsyncStorage.removeItem(StorageKeys.appAppearance);
 }
 
+/** @deprecated Legacy appearance preference — used only by v1.4 migration. */
+export async function getLegacyAppAppearance(): Promise<string | null> {
+  return AsyncStorage.getItem(StorageKeys.appAppearance);
+}
+
 export async function getAppLanguagePreference(): Promise<AppLanguagePreference> {
   const value = await AsyncStorage.getItem(StorageKeys.appLanguage);
 

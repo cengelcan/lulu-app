@@ -10,9 +10,10 @@ import {
   type CheckInReminderPresetId,
 } from '@/constants/reminder';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import type { ReminderTime } from '@/types/reminder';
-import { formatReminderTime12h } from '@/utils/time';
+import { formatWallClockTime } from '@/utils/formatters';
 
 type CheckInReminderPickerProps = {
   value: ReminderTime;
@@ -45,6 +46,7 @@ export function CheckInReminderPicker({
   hint,
   timeAccessibilityLabel,
 }: CheckInReminderPickerProps) {
+  const regionalFormat = useRegionalFormat();
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
   const brandAccentGlow = useThemeColor({}, 'brandAccentGlow');
@@ -106,7 +108,7 @@ export function CheckInReminderPicker({
                 key={preset.id}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: isSelected, disabled }}
-                accessibilityLabel={`${label}, ${formatReminderTime12h(preset.time)}`}
+                accessibilityLabel={`${label}, ${formatWallClockTime(preset.time, regionalFormat)}`}
                 disabled={disabled}
                 onPress={() => handlePresetSelect(preset.id)}
                 style={({ pressed }) => [
@@ -138,7 +140,7 @@ export function CheckInReminderPicker({
                   lightColor={textSecondaryColor}
                   darkColor={textSecondaryColor}
                   style={styles.presetTime}>
-                  {formatReminderTime12h(preset.time)}
+                  {formatWallClockTime(preset.time, regionalFormat)}
                 </ThemedText>
               </Pressable>
             );

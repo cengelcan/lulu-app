@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { setPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
-import { setOnboardingCompleted } from '@/storage/prefs.storage';
+import { completeCurrentOnboarding } from '@/storage/onboarding.storage';
 import { setUserSetupPath } from '@/storage/setup-path.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { useUserStore } from '@/stores/user.store';
@@ -17,7 +17,7 @@ async function handleJoinUrl(
 ): Promise<void> {
   await setPendingFamilyJoinCode(code);
   await setUserSetupPath('join_family');
-  await setOnboardingCompleted(true);
+  await completeCurrentOnboarding();
   useOnboardingStore.setState({ hasCompletedOnboarding: true });
 
   navigate(route);

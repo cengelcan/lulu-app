@@ -6,6 +6,7 @@ import { beginBootstrap, completeBootstrap } from '@/services/bootstrap/bootstra
 import { saveRemoteFamilyActivityDigestEnabled } from '@/services/notifications/family-activity-digest-preference';
 import { registerFamilyActivityPushToken } from '@/services/notifications/push-registration';
 import { getPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
+import { loadExperiencePreferences } from '@/storage/experience-preferences.storage';
 import * as petStorage from '@/storage/pet.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -15,6 +16,8 @@ import { useSetupStore } from '@/stores/setup.store';
 import { useUserStore } from '@/stores/user.store';
 import { hasJoinIntent } from '@/utils/join-intent';
 import { resolveAuthenticatedNoPetRoute } from '@/utils/resolve-authenticated-no-pet-route';
+import { getDeviceRegionalSnapshot } from '@/utils/device-regional-settings';
+import { resolvePreAuthOnboardingRoute } from '@/utils/onboarding-route';
 
 export type BootstrapPhase = 'loading' | 'error' | 'redirecting';
 
@@ -27,17 +30,12 @@ async function resolveBootstrapRoute(
   hasAnyPet: boolean,
   joinIntent: boolean
 ): Promise<Href> {
-  if (!hasCompletedOnboarding && !joinIntent) {
-    return '/welcome';
-  }
-
-  if (!hasCompletedOnboarding && joinIntent && !isAuthenticated) {
-    return '/(auth)?mode=signUp';
-  }
-
-  if (!isAuthenticated) {
-    return '/(auth)';
-  }
+  const preAuthRoute = resolvePreAuthOnboardingRoute(
+    hasCompletedOnboarding,
+    isAuthenticated,
+    joinIntent
+  );
+  if (preAuthRoute) return preAuthRoute;
 
   if (!hasAnyPet) {
     return resolveAuthenticatedNoPetRoute();
@@ -52,6 +50,18 @@ async function waitForMinSplashDuration(startedAt: number): Promise<void> {
     await new Promise<void>((resolve) => {
       setTimeout(resolve, remaining);
     });
+  }
+}
+
+async function migrateExperiencePreferences(): Promise<void> {
+  try {
+    const regionalSnapshot = getDeviceRegionalSnapshot();
+    await loadExperiencePreferences(regionalSnapshot.measurementSystem);
+  } catch (preferenceMigrationError) {
+    console.warn(
+      '[preferences] Continuing with legacy preferences after migration failure',
+      preferenceMigrationError
+    );
   }
 }
 
@@ -76,6 +86,8 @@ export function useBootstrap() {
     clearPetError();
 
     try {
+    await migrateExperiencePreferences();
+
     // Auth must resolve first so cloud pets are pulled into the local cache
     // before we load them into the pet store.
     await Promise.all([loadOnboardingStatus(), initializeAuth()]);

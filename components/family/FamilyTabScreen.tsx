@@ -5,10 +5,12 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { FamilyActiveContent } from '@/components/family/FamilyActiveContent';
 import { FamilyEmptyContent } from '@/components/family/FamilyEmptyContent';
 import { FamilyFreeUpsellContent } from '@/components/family/FamilyFreeUpsellContent';
+import { ContextualEducationCard } from '@/components/onboarding/contextual-education-card';
 import { ThemedText } from '@/components/themed-text';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing } from '@/constants/theme';
 import { useFamilyPlusAccess } from '@/hooks/use-family-plus';
+import { useContextualEducation } from '@/hooks/use-contextual-education';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useSharingStore } from '@/stores/sharing.store';
@@ -23,6 +25,8 @@ export function FamilyTabScreen({ edges = ['top', 'bottom'] }: FamilyTabScreenPr
   const { t } = useTranslation();
   const { canUseFamilySharing } = useFamilyPlusAccess();
   const primaryColor = useThemeColor({}, 'primary');
+  const alertColor = useThemeColor({}, 'alert');
+  const familyEducation = useContextualEducation('family');
 
   const familyGroup = useSharingStore((state) => state.familyGroup);
   const memberFamilyGroup = useSharingStore((state) => state.memberFamilyGroup);
@@ -52,7 +56,18 @@ export function FamilyTabScreen({ edges = ['top', 'bottom'] }: FamilyTabScreenPr
   return (
     <ScreenContainer scrollable edges={edges} contentStyle={styles.content}>
       {error ? (
-        <ThemedText style={styles.error}>{translateError(t, error)}</ThemedText>
+        <ThemedText style={[styles.error, { color: alertColor }]}>
+          {translateError(t, error)}
+        </ThemedText>
+      ) : null}
+
+      {familyEducation.isVisible ? (
+        <ContextualEducationCard
+          title={t('contextualEducation.familyTitle')}
+          description={t('contextualEducation.familyDescription')}
+          icon="person.2.fill"
+          onDismiss={familyEducation.dismiss}
+        />
       ) : null}
 
       {isLoading && !familyTabLoaded ? (
@@ -80,6 +95,7 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingBottom: Spacing.lg,
+    gap: Spacing.md,
   },
   loading: {
     flex: 1,
@@ -88,7 +104,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xxl,
   },
   error: {
-    color: '#FF6B6B',
     marginBottom: Spacing.sm,
   },
 });

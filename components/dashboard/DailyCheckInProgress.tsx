@@ -7,17 +7,18 @@ import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
 import {
   formatLocalDate,
-  formatWeekdayShort,
   getCurrentWeekDays,
   getTodayStart,
   isFutureLocalDate,
 } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { formatWeekdayShort } from '@/utils/formatters';
 
 const STATUS_CIRCLE_SIZE = 18;
 
@@ -113,13 +114,14 @@ function DayPill({ weekdayLabel, isCompleted, isFuture, isToday, colors, onPress
 
 export function DailyCheckInProgress() {
   const router = useRouter();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const checkIns = useCheckInStore((state) => state.checkIns);
   const isLoading = useCheckInStore((state) => state.isLoading);
 
   const primaryColor = useThemeColor({}, 'primary');
-  const colors = CHECK_IN_COLORS.dark;
-  const locale = getLocaleTag(language);
+  const colorScheme = useColorScheme();
+  const colors = CHECK_IN_COLORS[colorScheme];
 
   const weekDays = useMemo(() => getCurrentWeekDays(), []);
   const today = useMemo(() => getTodayStart(), []);
@@ -174,7 +176,7 @@ export function DailyCheckInProgress() {
             return (
               <DayPill
                 key={dayKey}
-                weekdayLabel={formatWeekdayShort(day, locale)}
+                weekdayLabel={formatWeekdayShort(day, regionalFormat)}
                 isCompleted={completedDayKeys.has(dayKey)}
                 isFuture={isFuture}
                 isToday={dayKey === todayKey}

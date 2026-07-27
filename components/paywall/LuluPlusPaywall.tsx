@@ -288,13 +288,13 @@ export function LuluPlusPaywallContent({
 
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surfaceElevated');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const accentColor = useThemeColor({}, 'accent');
-  const brandAccentLightColor = useThemeColor({}, 'brandAccentLight');
   const brandAccentSoftColor = useThemeColor({}, 'brandAccentSoft');
+  const brandAccentBorderColor = useThemeColor({}, 'brandAccentBorder');
   const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
+  const alertColor = useThemeColor({}, 'alert');
 
   const isPlusActive = useUserStore((state) => state.isPlusActive);
   const offerings = useSubscriptionStore((state) => state.offerings);
@@ -462,7 +462,7 @@ export function LuluPlusPaywallContent({
               expanded={paywallLayout.stackPlans}
               onPress={() => setSelectedPlanId(plan.id)}
               visual={plan.visual}
-              brandAccentColor={brandAccentColor}
+              brandAccentColor={accentColor}
               brandAccentSoftColor={brandAccentSoftColor}
               surfaceColor={surfaceColor}
               textColor={textColor}
@@ -504,7 +504,7 @@ export function LuluPlusPaywallContent({
             <Text
               allowFontScaling
               maxFontSizeMultiplier={1.25}
-              style={[styles.heroTitle, { color: brandAccentLightColor }]}>
+              style={[styles.heroTitle, { color: accentColor }]}>
               {t('paywall.title')}
             </Text>
             <View
@@ -512,10 +512,10 @@ export function LuluPlusPaywallContent({
                 styles.heroPill,
                 {
                   backgroundColor: brandAccentSoftColor,
-                  borderColor: Palette.brandAccentBorder,
+                  borderColor: brandAccentBorderColor,
                 },
               ]}>
-              <IconSymbol name="sparkles" size={14} color={brandAccentColor} />
+              <IconSymbol name="sparkles" size={14} color={accentColor} />
               <Text
                 allowFontScaling
                 maxFontSizeMultiplier={1.3}
@@ -536,7 +536,7 @@ export function LuluPlusPaywallContent({
               ]}>
               <Text allowFontScaling maxFontSizeMultiplier={1.35} style={[styles.featuresTitle, { color: textColor }]}>
                 {t('paywall.featuresTitleBefore')}
-                <Text style={{ color: brandAccentColor, fontWeight: '700' }}>
+                <Text style={{ color: accentColor, fontWeight: '700' }}>
                   {t('paywall.featuresTitleAccent')}
                 </Text>
                 {t('paywall.featuresTitleAfter')}
@@ -579,7 +579,7 @@ export function LuluPlusPaywallContent({
               <TrustBadge
                 icon="arrow.clockwise"
                 label={t('paywall.trustCancel')}
-                iconColor={Palette.brandAccentDark}
+                iconColor={accentColor}
                 textSecondaryColor={textSecondaryColor}
                 expanded={paywallLayout.stackTrustBadges}
               />
@@ -656,7 +656,7 @@ export function LuluPlusPaywallContent({
               accessibilityLiveRegion="assertive"
               allowFontScaling
               selectable
-              style={[styles.purchaseError, { color: textColor }]}>
+              style={[styles.purchaseError, { color: alertColor }]}>
               {translateError(t, subscriptionError)}
             </Text>
           ) : null}
@@ -679,7 +679,7 @@ export function LuluPlusPaywallContent({
             onPress={() => void handlePrimaryPress()}
             style={({ pressed }) => [
               styles.ctaButton,
-              isPlusActive ? { backgroundColor: brandAccentColor } : styles.ctaButtonGradient,
+              isPlusActive ? { backgroundColor: accentColor } : styles.ctaButtonGradient,
               {
                 opacity:
                   !isPlusActive && !previewMode && (!canPurchase || isLoading) ? 0.45 : pressed ? 0.9 : 1,

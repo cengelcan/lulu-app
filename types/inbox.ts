@@ -6,6 +6,7 @@ import type { CheckIn } from '@/types/check-in';
 import type { Pet } from '@/types/pet';
 import type { PetReminder } from '@/types/pet-reminder';
 import type { VetVisitBundle } from '@/types/vet-visit';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 
 export type InboxTranslateFn = (
   key: string,
@@ -74,7 +75,7 @@ export type InboxProviderInput = {
   permission: NotificationPermissionStatus | null;
   dismissedIds: Set<string>;
   referenceDate: Date;
-  locale: string;
+  regionalFormat: RegionalFormatContext;
   t: InboxTranslateFn;
   activityEvents?: ActivityEvent[];
   currentUserId?: string | null;

@@ -9,23 +9,16 @@ import { formatLocalDate, parseLocalDate } from '@/utils/date';
 type DateParts = { year: number; month: number; day: number; hour: number; minute: number };
 
 function getZonedParts(date: Date, timezone: string): DateParts {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(date);
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const formatPart = (options: Intl.DateTimeFormatOptions): number => Number(
+    new Intl.DateTimeFormat('en-CA', { ...options, timeZone: timezone }).format(date)
+  );
 
   return {
-    year: Number(values.year),
-    month: Number(values.month),
-    day: Number(values.day),
-    hour: Number(values.hour),
-    minute: Number(values.minute),
+    year: formatPart({ year: 'numeric' }),
+    month: formatPart({ month: '2-digit' }),
+    day: formatPart({ day: '2-digit' }),
+    hour: formatPart({ hour: '2-digit', hourCycle: 'h23' }),
+    minute: formatPart({ minute: '2-digit' }),
   };
 }
 

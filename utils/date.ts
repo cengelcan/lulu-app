@@ -14,10 +14,6 @@ export function isSameLocalDate(a: Date, b: Date): boolean {
   );
 }
 
-export function formatWeekdayShort(date: Date, locale = 'en-US'): string {
-  return date.toLocaleDateString(locale, { weekday: 'short' });
-}
-
 export function getCurrentWeekDays(referenceDate: Date = new Date()): Date[] {
   const today = new Date(referenceDate);
   today.setHours(0, 0, 0, 0);
@@ -77,46 +73,6 @@ export function isTodayLocalDate(dateString: string): boolean {
   }
 
   return isSameLocalDate(parsed, getTodayStart());
-}
-
-export function formatCheckInTitleDate(dateString: string, locale?: string): string {
-  const parsed = parseLocalDate(dateString);
-  if (!parsed) {
-    return dateString;
-  }
-
-  const weekday = parsed.toLocaleDateString(locale, { weekday: 'long' });
-  const day = parsed.getDate();
-  const month = parsed.toLocaleDateString(locale, { month: 'short' });
-
-  return `${weekday}, ${day} ${month}`;
-}
-
-export function formatFullTitleDate(dateString: string, locale?: string): string {
-  const parsed = parseLocalDate(dateString);
-  if (!parsed) {
-    return dateString;
-  }
-
-  const weekday = parsed.toLocaleDateString(locale, { weekday: 'long' });
-  const day = parsed.getDate();
-  const month = parsed.toLocaleDateString(locale, { month: 'short' });
-  const year = parsed.getFullYear();
-
-  return `${weekday}, ${day} ${month} ${year}`;
-}
-
-export function formatMemorialDate(dateString: string, locale = 'en-US'): string {
-  const parsed = new Date(dateString);
-  if (Number.isNaN(parsed.getTime())) {
-    return dateString;
-  }
-
-  return parsed.toLocaleDateString(locale, {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
 }
 
 export function formatDateTimeDdMmYyyyHhMm(dateString: string): string {

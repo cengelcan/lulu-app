@@ -5,14 +5,15 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { IOS_PICKER_HEIGHT, IOS_PICKER_WIDTH, IosPickerSheet } from '@/components/ui/IosPickerSheet';
+import { IOS_PICKER_HEIGHT, IosPickerSheet } from '@/components/ui/IosPickerSheet';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import type { ReminderTime } from '@/types/reminder';
+import { formatWallClockTime } from '@/utils/formatters';
 import {
-  formatReminderTime,
-  formatReminderTime12h,
   getReminderDialArcDots,
   getReminderDialKnobPosition,
   reminderTimeFromDate,
@@ -45,6 +46,7 @@ export function TimePickerField({
   isLast = false,
 }: TimePickerFieldProps) {
   const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const [showPicker, setShowPicker] = useState(false);
   const [pickerDate, setPickerDate] = useState(() => reminderTimeToDate(value));
 
@@ -55,8 +57,9 @@ export function TimePickerField({
   const backgroundColor = useThemeColor({}, 'background');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
+  const colorScheme = useColorScheme();
 
-  const displayValue = variant === 'dial' ? formatReminderTime12h(value) : formatReminderTime(value);
+  const displayValue = formatWallClockTime(value, regionalFormat);
   const arcDots = useMemo(
     () => (variant === 'dial' ? getReminderDialArcDots(value, DIAL_RADIUS, DIAL_CENTER) : []),
     [value, variant]
@@ -268,10 +271,10 @@ export function TimePickerField({
           <DateTimePicker
             display="spinner"
             mode="time"
-            themeVariant="dark"
+            themeVariant={colorScheme}
             value={pickerDate}
             onChange={handleIosChange}
-            style={{ width: IOS_PICKER_WIDTH, height: IOS_PICKER_HEIGHT, backgroundColor }}
+            style={{ width: '100%', height: IOS_PICKER_HEIGHT, backgroundColor }}
           />
         </IosPickerSheet>
       ) : null}

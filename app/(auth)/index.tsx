@@ -14,7 +14,8 @@ import { ContinueWithEmailButton } from '@/components/auth/ContinueWithEmailButt
 import { SocialAuthSection, useAppleSignInAvailable } from '@/components/auth/SocialAuthSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
-import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import {
@@ -23,7 +24,7 @@ import {
   requestPasswordReset,
 } from '@/services/auth';
 import { setPendingFamilyJoinCode } from '@/storage/pending-family-join.storage';
-import { setOnboardingCompleted } from '@/storage/prefs.storage';
+import { completeCurrentOnboarding } from '@/storage/onboarding.storage';
 import { clearUserSetupPath, setUserSetupPath } from '@/storage/setup-path.storage';
 import { usePetStore } from '@/stores/pet.store';
 import { useOnboardingStore } from '@/stores/onboarding.store';
@@ -38,6 +39,10 @@ type AuthMode = 'signIn' | 'signUp';
 const PASSWORD_MIN_LENGTH = 6;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SIGN_UP_MODE_PARAM = 'signUp';
+const AUTH_GRADIENT_COLORS = {
+  light: ['#FFFFFF', '#F8F7FC', '#F4F1FA'],
+  dark: ['#0A0A12', '#101010', '#14101C'],
+} as const;
 
 function resolveAuthMode(modeParam?: string | string[]): AuthMode {
   const value = Array.isArray(modeParam) ? modeParam[0] : modeParam;
@@ -83,13 +88,16 @@ export default function AuthScreen() {
     void (async () => {
       await setPendingFamilyJoinCode(normalizeFamilyCode(rawJoinCode));
       await setUserSetupPath('join_family');
-      await setOnboardingCompleted(true);
+      await completeCurrentOnboarding();
       useOnboardingStore.setState({ hasCompletedOnboarding: true });
     })();
   }, [joinCodeParam]);
 
   const alertColor = useThemeColor({}, 'alert');
+  const backgroundColor = useThemeColor({}, 'background');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const textColor = useThemeColor({}, 'text');
+  const colorScheme = useColorScheme();
 
   const isSignUp = mode === 'signUp';
 
@@ -244,9 +252,9 @@ export default function AuthScreen() {
   }, [email]);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor }]}>
       <LinearGradient
-        colors={['#0a0a12', '#101010', '#14101c']}
+        colors={AUTH_GRADIENT_COLORS[colorScheme]}
         locations={[0, 0.55, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -384,7 +392,7 @@ export default function AuthScreen() {
               onPress={toggleMode}
               disabled={isSubmitting}
               style={styles.toggle}>
-              <Text allowFontScaling style={[styles.togglePrefix, { color: Palette.onDark }]}>
+              <Text allowFontScaling style={[styles.togglePrefix, { color: textColor }]}>
                 {isSignUp ? t('auth.toggleToSignInPrefix') : t('auth.toggleToSignUpPrefix')}
                 <Text style={{ color: brandAccentColor, fontWeight: '600' }}>
                   {isSignUp ? t('auth.toggleToSignInLink') : t('auth.toggleToSignUpLink')}
@@ -404,7 +412,6 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Palette.surfaceDark,
   },
   safeArea: {
     flex: 1,

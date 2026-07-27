@@ -1,4 +1,6 @@
 import type { PlusPlanKind } from '@/services/subscription/plus-status';
+import { formatLongDate } from '@/utils/formatters';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 
 /** RevenueCat iOS bridge may send enum names, lowercase strings, or numeric values. */
 export function isIntroOrTrialPeriod(
@@ -54,17 +56,16 @@ function isLikelyIntroductoryBillingPeriod(
   return periodDays < fullCycleDays * 0.9;
 }
 
-export function formatSubscriptionDate(isoDate: string, locale: string): string | null {
+export function formatSubscriptionDate(
+  isoDate: string,
+  regionalFormat: RegionalFormatContext
+): string | null {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) {
     return null;
   }
 
-  return date.toLocaleDateString(locale, {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  return formatLongDate(date, regionalFormat);
 }
 
 export function getTrialDaysRemaining(expiresAt: string): number {

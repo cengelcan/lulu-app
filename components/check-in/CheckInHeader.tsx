@@ -5,13 +5,15 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { PetAvatar } from '@/components/pet/PetAvatar';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { IOS_PICKER_HEIGHT, IOS_PICKER_WIDTH, IosPickerSheet } from '@/components/ui/IosPickerSheet';
-import { CheckInTheme } from '@/constants/check-in-theme';
+import { IOS_PICKER_HEIGHT, IosPickerSheet } from '@/components/ui/IosPickerSheet';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useCheckInTheme } from '@/hooks/use-check-in-theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
-import { formatCheckInTitleDate, formatLocalDate, getTodayStart, parseLocalDate } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { formatLocalDate, getTodayStart, parseLocalDate } from '@/utils/date';
+import { formatWeekdayDate } from '@/utils/formatters';
 
 type CheckInDatePickerProps = {
   selectedDate: string;
@@ -32,6 +34,7 @@ export function CheckInDatePicker({
   const [pickerDate, setPickerDate] = useState(() => parseLocalDate(selectedDate) ?? getTodayStart());
 
   const backgroundColor = useThemeColor({}, 'background');
+  const colorScheme = useColorScheme();
 
   const handleAndroidChange = (event: DateTimePickerEvent, date?: Date) => {
     onClose();
@@ -75,14 +78,14 @@ export function CheckInDatePicker({
         display="spinner"
         maximumDate={getTodayStart()}
         mode="date"
-        themeVariant="dark"
+        themeVariant={colorScheme}
         value={pickerDate}
         onChange={(_event, date) => {
           if (date) {
             setPickerDate(date);
           }
         }}
-        style={{ width: IOS_PICKER_WIDTH, height: IOS_PICKER_HEIGHT, backgroundColor }}
+        style={{ width: '100%', height: IOS_PICKER_HEIGHT, backgroundColor }}
       />
     </IosPickerSheet>
   );
@@ -103,15 +106,22 @@ export function CheckInHeader({
   selectedDate,
   onOpenDatePicker,
 }: CheckInHeaderProps) {
-  const { language } = useTranslation();
-  const locale = getLocaleTag(language);
-  const formattedDate = formatCheckInTitleDate(selectedDate, locale);
+  const regionalFormat = useRegionalFormat();
+  const checkInTheme = useCheckInTheme();
+  const formattedDate = formatWeekdayDate(selectedDate, regionalFormat);
 
   return (
     <View style={styles.container}>
       <View style={styles.avatarWrap}>
-        <PetAvatar accentBorder accentColor={CheckInTheme.accent} photoUri={petPhotoUri} size={72} />
-        <View style={[styles.heartBadge, { backgroundColor: CheckInTheme.accent, borderColor: CheckInTheme.background }]}>
+        <PetAvatar accentBorder accentColor={checkInTheme.accent} photoUri={petPhotoUri} size={72} />
+        <View
+          style={[
+            styles.heartBadge,
+            {
+              backgroundColor: checkInTheme.accent,
+              borderColor: checkInTheme.background,
+            },
+          ]}>
           <IconSymbol name="heart.fill" size={12} color="#FFFFFF" />
         </View>
       </View>
@@ -121,7 +131,7 @@ export function CheckInHeader({
           <ThemedText type="defaultSemiBold" style={styles.title}>
             {screenTitle}
           </ThemedText>
-          <IconSymbol name="pawprint.fill" size={14} color={CheckInTheme.accent} />
+          <IconSymbol name="pawprint.fill" size={14} color={checkInTheme.accent} />
         </View>
         <Pressable
           accessibilityRole="button"
@@ -129,12 +139,12 @@ export function CheckInHeader({
           onPress={onOpenDatePicker}
           style={({ pressed }) => [styles.dateRow, { opacity: pressed ? 0.7 : 1 }]}>
           <ThemedText
-            lightColor={CheckInTheme.textMuted}
-            darkColor={CheckInTheme.textMuted}
+            lightColor={checkInTheme.textMuted}
+            darkColor={checkInTheme.textMuted}
             style={styles.dateText}>
             {formattedDate}
           </ThemedText>
-          <IconSymbol name="chevron.down" size={14} color={CheckInTheme.textMuted} />
+          <IconSymbol name="chevron.down" size={14} color={checkInTheme.textMuted} />
         </Pressable>
       </View>
     </View>

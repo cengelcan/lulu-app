@@ -1,26 +1,5 @@
 import type { ReminderTime } from '@/types/reminder';
 
-export function formatReminderTime24h({ hour, minute }: ReminderTime): string {
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-}
-
-export function formatReminderTime({ hour, minute }: ReminderTime): string {
-  const date = new Date();
-  date.setHours(hour, minute, 0, 0);
-  return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-}
-
-/** 12-hour clock display for reminder pickers (e.g. 6:00 PM instead of 18:00). */
-export function formatReminderTime12h({ hour, minute }: ReminderTime, locale?: string): string {
-  const date = new Date();
-  date.setHours(hour, minute, 0, 0);
-  return date.toLocaleTimeString(locale, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
-}
-
 /**
  * Wall-clock angle in degrees for dial UI.
  * 12 o'clock is at the top (-90°), advancing clockwise.

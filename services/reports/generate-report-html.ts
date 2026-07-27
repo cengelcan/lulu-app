@@ -41,6 +41,7 @@ type GenerateReportHtmlParams = {
    * rendered inside a WebView as a true WYSIWYG preview.
    */
   mode?: 'print' | 'screen';
+  screenBackgroundColor?: string;
 };
 
 export function generateReportHtml({
@@ -58,6 +59,7 @@ export function generateReportHtml({
   showAppStoreBadge = false,
   summary = null,
   mode = 'print',
+  screenBackgroundColor,
 }: GenerateReportHtmlParams): string {
   const petPhotoHtml = renderPetPhotoHtml(pet.name, photoDataUri);
   const appStoreBadgeHtml = renderAppStoreBadgeHtml(showAppStoreBadge, shellLabels);
@@ -124,7 +126,11 @@ export function generateReportHtml({
     <meta charset="utf-8" />
     ${viewportMeta}
     <title>${escapeHtml(pet.name)} ${escapeHtml(shellLabels.pdfTitleSuffix)}</title>
-    <style>${buildReportStyles({ primaryColor, forScreen: mode === 'screen' })}</style>
+    <style>${buildReportStyles({
+      primaryColor,
+      forScreen: mode === 'screen',
+      screenBackgroundColor,
+    })}</style>
   </head>
   <body>
     ${pagesHtml}

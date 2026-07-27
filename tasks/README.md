@@ -25,6 +25,16 @@ Bu klasör ilk App Store yayını sonrasında ele alınacak ürün geliştirmele
 
 ## Sıralı yol haritası
 
+### Yayın kapanış durumu — 2026-07-27
+
+- v1.1–v1.3 kapsamındaki Task 001–008 tamamlandı ve dokümantasyonları kapatıldı.
+- Analytics uygulaması ürün kararıyla sonraki sürüme ertelendi.
+- Design System'in uygulama geneli tema, visual regression ve ayrıntılı
+  erişilebilirlik çalışmaları Task 015'in v1.4 kapsamına taşındı.
+- Mevcut Free/Plus sınırları korunuyor; daha kapsamlı monetizasyon değişikliği
+  ayrı bir gelecek ürün güncellemesinde ele alınacak.
+- v1.3.0, 2026-07-27 tarihinde yayına alındı.
+
 | Sıra | Task | Öncelik | Efor | Önerilen hedef | Bağımlılık |
 |---|---|---:|---:|---|---|
 | 001 | [Plus vaadi ve monetizasyon sınırları](./001-plus-value-and-entitlement-alignment.md) | P0 | M | v1.1 | İlk yayın |

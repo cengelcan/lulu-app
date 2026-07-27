@@ -3,12 +3,15 @@ import { useState } from 'react';
 import { Platform, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { IOS_PICKER_HEIGHT, IOS_PICKER_WIDTH, IosPickerSheet } from '@/components/ui/IosPickerSheet';
+import { IOS_PICKER_HEIGHT, IosPickerSheet } from '@/components/ui/IosPickerSheet';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
-import { formatCheckInTitleDate, formatFullTitleDate, formatLocalDate, getTodayStart, parseLocalDate } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { formatLocalDate, getTodayStart, parseLocalDate } from '@/utils/date';
+import { formatWeekdayDate } from '@/utils/formatters';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 
 type DatePickerFieldProps = {
   accessibilityLabel: string;
@@ -31,15 +34,13 @@ function formatDisplayValue(
   value: string,
   placeholder: string,
   displayFormat: 'short' | 'full',
-  locale?: string
+  regionalFormat: RegionalFormatContext
 ): string {
   if (!value.trim()) {
     return placeholder;
   }
 
-  return displayFormat === 'full'
-    ? formatFullTitleDate(value, locale)
-    : formatCheckInTitleDate(value, locale);
+  return formatWeekdayDate(value, regionalFormat, displayFormat === 'full');
 }
 
 export function DatePickerField({
@@ -52,8 +53,8 @@ export function DatePickerField({
   minimumDate = null,
   displayFormat = 'short',
 }: DatePickerFieldProps) {
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const [showPicker, setShowPicker] = useState(false);
   const [pickerDate, setPickerDate] = useState(() => getPickerDate(value));
 
@@ -62,10 +63,16 @@ export function DatePickerField({
   const borderColor = useThemeColor({}, 'border');
   const surfaceColor = useThemeColor({}, 'surface');
   const backgroundColor = useThemeColor({}, 'background');
+  const colorScheme = useColorScheme();
 
   const hasValue = value.trim().length > 0;
   const resolvedPlaceholder = placeholder ?? t('common.selectDate');
-  const displayValue = formatDisplayValue(value, resolvedPlaceholder, displayFormat, locale);
+  const displayValue = formatDisplayValue(
+    value,
+    resolvedPlaceholder,
+    displayFormat,
+    regionalFormat
+  );
 
   const openPicker = () => {
     if (disabled) {
@@ -153,10 +160,10 @@ export function DatePickerField({
             maximumDate={maximumDate ?? undefined}
             minimumDate={minimumDate ?? undefined}
             mode="date"
-            themeVariant="dark"
+            themeVariant={colorScheme}
             value={pickerDate}
             onChange={handleIosChange}
-            style={{ width: IOS_PICKER_WIDTH, height: IOS_PICKER_HEIGHT, backgroundColor }}
+            style={{ width: '100%', height: IOS_PICKER_HEIGHT, backgroundColor }}
           />
         </IosPickerSheet>
       ) : null}

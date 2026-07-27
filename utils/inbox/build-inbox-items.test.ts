@@ -5,6 +5,7 @@ import type { CheckIn } from '@/types/check-in';
 import type { InboxProviderInput } from '@/types/inbox';
 import type { Pet } from '@/types/pet';
 import type { PetReminder } from '@/types/pet-reminder';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import {
   buildInboxItems,
   getActionRequiredCount,
@@ -13,6 +14,11 @@ import {
 const REFERENCE_DATE = new Date('2026-06-23T12:00:00.000Z');
 const TODAY_KEY = '2026-06-23';
 const YESTERDAY_KEY = '2026-06-22';
+const regionalFormat: RegionalFormatContext = {
+  language: 'en', languageLocale: 'en-US', regionCode: 'US', datePartOrder: 'mdy',
+  dateSeparator: '/', decimalSeparator: '.', digitGroupingSeparator: ',',
+  measurementSystem: 'us', uses24HourClock: false, timeZone: 'UTC',
+};
 
 const t = (key: string, params?: Record<string, string | number>) => {
   if (!params) {
@@ -112,7 +118,7 @@ function createInput(overrides: Partial<InboxProviderInput> = {}): InboxProvider
     permission: null,
     dismissedIds: new Set(),
     referenceDate: REFERENCE_DATE,
-    locale: 'en-US',
+    regionalFormat,
     t,
     ...overrides,
   };

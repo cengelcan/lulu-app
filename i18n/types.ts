@@ -40,7 +40,10 @@ export type Translations = {
   care: {
     title: string;
     subtitle: string;
+    attentionTitle: string;
     shortcutsTitle: string;
+    resourcesTitle: string;
+    reportsDescription: string;
     checkIn: string;
     checkInDescription: string;
     reminders: string;
@@ -148,9 +151,19 @@ export type Translations = {
   };
   settings: {
     title: string;
+    appearance: string;
+    appearanceSystem: string;
+    appearanceLight: string;
+    appearanceDark: string;
+    measurement: string;
+    weightUnitKg: string;
+    weightUnitLb: string;
+    weightUnitFooter: string;
     notifications: string;
     dailyCheckInReminder: string;
     petReminderNotifications: string;
+    medicationDoseNotifications: string;
+    medicationRefillNotifications: string;
     familyActivityDigest: string;
     reminderTime: string;
     notificationsDisabledFooter: string;
@@ -171,6 +184,9 @@ export type Translations = {
     footerLine2After: string;
     startButton: string;
     joinFamilyButton: string;
+    benefitDailyCare: string;
+    benefitFamily: string;
+    benefitVet: string;
   };
   onboarding: {
     intro1: {
@@ -197,6 +213,15 @@ export type Translations = {
       description: string;
       button: string;
     };
+  };
+  contextualEducation: {
+    dismiss: string;
+    medicationTitle: string;
+    medicationDescription: string;
+    familyTitle: string;
+    familyDescription: string;
+    vetVisitTitle: string;
+    vetVisitDescription: string;
   };
   auth: {
     title: string;
@@ -858,6 +883,8 @@ export type Translations = {
     petReminderBody: string;
     medicationDoseTitle: string;
     medicationDoseBody: string;
+    medicationRefillTitle: string;
+    medicationRefillBody: string;
     channelCheckIn: string;
     channelPetReminders: string;
     channelMedicationDoses: string;
@@ -1193,7 +1220,14 @@ export type Translations = {
     restorePetTitle: string;
     restorePetMessage: string;
     memorialNote: string;
+    activeBadge: string;
     deceasedBadge: string;
+    moreConditions: string;
+    showLess: string;
+    showMoreConditionsA11y: string;
+    showFewerConditionsA11y: string;
+    sharedWithYou: string;
+    ownerManaged: string;
     sections: {
       profilePhoto: string;
       petType: string;
@@ -1202,6 +1236,10 @@ export type Translations = {
       healthInformation: string;
       additionalInformation: string;
       owner: string;
+      profile: string;
+      health: string;
+      care: string;
+      sharing: string;
     };
     fields: {
       breed: string;
@@ -1215,6 +1253,7 @@ export type Translations = {
       microchip: string;
       ownerName: string;
       petName: string;
+      access: string;
       colorPlaceholder: string;
       birthDatePlaceholder: string;
       adoptionDatePlaceholder: string;

@@ -13,11 +13,11 @@ import { getNotificationPermission } from '@/storage/prefs.storage';
 import { useUserStore } from '@/stores/user.store';
 import type { InboxSection } from '@/types/inbox';
 import type { ActivityEvent } from '@/types/sharing';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import {
   buildInboxItems,
   getActionRequiredCount,
 } from '@/utils/inbox/build-inbox-items';
-import { getLocaleTag } from '@/utils/locale';
 
 import { useTranslation } from '@/hooks/use-translation';
 
@@ -31,7 +31,8 @@ type UseInboxResult = {
 };
 
 export function useInbox(): UseInboxResult {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const userId = useUserStore((state) => state.userId);
   const [sections, setSections] = useState<InboxSection[]>([]);
   const [actionRequiredCount, setActionRequiredCount] = useState(0);
@@ -77,7 +78,7 @@ export function useInbox(): UseInboxResult {
         permission,
         dismissedIds,
         referenceDate: new Date(),
-        locale: getLocaleTag(language),
+        regionalFormat,
         t,
         activityEvents,
         currentUserId: userId,
@@ -92,7 +93,7 @@ export function useInbox(): UseInboxResult {
       setIsLoading(false);
       setError(loadError instanceof Error ? loadError.message : 'errors.loadInbox');
     }
-  }, [language, t, userId]);
+  }, [regionalFormat, t, userId]);
 
   return {
     sections,

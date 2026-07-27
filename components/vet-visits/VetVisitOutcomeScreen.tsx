@@ -42,6 +42,7 @@ export function VetVisitOutcomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const secondary = useThemeColor({}, 'textSecondary');
   const accent = useThemeColor({}, 'accent');
+  const alertColor = useThemeColor({}, 'alert');
   const screenOptions = useHubStackScreenOptions(t('vetVisits.outcomeTitle'), '/vet-visits' as Href);
 
   useFocusEffect(useCallback(() => {
@@ -195,7 +196,13 @@ export function VetVisitOutcomeScreen() {
             ) : null}
           </>
         )}
-        {error ? <ThemedText accessibilityRole="alert" style={styles.error}>{error}</ThemedText> : null}
+        {error ? (
+          <ThemedText
+            accessibilityRole="alert"
+            style={[styles.error, { color: alertColor }]}>
+            {error}
+          </ThemedText>
+        ) : null}
       </ScreenContainer>
     </>
   );
@@ -208,5 +215,5 @@ const styles = StyleSheet.create({
   formCard: { padding: Spacing.md, gap: Spacing.md },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   switchCopy: { flex: 1 },
-  error: { color: '#ef4444' },
+  error: { textAlign: 'center' },
 });

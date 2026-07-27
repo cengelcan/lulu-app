@@ -5,6 +5,7 @@ import {
   getCheckInReminderContent,
   getCheckInReminderContentForDate,
   getMedicationDoseNotificationContent,
+  getMedicationRefillNotificationContent,
   getPetReminderNotificationContent,
 } from '@/services/notifications/content';
 import {
@@ -86,20 +87,26 @@ describe('getCheckInReminderContentForDate', () => {
 });
 
 describe('getPetReminderNotificationContent', () => {
-  it('localizes reminder title and body for German', () => {
+  it('localizes privacy-conscious reminder copy for German', () => {
     const { title, body } = getPetReminderNotificationContent(createVaccineReminder(), 'Luna', 'de');
 
-    assert.equal(title, 'Impfung');
+    assert.equal(title, 'Pet Health Journal');
     assert.match(body, /Luna/);
-    assert.match(body, /Impfung/);
+    assert.doesNotMatch(body, /Impfung/);
   });
 
-  it('localizes reminder title and body for English', () => {
-    const { title, body } = getPetReminderNotificationContent(createVaccineReminder(), 'Luna', 'en');
+  it('does not expose custom reminder details or notes', () => {
+    const reminder: PetReminder = {
+      ...createVaccineReminder(),
+      type: 'custom',
+      metadata: { title: 'Collect oncology results' },
+      notes: 'Family code 839201',
+    };
+    const { title, body } = getPetReminderNotificationContent(reminder, 'Luna', 'en');
 
-    assert.equal(title, 'Vaccine');
+    assert.equal(title, 'Pet Health Journal');
     assert.match(body, /Luna/);
-    assert.match(body, /Vaccine/);
+    assert.doesNotMatch(`${title} ${body}`, /oncology|839201/i);
   });
 });
 
@@ -110,12 +117,21 @@ describe('getMedicationDoseNotificationContent', () => {
     createdAt: '2026-07-22T00:00:00.000Z', updatedAt: '2026-07-22T00:00:00.000Z',
   };
 
-  it('keeps medication, dose and pet name in localized content', () => {
+  it('localizes copy without exposing the medication name or dose', () => {
     const english = getMedicationDoseNotificationContent(plan, 'Luna', 'en');
     const german = getMedicationDoseNotificationContent(plan, 'Luna', 'de');
-    assert.match(english.title, /Metronidazole/);
-    assert.match(english.body, /2 ml/);
+    assert.doesNotMatch(`${english.title} ${english.body}`, /Metronidazole|2 ml/);
     assert.match(german.body, /Luna/);
+    assert.doesNotMatch(`${german.title} ${german.body}`, /Metronidazole|2 ml/);
     assert.notEqual(english.body, german.body);
+  });
+});
+
+describe('getMedicationRefillNotificationContent', () => {
+  it('uses privacy-conscious copy without a medication name or dose', () => {
+    const content = getMedicationRefillNotificationContent('Luna', 'en');
+
+    assert.match(content.body, /Luna/);
+    assert.doesNotMatch(content.body, /Metronidazole|2 ml/);
   });
 });

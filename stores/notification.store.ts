@@ -2,10 +2,13 @@ import { create } from 'zustand';
 
 import {
   cancelAllPetReminderNotifications,
+  cancelAllMedicationDoseNotifications,
   cancelCheckInReminder,
   requestNotificationPermission,
   syncCheckInReminderSchedule,
   syncPetReminderNotificationSchedule,
+  syncMedicationDoseNotificationSchedule,
+  hasNotificationPermission,
 } from '@/services/notifications';
 import {
   fetchRemoteFamilyActivityDigestEnabled,
@@ -27,6 +30,7 @@ import {
   type NotificationPermissionStatus,
 } from '@/storage/prefs.storage';
 import { useLanguageStore } from '@/stores/language.store';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 import type { ReminderTime } from '@/types/reminder';
 import { getStoreErrorKey } from '@/utils/store-error';
 
@@ -34,6 +38,9 @@ type NotificationState = {
   reminderTime: ReminderTime | null;
   permission: NotificationPermissionStatus | null;
   petReminderNotificationsEnabled: boolean;
+  dailyCheckInNotificationsEnabled: boolean;
+  medicationDoseNotificationsEnabled: boolean;
+  medicationRefillNotificationsEnabled: boolean;
   familyActivityDigestEnabled: boolean;
   isLoading: boolean;
   error: string | null;
@@ -41,6 +48,9 @@ type NotificationState = {
   saveReminderTime: (reminderTime: ReminderTime) => Promise<void>;
   savePermission: (permission: NotificationPermissionStatus) => Promise<NotificationPermissionStatus>;
   savePetReminderNotificationsEnabled: (enabled: boolean) => Promise<boolean>;
+  saveDailyCheckInNotificationsEnabled: (enabled: boolean) => Promise<boolean>;
+  saveMedicationDoseNotificationsEnabled: (enabled: boolean) => Promise<boolean>;
+  saveMedicationRefillNotificationsEnabled: (enabled: boolean) => Promise<boolean>;
   saveFamilyActivityDigestEnabled: (enabled: boolean) => Promise<boolean>;
   clearError: () => void;
 };
@@ -49,6 +59,9 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   reminderTime: null,
   permission: null,
   petReminderNotificationsEnabled: true,
+  dailyCheckInNotificationsEnabled: false,
+  medicationDoseNotificationsEnabled: true,
+  medicationRefillNotificationsEnabled: true,
   familyActivityDigestEnabled: false,
   isLoading: false,
   error: null,
@@ -59,24 +72,62 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     try {
       const [
         reminderTime,
-        permission,
+        storedPermission,
         petReminderNotificationsEnabled,
         cachedFamilyActivityDigestEnabled,
         userId,
+        osPermissionGranted,
       ] = await Promise.all([
         getCheckInReminderTime(),
         getNotificationPermission(),
         getPetReminderNotificationsEnabled(),
         getFamilyActivityDigestEnabled(),
         getCurrentUserId(),
+        hasNotificationPermission(),
       ]);
 
-      let familyActivityDigestEnabled = cachedFamilyActivityDigestEnabled;
+      const permission: NotificationPermissionStatus | null = osPermissionGranted
+        ? 'allowed'
+        : storedPermission === 'allowed'
+          ? 'denied'
+          : storedPermission;
+      if (permission !== storedPermission && permission !== null) {
+        await setNotificationPermission(permission);
+      }
+
+      let remoteFamilyActivityDigestEnabled = cachedFamilyActivityDigestEnabled;
+      await useExperiencePreferencesStore.getState().loadPreferences();
+      let categories = useExperiencePreferencesStore.getState().preferences?.notifications;
       if (userId) {
         try {
-          familyActivityDigestEnabled =
+          remoteFamilyActivityDigestEnabled =
             await fetchRemoteFamilyActivityDigestEnabled(userId);
-          await setFamilyActivityDigestEnabled(familyActivityDigestEnabled);
+          const shouldRestoreLocalDigestOptIn =
+            storedPermission === 'denied' &&
+            permission === 'allowed' &&
+            categories?.familyDigest === true;
+
+          if (shouldRestoreLocalDigestOptIn) {
+            const registered = await registerFamilyActivityPushToken();
+            if (registered) {
+              remoteFamilyActivityDigestEnabled = true;
+              await saveRemoteFamilyActivityDigestEnabled(
+                userId,
+                true,
+                useLanguageStore.getState().resolvedLanguage
+              );
+            }
+          }
+          await setFamilyActivityDigestEnabled(remoteFamilyActivityDigestEnabled);
+          if (permission !== 'denied' && !shouldRestoreLocalDigestOptIn) {
+            await useExperiencePreferencesStore
+              .getState()
+              .saveNotificationCategoryPreference(
+                'familyDigest',
+                remoteFamilyActivityDigestEnabled
+              );
+            categories = useExperiencePreferencesStore.getState().preferences?.notifications;
+          }
         } catch (error) {
           console.warn(
             '[notifications] Using cached family activity digest preference',
@@ -89,9 +140,25 @@ export const useNotificationStore = create<NotificationState>((set) => ({
         reminderTime,
         permission,
         petReminderNotificationsEnabled,
-        familyActivityDigestEnabled,
+        dailyCheckInNotificationsEnabled: categories?.dailyCheckIn ?? permission === 'allowed',
+        medicationDoseNotificationsEnabled: categories?.medicationDoses ?? true,
+        medicationRefillNotificationsEnabled: categories?.medicationRefill ?? true,
+        familyActivityDigestEnabled:
+          categories?.familyDigest ?? remoteFamilyActivityDigestEnabled,
         isLoading: false,
       });
+      await Promise.all([
+        syncCheckInReminderSchedule({
+          permission,
+          enabled: categories?.dailyCheckIn ?? false,
+        }),
+        syncPetReminderNotificationSchedule({
+          enabled: categories?.petReminders ?? petReminderNotificationsEnabled,
+        }),
+        syncMedicationDoseNotificationSchedule({
+          enabled: categories?.medicationDoses ?? true,
+        }),
+      ]);
     } catch (error) {
       set({
         isLoading: false,
@@ -132,6 +199,9 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       }
 
       await setNotificationPermission(resolvedPermission);
+      await useExperiencePreferencesStore
+        .getState()
+        .saveNotificationCategoryPreference('dailyCheckIn', resolvedPermission === 'allowed');
       set({ permission: resolvedPermission, isLoading: false });
       await syncCheckInReminderSchedule({ permission: resolvedPermission });
       return resolvedPermission;
@@ -148,23 +218,25 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      let resolvedEnabled = enabled;
+      let permission = useNotificationStore.getState().permission;
 
       if (enabled) {
         const osGranted = await requestNotificationPermission(
           useLanguageStore.getState().resolvedLanguage
         );
-        if (!osGranted) {
-          resolvedEnabled = false;
-        }
+        permission = osGranted ? 'allowed' : 'denied';
+        await setNotificationPermission(permission);
       } else {
         await cancelAllPetReminderNotifications();
       }
 
-      await setPetReminderNotificationsEnabled(resolvedEnabled);
-      set({ petReminderNotificationsEnabled: resolvedEnabled, isLoading: false });
-      await syncPetReminderNotificationSchedule({ enabled: resolvedEnabled });
-      return resolvedEnabled;
+      await setPetReminderNotificationsEnabled(enabled);
+      await useExperiencePreferencesStore
+        .getState()
+        .saveNotificationCategoryPreference('petReminders', enabled);
+      set({ petReminderNotificationsEnabled: enabled, permission, isLoading: false });
+      await syncPetReminderNotificationSchedule({ enabled });
+      return enabled;
     } catch (error) {
       set({
         isLoading: false,
@@ -174,22 +246,103 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     }
   },
 
+  saveDailyCheckInNotificationsEnabled: async (enabled) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      let permission = useNotificationStore.getState().permission;
+      if (enabled) {
+        const granted = await requestNotificationPermission(
+          useLanguageStore.getState().resolvedLanguage
+        );
+        permission = granted ? 'allowed' : 'denied';
+        await setNotificationPermission(permission);
+      } else {
+        await cancelCheckInReminder();
+      }
+
+      await useExperiencePreferencesStore
+        .getState()
+        .saveNotificationCategoryPreference('dailyCheckIn', enabled);
+      set({ dailyCheckInNotificationsEnabled: enabled, permission, isLoading: false });
+      await syncCheckInReminderSchedule({ permission, enabled });
+      return enabled;
+    } catch (error) {
+      set({ isLoading: false, error: getStoreErrorKey(error, 'errors.saveNotificationPermission') });
+      throw error;
+    }
+  },
+
+  saveMedicationDoseNotificationsEnabled: async (enabled) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      let permission = useNotificationStore.getState().permission;
+      if (enabled) {
+        const granted = await requestNotificationPermission(
+          useLanguageStore.getState().resolvedLanguage
+        );
+        permission = granted ? 'allowed' : 'denied';
+        await setNotificationPermission(permission);
+      } else {
+        await cancelAllMedicationDoseNotifications();
+      }
+
+      await useExperiencePreferencesStore
+        .getState()
+        .saveNotificationCategoryPreference('medicationDoses', enabled);
+      set({ medicationDoseNotificationsEnabled: enabled, permission, isLoading: false });
+      await syncMedicationDoseNotificationSchedule({ enabled });
+      return enabled;
+    } catch (error) {
+      set({ isLoading: false, error: getStoreErrorKey(error, 'errors.saveNotificationPermission') });
+      throw error;
+    }
+  },
+
+  saveMedicationRefillNotificationsEnabled: async (enabled) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      let permission = useNotificationStore.getState().permission;
+      if (enabled) {
+        const granted = await requestNotificationPermission(
+          useLanguageStore.getState().resolvedLanguage
+        );
+        permission = granted ? 'allowed' : 'denied';
+        await setNotificationPermission(permission);
+      }
+
+      await useExperiencePreferencesStore
+        .getState()
+        .saveNotificationCategoryPreference('medicationRefill', enabled);
+      set({ medicationRefillNotificationsEnabled: enabled, permission, isLoading: false });
+      return enabled;
+    } catch (error) {
+      set({ isLoading: false, error: getStoreErrorKey(error, 'errors.saveNotificationPermission') });
+      throw error;
+    }
+  },
+
   saveFamilyActivityDigestEnabled: async (enabled) => {
     set({ isLoading: true, error: null });
 
     try {
-      let resolvedEnabled = enabled;
+      let deliveryEnabled = enabled;
+      let permission = useNotificationStore.getState().permission;
 
       if (enabled) {
         const osGranted = await requestNotificationPermission(
           useLanguageStore.getState().resolvedLanguage
         );
+        permission = osGranted ? 'allowed' : 'denied';
+        await setNotificationPermission(permission);
         if (!osGranted) {
-          resolvedEnabled = false;
+          deliveryEnabled = false;
         } else {
           const registered = await registerFamilyActivityPushToken();
           if (!registered) {
-            resolvedEnabled = false;
+            deliveryEnabled = false;
           }
         }
       }
@@ -197,12 +350,15 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       const userId = await requireAuthenticatedUserId();
       await saveRemoteFamilyActivityDigestEnabled(
         userId,
-        resolvedEnabled,
+        deliveryEnabled,
         useLanguageStore.getState().resolvedLanguage
       );
-      await setFamilyActivityDigestEnabled(resolvedEnabled);
-      set({ familyActivityDigestEnabled: resolvedEnabled, isLoading: false });
-      return resolvedEnabled;
+      await setFamilyActivityDigestEnabled(enabled);
+      await useExperiencePreferencesStore
+        .getState()
+        .saveNotificationCategoryPreference('familyDigest', enabled);
+      set({ familyActivityDigestEnabled: enabled, permission, isLoading: false });
+      return enabled;
     } catch (error) {
       set({
         isLoading: false,

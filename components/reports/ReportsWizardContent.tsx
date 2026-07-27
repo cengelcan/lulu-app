@@ -27,6 +27,7 @@ import { shouldStackReportActions } from '@/constants/reports-layout';
 import { Spacing, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
 import { usePlusFeature } from '@/hooks/use-plus-feature';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { translateError } from '@/utils/translate-error';
@@ -37,6 +38,7 @@ import { generateReportHtml } from '@/services/reports/generate-report-html';
 import * as checkInStorage from '@/storage/check-in.storage';
 import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as medicationStorage from '@/storage/medication.storage';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 import { usePetStore } from '@/stores/pet.store';
 import { canViewReports } from '@/utils/pet-access';
 import type {
@@ -52,8 +54,7 @@ import type {
   ReportSummary,
   ReportWizardStep,
 } from '@/types/report';
-import { formatCheckInTitleDate } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { formatDateTime, formatWeekdayDate } from '@/utils/formatters';
 import { buildReportPetSummary } from '@/utils/report-pet-summary';
 import { resolveReportExportAssets, type ReportExportAssets } from '@/utils/report-export-assets';
 import { getPresetDateRange, isReportDateRangeValid, resolveReportDateRange } from '@/utils/report-range';
@@ -73,7 +74,7 @@ export function ReportsWizardContent() {
   const initialStartDate = Array.isArray(rawStartDate) ? rawStartDate[0] : rawStartDate;
   const initialEndDate = Array.isArray(rawEndDate) ? rawEndDate[0] : rawEndDate;
   const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const regionalFormat = useRegionalFormat();
   const petDisplay = usePetDisplay();
   const { fontScale, width } = useWindowDimensions();
   const stackActions = shouldStackReportActions(width, fontScale);
@@ -81,6 +82,9 @@ export function ReportsWizardContent() {
 
   const pet = usePetStore((state) => state.pet);
   const loadPet = usePetStore((state) => state.loadPet);
+  const weightUnitPreference = useExperiencePreferencesStore(
+    (state) => state.preferences?.weightUnitPreference ?? 'kg'
+  );
 
   const [step, setStep] = useState<ReportWizardStep>('range');
   const [range, setRange] = useState<ReportDateRange>(() =>
@@ -116,8 +120,8 @@ export function ReportsWizardContent() {
   }, [pet, router]);
 
   const formatDate = useCallback(
-    (date: string) => formatCheckInTitleDate(date, locale),
-    [locale]
+    (date: string) => formatWeekdayDate(date, regionalFormat),
+    [regionalFormat]
   );
 
   const documentLabels = useMemo<ReportDocumentLabels>(
@@ -157,14 +161,8 @@ export function ReportsWizardContent() {
   }, [formatDate, range]);
 
   const generatedAtLabel = useMemo(() => {
-    return new Date().toLocaleString(locale, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }, [locale]);
+    return formatDateTime(new Date(), regionalFormat);
+  }, [regionalFormat]);
 
   const formatPageLabel = useCallback(
     (current: number, total: number) => t('reports.review.pageOf', { current, total }),
@@ -233,7 +231,8 @@ export function ReportsWizardContent() {
       const nextPetSummary = buildReportPetSummary(pet, records, {
         ...petDisplay,
         t,
-        locale,
+        regionalFormat,
+        weightUnit: weightUnitPreference,
       });
 
       setPetSummary(nextPetSummary);
@@ -246,7 +245,8 @@ export function ReportsWizardContent() {
         medicationPlans,
         medicationDoses,
         t,
-        locale,
+        regionalFormat,
+        weightUnit: weightUnitPreference,
       });
 
       setPreviewContent(content);
@@ -261,7 +261,7 @@ export function ReportsWizardContent() {
     } finally {
       setIsLoadingReview(false);
     }
-  }, [locale, pet, petDisplay, range, selection, t]);
+  }, [pet, petDisplay, range, regionalFormat, selection, t, weightUnitPreference]);
 
   const handleNext = () => {
     setValidationError(null);

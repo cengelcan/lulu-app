@@ -6,9 +6,10 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "luluapp",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
+      "requireFullScreen": false,
       "deploymentTarget": "16.4",
       "bundleIdentifier": "com.luluapp.app",
       "usesAppleSignIn": true,
@@ -40,7 +41,7 @@
         {
           "image": "./assets/images/lulu-logo.png",
           "resizeMode": "contain",
-          "backgroundColor": "#000000",
+          "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
           }
@@ -77,6 +78,7 @@
       "expo-image",
       "expo-sharing",
       "expo-status-bar",
+      "expo-system-ui",
       "expo-web-browser"
     ],
     "experiments": {

@@ -6,12 +6,12 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { usePetDisplay } from '@/hooks/use-pet-display';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { isSharedPet } from '@/utils/pet-access';
 import type { Pet } from '@/types/pet';
-import { formatMemorialDate } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { formatLongDate } from '@/utils/formatters';
 
 type PetListRowProps = {
   pet: Pet;
@@ -63,7 +63,8 @@ function MemorialPetListRow({
   disabled = false,
   onSelect,
 }: MemorialPetListRowProps) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const { displayPetBreed, displayPetSpecies } = usePetDisplay();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
@@ -79,7 +80,7 @@ function MemorialPetListRow({
   const breedLabel = breed !== displayPetBreed(null) ? breed : speciesLabel;
   const deceasedDateLabel = pet.deceasedAt
     ? t('myPets.deceasedOn', {
-        date: formatMemorialDate(pet.deceasedAt, getLocaleTag(language)),
+        date: formatLongDate(pet.deceasedAt, regionalFormat),
       })
     : null;
   const subtitle = deceasedDateLabel ?? breedLabel;

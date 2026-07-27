@@ -69,4 +69,25 @@ describe('medication schedule engine', () => {
     assert.equal(zonedWallTimeToUtc('2026-10-26', { hour: 8, minute: 0 }, 'Europe/Berlin'),
       '2026-10-26T07:00:00.000Z');
   });
+
+  it('does not require Intl.DateTimeFormat formatToParts support', () => {
+    const originalFormatToParts = Intl.DateTimeFormat.prototype.formatToParts;
+    Object.defineProperty(Intl.DateTimeFormat.prototype, 'formatToParts', {
+      configurable: true,
+      value: undefined,
+    });
+
+    try {
+      assert.equal(
+        zonedWallTimeToUtc('2026-07-20', { hour: 8, minute: 0 }, 'Europe/Berlin'),
+        '2026-07-20T06:00:00.000Z'
+      );
+    } finally {
+      Object.defineProperty(Intl.DateTimeFormat.prototype, 'formatToParts', {
+        configurable: true,
+        writable: true,
+        value: originalFormatToParts,
+      });
+    }
+  });
 });

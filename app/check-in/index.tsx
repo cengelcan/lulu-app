@@ -14,11 +14,12 @@ import { HeaderIconButton } from '@/components/ui/HeaderIconButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { CHECK_IN_CATEGORIES, CHECK_IN_NOTES_MAX_LENGTH } from '@/constants/check-in';
-import { CheckInTheme } from '@/constants/check-in-theme';
 import { getScreenHorizontalPadding, LayoutTokens } from '@/constants/layout';
 import { STACK_BACK_ONLY_OPTIONS } from '@/constants/navigation';
 import { Radius, Spacing, Typography, Palette } from '@/constants/theme';
 import { useAndroidBackHandler } from '@/hooks/use-android-back-handler';
+import { useCheckInTheme } from '@/hooks/use-check-in-theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCheckInStore } from '@/stores/check-in.store';
@@ -37,7 +38,6 @@ import { countCompletedCheckInFields, isCheckInFormComplete } from '@/utils/chec
 import { canWritePetCareData } from '@/utils/pet-access';
 import { translateError } from '@/utils/translate-error';
 import {
-  formatCheckInTitleDate,
   formatLocalDate,
   getTodayStart,
   isFutureLocalDate,
@@ -45,6 +45,7 @@ import {
   isValidLocalDateString,
   parseLocalDate,
 } from '@/utils/date';
+import { formatWeekdayDate } from '@/utils/formatters';
 
 function createCheckInId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -63,6 +64,7 @@ export default function CheckInScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const {
     date: dateParam,
     fromSetup: fromSetupParam,
@@ -96,7 +98,10 @@ export default function CheckInScreen() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   const alertColor = useThemeColor({}, 'alert');
+  const textColor = useThemeColor({}, 'text');
+  const borderColor = useThemeColor({}, 'border');
   const primaryTextColor = useThemeColor({}, 'primaryText');
+  const checkInTheme = useCheckInTheme();
   const horizontalPadding = getScreenHorizontalPadding(width);
 
   const rawDateParam = Array.isArray(dateParam) ? dateParam[0] : dateParam;
@@ -224,9 +229,9 @@ export default function CheckInScreen() {
 
     return t('checkIn.titlePast', {
       name: pet.name,
-      date: formatCheckInTitleDate(selectedDate),
+      date: formatWeekdayDate(selectedDate, regionalFormat),
     });
-  }, [pet, selectedDate, t]);
+  }, [pet, regionalFormat, selectedDate, t]);
 
   const trimmedNotes = notes.trim();
   const notesLength = notes.length;
@@ -362,12 +367,12 @@ export default function CheckInScreen() {
     () => (
       <HeaderIconButton
         accessibilityLabel={t('checkIn.title')}
-        borderColor={CheckInTheme.headerButtonBorder}
+        borderColor={checkInTheme.headerButtonBorder}
         onPress={() => setDatePickerVisible(true)}>
-        <IconSymbol name="calendar.badge.checkmark" size={18} color="#FFFFFF" />
+        <IconSymbol name="calendar.badge.checkmark" size={18} color={textColor} />
       </HeaderIconButton>
     ),
-    [t]
+    [checkInTheme.headerButtonBorder, t, textColor]
   );
 
   const checkInHeaderOptions = useMemo(
@@ -375,25 +380,25 @@ export default function CheckInScreen() {
       ...STACK_BACK_ONLY_OPTIONS,
       headerShown: true as const,
       title: t('checkIn.title'),
-      headerStyle: { backgroundColor: CheckInTheme.background },
+      headerStyle: { backgroundColor: checkInTheme.background },
       headerShadowVisible: false,
-      headerTintColor: '#FFFFFF',
+      headerTintColor: textColor,
       headerBackVisible: false,
       headerLeft: isFromSetup
         ? undefined
         : () => (
             <HeaderIconButton
               accessibilityLabel={t('common.back')}
-              borderColor={CheckInTheme.headerButtonBorder}
+              borderColor={checkInTheme.headerButtonBorder}
               onPress={leaveCheckIn}>
-              <IconSymbol name="chevron.left" size={18} color="#FFFFFF" />
+              <IconSymbol name="chevron.left" size={18} color={textColor} />
             </HeaderIconButton>
           ),
       headerRight,
       headerLeftContainerStyle: { paddingLeft: Spacing.md },
       headerRightContainerStyle: { paddingRight: Spacing.md },
     }),
-    [headerRight, isFromSetup, leaveCheckIn, t]
+    [checkInTheme.background, checkInTheme.headerButtonBorder, headerRight, isFromSetup, leaveCheckIn, t, textColor]
   );
 
   if (petIsLoading || !pet) {
@@ -407,7 +412,7 @@ export default function CheckInScreen() {
         <ScreenContainer
           edges={['bottom']}
           contentStyle={styles.centered}
-          style={{ backgroundColor: CheckInTheme.background }}>
+          style={{ backgroundColor: checkInTheme.background }}>
           <ContentState accessibilityLabel={t('common.loading')} kind="loading" />
         </ScreenContainer>
       </>
@@ -421,7 +426,7 @@ export default function CheckInScreen() {
         scrollable
         edges={['bottom']}
         contentStyle={styles.content}
-        style={{ backgroundColor: CheckInTheme.background }}>
+        style={{ backgroundColor: checkInTheme.background }}>
         <View style={[styles.body, { paddingBottom: insets.bottom + 88 }]}>
           <CheckInHeader
             petName={pet.name}
@@ -473,7 +478,8 @@ export default function CheckInScreen() {
           styles.footer,
           {
             paddingBottom: Math.max(insets.bottom, Spacing.md),
-            backgroundColor: CheckInTheme.background,
+            backgroundColor: checkInTheme.background,
+            borderTopColor: borderColor,
           },
         ]}>
         <View style={[styles.footerContent, { paddingHorizontal: horizontalPadding }]}>
@@ -548,7 +554,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     paddingTop: Spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.08)',
   },
   footerContent: {
     width: '100%',

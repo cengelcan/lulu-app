@@ -14,7 +14,8 @@ import { ensureNotificationHandlerConfigured } from '@/services/notifications/ha
 import { hasNotificationPermission } from '@/services/notifications/permissions';
 import * as medicationStorage from '@/storage/medication.storage';
 import { getActivePet } from '@/storage/pet.storage';
-import { getAppLanguage, getPetReminderNotificationsEnabled } from '@/storage/prefs.storage';
+import { getAppLanguage } from '@/storage/prefs.storage';
+import { loadNotificationCategoryPreferences } from '@/storage/experience-preferences.storage';
 import { translate } from '@/i18n';
 
 export async function cancelAllMedicationDoseNotifications(): Promise<void> {
@@ -30,13 +31,16 @@ export async function cancelAllMedicationDoseNotifications(): Promise<void> {
   ));
 }
 
-export async function syncMedicationDoseNotificationSchedule(): Promise<void> {
+export async function syncMedicationDoseNotificationSchedule(input?: {
+  enabled?: boolean | null;
+}): Promise<void> {
   if (process.env.EXPO_OS === 'web') return;
   await ensureNotificationHandlerConfigured();
   await cancelAllMedicationDoseNotifications();
-  const [enabled, pet, language, permission] = await Promise.all([
-    getPetReminderNotificationsEnabled(), getActivePet(), getAppLanguage(), hasNotificationPermission(),
+  const [categories, pet, language, permission] = await Promise.all([
+    loadNotificationCategoryPreferences(), getActivePet(), getAppLanguage(), hasNotificationPermission(),
   ]);
+  const enabled = input?.enabled ?? categories.medicationDoses;
   if (!enabled || !permission || !pet || pet.status === 'deceased') return;
 
   await ensureMedicationDoseHorizon(pet.id);

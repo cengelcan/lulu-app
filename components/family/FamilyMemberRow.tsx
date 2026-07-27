@@ -4,12 +4,13 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { getReadableForegroundColor } from '@/utils/color-contrast';
 
 const AVATAR_COLORS = [
   Palette.badgePink,
   '#60A5FA',
   Palette.badgeEmerald,
-  Palette.badgeViolet,
+  '#7C3AED',
   Palette.badgeOrange,
 ];
 
@@ -56,11 +57,12 @@ export function FamilyMemberRow({
   const seed = displayName ?? 'member';
   const initials = getInitials(displayName);
   const avatarColor = getAvatarColor(seed);
+  const avatarTextColor = getReadableForegroundColor(avatarColor);
 
   return (
     <View style={[styles.row, { borderBottomColor: borderColor }]}>
       <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-        <ThemedText style={styles.initials}>{initials}</ThemedText>
+        <ThemedText style={[styles.initials, { color: avatarTextColor }]}>{initials}</ThemedText>
       </View>
       <View style={styles.info}>
         <ThemedText type="defaultSemiBold">
@@ -94,7 +96,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   initials: {
-    color: '#ffffff',
     fontWeight: '600',
     fontSize: 14,
   },

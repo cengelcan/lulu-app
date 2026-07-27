@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { MedicationDoseRow } from '@/components/medications/MedicationDoseRow';
 import { MedicationPlanRow } from '@/components/medications/MedicationPlanRow';
+import { ContextualEducationCard } from '@/components/onboarding/contextual-education-card';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +11,7 @@ import { ContentState } from '@/components/ui/content-state';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing, Typography } from '@/constants/theme';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
+import { useContextualEducation } from '@/hooks/use-contextual-education';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { linkFollowUpToVetVisit } from '@/services/vet-visits/link-follow-up';
@@ -42,6 +44,7 @@ export function MedicationPlansScreen() {
   const [referenceNow] = useState(() => Date.now());
   const secondary = useThemeColor({}, 'textSecondary');
   const screenOptions = useHubStackScreenOptions(t('medications.title'));
+  const medicationEducation = useContextualEducation('medication');
 
   useFocusEffect(useCallback(() => { void loadPet(); }, [loadPet]));
   useFocusEffect(useCallback(() => {
@@ -87,6 +90,14 @@ export function MedicationPlansScreen() {
         <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.body}>
           {sourceVisitId ? t('vetVisits.chooseMedicationPlanDescription') : t('medications.description')}
         </ThemedText>
+        {!sourceVisitId && medicationEducation.isVisible ? (
+          <ContextualEducationCard
+            title={t('contextualEducation.medicationTitle')}
+            description={t('contextualEducation.medicationDescription')}
+            icon="pills.fill"
+            onDismiss={medicationEducation.dismiss}
+          />
+        ) : null}
         <Button title={t('medications.addPlan')} onPress={() => router.push({
           pathname: '/medications/[id]',
           params: sourceVisitId ? { id: 'new', sourceVisitId } : { id: 'new' },

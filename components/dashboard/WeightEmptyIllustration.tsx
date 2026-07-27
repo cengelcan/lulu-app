@@ -36,11 +36,13 @@ export function WeightScaleIcon({
 export function WeightEmptyIllustration({
   size = 88,
   accentColor = Palette.badgeViolet,
-  borderColor = 'rgba(161, 161, 170, 0.45)',
+  borderColor,
   backgroundColor,
 }: WeightEmptyIllustrationProps) {
   const surfaceColor = useThemeColor({}, 'surface');
+  const themeBorderColor = useThemeColor({}, 'border');
   const fillColor = backgroundColor ?? surfaceColor;
+  const frameBorderColor = borderColor ?? themeBorderColor;
   const iconSize = Math.round(size * 0.4);
   const frameSize = size - FRAME_INSET * 2;
 
@@ -55,7 +57,7 @@ export function WeightEmptyIllustration({
           rx={Radius.lg}
           ry={Radius.lg}
           fill={fillColor}
-          stroke={borderColor}
+          stroke={frameBorderColor}
           strokeWidth="1.5"
           strokeDasharray="5 5"
         />

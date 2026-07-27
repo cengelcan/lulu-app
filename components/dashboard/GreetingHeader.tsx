@@ -3,27 +3,25 @@ import { StyleSheet, View } from 'react-native';
 import { NotificationBellButton } from '@/components/dashboard/NotificationBellButton';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
-import { getLocaleTag } from '@/utils/locale';
+import { formatWeekdayDate } from '@/utils/formatters';
 
 type GreetingHeaderProps = {
   ownerName: string | null;
 };
 
 export function GreetingHeader({ ownerName }: GreetingHeaderProps) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const greetingTitle = ownerName
     ? t('dashboard.greeting', { name: ownerName })
     : t('dashboard.greetingFallback');
 
-  const dateLabel = new Date().toLocaleDateString(getLocaleTag(language), {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
+  const dateLabel = formatWeekdayDate(new Date(), regionalFormat);
 
   return (
     <View style={styles.container}>

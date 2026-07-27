@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
 import {
-  getOnboardingCompleted,
-  setOnboardingCompleted,
-} from '@/storage/prefs.storage';
+  completeCurrentOnboarding,
+  getCurrentOnboardingCompleted,
+} from '@/storage/onboarding.storage';
 import { getStoreErrorKey } from '@/utils/store-error';
 
 type OnboardingState = {
@@ -24,7 +24,7 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const hasCompletedOnboarding = await getOnboardingCompleted();
+      const hasCompletedOnboarding = await getCurrentOnboardingCompleted();
       set({ hasCompletedOnboarding, isLoading: false });
     } catch (error) {
       set({
@@ -38,7 +38,7 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await setOnboardingCompleted(true);
+      await completeCurrentOnboarding();
       set({ hasCompletedOnboarding: true, isLoading: false });
     } catch (error) {
       set({

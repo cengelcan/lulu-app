@@ -1,8 +1,6 @@
 import type { ReminderTypeLabelKey } from '@/constants/reminder-types';
 import { REMINDER_TYPES } from '@/constants/reminder-types';
 import type { PetReminder, ReminderTypeId } from '@/types/pet-reminder';
-import { formatCheckInTitleDate } from '@/utils/date';
-import { formatReminderTime } from '@/utils/time';
 
 type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
 
@@ -13,32 +11,6 @@ export function getReminderTypeLabelKey(type: ReminderTypeId): ReminderTypeLabel
   }
 
   return definition.labelKey;
-}
-
-export function formatReminderDueDate(date: string, locale: string): string {
-  return formatCheckInTitleDate(date, locale);
-}
-
-export function formatReminderDateTime(
-  dueDate: string,
-  dueTime: PetReminder['dueTime'],
-  locale: string,
-  todayKey: string,
-  tomorrowKey: string,
-  t: TranslateFn
-): string {
-  const timeLabel = formatReminderTime(dueTime);
-
-  if (dueDate === todayKey) {
-    return `${t('common.today')} ${timeLabel}`;
-  }
-
-  if (dueDate === tomorrowKey) {
-    return `${t('common.tomorrow')} ${timeLabel}`;
-  }
-
-  const dateLabel = formatReminderDueDate(dueDate, locale);
-  return `${dateLabel} ${timeLabel}`;
 }
 
 export function getReminderTitle(reminder: PetReminder, t: TranslateFn): string {

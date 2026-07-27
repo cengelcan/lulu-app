@@ -2,7 +2,6 @@ import { getTranslations, translate } from '@/i18n';
 import type { ResolvedLanguage } from '@/types/language';
 import type { PetReminder } from '@/types/pet-reminder';
 import type { MedicationPlan } from '@/types/medication';
-import { getReminderTitle } from '@/utils/pet-reminder-display';
 
 import {
   CHECK_IN_REMINDER_VARIANT_COUNT,
@@ -20,17 +19,23 @@ function applyTranslationParams(
 }
 
 export function getMedicationDoseNotificationContent(
-  plan: MedicationPlan,
+  _plan: MedicationPlan,
   petName: string,
   language: ResolvedLanguage = 'en'
 ): { title: string; body: string } {
   return {
-    title: translate(language, 'notifications.medicationDoseTitle', { medication: plan.name }),
-    body: translate(language, 'notifications.medicationDoseBody', {
-      name: petName,
-      dose: plan.dosage,
-      unit: plan.unit,
-    }),
+    title: translate(language, 'notifications.medicationDoseTitle'),
+    body: translate(language, 'notifications.medicationDoseBody', { name: petName }),
+  };
+}
+
+export function getMedicationRefillNotificationContent(
+  petName: string,
+  language: ResolvedLanguage = 'en'
+): { title: string; body: string } {
+  return {
+    title: translate(language, 'notifications.medicationRefillTitle'),
+    body: translate(language, 'notifications.medicationRefillBody', { name: petName }),
   };
 }
 
@@ -71,17 +76,14 @@ export function getCheckInReminderContentForDate(
 }
 
 export function getPetReminderNotificationContent(
-  reminder: PetReminder,
+  _reminder: PetReminder,
   petName: string,
   language: ResolvedLanguage = 'en'
 ): { title: string; body: string } {
-  const title = getReminderTitle(reminder, (key) => translate(language, key));
-
   return {
-    title,
+    title: translate(language, 'notifications.reminderTitle'),
     body: translate(language, 'notifications.petReminderBody', {
       name: petName,
-      title,
     }),
   };
 }

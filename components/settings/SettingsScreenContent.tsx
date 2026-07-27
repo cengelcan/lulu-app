@@ -3,13 +3,18 @@ import { useCallback } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { type Edge } from 'react-native-safe-area-context';
 
+import { AppearanceSection } from '@/components/settings/appearance-section';
 import { LanguageSection } from '@/components/settings/LanguageSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
+import { WeightUnitSection } from '@/components/settings/weight-unit-section';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Spacing } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 import { useLanguageStore } from '@/stores/language.store';
 import { useNotificationStore } from '@/stores/notification.store';
+import { useUserStore } from '@/stores/user.store';
+import { pushWeightUnitPreference } from '@/services/sync/weight-unit-preference-sync';
 import type { ReminderTime } from '@/types/reminder';
 
 type SettingsScreenContentProps = {
@@ -28,9 +33,26 @@ export function SettingsScreenContent({
   const savePetReminderNotificationsEnabled = useNotificationStore(
     (state) => state.savePetReminderNotificationsEnabled
   );
-  const savePermission = useNotificationStore((state) => state.savePermission);
   const petReminderNotificationsEnabled = useNotificationStore(
     (state) => state.petReminderNotificationsEnabled
+  );
+  const dailyCheckInNotificationsEnabled = useNotificationStore(
+    (state) => state.dailyCheckInNotificationsEnabled
+  );
+  const medicationDoseNotificationsEnabled = useNotificationStore(
+    (state) => state.medicationDoseNotificationsEnabled
+  );
+  const medicationRefillNotificationsEnabled = useNotificationStore(
+    (state) => state.medicationRefillNotificationsEnabled
+  );
+  const saveDailyCheckInNotificationsEnabled = useNotificationStore(
+    (state) => state.saveDailyCheckInNotificationsEnabled
+  );
+  const saveMedicationDoseNotificationsEnabled = useNotificationStore(
+    (state) => state.saveMedicationDoseNotificationsEnabled
+  );
+  const saveMedicationRefillNotificationsEnabled = useNotificationStore(
+    (state) => state.saveMedicationRefillNotificationsEnabled
   );
   const familyActivityDigestEnabled = useNotificationStore(
     (state) => state.familyActivityDigestEnabled
@@ -40,6 +62,21 @@ export function SettingsScreenContent({
   );
   const clearError = useNotificationStore((state) => state.clearError);
 
+  const themePreference = useExperiencePreferencesStore(
+    (state) => state.preferences?.themePreference ?? 'system'
+  );
+  const loadPreferences = useExperiencePreferencesStore((state) => state.loadPreferences);
+  const saveThemePreference = useExperiencePreferencesStore(
+    (state) => state.saveThemePreference
+  );
+  const weightUnitPreference = useExperiencePreferencesStore(
+    (state) => state.preferences?.weightUnitPreference ?? 'kg'
+  );
+  const saveWeightUnitPreference = useExperiencePreferencesStore(
+    (state) => state.saveWeightUnitPreference
+  );
+  const userId = useUserStore((state) => state.userId);
+
   const languagePreference = useLanguageStore((state) => state.languagePreference);
   const saveLanguage = useLanguageStore((state) => state.saveLanguage);
 
@@ -48,14 +85,33 @@ export function SettingsScreenContent({
   useFocusEffect(
     useCallback(() => {
       void loadNotificationSettings();
-    }, [loadNotificationSettings])
+      void loadPreferences();
+    }, [loadNotificationSettings, loadPreferences])
   );
 
   const handleToggleCheckIn = async (enabled: boolean) => {
     clearError();
 
     try {
-      await savePermission(enabled ? 'allowed' : 'later');
+      await saveDailyCheckInNotificationsEnabled(enabled);
+    } catch {
+      // Store sets error state.
+    }
+  };
+
+  const handleToggleMedicationDoses = async (enabled: boolean) => {
+    clearError();
+    try {
+      await saveMedicationDoseNotificationsEnabled(enabled);
+    } catch {
+      // Store sets error state.
+    }
+  };
+
+  const handleToggleMedicationRefill = async (enabled: boolean) => {
+    clearError();
+    try {
+      await saveMedicationRefillNotificationsEnabled(enabled);
     } catch {
       // Store sets error state.
     }
@@ -95,6 +151,29 @@ export function SettingsScreenContent({
     void saveLanguage(nextLanguage);
   };
 
+  const handleThemeSelect = (nextTheme: typeof themePreference) => {
+    void saveThemePreference(nextTheme).catch(() => {
+      // Store keeps the previous preference and records the error.
+    });
+  };
+
+  const handleWeightUnitSelect = async (nextUnit: typeof weightUnitPreference) => {
+    try {
+      await saveWeightUnitPreference(nextUnit);
+    } catch {
+      return;
+    }
+
+    if (userId) {
+      try {
+        await pushWeightUnitPreference(userId, nextUnit);
+      } catch (error) {
+        // Local-first: keep the selection and reconcile it on the next authenticated sync.
+        console.warn('Failed to sync weight unit preference', error);
+      }
+    }
+  };
+
   const isInitialLoading = isLoading && permission === null;
 
   return (
@@ -104,15 +183,28 @@ export function SettingsScreenContent({
           <ActivityIndicator color={primaryColor} style={styles.loading} />
         ) : (
           <>
+            <AppearanceSection
+              preference={themePreference}
+              onChange={handleThemeSelect}
+            />
+            <WeightUnitSection
+              preference={weightUnitPreference}
+              onChange={(nextUnit) => void handleWeightUnitSelect(nextUnit)}
+            />
             <NotificationSection
               permission={permission}
               reminderTime={reminderTime}
+              dailyCheckInNotificationsEnabled={dailyCheckInNotificationsEnabled}
               petReminderNotificationsEnabled={petReminderNotificationsEnabled}
+              medicationDoseNotificationsEnabled={medicationDoseNotificationsEnabled}
+              medicationRefillNotificationsEnabled={medicationRefillNotificationsEnabled}
               familyActivityDigestEnabled={familyActivityDigestEnabled}
               isLoading={isLoading}
               error={storeError}
               onToggleCheckIn={(enabled) => void handleToggleCheckIn(enabled)}
               onTogglePetReminders={(enabled) => void handleTogglePetReminders(enabled)}
+              onToggleMedicationDoses={(enabled) => void handleToggleMedicationDoses(enabled)}
+              onToggleMedicationRefill={(enabled) => void handleToggleMedicationRefill(enabled)}
               onToggleFamilyActivityDigest={(enabled) =>
                 void handleToggleFamilyActivityDigest(enabled)
               }

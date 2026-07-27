@@ -12,6 +12,7 @@ type GroupedSectionProps = {
   actionLabel?: string;
   onActionPress?: () => void;
   titleTrailing?: React.ReactNode;
+  footer?: string;
 };
 
 export function GroupedSection({
@@ -21,6 +22,7 @@ export function GroupedSection({
   actionLabel,
   onActionPress,
   titleTrailing,
+  footer,
 }: GroupedSectionProps) {
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
@@ -52,6 +54,14 @@ export function GroupedSection({
         ) : null}
       </View>
       <Card style={[styles.card, cardStyle]}>{children}</Card>
+      {footer ? (
+        <ThemedText
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.footer}>
+          {footer}
+        </ThemedText>
+      ) : null}
     </View>
   );
 }
@@ -86,5 +96,9 @@ const styles = StyleSheet.create({
     padding: 0,
     gap: 0,
     overflow: 'hidden',
+  },
+  footer: {
+    ...Typography.caption,
+    paddingHorizontal: Spacing.xs,
   },
 });

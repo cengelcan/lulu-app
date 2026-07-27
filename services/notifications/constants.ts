@@ -69,6 +69,11 @@ export const MEDICATION_DOSE_NOTIFICATION_SOUND = 'bell_ring.wav';
 export const MEDICATION_DOSE_CATEGORY_ID = 'medication-dose-actions-v1';
 export const MEDICATION_DOSE_ACTION_TAKE = 'medication-dose-take';
 export const MEDICATION_DOSE_ACTION_SNOOZE = 'medication-dose-snooze';
+export const MEDICATION_REFILL_NOTIFICATION_ID_PREFIX = 'medication-refill-';
+
+export function getMedicationRefillNotificationId(planId: string): string {
+  return `${MEDICATION_REFILL_NOTIFICATION_ID_PREFIX}${planId}`;
+}
 
 export function getMedicationDoseNotificationId(doseId: string): string {
   return `${MEDICATION_DOSE_NOTIFICATION_ID_PREFIX}${doseId}`;

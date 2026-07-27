@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { BrandGradientFill } from '@/components/ui/BrandGradient';
 import { Radius, Spacing, Typography } from '@/constants/theme';
@@ -21,10 +21,12 @@ export function SegmentedControl<T extends string>({
   value,
   onChange,
 }: SegmentedControlProps<T>) {
+  const { fontScale } = useWindowDimensions();
   const surfaceColor = useThemeColor({}, 'surface');
   const borderColor = useThemeColor({}, 'border');
   const primaryTextColor = useThemeColor({}, 'primaryText');
   const textColor = useThemeColor({}, 'text');
+  const usesVerticalLayout = fontScale >= 1.3;
 
   const handleSelect = (nextValue: T) => {
     if (nextValue === value) {
@@ -41,18 +43,24 @@ export function SegmentedControl<T extends string>({
   return (
     <View
       accessibilityRole="tablist"
-      style={[styles.container, { backgroundColor: surfaceColor, borderColor }]}>
+      style={[
+        styles.container,
+        usesVerticalLayout && styles.containerVertical,
+        { backgroundColor: surfaceColor, borderColor },
+      ]}>
       {options.map((option) => {
         const isSelected = option.value === value;
 
         return (
           <Pressable
             key={option.value}
+            accessibilityLabel={option.label}
             accessibilityRole="tab"
             accessibilityState={{ selected: isSelected }}
             onPress={() => handleSelect(option.value)}
             style={({ pressed }) => [
               styles.segment,
+              usesVerticalLayout && styles.segmentVertical,
               isSelected && styles.segmentSelected,
               pressed && !isSelected && styles.segmentPressed,
               pressed && isSelected && styles.segmentSelectedPressed,
@@ -61,7 +69,7 @@ export function SegmentedControl<T extends string>({
             <Text
               allowFontScaling
               maxFontSizeMultiplier={Typography.caption.maxFontSizeMultiplier}
-              numberOfLines={1}
+              numberOfLines={usesVerticalLayout ? undefined : 1}
               style={[
                 styles.label,
                 { color: isSelected ? primaryTextColor : textColor },
@@ -83,6 +91,9 @@ const styles = StyleSheet.create({
     padding: Spacing.xxs,
     gap: Spacing.xxs,
   },
+  containerVertical: {
+    flexDirection: 'column',
+  },
   segment: {
     flex: 1,
     minHeight: 36,
@@ -91,6 +102,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
+  },
+  segmentVertical: {
+    width: '100%',
   },
   segmentSelected: {
     overflow: 'hidden',

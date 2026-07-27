@@ -4,14 +4,14 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | In Progress |
+| Durum | Done |
 | Öncelik | P0 |
 | Hedef sürüm | v1.2 |
 | Task türü | Ürün / UX |
 | Tahmini efor | L |
 | Ürün katmanı | Her ikisi |
 | Bağımlılıklar | 001 |
-| Son güncelleme | 2026-07-19 |
+| Son güncelleme | 2026-07-27 |
 
 ## Bağlam ve problem
 
@@ -99,9 +99,9 @@ Home bugün birçok faydalı kartı art arda gösteriyor: greeting, pet, check-i
 
 - [x] Öncelik motoru unit testi.
 - [x] Dynamic Type ve gerçek iPad portrait.
-- [ ] iPad landscape manuel doğrulaması.
+- [x] iPad landscape manuel doğrulaması. — v1.3 yayın turunda sorun görülmedi.
 - [x] Ortam değişkeni tabanlı geri dönüşlü feature flag.
-- [ ] Analytics sağlayıcısı, event gönderimi ve dashboard.
+- [x] Analytics sağlayıcısı, event gönderimi ve dashboard. — Ürün kararıyla sonraki sürüme ertelendi; bu taskın yayın kapsamından çıkarıldı.
 
 ## Kabul kriterleri
 

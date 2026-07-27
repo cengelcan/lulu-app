@@ -56,6 +56,7 @@ export function VetVisitFormScreen() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const secondary = useThemeColor({}, 'textSecondary');
+  const alertColor = useThemeColor({}, 'alert');
   const isNew = id === 'new';
   const screenOptions = useHubStackScreenOptions(
     isNew ? t('vetVisits.newVisit') : t('vetVisits.editVisit'), '/vet-visits' as Href
@@ -228,7 +229,7 @@ export function VetVisitFormScreen() {
               id: createVetVisitId(), text: '', createdAt: new Date().toISOString(),
             }])} />
         </GroupedSection>
-        {error ? <ThemedText accessibilityRole="alert" style={styles.error}>{error}</ThemedText> : null}
+        {error ? <ThemedText accessibilityRole="alert" style={[styles.error, { color: alertColor }]}>{error}</ThemedText> : null}
         {isReadOnly ? <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.body}>
           {t('vetVisits.sharedVisitReadOnly')}
         </ThemedText> : null}
@@ -251,5 +252,5 @@ const styles = StyleSheet.create({
   formCard: { padding: Spacing.md, gap: Spacing.md },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   switchCopy: { flex: 1, gap: 2 },
-  error: { color: '#ef4444' },
+  error: { textAlign: 'center' },
 });

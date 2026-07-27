@@ -1,4 +1,5 @@
 export const StorageKeys = {
+  experiencePreferences: '@lulu/experience_preferences_v1',
   onboardingCompleted: '@pet_health_journal/onboarding_completed',
   currentUserId: '@pet_health_journal/current_user_id',
   checkInPreferences: '@pet_health_journal/check_in_preferences',
@@ -19,6 +20,7 @@ export const StorageKeys = {
   userSetupPath: '@pet_health_journal/user_setup_path',
   joinRemindersPromptPending: '@pet_health_journal/join_reminders_prompt_pending',
   joinRemindersPromptDismissed: '@pet_health_journal/join_reminders_prompt_dismissed',
+  contextualEducationDismissed: '@pet_health_journal/contextual_education_dismissed',
 } as const;
 
 export type StorageKey = (typeof StorageKeys)[keyof typeof StorageKeys];

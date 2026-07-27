@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import type { PetRecord } from '@/types/pet-record';
+import type { WeightUnit } from '@/types/pet-record';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import {
   buildWeightChartData,
   formatWeightDelta,
@@ -11,17 +13,24 @@ import {
   WEIGHT_CHART_MAX_POINTS,
 } from '@/utils/weight-chart';
 
+const regionalFormat: RegionalFormatContext = {
+  language: 'en', languageLocale: 'en-US', regionCode: 'US', datePartOrder: 'mdy',
+  dateSeparator: '/', decimalSeparator: '.', digitGroupingSeparator: ',',
+  measurementSystem: 'us', uses24HourClock: false, timeZone: 'UTC',
+};
+
 function createWeightRecord(
   date: string,
   value: number,
-  createdAt = `${date}T10:00:00.000Z`
+  createdAt = `${date}T10:00:00.000Z`,
+  unit: WeightUnit = 'kg'
 ): PetRecord {
   return {
     id: `weight-${date}-${createdAt}`,
     petId: 'pet-1',
     type: 'weight',
     date,
-    metadata: { value, unit: 'kg' },
+    metadata: { value, unit },
     notes: null,
     createdAt,
     updatedAt: createdAt,
@@ -63,6 +72,20 @@ describe('buildWeightChartData', () => {
     assert.equal(data.points[1]?.value, 4.6);
     assert.equal(data.minValue, 4.4);
     assert.equal(data.maxValue, 4.6);
+  });
+
+  it('normalizes mixed source units into the selected display unit', () => {
+    const data = buildWeightChartData(
+      [
+        createWeightRecord('2026-06-20', 10),
+        createWeightRecord('2026-06-21', 22.046226218487757, undefined, 'lb'),
+      ],
+      'lb'
+    );
+
+    assert.equal(data.unit, 'lb');
+    assert.deepEqual(data.points.map((point) => point.value), [22, 22]);
+    assert.ok(data.points.every((point) => point.unit === 'lb'));
   });
 });
 
@@ -113,8 +136,8 @@ describe('getWeightChartChange', () => {
 
 describe('formatWeightDelta', () => {
   it('formats positive and negative deltas with signs', () => {
-    assert.equal(formatWeightDelta(0.2, 'en-US'), '+0.2');
-    assert.equal(formatWeightDelta(-0.3, 'en-US'), '-0.3');
-    assert.equal(formatWeightDelta(0, 'en-US'), '0');
+    assert.equal(formatWeightDelta(0.2, regionalFormat), '+0.2');
+    assert.equal(formatWeightDelta(-0.3, regionalFormat), '-0.3');
+    assert.equal(formatWeightDelta(0, regionalFormat), '0');
   });
 });

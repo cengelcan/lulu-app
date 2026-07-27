@@ -10,6 +10,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 import type { PetRecord } from '@/types/pet-record';
 import { buildWeightChartData } from '@/utils/weight-chart';
 
@@ -24,8 +25,14 @@ export function WeightSection({ records }: WeightSectionProps) {
   const { t } = useTranslation();
   const titleColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
+  const weightUnitPreference = useExperiencePreferencesStore(
+    (state) => state.preferences?.weightUnitPreference ?? 'kg'
+  );
 
-  const chartData = useMemo(() => buildWeightChartData(records), [records]);
+  const chartData = useMemo(
+    () => buildWeightChartData(records, weightUnitPreference),
+    [records, weightUnitPreference]
+  );
 
   const latestLabel = useMemo(() => {
     if (!chartData.latest) {

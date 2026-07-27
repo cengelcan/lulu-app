@@ -22,6 +22,8 @@ export function resetUserScopedStores(): void {
     require('@/stores/family-activity.store') as typeof import('@/stores/family-activity.store');
   const { useVetVisitStore } =
     require('@/stores/vet-visit.store') as typeof import('@/stores/vet-visit.store');
+  const { useExperiencePreferencesStore } =
+    require('@/stores/experience-preferences.store') as typeof import('@/stores/experience-preferences.store');
 
   usePetStore.setState({
     pets: [],
@@ -55,7 +57,14 @@ export function resetUserScopedStores(): void {
   useVetVisitStore.setState({ bundles: [], isLoading: false, error: null });
   useNotificationStore.setState({
     reminderTime: null,
+    permission: null,
+    dailyCheckInNotificationsEnabled: false,
+    petReminderNotificationsEnabled: true,
+    medicationDoseNotificationsEnabled: true,
+    medicationRefillNotificationsEnabled: true,
     familyActivityDigestEnabled: false,
+    isLoading: false,
+    error: null,
   });
   useSharingStore.setState({
     familyGroup: null,
@@ -69,4 +78,10 @@ export function resetUserScopedStores(): void {
     error: null,
   });
   useFamilyActivityStore.getState().clear();
+  useExperiencePreferencesStore.setState({
+    preferences: null,
+    hasLoaded: false,
+    isLoading: false,
+    error: null,
+  });
 }

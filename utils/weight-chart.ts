@@ -1,5 +1,8 @@
 import type { PetRecord, WeightUnit } from '@/types/pet-record';
 import { formatLocalDate } from '@/utils/date';
+import { formatRegionalNumber } from '@/utils/formatters';
+import type { RegionalFormatContext } from '@/utils/regional-format';
+import { convertWeight, roundWeightForDisplay } from '@/utils/weight-unit';
 
 export const WEIGHT_CHART_MAX_POINTS = 12;
 export const WEIGHT_CHANGE_PERIOD_DAYS = 30;
@@ -49,6 +52,7 @@ function compareWeightRecords(a: WeightRecord, b: WeightRecord): number {
 
 export function buildWeightChartData(
   records: PetRecord[],
+  displayUnit?: WeightUnit,
   maxPoints: number = WEIGHT_CHART_MAX_POINTS
 ): WeightChartData {
   const weightRecords = records.filter(isWeightRecord).sort(compareWeightRecords);
@@ -72,10 +76,13 @@ export function buildWeightChartData(
   }
 
   const sliced = uniqueRecords.slice(-maxPoints);
+  const resolvedUnit = displayUnit ?? sliced.at(-1)?.metadata.unit ?? 'kg';
   const points: WeightChartPoint[] = sliced.map((record) => ({
     date: record.date,
-    value: record.metadata.value,
-    unit: record.metadata.unit,
+    value: roundWeightForDisplay(
+      convertWeight(record.metadata.value, record.metadata.unit, resolvedUnit)
+    ),
+    unit: resolvedUnit,
   }));
   const latest = points.at(-1) ?? null;
   const values = points.map((point) => point.value);
@@ -156,8 +163,8 @@ export function getWeightChartChange(
   };
 }
 
-export function formatWeightDelta(value: number, locale: string): string {
-  const formatted = Math.abs(value).toLocaleString(locale, {
+export function formatWeightDelta(value: number, context: RegionalFormatContext): string {
+  const formatted = formatRegionalNumber(Math.abs(value), context, {
     maximumFractionDigits: 1,
     minimumFractionDigits: Number.isInteger(Math.abs(value)) ? 0 : 1,
   });

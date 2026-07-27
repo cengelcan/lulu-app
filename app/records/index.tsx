@@ -13,12 +13,13 @@ import { RECORD_TYPES } from '@/constants/record-types';
 import { Spacing, Typography } from '@/constants/theme';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
 import { usePlusFeature } from '@/hooks/use-plus-feature';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePetRecordStore } from '@/stores/pet-record.store';
 import { usePetStore } from '@/stores/pet.store';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 import type { RecordTypeId } from '@/types/pet-record';
-import { getLocaleTag } from '@/utils/locale';
 import {
   formatRecordDate,
   getRecordFormRoute,
@@ -31,14 +32,17 @@ const RECENT_RECORDS_LIMIT = 8;
 
 export default function RecordsScreen() {
   const router = useRouter();
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
 
   const pet = usePetStore((state) => state.pet);
   const loadPet = usePetStore((state) => state.loadPet);
   const records = usePetRecordStore((state) => state.records);
   const isLoading = usePetRecordStore((state) => state.isLoading);
   const loadRecords = usePetRecordStore((state) => state.loadRecords);
+  const weightUnitPreference = useExperiencePreferencesStore(
+    (state) => state.preferences?.weightUnitPreference ?? 'kg'
+  );
 
   const primaryColor = useThemeColor({}, 'primary');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
@@ -108,10 +112,10 @@ export default function RecordsScreen() {
                   <RecordHistoryRow
                     key={record.id}
                     backgroundColor={typeDefinition?.backgroundColor ?? '#6b7280'}
-                    dateLabel={formatRecordDate(record.date, locale)}
+                    dateLabel={formatRecordDate(record.date, regionalFormat)}
                     icon={typeDefinition?.icon ?? 'doc.text.fill'}
                     isLast={index === recentRecords.length - 1}
-                    subtitle={getRecordSummary(record, t)}
+                    subtitle={getRecordSummary(record, t, weightUnitPreference, regionalFormat)}
                     title={t(getRecordTypeLabelKey(record.type))}
                     onPress={() => handleHistoryPress(record.type, record.id)}
                   />

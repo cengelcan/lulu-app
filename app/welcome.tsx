@@ -3,44 +3,47 @@ import { useCallback } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { WelcomeScreen } from '@/components/welcome/welcome-screen';
-import { ONBOARDING_INTRO_SCREENS_ENABLED } from '@/constants/onboarding';
 import { useTranslation } from '@/hooks/use-translation';
-import { setOnboardingCompleted } from '@/storage/prefs.storage';
 import { setUserSetupPath } from '@/storage/setup-path.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
+import { translateError } from '@/utils/translate-error';
 
 export default function WelcomeRoute() {
   const router = useRouter();
   const { t } = useTranslation();
+  const completeOnboarding = useOnboardingStore((state) => state.completeOnboarding);
+  const clearError = useOnboardingStore((state) => state.clearError);
+  const isLoading = useOnboardingStore((state) => state.isLoading);
+  const error = useOnboardingStore((state) => state.error);
 
   const handleStart = useCallback(async () => {
-    if (ONBOARDING_INTRO_SCREENS_ENABLED) {
-      router.replace('/(onboarding)/intro-1');
-      return;
-    }
-
-    await setOnboardingCompleted(true);
-    useOnboardingStore.setState({ hasCompletedOnboarding: true });
+    clearError();
+    await completeOnboarding();
+    if (useOnboardingStore.getState().error) return;
     router.replace('/(auth)?mode=signUp' as Href);
-  }, [router]);
+  }, [clearError, completeOnboarding, router]);
 
   const handleJoinFamily = useCallback(async () => {
+    clearError();
     await setUserSetupPath('join_family');
-    await setOnboardingCompleted(true);
-    useOnboardingStore.setState({ hasCompletedOnboarding: true });
+    await completeOnboarding();
+    if (useOnboardingStore.getState().error) return;
     router.replace('/(auth)?mode=signUp');
-  }, [router]);
+  }, [clearError, completeOnboarding, router]);
 
   return (
     <WelcomeScreen
       appName={t('welcome.appName')}
       tagline={t('welcome.tagline')}
-      footerLine1={t('welcome.footerLine1')}
-      footerLine2Before={t('welcome.footerLine2Before')}
-      footerLine2Accent={t('welcome.footerLine2Accent')}
-      footerLine2After={t('welcome.footerLine2After')}
+      benefits={[
+        { icon: 'checkmark.circle.fill', label: t('welcome.benefitDailyCare') },
+        { icon: 'person.2.fill', label: t('welcome.benefitFamily') },
+        { icon: 'calendar.badge.checkmark', label: t('welcome.benefitVet') },
+      ]}
       startButtonTitle={t('welcome.startButton')}
       onStart={handleStart}
+      isLoading={isLoading}
+      error={translateError(t, error)}
       footerExtra={
         <Pressable accessibilityRole="button" onPress={() => void handleJoinFamily()}>
           <Text allowFontScaling style={styles.joinLink}>

@@ -1,7 +1,7 @@
 import { StyleSheet, Switch, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing, Typography } from '@/constants/theme';
+import { Palette, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 type SettingsToggleRowProps = {
@@ -20,8 +20,7 @@ export function SettingsToggleRow({
   isLast = false,
 }: SettingsToggleRowProps) {
   const borderColor = useThemeColor({}, 'border');
-  const primaryColor = useThemeColor({}, 'primary');
-  const primaryTextColor = useThemeColor({}, 'primaryText');
+  const brandAccentColor = useThemeColor({}, 'brandAccent');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   return (
@@ -35,11 +34,13 @@ export function SettingsToggleRow({
       </ThemedText>
       <Switch
         accessibilityLabel={label}
+        accessibilityRole="switch"
+        accessibilityState={{ checked: value, disabled }}
         disabled={disabled}
         ios_backgroundColor={textSecondaryColor}
         onValueChange={onValueChange}
-        thumbColor={primaryTextColor}
-        trackColor={{ false: textSecondaryColor, true: primaryColor }}
+        thumbColor={Palette.canvas}
+        trackColor={{ false: textSecondaryColor, true: brandAccentColor }}
         value={value}
       />
     </View>

@@ -15,12 +15,17 @@ import { translateError } from '@/utils/translate-error';
 type NotificationSectionProps = {
   permission: NotificationPermissionStatus | null;
   reminderTime: ReminderTime | null;
+  dailyCheckInNotificationsEnabled: boolean;
   petReminderNotificationsEnabled: boolean;
+  medicationDoseNotificationsEnabled: boolean;
+  medicationRefillNotificationsEnabled: boolean;
   familyActivityDigestEnabled: boolean;
   isLoading: boolean;
   error: string | null;
   onToggleCheckIn: (enabled: boolean) => void;
   onTogglePetReminders: (enabled: boolean) => void;
+  onToggleMedicationDoses: (enabled: boolean) => void;
+  onToggleMedicationRefill: (enabled: boolean) => void;
   onToggleFamilyActivityDigest: (enabled: boolean) => void;
   onTimeChange: (time: ReminderTime) => void;
 };
@@ -28,21 +33,26 @@ type NotificationSectionProps = {
 export function NotificationSection({
   permission,
   reminderTime,
+  dailyCheckInNotificationsEnabled,
   petReminderNotificationsEnabled,
+  medicationDoseNotificationsEnabled,
+  medicationRefillNotificationsEnabled,
   familyActivityDigestEnabled,
   isLoading,
   error,
   onToggleCheckIn,
   onTogglePetReminders,
+  onToggleMedicationDoses,
+  onToggleMedicationRefill,
   onToggleFamilyActivityDigest,
   onTimeChange,
 }: NotificationSectionProps) {
   const { t } = useTranslation();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const resolvedError = translateError(t, error);
-  const checkInEnabled = permission === 'allowed';
+  const checkInEnabled = dailyCheckInNotificationsEnabled;
   const isDenied = permission === 'denied';
-  const toggleDisabled = isLoading || isDenied;
+  const toggleDisabled = isLoading;
   const time = reminderTime ?? { hour: 9, minute: 0 };
 
   const handleOpenSystemSettings = () => {
@@ -57,7 +67,6 @@ export function NotificationSection({
           value={checkInEnabled}
           disabled={toggleDisabled}
           onValueChange={onToggleCheckIn}
-          isLast={!checkInEnabled}
         />
         {checkInEnabled ? (
           <TimePickerField
@@ -74,6 +83,18 @@ export function NotificationSection({
           value={petReminderNotificationsEnabled}
           disabled={toggleDisabled}
           onValueChange={onTogglePetReminders}
+        />
+        <SettingsToggleRow
+          label={t('settings.medicationDoseNotifications')}
+          value={medicationDoseNotificationsEnabled}
+          disabled={toggleDisabled}
+          onValueChange={onToggleMedicationDoses}
+        />
+        <SettingsToggleRow
+          label={t('settings.medicationRefillNotifications')}
+          value={medicationRefillNotificationsEnabled}
+          disabled={toggleDisabled}
+          onValueChange={onToggleMedicationRefill}
         />
         <SettingsToggleRow
           label={t('settings.familyActivityDigest')}

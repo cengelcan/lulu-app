@@ -19,6 +19,10 @@ export {
   syncMedicationDoseNotificationSchedule,
 } from '@/services/notifications/medication-dose-schedule';
 export {
+  notifyMedicationRefillIfNeeded,
+} from '@/services/notifications/medication-refill';
+export { shouldSendMedicationRefillNotification } from '@/services/notifications/medication-refill-policy';
+export {
   cancelCheckInReminder,
   syncCheckInReminderSchedule,
 } from '@/services/notifications/schedule';

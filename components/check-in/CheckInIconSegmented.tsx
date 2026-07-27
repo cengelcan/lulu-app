@@ -2,8 +2,9 @@ import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
-import { CheckInTheme, getCheckInToneColors, type CheckInOptionTone } from '@/constants/check-in-theme';
+import { getCheckInToneColors, type CheckInOptionTone } from '@/constants/check-in-theme';
 import { Radius, Spacing } from '@/constants/theme';
+import { useCheckInTheme } from '@/hooks/use-check-in-theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 export type CheckInIconSegmentOption<T extends string> = {
@@ -26,6 +27,7 @@ export function CheckInIconSegmented<T extends string>({
 }: CheckInIconSegmentedProps<T>) {
   const borderColor = useThemeColor({}, 'border');
   const iconColor = useThemeColor({}, 'icon');
+  const checkInTheme = useCheckInTheme();
 
   const handleSelect = (nextValue: T) => {
     if (nextValue === value) {
@@ -42,10 +44,15 @@ export function CheckInIconSegmented<T extends string>({
   return (
     <View
       accessibilityRole="radiogroup"
-      style={[styles.container, { borderColor }]}>
+      style={[
+        styles.container,
+        { borderColor, backgroundColor: checkInTheme.toneNeutralBg },
+      ]}>
       {options.map((option) => {
         const isSelected = option.value === value;
-        const toneColors = option.tone ? getCheckInToneColors(option.tone) : null;
+        const toneColors = option.tone
+          ? getCheckInToneColors(option.tone, checkInTheme)
+          : null;
 
         return (
           <Pressable
@@ -76,7 +83,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: Radius.md,
     borderWidth: StyleSheet.hairlineWidth,
-    backgroundColor: CheckInTheme.toneNeutralBg,
     padding: Spacing.xxs,
     gap: Spacing.xxs,
   },

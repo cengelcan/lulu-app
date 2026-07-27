@@ -7,14 +7,15 @@ import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 import type { CheckIn } from '@/types/check-in';
 import type { PetRecord } from '@/types/pet-record';
 import { getAbnormalCheckInFields } from '@/utils/check-in';
-import { formatCheckInTitleDate } from '@/utils/date';
+import { formatRegionalNumber, formatWeekdayDate } from '@/utils/formatters';
 import { getLatestCheckIn } from '@/utils/last-check-in';
-import { getLocaleTag } from '@/utils/locale';
 import { buildWeightChartData } from '@/utils/weight-chart';
 
 type HealthOverviewCardProps = {
@@ -34,20 +35,26 @@ const STATUS_ICONS: Record<HealthOverviewStatus, IconSymbolName> = {
 export function HealthOverviewCard({ checkIns, petName, records }: HealthOverviewCardProps) {
   const router = useRouter();
   const { fontScale, width } = useWindowDimensions();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const successColor = useThemeColor({}, 'success');
   const warningColor = useThemeColor({}, 'warning');
   const semanticAccentColor = useThemeColor({}, 'accent');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
-  const locale = getLocaleTag(language);
+  const weightUnitPreference = useExperiencePreferencesStore(
+    (state) => state.preferences?.weightUnitPreference ?? 'kg'
+  );
 
   const latestCheckIn = useMemo(() => getLatestCheckIn(checkIns), [checkIns]);
   const abnormalFields = useMemo(
     () => (latestCheckIn ? getAbnormalCheckInFields(latestCheckIn) : []),
     [latestCheckIn]
   );
-  const weightData = useMemo(() => buildWeightChartData(records), [records]);
+  const weightData = useMemo(
+    () => buildWeightChartData(records, weightUnitPreference),
+    [records, weightUnitPreference]
+  );
 
   const status: HealthOverviewStatus = !latestCheckIn
     ? 'insufficient'
@@ -76,7 +83,9 @@ export function HealthOverviewCard({ checkIns, petName, records }: HealthOvervie
 
   const latestWeightLabel = weightData.latest
     ? t('records.summary.weightValue', {
-        value: weightData.latest.value,
+        value: formatRegionalNumber(weightData.latest.value, regionalFormat, {
+          maximumFractionDigits: 1,
+        }),
         unit: t(`records.units.${weightData.latest.unit}`),
       })
     : t('dashboard.healthOverview.noWeight');
@@ -121,7 +130,7 @@ export function HealthOverviewCard({ checkIns, petName, records }: HealthOvervie
             </ThemedText>
             <ThemedText selectable type="defaultSemiBold" style={styles.metricValue}>
               {latestCheckIn
-                ? formatCheckInTitleDate(latestCheckIn.date, locale)
+                ? formatWeekdayDate(latestCheckIn.date, regionalFormat)
                 : t('dashboard.healthOverview.noCheckIn')}
             </ThemedText>
           </View>

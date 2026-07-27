@@ -15,6 +15,7 @@ import { REMINDER_TYPES } from '@/constants/reminder-types';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
 import { Spacing, Typography } from '@/constants/theme';
 import { usePlusFeature } from '@/hooks/use-plus-feature';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePetReminderStore } from '@/stores/pet-reminder.store';
@@ -27,7 +28,6 @@ import {
   listOverduePendingReminders,
   listUpcomingPendingReminders,
 } from '@/utils/upcoming-reminders';
-import { getLocaleTag } from '@/utils/locale';
 import {
   getReminderFormRoute,
   getReminderTitle,
@@ -47,8 +47,8 @@ export default function RemindersScreen() {
     fromNotification?: string | string[];
   }>();
   const [referenceNow, setReferenceNow] = useState(() => new Date());
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
 
   const pet = usePetStore((state) => state.pet);
   const loadPet = usePetStore((state) => state.loadPet);
@@ -167,7 +167,7 @@ export default function RemindersScreen() {
               const { dateLabel, timeLabel } = formatReminderDateTimeParts(
                 reminder.dueDate,
                 reminder.dueTime,
-                locale,
+                regionalFormat,
                 todayKey,
                 tomorrowKey,
                 t
@@ -199,7 +199,7 @@ export default function RemindersScreen() {
               const { dateLabel, timeLabel } = formatReminderDateTimeParts(
                 reminder.dueDate,
                 reminder.dueTime,
-                locale,
+                regionalFormat,
                 todayKey,
                 tomorrowKey,
                 t
@@ -248,7 +248,7 @@ export default function RemindersScreen() {
             {completedPreview.map((reminder, index) => (
               <CompletedReminderRow
                 key={reminder.id}
-                dateLabel={formatCompletedReminderDate(reminder.dueDate, locale)}
+                dateLabel={formatCompletedReminderDate(reminder.dueDate, regionalFormat)}
                 isLast={index === completedPreview.length - 1}
                 title={getReminderTitle(reminder, t)}
                 typeLabel={t(getReminderTypeLabelKey(reminder.type))}

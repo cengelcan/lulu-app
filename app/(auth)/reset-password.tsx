@@ -9,7 +9,8 @@ import { AuthInput } from '@/components/auth/AuthInput';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import {
@@ -21,6 +22,10 @@ import {
 } from '@/services/auth';
 
 const PASSWORD_MIN_LENGTH = 6;
+const AUTH_GRADIENT_COLORS = {
+  light: ['#FFFFFF', '#F8F7FC', '#F4F1FA'],
+  dark: ['#0A0A12', '#101010', '#14101C'],
+} as const;
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -36,7 +41,9 @@ export default function ResetPasswordScreen() {
 
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const alertColor = useThemeColor({}, 'alert');
+  const backgroundColor = useThemeColor({}, 'background');
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     let isMounted = true;
@@ -102,9 +109,9 @@ export default function ResetPasswordScreen() {
   }, [router]);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor }]}>
       <LinearGradient
-        colors={['#0a0a12', '#101010', '#14101c']}
+        colors={AUTH_GRADIENT_COLORS[colorScheme]}
         locations={[0, 0.55, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -201,7 +208,6 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Palette.surfaceDark,
   },
   safeArea: {
     flex: 1,

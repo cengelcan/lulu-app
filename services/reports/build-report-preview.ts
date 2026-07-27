@@ -8,9 +8,11 @@ import type {
   ReportRecordEntry,
 } from '@/types/report';
 import type { CheckIn, CheckInCategory } from '@/types/check-in';
-import type { PetRecord, RecordTypeId } from '@/types/pet-record';
+import type { PetRecord, RecordTypeId, WeightUnit } from '@/types/pet-record';
 import type { MedicationDose, MedicationPlan } from '@/types/medication';
+import { formatTime } from '@/utils/formatters';
 import { getRecordSummary, getRecordTypeLabelKey } from '@/utils/pet-record-display';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import { isDateWithinRange, resolveReportDateRange } from '@/utils/report-range';
 
 type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
@@ -23,7 +25,8 @@ type BuildReportPreviewParams = {
   medicationDoses?: MedicationDose[];
   medicationPlans?: MedicationPlan[];
   t: TranslateFn;
-  locale: string;
+  regionalFormat: RegionalFormatContext;
+  weightUnit?: WeightUnit;
 };
 
 function getCheckInFieldLabel(category: CheckInCategory, t: TranslateFn): string {
@@ -44,11 +47,8 @@ function getCheckInEmoji(_category: CheckInCategory): string {
   return '•';
 }
 
-function formatRecordTime(createdAt: string, locale: string): string {
-  return new Date(createdAt).toLocaleTimeString(locale, {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+function formatRecordTime(createdAt: string, regionalFormat: RegionalFormatContext): string {
+  return formatTime(createdAt, regionalFormat);
 }
 
 function groupRecordsByDate(entries: ReportRecordEntry[]): ReportRecordDayGroup[] {
@@ -79,7 +79,8 @@ export function buildReportPreviewContent({
   medicationDoses = [],
   medicationPlans = [],
   t,
-  locale,
+  regionalFormat,
+  weightUnit,
 }: BuildReportPreviewParams): ReportPreviewContent {
   const { startDate, endDate } = resolveReportDateRange(range);
 
@@ -125,11 +126,11 @@ export function buildReportPreviewContent({
 
       return {
         date: record.date,
-        time: formatRecordTime(record.createdAt, locale),
+        time: formatRecordTime(record.createdAt, regionalFormat),
         typeId: record.type,
         icon: typeDefinition?.icon ?? 'ellipsis.circle.fill',
         typeLabel: t(getRecordTypeLabelKey(record.type)),
-        detail: getRecordSummary(record, t),
+        detail: getRecordSummary(record, t, weightUnit, regionalFormat),
         notes: record.notes?.trim() ? record.notes.trim() : null,
       };
     });
@@ -143,7 +144,7 @@ export function buildReportPreviewContent({
       if (!plan) continue;
       recordEntries.push({
         date: dose.localDate,
-        time: formatRecordTime(dose.completedAt ?? dose.scheduledAt, locale),
+        time: formatRecordTime(dose.completedAt ?? dose.scheduledAt, regionalFormat),
         typeId: 'medicationDose',
         icon: 'pills.fill',
         emoji: '💊',

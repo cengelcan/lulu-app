@@ -17,15 +17,17 @@ type ReportStylesParams = {
   primaryColor: string;
   /** When true, append screen-only styles for the in-app WebView preview. */
   forScreen?: boolean;
+  /** App-theme surface surrounding the intentionally white printable pages. */
+  screenBackgroundColor?: string;
 };
 
 /** Vertical gap between pages when rendered on screen (not used for print). */
 export const REPORT_SCREEN_PAGE_GAP = 14;
 
-function buildScreenStyles(): string {
+function buildScreenStyles(screenBackgroundColor: string): string {
   return `
       html, body {
-        background: #e7eae8;
+        background: ${screenBackgroundColor};
       }
       .report-page {
         margin: 0 auto ${REPORT_SCREEN_PAGE_GAP}px;
@@ -36,7 +38,11 @@ function buildScreenStyles(): string {
       }`;
 }
 
-export function buildReportStyles({ primaryColor, forScreen = false }: ReportStylesParams): string {
+export function buildReportStyles({
+  primaryColor,
+  forScreen = false,
+  screenBackgroundColor = '#e7eae8',
+}: ReportStylesParams): string {
   const chipMinWidth = `calc((100% - ${OBSERVATION_CHIP_GAP * 7}px) / 8)`;
 
   const baseStyles = `
@@ -515,7 +521,7 @@ export function buildReportStyles({ primaryColor, forScreen = false }: ReportSty
         width: 100%;
       }`;
 
-  return forScreen ? `${baseStyles}\n${buildScreenStyles()}` : baseStyles;
+  return forScreen ? `${baseStyles}\n${buildScreenStyles(screenBackgroundColor)}` : baseStyles;
 }
 
 export { REPORT_CONTENT_WIDTH };

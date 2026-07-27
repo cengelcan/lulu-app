@@ -10,16 +10,19 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ContentState } from '@/components/ui/content-state';
+import { CARE_TOOLS } from '@/constants/care-tools';
 import { LayoutTokens } from '@/constants/layout';
 import { Spacing, Typography } from '@/constants/theme';
 import { useInbox } from '@/hooks/use-inbox';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { trackVetVisitEvent } from '@/services/analytics/vet-visit';
 import { usePetStore } from '@/stores/pet.store';
 import { useVetVisitStore } from '@/stores/vet-visit.store';
 import type { InboxItem } from '@/types/inbox';
-import { getLocaleTag } from '@/utils/locale';
+import { formatDateTime } from '@/utils/formatters';
+import { canViewReports } from '@/utils/pet-access';
 import { translateError } from '@/utils/translate-error';
 import { getUpcomingVetVisit, getVetVisitPreparationProgress } from '@/utils/vet-visit';
 
@@ -29,7 +32,8 @@ type CareHubScreenProps = {
 
 export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps) {
   const router = useRouter();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const { sections, showPetName, isLoading, error, refresh } = useInbox();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const pet = usePetStore((state) => state.pet);
@@ -50,6 +54,14 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
   const preparationProgress = upcomingVetVisit
     ? getVetVisitPreparationProgress(upcomingVetVisit)
     : null;
+  const attentionSections = useMemo(
+    () => sections.filter((section) => section.category !== 'activity'),
+    [sections]
+  );
+  const activitySections = useMemo(
+    () => sections.filter((section) => section.category === 'activity'),
+    [sections]
+  );
 
   const handleItemPress = (item: InboxItem) => {
     router.push(item.route);
@@ -73,97 +85,58 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
         </ThemedText>
       </View>
 
-      {upcomingVetVisit ? (
-        <View style={styles.section} testID="care-upcoming-vet-visit">
-          <ThemedText
-            accessibilityRole="header"
-            lightColor={textSecondaryColor}
-            darkColor={textSecondaryColor}
-            style={styles.sectionTitle}>
-            {t('vetVisits.upcomingTitle')}
-          </ThemedText>
-          <Card style={styles.upcomingCard}>
-            <ThemedText type="defaultSemiBold">
-              {new Date(upcomingVetVisit.visit.scheduledAt).toLocaleString(getLocaleTag(language), {
-                dateStyle: 'medium', timeStyle: 'short',
-              })}
-            </ThemedText>
-            <ThemedText lightColor={textSecondaryColor} darkColor={textSecondaryColor} style={Typography.caption}>
-              {preparationProgress?.completed === preparationProgress?.total
-                ? t('vetVisits.ready')
-                : t('vetVisits.preparationProgress', preparationProgress ?? { completed: 0, total: 3 })}
-            </ThemedText>
-            <Button title={upcomingVetVisit.visit.status === 'in_progress'
-              ? t('vetVisits.continueVisit') : t('common.edit')} variant="secondary"
-              onPress={() => {
-                void trackVetVisitEvent('workspace_opened', 'care');
-                router.push((upcomingVetVisit.visit.status === 'in_progress'
-                  ? `/vet-visits/live/${upcomingVetVisit.visit.id}`
-                  : `/vet-visits/${upcomingVetVisit.visit.id}`) as Href);
-              }} />
-          </Card>
-        </View>
-      ) : null}
-
-      <View style={styles.section} testID="care-shortcuts">
+      <View style={styles.section} testID="care-attention">
         <ThemedText
           accessibilityRole="header"
           lightColor={textSecondaryColor}
           darkColor={textSecondaryColor}
           style={styles.sectionTitle}>
-          {t('care.shortcutsTitle')}
+          {t('care.attentionTitle')}
         </ThemedText>
-        <Card style={styles.listCard}>
-          <CareShortcutRow
-            title={t('care.checkIn')}
-            description={t('care.checkInDescription')}
-            icon="checkmark.circle.fill"
-            onPress={() => router.push('/check-in')}
-          />
-          <CareShortcutRow
-            title={t('medications.title')}
-            description={t('medications.description')}
-            icon="pills.fill"
-            onPress={() => router.push('/medications' as Href)}
-          />
-          <CareShortcutRow
-            title={t('care.reminders')}
-            description={t('care.remindersDescription')}
-            icon="bell.fill"
-            onPress={() => router.push('/reminders')}
-          />
-          <CareShortcutRow
-            title={t('vetVisits.prepare')}
-            description={t('vetVisits.prepareDescription')}
-            icon="calendar.badge.checkmark"
-            onPress={() => {
-              void trackVetVisitEvent('workspace_opened', 'care');
-              router.push('/vet-visits' as Href);
-            }}
-          />
-          <CareShortcutRow
-            title={t('care.records')}
-            description={t('care.recordsDescription')}
-            icon="doc.text.fill"
-            isLast
-            onPress={() => router.push('/records')}
-          />
-        </Card>
-      </View>
 
-      <View style={styles.section} testID="care-timeline">
-        <ThemedText
-          accessibilityRole="header"
-          lightColor={textSecondaryColor}
-          darkColor={textSecondaryColor}
-          style={styles.sectionTitle}>
-          {t('care.timelineTitle')}
-        </ThemedText>
-        <Button
-          title={t('care.familyActivity')}
-          variant="secondary"
-          onPress={() => router.push('/family-activity' as Href)}
-        />
+        {upcomingVetVisit ? (
+          <View style={styles.attentionGroup} testID="care-upcoming-vet-visit">
+            <ThemedText
+              accessibilityRole="header"
+              lightColor={textSecondaryColor}
+              darkColor={textSecondaryColor}
+              style={styles.subsectionTitle}>
+              {t('vetVisits.upcomingTitle')}
+            </ThemedText>
+            <Card style={styles.upcomingCard}>
+              <ThemedText type="defaultSemiBold">
+                {formatDateTime(upcomingVetVisit.visit.scheduledAt, regionalFormat)}
+              </ThemedText>
+              <ThemedText
+                lightColor={textSecondaryColor}
+                darkColor={textSecondaryColor}
+                style={Typography.caption}>
+                {preparationProgress?.completed === preparationProgress?.total
+                  ? t('vetVisits.ready')
+                  : t(
+                      'vetVisits.preparationProgress',
+                      preparationProgress ?? { completed: 0, total: 3 }
+                    )}
+              </ThemedText>
+              <Button
+                title={
+                  upcomingVetVisit.visit.status === 'in_progress'
+                    ? t('vetVisits.continueVisit')
+                    : t('common.edit')
+                }
+                variant="secondary"
+                onPress={() => {
+                  void trackVetVisitEvent('workspace_opened', 'care');
+                  router.push(
+                    (upcomingVetVisit.visit.status === 'in_progress'
+                      ? `/vet-visits/live/${upcomingVetVisit.visit.id}`
+                      : `/vet-visits/${upcomingVetVisit.visit.id}`) as Href
+                  );
+                }}
+              />
+            </Card>
+          </View>
+        ) : null}
 
         {isLoading ? (
           <ContentState
@@ -179,16 +152,9 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
             actionLabel={t('common.tryAgain')}
             onActionPress={() => void refresh()}
           />
-        ) : sections.length === 0 ? (
-          <ContentState
-            kind="empty"
-            presentation="card"
-            title={t('care.emptyTitle')}
-            message={t('care.emptyDescription')}
-          />
-        ) : (
-          <View style={styles.timelineSections}>
-            {sections.map((section) => (
+        ) : attentionSections.length > 0 ? (
+          <View style={styles.attentionSections}>
+            {attentionSections.map((section) => (
               <InboxSectionView
                 key={section.category}
                 section={section}
@@ -197,8 +163,91 @@ export function CareHubScreen({ edges = ['top', 'bottom'] }: CareHubScreenProps)
               />
             ))}
           </View>
-        )}
+        ) : !upcomingVetVisit ? (
+          <ContentState
+            kind="empty"
+            presentation="card"
+            title={t('care.emptyTitle')}
+            message={t('care.emptyDescription')}
+          />
+        ) : null}
       </View>
+
+      <View style={styles.section} testID="care-shortcuts">
+        <ThemedText
+          accessibilityRole="header"
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.sectionTitle}>
+          {t('care.shortcutsTitle')}
+        </ThemedText>
+        <Card style={styles.listCard}>
+          {CARE_TOOLS.map((tool, index) => (
+            <CareShortcutRow
+              key={tool.id}
+              title={t(tool.titleKey)}
+              description={t(tool.descriptionKey)}
+              icon={tool.icon}
+              isLast={index === CARE_TOOLS.length - 1}
+              onPress={() => {
+                if (tool.id === 'vet_visits') {
+                  void trackVetVisitEvent('workspace_opened', 'care');
+                }
+                router.push(tool.route);
+              }}
+            />
+          ))}
+        </Card>
+      </View>
+
+      <View style={styles.section} testID="care-resources">
+        <ThemedText
+          accessibilityRole="header"
+          lightColor={textSecondaryColor}
+          darkColor={textSecondaryColor}
+          style={styles.sectionTitle}>
+          {t('care.resourcesTitle')}
+        </ThemedText>
+        <Card style={styles.listCard}>
+          {pet && canViewReports(pet) ? (
+            <CareShortcutRow
+              title={t('reports.title')}
+              description={t('care.reportsDescription')}
+              icon="chart.line.uptrend.xyaxis"
+              onPress={() => router.push('/reports' as Href)}
+            />
+          ) : null}
+          <CareShortcutRow
+            title={t('familyActivity.title')}
+            description={t('familyActivity.description')}
+            icon="person.2.fill"
+            isLast
+            onPress={() => router.push('/family-activity' as Href)}
+          />
+        </Card>
+      </View>
+
+      {activitySections.length > 0 ? (
+        <View style={styles.section} testID="care-timeline">
+          <ThemedText
+            accessibilityRole="header"
+            lightColor={textSecondaryColor}
+            darkColor={textSecondaryColor}
+            style={styles.sectionTitle}>
+            {t('care.timelineTitle')}
+          </ThemedText>
+          <View style={styles.timelineSections}>
+            {activitySections.map((section) => (
+              <InboxSectionView
+                key={section.category}
+                section={section}
+                showPetName={showPetName}
+                onItemPress={handleItemPress}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
     </ScreenContainer>
   );
 }
@@ -236,6 +285,17 @@ const styles = StyleSheet.create({
   },
   upcomingCard: {
     gap: Spacing.sm,
+  },
+  attentionGroup: {
+    gap: Spacing.xs,
+  },
+  subsectionTitle: {
+    ...Typography.caption,
+    fontWeight: '600',
+    paddingHorizontal: Spacing.xs,
+  },
+  attentionSections: {
+    gap: Spacing.md,
   },
   timelineSections: {
     gap: Spacing.lg,

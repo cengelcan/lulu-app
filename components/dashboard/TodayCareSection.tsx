@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
-import { getLocaleTag } from '@/utils/locale';
+import { formatMediumDate, formatWallClockTime } from '@/utils/formatters';
 import { getReminderFormRoute, getReminderTitle } from '@/utils/pet-reminder-display';
-import { formatReminderTime24h } from '@/utils/time';
 import type { NextCareAction } from '@/utils/dashboard/build-next-care-action';
 
 type TodayCareSectionProps = {
@@ -29,12 +29,12 @@ type ActionPresentation = {
 
 export function TodayCareSection({ action, petName }: TodayCareSectionProps) {
   const router = useRouter();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const warningColor = useThemeColor({}, 'warning');
   const successColor = useThemeColor({}, 'success');
   const semanticAccentColor = useThemeColor({}, 'accent');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const locale = getLocaleTag(language);
 
   const presentation: ActionPresentation = (() => {
     switch (action.kind) {
@@ -73,11 +73,8 @@ export function TodayCareSection({ action, petName }: TodayCareSectionProps) {
           title: t('dashboard.today.upcomingTitle'),
           message: t('dashboard.today.upcomingMessage', {
             name: getReminderTitle(action.reminder, t),
-            date: new Date(`${action.reminder.dueDate}T12:00:00`).toLocaleDateString(locale, {
-              day: 'numeric',
-              month: 'short',
-            }),
-            time: formatReminderTime24h(action.reminder.dueTime),
+            date: formatMediumDate(action.reminder.dueDate, regionalFormat, false),
+            time: formatWallClockTime(action.reminder.dueTime, regionalFormat),
           }),
           buttonLabel: t('dashboard.today.viewReminder'),
           icon: 'clock.fill',

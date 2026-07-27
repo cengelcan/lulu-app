@@ -4,10 +4,11 @@ import Svg, { Line } from 'react-native-svg';
 
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useTranslation } from '@/hooks/use-translation';
-import { formatWeekdayShort, parseLocalDate } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { parseLocalDate } from '@/utils/date';
+import { formatWeekdayShort } from '@/utils/formatters';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import type { TrendChartDay } from '@/utils/trends';
 
 const DOT_SIZE = 7;
@@ -105,13 +106,13 @@ function getChartSegments(chartPoints: ChartPoint[]): ChartSegment[] {
   return segments;
 }
 
-function formatWeekdayLetter(dateKey: string, locale: string): string {
+function formatWeekdayLetter(dateKey: string, context: RegionalFormatContext): string {
   const date = parseLocalDate(dateKey);
   if (!date) {
     return '';
   }
 
-  return formatWeekdayShort(date, locale).charAt(0).toUpperCase();
+  return formatWeekdayShort(date, context).charAt(0).toUpperCase();
 }
 
 export function TrendLineChart({
@@ -120,11 +121,10 @@ export function TrendLineChart({
   axisLabels,
   height = DEFAULT_HEIGHT,
 }: TrendLineChartProps) {
-  const { language } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
   const [plotWidth, setPlotWidth] = useState(0);
-  const locale = getLocaleTag(language);
 
   const positions = useMemo(
     () => chartDays.map((day) => day.value),
@@ -246,7 +246,7 @@ export function TrendLineChart({
               darkColor={textSecondaryColor}
               style={styles.xLabel}
               numberOfLines={1}>
-              {formatWeekdayLetter(day.date, locale)}
+                {formatWeekdayLetter(day.date, regionalFormat)}
             </ThemedText>
           ))}
         </View>

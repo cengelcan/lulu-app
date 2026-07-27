@@ -3,10 +3,12 @@ import { StyleSheet, View } from 'react-native';
 import { TrendEmptyIllustration } from '@/components/dashboard/TrendEmptyIllustration';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
-import { formatWeekdayShort, parseLocalDate } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { parseLocalDate } from '@/utils/date';
+import { formatWeekdayShort } from '@/utils/formatters';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import type { TrendChartDay } from '@/utils/trends';
 
 type TrendMetricEmptyStateProps = {
@@ -14,25 +16,25 @@ type TrendMetricEmptyStateProps = {
   accentColor?: string;
 };
 
-function formatWeekdayLetter(dateKey: string, locale: string): string {
+function formatWeekdayLetter(dateKey: string, context: RegionalFormatContext): string {
   const date = parseLocalDate(dateKey);
   if (!date) {
     return '';
   }
 
-  return formatWeekdayShort(date, locale).charAt(0).toUpperCase();
+  return formatWeekdayShort(date, context).charAt(0).toUpperCase();
 }
 
 export function TrendMetricEmptyState({
   chartDays,
   accentColor,
 }: TrendMetricEmptyStateProps) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const titleColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
   const surfaceSoftColor = useThemeColor({}, 'surfaceSoft');
-  const locale = getLocaleTag(language);
   const illustrationColor = accentColor ?? textSecondaryColor;
 
   return (
@@ -67,7 +69,7 @@ export function TrendMetricEmptyState({
             darkColor={textSecondaryColor}
             style={styles.label}
             numberOfLines={1}>
-            {formatWeekdayLetter(day.date, locale)}
+            {formatWeekdayLetter(day.date, regionalFormat)}
           </ThemedText>
         ))}
       </View>

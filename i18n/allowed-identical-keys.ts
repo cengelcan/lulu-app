@@ -30,6 +30,7 @@ export const ALLOWED_IDENTICAL_KEYS = new Set<string>([
   'settings.languageGerman',
   'settings.languageTurkish',
   'settings.languageSystem',
+  'settings.appearanceSystem',
 
   // Units and symbols
   'common.ok',

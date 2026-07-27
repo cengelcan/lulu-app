@@ -1,8 +1,10 @@
 import type { ReportPetSummary } from '@/types/report';
 import type { Pet } from '@/types/pet';
-import type { PetRecord } from '@/types/pet-record';
+import type { PetRecord, WeightUnit } from '@/types/pet-record';
 import { getPetAgeParts } from '@/utils/pet-age';
-import { formatCheckInTitleDate } from '@/utils/date';
+import { formatRegionalNumber, formatWeekdayDate } from '@/utils/formatters';
+import type { RegionalFormatContext } from '@/utils/regional-format';
+import { convertWeight, roundWeightForDisplay } from '@/utils/weight-unit';
 
 type PetDisplayHelpers = {
   displayPetSpecies: (species: Pet['species']) => string;
@@ -12,7 +14,8 @@ type PetDisplayHelpers = {
   displayPetDate: (date: string | null | undefined) => string;
   displayPetText: (value: string | null | undefined) => string;
   t: (key: string, params?: Record<string, string | number>) => string;
-  locale: string;
+  regionalFormat: RegionalFormatContext;
+  weightUnit: WeightUnit;
 };
 
 function formatLocalizedAge(
@@ -44,7 +47,7 @@ export function buildReportPetSummary(
   records: PetRecord[],
   helpers: PetDisplayHelpers
 ): ReportPetSummary {
-  const { displayPetSpecies, displayPetBreed, displayPetSex, displayPetSpayNeuterStatus, displayPetDate, displayPetText, t, locale } =
+  const { displayPetSpecies, displayPetBreed, displayPetSex, displayPetSpayNeuterStatus, displayPetDate, displayPetText, t, regionalFormat, weightUnit } =
     helpers;
 
   const latestWeight = getLatestWeightRecord(records);
@@ -58,10 +61,16 @@ export function buildReportPetSummary(
 
   let weightLabel = displayPetText(null);
   if (latestWeight && latestWeight.type === 'weight') {
-    const unitLabel = t(`records.units.${latestWeight.metadata.unit}`);
+    const unitLabel = t(`records.units.${weightUnit}`);
+    const convertedValue = roundWeightForDisplay(
+      convertWeight(latestWeight.metadata.value, latestWeight.metadata.unit, weightUnit)
+    );
+    const formattedValue = formatRegionalNumber(convertedValue, regionalFormat, {
+      maximumFractionDigits: 1,
+    });
     weightLabel = t('reports.petCard.weightRecorded', {
-      value: `${latestWeight.metadata.value} ${unitLabel}`,
-      date: formatCheckInTitleDate(latestWeight.date, locale),
+      value: `${formattedValue} ${unitLabel}`,
+      date: formatWeekdayDate(latestWeight.date, regionalFormat),
     });
   }
 

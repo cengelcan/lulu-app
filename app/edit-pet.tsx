@@ -14,6 +14,8 @@ import {
 import { DeletePetConfirmModal } from '@/components/pet/DeletePetConfirmModal';
 import { GroupedSection } from '@/components/pet/GroupedSection';
 import { PetAvatar } from '@/components/pet/PetAvatar';
+import { BreedSearchField } from '@/components/setup/BreedSearchField';
+import { HealthConditionsSearchField } from '@/components/setup/HealthConditionsSearchField';
 import { PetSpeciesSelector } from '@/components/setup/PetSpeciesSelector';
 import { SelectableOption } from '@/components/setup/selectable-option';
 import { ThemedText } from '@/components/themed-text';
@@ -258,6 +260,26 @@ export default function EditPetScreen() {
     spayNeuterStatus,
     species,
   ]);
+
+  const breedOptions = useMemo(
+    () =>
+      species
+        ? getBreedOptionsForSpecies(species).map((option) => ({
+            value: option.value,
+            label: getBreedLabel(option.value),
+          }))
+        : [],
+    [getBreedLabel, species]
+  );
+
+  const healthOptions = useMemo(
+    () =>
+      HEALTH_CONDITION_OPTIONS.map((option) => ({
+        value: option.value,
+        label: getHealthConditionLabel(option.value),
+      })),
+    [getHealthConditionLabel]
+  );
 
   useEffect(() => {
     if (petId) {
@@ -651,18 +673,18 @@ export default function EditPetScreen() {
                   style={styles.optionalHint}>
                   {t('common.optional')}
                 </ThemedText>
-                {getBreedOptionsForSpecies(species).map((option) => (
-                  <SelectableOption
-                    key={option.value}
-                    label={getBreedLabel(option.value)}
-                    selected={breed === option.value}
-                    onPress={() => {
-                      setValidationError(null);
-                      clearError();
-                      setBreed(breed === option.value ? null : option.value);
-                    }}
-                  />
-                ))}
+                <BreedSearchField
+                  breed={breed}
+                  breedOptions={breedOptions}
+                  placeholder={t('setup.petNameBreed.breedPlaceholder')}
+                  noResultsLabel={t('setup.petNameBreed.breedNoResults')}
+                  accessibilityLabel={t('pet.fields.breed')}
+                  onBreedChange={(value) => {
+                    setValidationError(null);
+                    clearError();
+                    setBreed(value);
+                  }}
+                />
               </View>
             </GroupedSection>
           ) : null}
@@ -767,18 +789,26 @@ export default function EditPetScreen() {
                 }}
               />
               <ThemedText type="defaultSemiBold">{t('pet.fields.healthConditions')}</ThemedText>
-              {HEALTH_CONDITION_OPTIONS.map((option) => (
-                <SelectableOption
-                  key={option.value}
-                  label={getHealthConditionLabel(option.value)}
-                  selected={healthConditions.includes(option.value)}
-                  onPress={() => {
-                    setValidationError(null);
-                    clearError();
-                    setHealthConditions((current) => toggleHealthCondition(current, option.value));
-                  }}
-                />
-              ))}
+              <ThemedText style={styles.optionalHint}>
+                {t('setup.petAgeHealth.healthOptionalHint')}
+              </ThemedText>
+              <HealthConditionsSearchField
+                healthConditions={healthConditions}
+                healthOptions={healthOptions}
+                placeholder={t('setup.petAgeHealth.healthPlaceholder')}
+                noResultsLabel={t('setup.petAgeHealth.healthNoResults')}
+                accessibilityLabel={t('setup.petAgeHealth.healthAccessibilityLabel')}
+                onToggleHealthCondition={(condition) => {
+                  setValidationError(null);
+                  clearError();
+                  setHealthConditions((current) => toggleHealthCondition(current, condition));
+                }}
+                onClearHealthConditions={() => {
+                  setValidationError(null);
+                  clearError();
+                  setHealthConditions([]);
+                }}
+              />
             </View>
           </GroupedSection>
 

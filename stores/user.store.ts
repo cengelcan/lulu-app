@@ -32,11 +32,13 @@ import {
 import { pullPetRemindersIntoLocal } from '@/services/sync/reminders-sync';
 import { pullPetRecordsIntoLocal } from '@/services/sync/records-sync';
 import { pullVetVisitsIntoLocal } from '@/services/sync/vet-visits-sync';
+import { reconcileWeightUnitPreference } from '@/services/sync/weight-unit-preference-sync';
 import { withCloudDataSyncLock } from '@/services/sync/sync-lock';
 import { getCurrentUserId, setCurrentUserId, removeCurrentUserId } from '@/storage/prefs.storage';
 import { getUserProfile, setUserProfile } from '@/storage/user.storage';
 import type { PlusSubscriptionDetails } from '@/services/subscription/plus-status';
 import type { AuthProvider, UserProfile } from '@/types/user';
+import { useExperiencePreferencesStore } from '@/stores/experience-preferences.store';
 
 export type AuthStatus = 'unknown' | 'authenticated' | 'unauthenticated';
 
@@ -133,6 +135,13 @@ async function syncUserDataFromCloud(): Promise<void> {
       await pullMedicationIntoLocal(userId);
       await pullVetVisitsIntoLocal(userId);
       const profile = await pullProfileIntoLocal(userId);
+      await useExperiencePreferencesStore.getState().loadPreferences();
+      const localWeightUnit =
+        useExperiencePreferencesStore.getState().preferences?.weightUnitPreference ?? 'kg';
+      const syncedWeightUnit = await reconcileWeightUnitPreference(userId, localWeightUnit);
+      await useExperiencePreferencesStore
+        .getState()
+        .saveWeightUnitPreference(syncedWeightUnit);
       useUserStore.setState({
         displayName: profile.displayName,
         avatarUri: profile.avatarUri,

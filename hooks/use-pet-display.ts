@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 
 import { useTranslation } from '@/hooks/use-translation';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import type {
   HealthCondition,
   PetAgeGroup,
@@ -8,12 +9,11 @@ import type {
   PetSpayNeuterStatus,
   PetSpecies,
 } from '@/types/pet';
-import { formatCheckInTitleDate, formatFullTitleDate } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { formatWeekdayDate } from '@/utils/formatters';
 
 export function usePetDisplay() {
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
 
   const displayPetText = useCallback(
     (value: string | null | undefined): string => {
@@ -75,9 +75,9 @@ export function usePetDisplay() {
         return t('pet.notSet');
       }
 
-      return formatFullTitleDate(trimmed, locale);
+      return formatWeekdayDate(trimmed, regionalFormat, true);
     },
-    [locale, t]
+    [regionalFormat, t]
   );
 
   const displayHealthConditions = useCallback(

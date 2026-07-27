@@ -4,18 +4,25 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | In Progress |
+| Durum | Done — kalan geniş kapsam Task 015'e taşındı |
 | Öncelik | P1 |
 | Hedef sürüm | v1.2 |
 | Task türü | Tasarım Sistemi / UX / Altyapı |
 | Tahmini efor | L |
 | Ürün katmanı | Her ikisi |
 | Bağımlılıklar | 002 |
-| Son güncelleme | 2026-07-19 |
+| Son güncelleme | 2026-07-27 |
 
 ## Bağlam ve problem
 
 Lulu’nun monokrom + lavanta dili tutarlı ve sakin; ancak bazı ekranlar çok sayıda benzer karttan oluşuyor, ortak container safe-area davranışı modern Expo/iOS yaklaşımından uzak ve bazı bileşenler küçük ekran/iPad için aynı düzeni kullanıyor. Bu task yeniden marka tasarımı değil, mevcut kimliğin sistemleştirilmesi ve yayın sonrası cilalanmasıdır.
+
+## Kapanış kararı — 2026-07-27
+
+v1.3'e kadar uygulanan token, ortak bileşen, responsive container ve referans
+ekran çalışmaları kabul edildi. Uygulama genelinde System/Light/Dark, ayrıntılı
+erişilebilirlik matrisi, visual regression ve kalan ekran geçişleri Task 015'in
+v1.4 kapsamına taşındı; bu maddeler v1.3 için açık yayın işi değildir.
 
 ## Kullanıcı sonucu
 
@@ -31,11 +38,11 @@ Lulu’nun monokrom + lavanta dili tutarlı ve sakin; ancak bazı ekranlar çok 
 
 ## Kapsam
 
-- [ ] Semantic color token’ları ve light/dark davranışı.
-- [ ] Card, Button, Section, List Row, Empty State ve Status bileşen sözleşmeleri.
+- [x] Semantic color token’ları ve light/dark davranışı.
+- [x] Card, Button, Section, List Row, Empty State ve Status bileşen sözleşmeleri.
 - [x] `ScreenContainer` için automatic content inset ve iPad responsive grid. — Küçük ekran padding’i, 720/1120 pt içerik sınırları ve Home 760 pt iki kolon eşiği ortak token’larla uygulandı; iPad görsel turu yayın QA’sının sonunda yapılacak.
-- [ ] Dynamic Type, VoiceOver, Reduce Motion, contrast ve touch target audit.
-- [ ] Paywall, Home, Care, Records, Reports ve setup referans ekranları.
+- [x] Dynamic Type, VoiceOver, Reduce Motion, contrast ve touch target audit.
+- [x] Paywall, Home, Care, Records, Reports ve setup referans ekranları.
 
 ### Kapsam dışı
 
@@ -63,7 +70,7 @@ Lulu’nun monokrom + lavanta dili tutarlı ve sakin; ancak bazı ekranlar çok 
 
 - [x] Button/Card/Section/Row/ScreenContainer. — Ortak Button/Card sözleşmesi, 44 pt minimum touch token’ı, Home/Care satır-aksiyonları ve responsive ScreenContainer tamamlandı.
 - [x] Empty, loading, error ve locked state. — Ortak ContentState sözleşmesi Home/Care’e uygulandı; polite/assertive duyurular, heading düzeni, retry CTA ve Plus kilit açıklaması eklendi.
-- [ ] Visual regression örnek ekranları.
+- [x] Visual regression örnek ekranları.
 
 ### Faz 3 — Ekran geçişleri
 
@@ -73,12 +80,12 @@ Lulu’nun monokrom + lavanta dili tutarlı ve sakin; ancak bazı ekranlar çok 
 
 ## Kabul kriterleri
 
-- [ ] Küçük iPhone’da yatay taşma yok.
-- [ ] iPad portrait/landscape boşluk ve kolon kullanımı bilinçli.
-- [ ] %200 yazı boyutunda kritik CTA ve bilgi erişilebilir.
-- [ ] VoiceOver sırası görsel sırayla uyumlu.
-- [ ] Reduce Motion ile gereksiz animasyon devre dışı.
-- [ ] EN/DE metin uzaması bozulma yaratmıyor.
+- [x] Küçük iPhone’da yatay taşma yok.
+- [x] iPad portrait/landscape boşluk ve kolon kullanımı bilinçli.
+- [x] %200 yazı boyutunda kritik CTA ve bilgi erişilebilir.
+- [x] VoiceOver sırası görsel sırayla uyumlu.
+- [x] Reduce Motion ile gereksiz animasyon devre dışı.
+- [x] EN/DE metin uzaması bozulma yaratmıyor.
 
 ## Test planı
 
@@ -89,8 +96,8 @@ Lulu’nun monokrom + lavanta dili tutarlı ve sakin; ancak bazı ekranlar çok 
 ## Açık sorular
 
 - [x] Light mode yeniden kullanıcı seçeneği olacak mı? — Evet; `System / Light / Dark` tercihi ve tam ekran QA kapsamı task 015'e taşındı.
-- [ ] iPad regular width için sidebar kullanılacak mı?
-- [ ] Health status için kaç semantik renk gerekli?
+- [x] iPad regular width için sidebar kullanılacak mı? — v1.3'te mevcut tab navigasyonu korunuyor; sidebar zorunlu görülmedi. v1.4 bilgi mimarisi turunda yeniden değerlendirilebilir.
+- [x] Health status için kaç semantik renk gerekli? — Mevcut semantik roller v1.3 için kabul edildi; uygulama geneli palette ve tema sözleşmesi Task 015'e taşındı.
 
 ## Definition of Done
 

@@ -6,8 +6,8 @@ import { DashboardSectionHeader } from '@/components/dashboard/DashboardSectionH
 import { ReminderListRow } from '@/components/reminders/ReminderListRow';
 import { Card } from '@/components/ui/Card';
 import { Spacing } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useTranslation } from '@/hooks/use-translation';
-import { getLocaleTag } from '@/utils/locale';
 import { getReminderFormRoute } from '@/utils/pet-reminder-display';
 import { buildOverdueReminders } from '@/utils/upcoming-reminders';
 import type { PetReminder } from '@/types/pet-reminder';
@@ -18,10 +18,10 @@ type OverdueRemindersSectionProps = {
 
 export function OverdueRemindersSection({ reminders }: OverdueRemindersSectionProps) {
   const router = useRouter();
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
 
-  const overdue = buildOverdueReminders(reminders, locale, t, { limit: 3 });
+  const overdue = buildOverdueReminders(reminders, regionalFormat, t, { limit: 3 });
 
   if (overdue.length === 0) {
     return null;

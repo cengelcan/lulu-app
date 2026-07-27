@@ -48,6 +48,7 @@ export function MedicationPlanFormScreen() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const secondary = useThemeColor({}, 'textSecondary');
+  const alertColor = useThemeColor({}, 'alert');
   const isNew = id === 'new';
   const title = isNew ? t('medications.addPlan') : t('medications.editPlan');
   const screenOptions = useHubStackScreenOptions(title, '/medications' as Href);
@@ -190,7 +191,7 @@ export function MedicationPlanFormScreen() {
           {!isPrn ? <TimePickerField accessibilityLabel={t('medications.fields.time')}
             label={t('medications.fields.time')} value={time} onChange={setTime} variant="row" isLast /> : null}
         </GroupedSection>
-        {error ? <ThemedText accessibilityRole="alert" style={styles.error} selectable>{error}</ThemedText> : null}
+        {error ? <ThemedText accessibilityRole="alert" style={[styles.error, { color: alertColor }]} selectable>{error}</ThemedText> : null}
         <Button title={t('medications.save')} disabled={saving} onPress={() => void handleSave()} />
         {existing?.plan.status === 'active' ? <Button title={t('medications.archive')}
           variant="destructive" disabled={saving} onPress={handleArchive} /> : null}
@@ -204,5 +205,5 @@ const styles = StyleSheet.create({
   formCard: { padding: Spacing.md, gap: Spacing.md },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   switchCopy: { flex: 1, gap: 2 },
-  error: { color: '#ef4444' },
+  error: { textAlign: 'center' },
 });

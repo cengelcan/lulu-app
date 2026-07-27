@@ -4,18 +4,23 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | In Progress |
+| Durum | Done |
 | Öncelik | P0 |
 | Hedef sürüm | v1.3 |
 | Task türü | Sağlık / Plus / Bildirim |
 | Tahmini efor | XL |
 | Ürün katmanı | Her ikisi; gelişmiş özellikler Plus |
 | Bağımlılıklar | 001 |
-| Son güncelleme | 2026-07-22 |
+| Son güncelleme | 2026-07-27 |
 
 ## Bağlam ve problem
 
 Mevcut medication record ve reminder altyapısı tekil kayıt oluşturabiliyor ancak bir tedaviyi doz programı, uygulama geçmişi, kaçırılan doz, stok ve aile koordinasyonu ile modellemiyor. Özellikle birden fazla bakıcı olduğunda aynı dozun iki kez verilmesi veya hiç verilmemesi riski bulunur.
+
+## Kapanış notu — 2026-07-27
+
+Medication planı, doz durumları, bildirimler, stok/refill, family senkronizasyonu
+ve rapor entegrasyonu v1.3 yayın turunda doğrulandı ve kabul edildi.
 
 ## Kullanıcı sonucu
 
@@ -31,13 +36,13 @@ Mevcut medication record ve reminder altyapısı tekil kayıt oluşturabiliyor a
 
 ### Dahil
 
-- [ ] İlaç adı, form, doz, birim, talimat, başlangıç/bitiş ve not.
-- [ ] Günlük/haftalık/custom schedule ve gerektiğinde (`PRN`) modu.
-- [ ] Doz durumları: scheduled, taken, skipped, missed, snoozed.
-- [ ] Dozu veren kişi ve timestamp.
-- [ ] Yerel bildirim, snooze ve bildirimden tamamlama.
-- [ ] Stok miktarı ve refill uyarısı — Plus.
-- [ ] Reçete/fotoğraf eki Task 009 ile entegre olacak biçimde alan hazırlığı.
+- [x] İlaç adı, form, doz, birim, talimat, başlangıç/bitiş ve not.
+- [x] Günlük/haftalık/custom schedule ve gerektiğinde (`PRN`) modu.
+- [x] Doz durumları: scheduled, taken, skipped, missed, snoozed.
+- [x] Dozu veren kişi ve timestamp.
+- [x] Yerel bildirim, snooze ve bildirimden tamamlama.
+- [x] Stok miktarı ve refill uyarısı — Plus.
+- [x] Reçete/fotoğraf eki Task 009 ile entegre olacak biçimde alan hazırlığı.
 
 ### Kapsam dışı
 
@@ -112,17 +117,17 @@ Kullanıcının daha önce kaydettiği ilaç ve doz geçmişi abonelik bittiğin
 
 ## Kabul kriterleri
 
-- [ ] Kullanıcı farklı recurrence tipleriyle ilaç planı oluşturabiliyor.
-- [ ] Bildirimden tamamlanan doz bütün cihazlara idempotent senkronize oluyor.
-- [ ] DST/offline/concurrent completion testleri geçiyor.
-- [ ] Memorial pet bildirimleri iptal, geçmiş korunuyor.
-- [ ] EN/DE ve accessibility QA tamam.
+- [x] Kullanıcı farklı recurrence tipleriyle ilaç planı oluşturabiliyor.
+- [x] Bildirimden tamamlanan doz bütün cihazlara idempotent senkronize oluyor.
+- [x] DST/offline/concurrent completion testleri geçiyor.
+- [x] Memorial pet bildirimleri iptal, geçmiş korunuyor.
+- [x] EN/DE ve accessibility QA tamam.
 
 ## Açık sorular
 
-- [ ] Free aktif ilaç programı sınırı kaç olmalı?
-- [ ] PRN dozlar schedule dışında nasıl gösterilecek?
-- [ ] Notification lock-screen’da ilaç adı varsayılan olarak gizli mi olmalı?
+- [x] Free aktif ilaç programı sınırı kaç olmalı? — v1.3'te plan sayısı ayrıca sınırlandırılmıyor; inventory/refill Plus özelliği olarak kalıyor.
+- [x] PRN dozlar schedule dışında nasıl gösterilecek? — PRN planı sabit occurrence üretmeden ilaç planları içinde gösteriliyor.
+- [x] Notification lock-screen’da ilaç adı varsayılan olarak gizli mi olmalı? — Hayır; v1.3'te mevcut lokal bildirim içeriği korunuyor ve yayın turunda kabul edildi. Ayrıntılı bildirim gizliliği tercihi Task 015 kapsamında yeniden ele alınabilir.
 
 ## Test planı
 
@@ -135,8 +140,8 @@ Kullanıcının daha önce kaydettiği ilaç ve doz geçmişi abonelik bittiğin
 
 - [x] Simülatör — Family üyesi bildirime dokunup dozu “Verildi” yaptı; ana hesapta aktör hareketi, doz durumu ve stok `10 → 9` realtime olarak doğru güncellendi.
 - [x] Simülatör — İlaç doz geçmişi rapor önizlemesinde doğru göründü.
-- [ ] İki eşzamanlı fiziksel cihaz veya simülatör — Aynı doza iki hesaptan aynı anda “Verildi” işlemi uygulanacak; stok yalnızca bir azalmalı ve tek doz hareketi oluşmalı.
-- [ ] Fiziksel cihaz — Kilit ekranı bildirimi, bildirim aksiyonları ve uygulama tamamen kapalıyken teslimat doğrulanacak.
+- [x] İki eşzamanlı fiziksel cihaz veya simülatör — Aynı doza iki hesaptan aynı anda “Verildi” işlemi uygulanacak; stok yalnızca bir azalmalı ve tek doz hareketi oluşmalı.
+- [x] Fiziksel cihaz — Kilit ekranı bildirimi, bildirim aksiyonları ve uygulama tamamen kapalıyken teslimat doğrulanacak.
 
 ## Definition of Done
 

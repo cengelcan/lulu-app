@@ -2,8 +2,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { CheckInTheme } from '@/constants/check-in-theme';
 import { Radius, Spacing, Typography } from '@/constants/theme';
+import { useCheckInTheme } from '@/hooks/use-check-in-theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import type { CheckInFormState } from '@/types/check-in';
@@ -75,6 +75,8 @@ export function CheckInProgressCard({
   totalCount,
 }: CheckInProgressCardProps) {
   const { t } = useTranslation();
+  const checkInTheme = useCheckInTheme();
+  const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
 
   const progress = totalCount > 0 ? completedCount / totalCount : 0;
@@ -96,23 +98,23 @@ export function CheckInProgressCard({
     : t('checkIn.progressCard.inProgressSubtitle');
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: checkInTheme.surface }]}>
       <View style={styles.decorIcon}>
-        <IconSymbol name="pawprint.fill" size={80} color={CheckInTheme.accent} />
+        <IconSymbol name="pawprint.fill" size={80} color={checkInTheme.accent} />
       </View>
 
       <View style={styles.row}>
         <View style={styles.ringContainer}>
           <ProgressRing
             progress={progress}
-            accentColor={CheckInTheme.accent}
-            trackColor="rgba(255,255,255,0.08)"
+            accentColor={checkInTheme.accent}
+            trackColor={checkInTheme.progressTrack}
           />
           <View style={styles.ringLabel}>
             <ThemedText type="defaultSemiBold" style={styles.ringCount}>
               {completedCount}/{totalCount}
             </ThemedText>
-            <ThemedText style={styles.ringSubtext}>
+            <ThemedText style={[styles.ringSubtext, { color: textColor }]}>
               {t('checkIn.progressCard.completedLabel')}
             </ThemedText>
           </View>
@@ -133,18 +135,18 @@ export function CheckInProgressCard({
       </View>
 
       <View style={styles.barRow}>
-        <View style={styles.barTrack}>
+        <View style={[styles.barTrack, { backgroundColor: checkInTheme.progressTrack }]}>
           <View
             style={[
               styles.barFill,
               {
                 width: `${percent}%`,
-                backgroundColor: CheckInTheme.accent,
+                backgroundColor: checkInTheme.accent,
               },
             ]}
           />
         </View>
-        <ThemedText style={styles.percentLabel}>
+        <ThemedText style={[styles.percentLabel, { color: textColor }]}>
           {t('checkIn.progressCard.percentComplete', { percent })}
         </ThemedText>
       </View>
@@ -156,7 +158,6 @@ const styles = StyleSheet.create({
   card: {
     overflow: 'hidden',
     gap: Spacing.md,
-    backgroundColor: CheckInTheme.surface,
     borderRadius: Radius.lg,
     padding: Spacing.md,
   },
@@ -202,7 +203,6 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     fontSize: 9,
     lineHeight: 11,
-    color: '#FFFFFF',
     opacity: 0.85,
   },
   textBlock: {
@@ -226,7 +226,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 6,
     borderRadius: Radius.full,
-    backgroundColor: 'rgba(255,255,255,0.08)',
     overflow: 'hidden',
   },
   barFill: {
@@ -235,7 +234,6 @@ const styles = StyleSheet.create({
   },
   percentLabel: {
     ...Typography.caption,
-    color: '#FFFFFF',
     minWidth: 36,
     textAlign: 'right',
   },

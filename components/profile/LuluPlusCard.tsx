@@ -9,6 +9,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { AccessibilityTokens } from '@/constants/accessibility';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { LULU_PLUS_FEATURES } from '@/constants/plus-features';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useTranslation } from '@/hooks/use-translation';
 import { refreshSubscriptionStatus } from '@/services/subscription/lifecycle';
 import type { PlusSubscriptionDetails } from '@/services/subscription/plus-status';
@@ -19,7 +20,7 @@ import {
   getTrialDaysRemaining,
   projectNextRenewalDate,
 } from '@/utils/subscription-display';
-import { getLocaleTag } from '@/utils/locale';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 
 const APP_STORE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscriptions';
 const GRADIENT_COLORS = ['#6B4FC4', '#8B6FD4', '#A998D6'] as const;
@@ -48,7 +49,7 @@ function buildActiveSubscriptionCopy(
   subscription: PlusSubscriptionDetails | null,
   plusExpiresAt: string | null,
   t: (key: string, params?: Record<string, string>) => string,
-  locale: string
+  regionalFormat: RegionalFormatContext
 ): { planLabel: string | null; detailLines: string[] } {
   const detailLines: string[] = [];
   const planLabelKey = subscription ? getPlanLabelKey(subscription.planKind) : null;
@@ -58,7 +59,7 @@ function buildActiveSubscriptionCopy(
   if (subscription?.planKind === 'lifetime') {
     detailLines.push(t('profile.luluPlusLifetimeAccess'));
     if (subscription.purchasedAt) {
-      const purchased = formatSubscriptionDate(subscription.purchasedAt, locale);
+      const purchased = formatSubscriptionDate(subscription.purchasedAt, regionalFormat);
       if (purchased) {
         detailLines.push(t('profile.luluPlusPurchasedOn', { date: purchased }));
       }
@@ -76,14 +77,14 @@ function buildActiveSubscriptionCopy(
       detailLines.push(t('profile.luluPlusTrialDaysLeft', { count: String(daysRemaining) }));
     }
 
-    const trialEnd = formatSubscriptionDate(expiresAt, locale);
+    const trialEnd = formatSubscriptionDate(expiresAt, regionalFormat);
     if (trialEnd) {
       detailLines.push(t('profile.luluPlusTrialEndsOn', { date: trialEnd }));
     }
 
     const nextRenewal = projectNextRenewalDate(expiresAt, subscription.planKind);
     const nextRenewalLabel = nextRenewal
-      ? formatSubscriptionDate(nextRenewal.toISOString(), locale)
+      ? formatSubscriptionDate(nextRenewal.toISOString(), regionalFormat)
       : null;
     if (nextRenewalLabel) {
       detailLines.push(t('profile.luluPlusNextRenewalOn', { date: nextRenewalLabel }));
@@ -93,7 +94,7 @@ function buildActiveSubscriptionCopy(
   }
 
   if (expiresAt) {
-    const formatted = formatSubscriptionDate(expiresAt, locale);
+    const formatted = formatSubscriptionDate(expiresAt, regionalFormat);
     if (formatted) {
       if (subscription?.willRenew === false) {
         detailLines.push(t('profile.luluPlusExpiresOn', { date: formatted }));
@@ -108,7 +109,8 @@ function buildActiveSubscriptionCopy(
 
 export function LuluPlusCard() {
   const router = useRouter();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const isPlusActive = useUserStore((state) => state.isPlusActive);
   const plusExpiresAt = useUserStore((state) => state.plusExpiresAt);
   const plusSubscription = useUserStore((state) => state.plusSubscription);
@@ -119,11 +121,9 @@ export function LuluPlusCard() {
     }
   }, [isPlusActive]);
 
-  const locale = getLocaleTag(language);
-
   const { planLabel, detailLines } = useMemo(
-    () => buildActiveSubscriptionCopy(plusSubscription, plusExpiresAt, t, locale),
-    [locale, plusExpiresAt, plusSubscription, t]
+    () => buildActiveSubscriptionCopy(plusSubscription, plusExpiresAt, t, regionalFormat),
+    [plusExpiresAt, plusSubscription, regionalFormat, t]
   );
 
   const showManageButton =

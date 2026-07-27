@@ -7,10 +7,12 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius, Spacing, Typography } from '@/constants/theme';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatLocalDate, getTodayStart, isTodayLocalDate, parseLocalDate } from '@/utils/date';
-import { getLocaleTag } from '@/utils/locale';
+import { formatMediumDate, formatRegionalNumber } from '@/utils/formatters';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import {
   formatWeightDelta,
   getWeightChartAxisTicks,
@@ -50,28 +52,25 @@ type ChartSegment = {
   centerY: number;
 };
 
-function formatAxisValue(value: number, locale: string): string {
-  return value.toLocaleString(locale, {
+function formatAxisValue(value: number, context: RegionalFormatContext): string {
+  return formatRegionalNumber(value, context, {
     maximumFractionDigits: 1,
     minimumFractionDigits: Number.isInteger(value) ? 0 : 1,
   });
 }
 
-function formatPointDate(dateKey: string, locale: string): string {
+function formatPointDate(dateKey: string, context: RegionalFormatContext): string {
   const date = parseLocalDate(dateKey);
   if (!date) {
     return dateKey;
   }
 
-  return date.toLocaleDateString(locale, {
-    day: 'numeric',
-    month: 'short',
-  });
+  return formatMediumDate(dateKey, context, false);
 }
 
 function formatLastLogDate(
   dateKey: string,
-  locale: string,
+  context: RegionalFormatContext,
   t: (key: string) => string
 ): string {
   if (isTodayLocalDate(dateKey)) {
@@ -85,7 +84,7 @@ function formatLastLogDate(
     return t('dashboard.weightLastLogYesterday');
   }
 
-  return formatPointDate(dateKey, locale);
+  return formatPointDate(dateKey, context);
 }
 
 function getChartPointX(index: number, pointCount: number, width: number): number {
@@ -175,8 +174,8 @@ export function WeightChart({
   accentColor = Palette.badgeViolet,
   height = DEFAULT_HEIGHT,
 }: WeightChartProps) {
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const titleColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const borderColor = useThemeColor({}, 'border');
@@ -261,20 +260,20 @@ export function WeightChart({
 
   const unitLabel = data.unit ? t(`records.units.${data.unit}`) : '';
   const latest = data.latest;
-  const lastLogLabel = latest ? formatLastLogDate(latest.date, locale, t) : '—';
+  const lastLogLabel = latest ? formatLastLogDate(latest.date, regionalFormat, t) : '—';
 
   const changeLabel = (() => {
     if (!change || !data.unit) {
       return '—';
     }
 
-    const delta = `${formatWeightDelta(change.valueDelta, locale)} ${unitLabel}`;
+    const delta = `${formatWeightDelta(change.valueDelta, regionalFormat)} ${unitLabel}`;
 
     if (change.percentDelta === null) {
       return t('dashboard.weightChangeValueNoPercent', { delta });
     }
 
-    const percent = Math.abs(change.percentDelta).toLocaleString(locale, {
+    const percent = formatRegionalNumber(Math.abs(change.percentDelta), regionalFormat, {
       maximumFractionDigits: 1,
       minimumFractionDigits: Number.isInteger(Math.abs(change.percentDelta)) ? 0 : 1,
     });
@@ -304,7 +303,7 @@ export function WeightChart({
                   { top: guideYs.high - Y_AXIS_LABEL_LINE_HEIGHT / 2 },
                 ]}
                 numberOfLines={1}>
-                {formatAxisValue(axisTicks.max, locale)}
+                {formatAxisValue(axisTicks.max, regionalFormat)}
               </ThemedText>
               <ThemedText
                 lightColor={textSecondaryColor}
@@ -315,7 +314,7 @@ export function WeightChart({
                   { top: guideYs.mid - Y_AXIS_LABEL_LINE_HEIGHT / 2 },
                 ]}
                 numberOfLines={1}>
-                {formatAxisValue(axisTicks.mid, locale)}
+                {formatAxisValue(axisTicks.mid, regionalFormat)}
               </ThemedText>
               <ThemedText
                 lightColor={textSecondaryColor}
@@ -326,7 +325,7 @@ export function WeightChart({
                   { top: guideYs.low - Y_AXIS_LABEL_LINE_HEIGHT / 2 },
                 ]}
                 numberOfLines={1}>
-                {formatAxisValue(axisTicks.min, locale)}
+                {formatAxisValue(axisTicks.min, regionalFormat)}
               </ThemedText>
             </>
           ) : null}
@@ -453,7 +452,7 @@ export function WeightChart({
                           : { left: x, transform: [{ translateX: '-50%' }] },
                     ]}
                     numberOfLines={1}>
-                    {formatPointDate(point.date, locale)}
+                    {formatPointDate(point.date, regionalFormat)}
                   </ThemedText>
                 );
               })

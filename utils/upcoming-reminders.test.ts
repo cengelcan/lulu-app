@@ -2,9 +2,15 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import type { PetReminder } from '@/types/pet-reminder';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import { buildUpcomingReminders, hasUpcomingReminders, listOverduePendingReminders, listUpcomingPendingReminders } from '@/utils/upcoming-reminders';
 
 const REFERENCE_DATE = new Date('2026-06-23T12:00:00');
+const regionalFormat: RegionalFormatContext = {
+  language: 'en', languageLocale: 'en-US', regionCode: 'US', datePartOrder: 'mdy',
+  dateSeparator: '/', decimalSeparator: '.', digitGroupingSeparator: ',',
+  measurementSystem: 'us', uses24HourClock: false, timeZone: 'UTC',
+};
 
 const t = (key: string) => key;
 
@@ -68,7 +74,7 @@ describe('buildUpcomingReminders', () => {
       createReminder({ id: 'far-1', type: 'custom', dueDate: '2026-08-01' }),
     ];
 
-    const items = buildUpcomingReminders(reminders, 'en-US', t, {
+    const items = buildUpcomingReminders(reminders, regionalFormat, t, {
       referenceDate: REFERENCE_DATE,
       withinDays: 7,
     });
@@ -84,7 +90,7 @@ describe('buildUpcomingReminders', () => {
       createReminder({ id: 'far', type: 'custom', dueDate: '2026-08-01' }),
     ];
 
-    const items = buildUpcomingReminders(reminders, 'en-US', t, {
+    const items = buildUpcomingReminders(reminders, regionalFormat, t, {
       referenceDate: REFERENCE_DATE,
     });
 
@@ -109,11 +115,12 @@ describe('buildUpcomingReminders', () => {
       }),
     ];
 
-    const items = buildUpcomingReminders(reminders, 'en-US', t, {
+    const items = buildUpcomingReminders(reminders, regionalFormat, t, {
       referenceDate: REFERENCE_DATE,
     });
 
     assert.deepEqual(items.map((item) => item.reminderId), ['later-today']);
+    assert.match(items[0]?.timeLabel ?? '', /03:00\s?PM/i);
   });
 
   it('ignores completed reminders', () => {
@@ -127,7 +134,7 @@ describe('buildUpcomingReminders', () => {
       }),
     ];
 
-    const items = buildUpcomingReminders(reminders, 'en-US', t, {
+    const items = buildUpcomingReminders(reminders, regionalFormat, t, {
       referenceDate: REFERENCE_DATE,
     });
 
@@ -140,7 +147,7 @@ describe('buildUpcomingReminders', () => {
       createReminder({ id: 'remaining', type: 'custom', dueDate: '2026-06-25' }),
     ];
 
-    const items = buildUpcomingReminders(reminders, 'en-US', t, {
+    const items = buildUpcomingReminders(reminders, regionalFormat, t, {
       excludeReminderIds: ['highlighted'],
       referenceDate: REFERENCE_DATE,
     });

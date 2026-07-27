@@ -38,7 +38,10 @@ export const tr: Translations = {
   "care": {
     "title": "Bakım",
     "subtitle": "İlgilenmen gereken her şey tek bir yerde.",
+    "attentionTitle": "Şimdi ve sırada",
     "shortcutsTitle": "Bakım araçları",
+    "resourcesTitle": "Geçmiş ve koordinasyon",
+    "reportsDescription": "İncelemek veya paylaşmak için sağlık özeti oluştur",
     "checkIn": "Günlük Check-In",
     "checkInDescription": "Petinin bugün nasıl olduğunu kaydet",
     "reminders": "Hatırlatıcılar",
@@ -47,7 +50,7 @@ export const tr: Translations = {
     "recordsDescription": "Sağlık geçmişini ekle veya incele",
     "timelineTitle": "Bakım zaman akışı",
     "emptyTitle": "Her şey tamam",
-    "emptyDescription": "Yaklaşan bakımlar ve aile aktiviteleri burada görünecek.",
+    "emptyDescription": "Acil veya yaklaşan bir bakım işi yok.",
     "loadingTimeline": "Bakım zaman akışı yükleniyor",
     "familyActivity": "Tüm aile aktivitelerini gör",
     "familyManagement": "Aile ve Paylaşım",
@@ -146,9 +149,19 @@ export const tr: Translations = {
   },
   "settings": {
     "title": "Ayarlar",
+    "appearance": "GÖRÜNÜM",
+    "appearanceSystem": "Sistem",
+    "appearanceLight": "Açık",
+    "appearanceDark": "Koyu",
+    "measurement": "ÖLÇÜ BİRİMİ",
+    "weightUnitKg": "Kilogram (kg)",
+    "weightUnitLb": "Pound (lb)",
+    "weightUnitFooter": "Kilo kayıtları bu birimle gösterilir. Saklanan sağlık verisi değiştirilmez.",
     "notifications": "BİLDİRİMLER",
     "dailyCheckInReminder": "Günlük Check-In Hatırlatıcısı",
     "petReminderNotifications": "Hatırlatıcı Bildirimleri",
+    "medicationDoseNotifications": "İlaç Dozları",
+    "medicationRefillNotifications": "İlaç Stoğu",
     "familyActivityDigest": "Aile Aktivitesi Özeti",
     "reminderTime": "Hatırlatma Saati",
     "notificationsDisabledFooter": "Bildirimler sistem ayarlarında kapalı.",
@@ -168,7 +181,10 @@ export const tr: Translations = {
     "footerLine2Accent": "her",
     "footerLine2After": " veteriner ziyaretini açıkla.",
     "startButton": "Başla",
-    "joinFamilyButton": "Bir kodla aileye katıl"
+    "joinFamilyButton": "Bir kodla aileye katıl",
+    "benefitDailyCare": "Günlük bakım ve sağlık notlarını bir arada tut",
+    "benefitFamily": "Güvendiğin kişilerle bakımı koordine et",
+    "benefitVet": "Detayları unutmadan veteriner görüşmesine hazırlan"
   },
   "onboarding": {
     "intro1": {
@@ -195,6 +211,15 @@ export const tr: Translations = {
       "description": "Petinin bakıma ihtiyacı olduğunda düzenli notlar ve sağlık kayıtları yanında olsun.",
       "button": "Takibe Başla"
     }
+  },
+  "contextualEducation": {
+    "dismiss": "Anladım",
+    "medicationTitle": "Tedaviyi düzenli takip et",
+    "medicationDescription": "Planı bir kez oluştur; bugünün dozlarını ve kalan miktarı tek yerden takip et.",
+    "familyTitle": "Bakımı paylaş, belirsizliği değil",
+    "familyDescription": "Güvendiğin kişileri davet et; yapılanları ve sırada ne olduğunu herkes görebilsin.",
+    "vetVisitTitle": "Önemli detaylarla hazır git",
+    "vetVisitDescription": "Randevuyu, sorularını ve takip notlarını yönlendirmeli tek bir alanda topla."
   },
   "auth": {
     "title": "Tekrar hoş geldin",
@@ -936,9 +961,11 @@ export const tr: Translations = {
       "{{name}} için günlük sağlık kontrolünü unutma.",
       "{{name}} ile ilgili küçük değişiklikleri kaydetme zamanı."
     ],
-    "petReminderBody": "{{name}} için {{title}} zamanı geldi",
-    "medicationDoseTitle": "{{medication}} dozu",
-    "medicationDoseBody": "{{name}} için {{dose}} {{unit}} ver",
+    "petReminderBody": "{{name}} için bir bakım hatırlatıcısının zamanı geldi.",
+    "medicationDoseTitle": "İlaç hatırlatıcısı",
+    "medicationDoseBody": "{{name}} için planlanmış bir ilaç işlemi var.",
+    "medicationRefillTitle": "İlaç stoğu azalıyor",
+    "medicationRefillBody": "{{name}} için ilaç stoğunu kontrol et.",
     "channelCheckIn": "Check-in hatırlatıcıları",
     "channelPetReminders": "Pet hatırlatıcıları",
     "channelMedicationDoses": "İlaç dozları",
@@ -1274,7 +1301,14 @@ export const tr: Translations = {
     "restorePetTitle": "{{name}} geri alınsın mı?",
     "restorePetMessage": "Bu, {{name}} öğesini yeniden aktif olarak işaretler; böylece check-in ve hatırlatıcı ekleyebilirsin.",
     "memorialNote": "{{name}} vefat etti olarak işaretli. Check-in ve hatırlatıcılar kapalı; kayıtlar görüntülenebilir.",
+    "activeBadge": "Aktif",
     "deceasedBadge": "Sevgiyle anıyoruz",
+    "moreConditions": "+{{count}} daha",
+    "showLess": "Daha az göster",
+    "showMoreConditionsA11y": "{{count}} sağlık durumu daha göster",
+    "showFewerConditionsA11y": "Daha az sağlık durumu göster",
+    "sharedWithYou": "Seninle paylaşıldı",
+    "ownerManaged": "Sen yönetiyorsun",
     "sections": {
       "profilePhoto": "Profil Fotoğrafı",
       "petType": "Pet Türü",
@@ -1282,7 +1316,11 @@ export const tr: Translations = {
       "basicInformation": "Temel Bilgiler",
       "healthInformation": "Sağlık Bilgileri",
       "additionalInformation": "Ek Bilgiler",
-      "owner": "Sahip"
+      "owner": "Sahip",
+      "profile": "Profil",
+      "health": "Sağlık",
+      "care": "Bakım bilgileri",
+      "sharing": "Paylaşım"
     },
     "fields": {
       "breed": "Irk",
@@ -1296,6 +1334,7 @@ export const tr: Translations = {
       "microchip": "Mikroçip",
       "ownerName": "Sahip Adı",
       "petName": "Pet Adı",
+      "access": "Erişim",
       "colorPlaceholder": "ör. Altın, Siyah beyaz",
       "birthDatePlaceholder": "Doğum tarihi seç",
       "adoptionDatePlaceholder": "Sahiplenme tarihi seç",

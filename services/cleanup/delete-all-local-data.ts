@@ -7,6 +7,7 @@ import * as petRecordStorage from '@/storage/pet-record.storage';
 import * as petStorage from '@/storage/pet.storage';
 import * as vetVisitStorage from '@/storage/vet-visit.storage';
 import { clearDismissedInboxItems } from '@/storage/inbox-dismissed.storage';
+import { clearContextualEducationDismissals } from '@/storage/contextual-education.storage';
 import {
   clearJoinRemindersPromptState,
 } from '@/storage/join-reminders-prompt.storage';
@@ -22,8 +23,8 @@ import {
   removeFamilyActivityReadState,
   removeNotificationPermission,
   removePetReminderNotificationsEnabled,
-  setOnboardingCompleted,
 } from '@/storage/prefs.storage';
+import { resetCurrentOnboarding } from '@/storage/onboarding.storage';
 import { clearLastStoreReviewPromptAt, clearUserProfile } from '@/storage/user.storage';
 import { useCheckInStore } from '@/stores/check-in.store';
 import { useLanguageStore } from '@/stores/language.store';
@@ -52,7 +53,7 @@ export async function deleteAllLocalData(): Promise<void> {
 
   await Promise.all([
     removeActivePetId(),
-    setOnboardingCompleted(false),
+    resetCurrentOnboarding(),
     removeCurrentUserId(),
     removeFamilyActivityDigestEnabled(),
     removeFamilyActivityReadState(),
@@ -64,6 +65,7 @@ export async function deleteAllLocalData(): Promise<void> {
     clearUserProfile(),
     clearLastStoreReviewPromptAt(),
     clearDismissedInboxItems(),
+    clearContextualEducationDismissals(),
     clearPendingFamilyJoinCode(),
     clearUserSetupPath(),
     clearJoinRemindersPromptState(),

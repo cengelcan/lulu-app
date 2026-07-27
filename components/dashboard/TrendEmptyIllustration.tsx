@@ -1,6 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line, Rect } from 'react-native-svg';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+
 type TrendEmptyIllustrationProps = {
   width?: number;
   height?: number;
@@ -20,8 +22,10 @@ const LINE_POINTS = [
 export function TrendEmptyIllustration({
   width = 52,
   height = 36,
-  color = 'rgba(161, 161, 170, 0.55)',
+  color,
 }: TrendEmptyIllustrationProps) {
+  const themeColor = useThemeColor({}, 'textTertiary');
+  const illustrationColor = color ?? themeColor;
   const barsWidth = BAR_WIDTH * BAR_HEIGHTS.length + BAR_GAP * (BAR_HEIGHTS.length - 1);
   const offsetX = (width - barsWidth) / 2;
   const baselineY = height - 2;
@@ -40,7 +44,7 @@ export function TrendEmptyIllustration({
               width={BAR_WIDTH}
               height={barHeight}
               rx={2}
-              fill={color}
+              fill={illustrationColor}
               opacity={0.35}
             />
           );
@@ -56,7 +60,7 @@ export function TrendEmptyIllustration({
               cx={x}
               cy={y}
               r={2.5}
-              fill={color}
+              fill={illustrationColor}
               opacity={0.7}
             />
           );
@@ -76,7 +80,7 @@ export function TrendEmptyIllustration({
               y1={y1}
               x2={x2}
               y2={y2}
-              stroke={color}
+              stroke={illustrationColor}
               strokeWidth={1.5}
               strokeDasharray="3 3"
               opacity={0.7}

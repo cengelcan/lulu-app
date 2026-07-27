@@ -1,15 +1,13 @@
-import { Dimensions, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
 const HEADER_ACTION_WIDTH = 72;
 
 export const IOS_PICKER_HEIGHT = 216;
-export const IOS_PICKER_WIDTH = SCREEN_WIDTH;
 
 type IosPickerSheetProps = {
   visible: boolean;
@@ -42,6 +40,7 @@ export function IosPickerSheet({
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
         <Pressable
+          accessibilityViewIsModal
           style={[styles.sheet, { backgroundColor: surfaceColor }]}
           onPress={(event) => event.stopPropagation()}>
           <View style={[styles.sheetHeader, { borderBottomColor: borderColor }]}>
@@ -93,6 +92,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     width: '100%',
+    maxWidth: 640,
+    alignSelf: 'center',
     borderTopLeftRadius: Radius.xl,
     borderTopRightRadius: Radius.xl,
     paddingBottom: Spacing.lg,

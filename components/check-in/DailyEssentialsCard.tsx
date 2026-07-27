@@ -7,8 +7,8 @@ import {
   CHECK_IN_CATEGORIES,
   CHECK_IN_OPTIONS_BY_CATEGORY,
 } from '@/constants/check-in';
-import { CheckInTheme } from '@/constants/check-in-theme';
 import { Spacing, Typography } from '@/constants/theme';
+import { useCheckInTheme } from '@/hooks/use-check-in-theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import type { CheckInCategory, CheckInFormState } from '@/types/check-in';
@@ -19,7 +19,20 @@ type MetricCardProps = {
 };
 
 function MetricCard({ children }: MetricCardProps) {
-  return <View style={styles.metricCard}>{children}</View>;
+  const checkInTheme = useCheckInTheme();
+
+  return (
+    <View
+      style={[
+        styles.metricCard,
+        {
+          backgroundColor: checkInTheme.glassSurface,
+          borderColor: checkInTheme.glassBorder,
+        },
+      ]}>
+      {children}
+    </View>
+  );
 }
 
 type CheckInMetricRowProps = {
@@ -140,8 +153,6 @@ const styles = StyleSheet.create({
   metricCard: {
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: CheckInTheme.glassBorder,
-    backgroundColor: CheckInTheme.glassSurface,
     padding: Spacing.md,
   },
   segmentedContent: {

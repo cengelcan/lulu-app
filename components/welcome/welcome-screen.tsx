@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LuluLogo } from '@/components/LuluLogo';
@@ -10,35 +10,37 @@ import { Fonts, Palette, Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 const WELCOME_BG = require('@/assets/images/welcome-bg.png');
-const LOGO_SIZE = 259;
+const LOGO_SIZE = 180;
+
+type WelcomeBenefit = {
+  icon: 'checkmark.circle.fill' | 'person.2.fill' | 'calendar.badge.checkmark';
+  label: string;
+};
 
 type WelcomeScreenProps = {
   appName: string;
   tagline: string;
-  footerLine1: string;
-  footerLine2Before: string;
-  footerLine2Accent: string;
-  footerLine2After: string;
+  benefits: readonly WelcomeBenefit[];
   startButtonTitle: string;
   onStart: () => void;
   isLoading?: boolean;
+  error?: string | null;
   footerExtra?: React.ReactNode;
 };
 
 export function WelcomeScreen({
   appName,
   tagline,
-  footerLine1,
-  footerLine2Before,
-  footerLine2Accent,
-  footerLine2After,
+  benefits,
   startButtonTitle,
   onStart,
   isLoading = false,
+  error = null,
   footerExtra,
 }: WelcomeScreenProps) {
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const buttonTextColor = useThemeColor({}, 'primaryText');
+  const alertColor = useThemeColor({}, 'alert');
 
   return (
     <View style={styles.root}>
@@ -64,45 +66,56 @@ export function WelcomeScreen({
       />
 
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        <View style={styles.header}>
-          <LuluLogo accessibilityLabel={appName} size={LOGO_SIZE} style={styles.logo} />
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <LuluLogo accessibilityLabel={appName} size={LOGO_SIZE} style={styles.logo} />
 
-          <Text allowFontScaling style={styles.appName}>
-            {appName}
-          </Text>
-
-          <Text allowFontScaling style={styles.subtitle}>
-            <Text style={{ color: brandAccentColor }}>• </Text>
-            {tagline}
-            <Text style={{ color: brandAccentColor }}> •</Text>
-          </Text>
-
-          <View style={styles.taglines}>
-            <Text allowFontScaling style={styles.taglineLine}>
-              {footerLine1}
+            <Text allowFontScaling style={styles.appName}>
+              {appName}
             </Text>
 
-            <Text allowFontScaling style={styles.taglineLine}>
-              {footerLine2Before}
-              <Text style={{ color: brandAccentColor }}>{footerLine2Accent}</Text>
-              {footerLine2After}
+            <Text allowFontScaling style={styles.subtitle}>
+              {tagline}
             </Text>
           </View>
-        </View>
 
-        <View style={styles.spacer} />
+          <View style={styles.benefits}>
+            {benefits.slice(0, 3).map((benefit) => (
+              <View key={benefit.label} style={styles.benefitRow}>
+                <View style={styles.benefitIcon}>
+                  <IconSymbol name={benefit.icon} size={20} color={brandAccentColor} />
+                </View>
+                <Text allowFontScaling style={styles.benefitLabel}>
+                  {benefit.label}
+                </Text>
+              </View>
+            ))}
+          </View>
 
-        <View style={styles.footer}>
-          <Button
-            title={startButtonTitle}
-            accessibilityLabel={startButtonTitle}
-            onPress={onStart}
-            disabled={isLoading}
-            style={styles.startButton}
-            trailingIcon={<IconSymbol name="pawprint.fill" size={18} color={buttonTextColor} />}
-          />
-          {footerExtra ? <View style={styles.footerExtra}>{footerExtra}</View> : null}
-        </View>
+          <View style={styles.footer}>
+            {error ? (
+              <Text
+                accessibilityLiveRegion="assertive"
+                allowFontScaling
+                selectable
+                style={[styles.error, { color: alertColor }]}>
+                {error}
+              </Text>
+            ) : null}
+            <Button
+              title={startButtonTitle}
+              accessibilityLabel={startButtonTitle}
+              onPress={onStart}
+              disabled={isLoading}
+              style={styles.startButton}
+              trailingIcon={<IconSymbol name="pawprint.fill" size={18} color={buttonTextColor} />}
+            />
+            {footerExtra ? <View style={styles.footerExtra}>{footerExtra}</View> : null}
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -127,11 +140,17 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.sm,
+    gap: Spacing.lg,
   },
   header: {
     alignItems: 'center',
-    paddingTop: Spacing.md,
     gap: Spacing.xs,
   },
   logo: {
@@ -142,8 +161,8 @@ const styles = StyleSheet.create({
   appName: {
     color: Palette.brandAccentLight,
     textAlign: 'center',
-    fontSize: 46,
-    lineHeight: 50,
+    fontSize: 40,
+    lineHeight: 44,
     fontWeight: Typography.displayLg.fontWeight,
     letterSpacing: -1.3,
     fontFamily: Platform.select({
@@ -155,29 +174,48 @@ const styles = StyleSheet.create({
   subtitle: {
     color: Palette.onDark,
     textAlign: 'center',
-    fontSize: 17,
-    lineHeight: 22,
+    ...Typography.body,
     fontWeight: '500',
-    letterSpacing: 0.4,
+    maxWidth: 420,
   },
-  taglines: {
+  benefits: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    gap: Spacing.sm,
+  },
+  benefitRow: {
+    minHeight: 56,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: Spacing.xxs,
-    gap: Spacing.xxs,
+    gap: Spacing.sm,
+    borderRadius: Radius.lg,
+    borderCurve: 'continuous',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: 'rgba(0,0,0,0.42)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
   },
-  taglineLine: {
+  benefitIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    flexShrink: 0,
+  },
+  benefitLabel: {
     color: Palette.onDark,
-    textAlign: 'center',
-    fontSize: Typography.body.fontSize,
-    lineHeight: Typography.body.lineHeight,
-    fontWeight: '400',
-  },
-  spacer: {
     flex: 1,
+    ...Typography.bodySemiBold,
   },
   footer: {
-    paddingBottom: Spacing.sm,
     gap: Spacing.md,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
   },
   footerExtra: {
     alignItems: 'center',
@@ -186,5 +224,12 @@ const styles = StyleSheet.create({
     width: '100%',
     minHeight: 52,
     borderRadius: Radius.pill,
+  },
+  error: {
+    ...Typography.caption,
+    textAlign: 'center',
+    backgroundColor: 'rgba(0,0,0,0.58)',
+    padding: Spacing.sm,
+    borderRadius: Radius.md,
   },
 });

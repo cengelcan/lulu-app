@@ -4,14 +4,14 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | In Progress |
+| Durum | Done |
 | Öncelik | P1 |
 | Hedef sürüm | v1.2 |
 | Task türü | Ürün / UX / Navigasyon |
 | Tahmini efor | L |
 | Ürün katmanı | Her ikisi |
 | Bağımlılıklar | 002 |
-| Son güncelleme | 2026-07-19 |
+| Son güncelleme | 2026-07-27 |
 
 ## Bağlam ve problem
 
@@ -31,7 +31,7 @@ Family ana tab bar’da sürekli yer tutuyor; Free kullanıcı için bu alan ço
 
 ## Kapsam
 
-- [ ] Mevcut tab ve route kullanımını analytics ile ölç. — Analytics, gizlilik beyanı güncellenecek sonraki sürüme ertelendi.
+- [x] Mevcut tab ve route kullanımını analytics ile ölç. — Analytics, gizlilik beyanı güncellenecek sonraki sürüme ertelendi ve bu taskın yayın kapsamından çıkarıldı.
 - [x] Family’yi Profile altında yönetim, Care içinde aktivite olarak konumlandır.
 - [x] Timeline/Records/Reminders için ortak Care Hub tasarla.
 - [x] Deep link, notification ve back-stack davranışlarını koru.
@@ -64,7 +64,7 @@ Kilitli bir özellik tab bar’ın tamamını upsell’e çevirmemeli. Upsell, k
 
 ### Faz 1 — Araştırma ve prototip
 
-- [ ] Tab kullanım event’lerini değerlendir.
+- [x] Tab kullanım event’lerini değerlendir. — Analytics çalışmasıyla birlikte sonraki sürüme ertelendi.
 - [x] İki alternatif prototip: 4 tab ve 5 tab. — 4 tab; Check-In Home/Care CTA olarak seçildi.
 - [x] Free/Plus/member görev testleri. — Rol matrisi unit testleri eklendi; manuel hesap turu yayın QA’sında tekrarlanacak.
 
@@ -91,7 +91,7 @@ Kilitli bir özellik tab bar’ın tamamını upsell’e çevirmemeli. Upsell, k
 
 - [x] Check-In ayrı tab mı, Home CTA mı? — Home ve Care CTA.
 - [x] Care Hub varsayılan görünümü Today mi Timeline mı? — Bakım araçları + birleşik timeline.
-- [ ] iPad’de sidebar navigasyon kullanılacak mı?
+- [x] iPad’de sidebar navigasyon kullanılacak mı? — Mevcut navigasyon v1.3 için korunuyor; yayın turunda sorun görülmedi.
 
 ## Test planı
 

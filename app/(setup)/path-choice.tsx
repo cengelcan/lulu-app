@@ -9,7 +9,7 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
-import { setOnboardingCompleted } from '@/storage/prefs.storage';
+import { completeCurrentOnboarding } from '@/storage/onboarding.storage';
 import { setUserSetupPath } from '@/storage/setup-path.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
 import { useSetupStore } from '@/stores/setup.store';
@@ -64,7 +64,7 @@ export default function PathChoiceScreen() {
 
   const handleJoin = useCallback(async () => {
     await setUserSetupPath('join_family');
-    await setOnboardingCompleted(true);
+    await completeCurrentOnboarding();
     useOnboardingStore.setState({ hasCompletedOnboarding: true });
 
     await useUserStore.getState().loadUserProfile();

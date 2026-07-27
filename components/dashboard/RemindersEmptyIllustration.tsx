@@ -17,11 +17,13 @@ const FRAME_INSET = 6;
 export function RemindersEmptyIllustration({
   size = 88,
   accentColor = Palette.badgeViolet,
-  borderColor = 'rgba(161, 161, 170, 0.45)',
+  borderColor,
   backgroundColor,
 }: RemindersEmptyIllustrationProps) {
   const surfaceColor = useThemeColor({}, 'surface');
+  const themeBorderColor = useThemeColor({}, 'border');
   const fillColor = backgroundColor ?? surfaceColor;
+  const frameBorderColor = borderColor ?? themeBorderColor;
   const calendarSize = Math.round(size * 0.38);
   const badgeSize = Math.round(size * 0.22);
   const frameSize = size - FRAME_INSET * 2;
@@ -37,7 +39,7 @@ export function RemindersEmptyIllustration({
           rx={Radius.lg}
           ry={Radius.lg}
           fill={fillColor}
-          stroke={borderColor}
+          stroke={frameBorderColor}
           strokeWidth="1.5"
           strokeDasharray="5 5"
         />

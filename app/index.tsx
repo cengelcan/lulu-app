@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LuluLogo } from '@/components/LuluLogo';
 import { Button } from '@/components/ui/Button';
-import { Palette, Spacing, Typography } from '@/constants/theme';
+import { Spacing, Typography } from '@/constants/theme';
 import { useBootstrap } from '@/hooks/use-bootstrap';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
@@ -15,13 +15,15 @@ export default function SplashScreen() {
   const { phase, error, retry } = useBootstrap();
   const { t } = useTranslation();
   const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
+  const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const resolvedError = translateError(t, error);
 
   const isLoading = phase === 'loading' || phase === 'redirecting';
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
           <LuluLogo
@@ -36,7 +38,7 @@ export default function SplashScreen() {
 
           {phase === 'error' && resolvedError ? (
             <View style={[styles.errorContainer, { backgroundColor: surfaceColor }]}>
-              <Text allowFontScaling style={styles.errorText}>
+              <Text allowFontScaling style={[styles.errorText, { color: textSecondaryColor }]}>
                 {resolvedError}
               </Text>
               <Button title={t('common.tryAgain')} onPress={() => void retry()} />
@@ -51,7 +53,6 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#000000',
   },
   safeArea: {
     flex: 1,
@@ -78,7 +79,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   errorText: {
-    color: Palette.onDarkSoft,
     textAlign: 'center',
     ...Typography.body,
   },

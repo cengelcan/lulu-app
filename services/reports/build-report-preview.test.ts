@@ -4,6 +4,20 @@ import { describe, it } from 'node:test';
 import { createDefaultReportDataSelection } from '@/constants/reports';
 import { buildReportPreviewContent } from '@/services/reports/build-report-preview';
 import type { MedicationDose, MedicationPlan } from '@/types/medication';
+import type { PetRecord } from '@/types/pet-record';
+import type { RegionalFormatContext } from '@/utils/regional-format';
+
+const regionalFormat: RegionalFormatContext = {
+  language: 'en', languageLocale: 'en-US', regionCode: 'US', datePartOrder: 'mdy',
+  dateSeparator: '/', decimalSeparator: '.', digitGroupingSeparator: ',',
+  measurementSystem: 'us', uses24HourClock: false, timeZone: 'UTC',
+};
+const turkeyEnglishRegionalFormat: RegionalFormatContext = {
+  ...regionalFormat,
+  regionCode: 'TR', datePartOrder: 'dmy', dateSeparator: '.',
+  decimalSeparator: ',', digitGroupingSeparator: '.', measurementSystem: 'metric',
+  uses24HourClock: true, timeZone: 'Europe/Istanbul',
+};
 
 const plan: MedicationPlan = {
   id: 'plan-1', petId: 'pet-1', name: 'Metronidazole', dosage: '1', unit: 'tablet',
@@ -24,12 +38,13 @@ describe('buildReportPreviewContent medication integration', () => {
     const content = buildReportPreviewContent({
       range: { preset: 'custom', startDate: '2026-06-20', endDate: '2026-06-25' },
       selection: createDefaultReportDataSelection(), checkIns: [], records: [],
-      medicationPlans: [plan], medicationDoses: [dose], locale: 'en-US',
+      medicationPlans: [plan], medicationDoses: [dose], regionalFormat,
       t: (key, params) => params ? `${key}:${JSON.stringify(params)}` : key,
     });
 
     assert.equal(content.isEmpty, false);
     assert.equal(content.recordGroups[0]?.entries[0]?.typeId, 'medicationDose');
+    assert.match(content.recordGroups[0]?.entries[0]?.time ?? '', /07:02\s?AM/i);
     assert.match(content.recordGroups[0]?.entries[0]?.detail ?? '', /Metronidazole/);
   });
 
@@ -38,8 +53,39 @@ describe('buildReportPreviewContent medication integration', () => {
     const content = buildReportPreviewContent({
       range: { preset: 'custom', startDate: '2026-06-20', endDate: '2026-06-25' },
       selection, checkIns: [], records: [], medicationPlans: [plan], medicationDoses: [dose],
-      locale: 'en-US', t: (key) => key,
+      regionalFormat, t: (key) => key,
     });
     assert.equal(content.isEmpty, true);
+  });
+});
+
+describe('buildReportPreviewContent weight preference', () => {
+  it('formats a weight record in the selected display unit without mutating its source', () => {
+    const weightRecord: PetRecord = {
+      id: 'weight-1',
+      petId: 'pet-1',
+      type: 'weight',
+      date: '2026-06-23',
+      metadata: { value: 4.75, unit: 'kg' },
+      notes: null,
+      createdAt: '2026-06-23T07:00:00.000Z',
+      updatedAt: '2026-06-23T07:00:00.000Z',
+    };
+    const content = buildReportPreviewContent({
+      range: { preset: 'custom', startDate: '2026-06-20', endDate: '2026-06-25' },
+      selection: createDefaultReportDataSelection(),
+      checkIns: [],
+      records: [weightRecord],
+      regionalFormat: turkeyEnglishRegionalFormat,
+      weightUnit: 'lb',
+      t: (key, params) => {
+        if (key === 'records.units.lb') return 'lb';
+        if (key === 'records.summary.weightValue') return `${params?.value} ${params?.unit}`;
+        return key;
+      },
+    });
+
+    assert.equal(content.recordGroups[0]?.entries[0]?.detail, '10,5 lb');
+    assert.deepEqual(weightRecord.metadata, { value: 4.75, unit: 'kg' });
   });
 });

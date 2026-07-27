@@ -14,12 +14,17 @@ import {
 } from '@/storage/prefs.storage';
 import { clearUserSetupPath } from '@/storage/setup-path.storage';
 import { clearUserProfile } from '@/storage/user.storage';
+import {
+  resetUserScopedNotificationPreferences,
+  resetWeightUnitPreference,
+} from '@/storage/experience-preferences.storage';
+import { getDeviceRegionalSnapshot } from '@/utils/device-regional-settings';
 
 /**
  * Clears all user-scoped local data (pets, check-ins, records, reminder, profile)
  * while preserving app-level preferences (onboarding, theme, language) and the
- * current auth session. Used when a different account signs in on the same device,
- * since data is stored locally per-device until cloud sync exists.
+ * current auth session. The user-scoped weight unit is reset to the device default
+ * until the next account's cloud preference is reconciled.
  */
 export async function wipeUserScopedData(): Promise<void> {
   await cancelCheckInReminder();
@@ -32,6 +37,9 @@ export async function wipeUserScopedData(): Promise<void> {
   await vetVisitStorage.deleteAllVetVisits();
   await checkInStorage.deleteAllCheckIns();
   await petStorage.deleteAllPets();
+  const measurementSystem = getDeviceRegionalSnapshot().measurementSystem;
+  resetWeightUnitPreference(measurementSystem);
+  resetUserScopedNotificationPreferences(measurementSystem);
 
   await Promise.all([
     removeActivePetId(),

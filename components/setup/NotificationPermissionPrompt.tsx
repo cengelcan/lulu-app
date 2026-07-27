@@ -64,6 +64,7 @@ export function NotificationPermissionPrompt({
 }: NotificationPermissionPromptProps) {
   const brandAccentColor = useThemeColor({}, 'brandAccent');
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
+  const textColor = useThemeColor({}, 'text');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
   const surfaceElevatedColor = useThemeColor({}, 'surfaceElevated');
   const borderColor = useThemeColor({}, 'border');
@@ -110,7 +111,7 @@ export function NotificationPermissionPrompt({
           label={benefitDaily}
           brandAccentColor={brandAccentColor}
           brandAccentSoft={brandAccentSoft}
-          textColor={Palette.onDark}
+          textColor={textColor}
           borderColor={borderColor}
           isLast={false}
         />
@@ -119,7 +120,7 @@ export function NotificationPermissionPrompt({
           label={benefitSettings}
           brandAccentColor={brandAccentColor}
           brandAccentSoft={brandAccentSoft}
-          textColor={Palette.onDark}
+          textColor={textColor}
           borderColor={borderColor}
           isLast
         />

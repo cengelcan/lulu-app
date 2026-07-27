@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { setupTotalSteps, useSetupMode } from '@/hooks/use-setup-mode';
 import { useSetupScreenBack } from '@/hooks/use-setup-screen-back';
@@ -21,12 +22,13 @@ import { useNotificationStore } from '@/stores/notification.store';
 import { usePetStore } from '@/stores/pet.store';
 import { useSetupStore } from '@/stores/setup.store';
 import type { NotificationPermissionStatus } from '@/storage/prefs.storage';
-import { formatReminderTime12h } from '@/utils/time';
+import { formatWallClockTime } from '@/utils/formatters';
 import { translateValidationError } from '@/utils/translate-error';
 
 export default function NotificationPermissionScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const mode = useSetupMode();
   const totalSteps = setupTotalSteps(mode);
   const { onBack } = useSetupScreenBack(6, mode);
@@ -61,8 +63,10 @@ export default function NotificationPermissionScreen() {
   const error = translateValidationError(t, validationError) ?? petError ?? notificationError;
 
   const previewTimeLabel = useMemo(
-    () => (reminderTime ? formatReminderTime12h(reminderTime) : t('setup.notifications.previewTimeFallback')),
-    [reminderTime, t]
+    () => (reminderTime
+      ? formatWallClockTime(reminderTime, regionalFormat)
+      : t('setup.notifications.previewTimeFallback')),
+    [regionalFormat, reminderTime, t]
   );
 
   const completeSetup = useCallback(

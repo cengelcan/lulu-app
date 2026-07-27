@@ -4,14 +4,14 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | In Progress |
+| Durum | Done |
 | Öncelik | P1 |
 | Hedef sürüm | v1.2 |
 | Task türü | Plus / UX / Büyüme |
 | Tahmini efor | M |
 | Ürün katmanı | Plus |
 | Bağımlılıklar | 001, 004 |
-| Son güncelleme | 2026-07-19 |
+| Son güncelleme | 2026-07-27 |
 
 ## Bağlam ve problem
 
@@ -24,10 +24,10 @@
 ## Kapsam
 
 - [x] Haftalık plan yerine aylık plan seçeneğini ürün/finans açısından değerlendir. — Aylık €4,99; yıllık €24,99 ve lifetime €59,99 olarak kararlaştırıldı.
-- [ ] Yıllık planı ana, lifetime’ı ayrı ve haftalık/aylığı ikincil hiyerarşide prototiple.
-- [ ] Gerçek feature kataloğundan 3–4 somut fayda göster.
-- [ ] Lokal fiyat, dönem, hemen ücretlendirme ve otomatik yenileme CTA yakınında kalır.
-- [ ] Restore, Terms, Privacy ve Manage Subscription görünür.
+- [x] Yıllık planı ana, lifetime’ı ayrı ve haftalık/aylığı ikincil hiyerarşide prototiple.
+- [x] Gerçek feature kataloğundan 3–4 somut fayda göster.
+- [x] Lokal fiyat, dönem, hemen ücretlendirme ve otomatik yenileme CTA yakınında kalır.
+- [x] Restore, Terms, Privacy ve Manage Subscription görünür.
 - [x] RevenueCat offering ve App Store Connect ürün migration planı. — `lulu_plus_monthly` aynı subscription group ve `plus` entitlement altında oluşturuldu; 1.1 onayı sırasında default offering Weekly + Monthly birlikte tutuluyor.
 
 ### Kapsam dışı
@@ -62,34 +62,34 @@
 ### Faz 1 — Fiyat ve prototip
 
 - [x] Aylık/haftalık karar ve gelir senaryosu. — Haftalık yeni paywall'dan kaldırılıyor; aylık temel abonelik seçeneği oluyor.
-- [ ] iPhone/iPad prototipleri.
-- [ ] EN/DE copy ve App Review compliance review.
+- [x] iPhone/iPad prototipleri.
+- [x] EN/DE copy ve App Review compliance review.
 
 ### Faz 2 — Store yapılandırması
 
 - [x] App Store Connect ve RevenueCat offering. — Monthly ürün ve paket eklendi; Weekly paketi 1.1 geriye uyumluluğu için geçici olarak offering'de.
-- [ ] Eski aboneler için grandfathering/ürün görünürlüğü.
-- [ ] Dynamic eligibility ve localized prices.
+- [x] Eski aboneler için grandfathering/ürün görünürlüğü.
+- [x] Dynamic eligibility ve localized prices.
 
 ### Faz 3 — Deney ve yayın
 
-- [ ] Feature flag/A-B varyantı gerekiyorsa server controlled.
-- [ ] Sandbox satın alma/restore/expired/lifetime QA.
-- [ ] Review screenshot ve notes güncellemesi.
+- [x] Feature flag/A-B varyantı gerekiyorsa server controlled.
+- [x] Sandbox satın alma/restore/expired/lifetime QA.
+- [x] Review screenshot ve notes güncellemesi.
 
 ## Kabul kriterleri
 
-- [ ] Kullanıcı seçili planın tutarını ve yenileme dönemini CTA yanında görüyor.
-- [ ] Dar ekranda plan/metin kesilmiyor.
-- [ ] Paywall feature listesi 001 ürün kataloğuyla aynı.
-- [ ] Aktif abone satın alma yerine manage flow görüyor.
-- [ ] App Review 3.1.2(c) gereksinimleri karşılanıyor.
+- [x] Kullanıcı seçili planın tutarını ve yenileme dönemini CTA yanında görüyor.
+- [x] Dar ekranda plan/metin kesilmiyor.
+- [x] Paywall feature listesi 001 ürün kataloğuyla aynı.
+- [x] Aktif abone satın alma yerine manage flow görüyor.
+- [x] App Review 3.1.2(c) gereksinimleri karşılanıyor.
 
 ## Açık sorular
 
 - [x] Haftalık ürün tamamen satıştan kaldırılacak mı? — Evet; 1.2 yayınlandıktan sonra RevenueCat offering ve App Store satışından kaldırılacak.
-- [ ] Lifetime plan kalıcı mı dönemsel mi?
-- [ ] Paywall giriş noktasına göre başlık kişiselleştirilecek mi?
+- [x] Lifetime plan kalıcı mı dönemsel mi? — v1.3 için kalıcı ürün seçeneği olarak korunuyor; gelecek fiyatlandırma çalışması ayrı karar verebilir.
+- [x] Paywall giriş noktasına göre başlık kişiselleştirilecek mi? — Hayır; v1.3'te tek ve tutarlı paywall başlığı korunuyor.
 
 ## Test planı
 

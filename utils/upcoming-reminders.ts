@@ -1,12 +1,13 @@
 import { REMINDER_TYPES } from '@/constants/reminder-types';
 import type { PetReminder } from '@/types/pet-reminder';
 import { addDays } from '@/services/notifications/date';
-import { formatLocalDate, parseLocalDate } from '@/utils/date';
+import { formatLocalDate } from '@/utils/date';
+import { formatMediumDate, formatWallClockTime } from '@/utils/formatters';
 import {
   getReminderTitle,
   getReminderTypeLabelKey,
 } from '@/utils/pet-reminder-display';
-import { formatReminderTime24h } from '@/utils/time';
+import type { RegionalFormatContext } from '@/utils/regional-format';
 import { isReminderOverdue } from '@/utils/reminder-overdue';
 
 type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
@@ -14,12 +15,12 @@ type TranslateFn = (key: string, params?: Record<string, string | number>) => st
 export function formatReminderDateTimeParts(
   dueDate: string,
   dueTime: PetReminder['dueTime'],
-  locale: string,
+  regionalFormat: RegionalFormatContext,
   todayKey: string,
   tomorrowKey: string,
   t: TranslateFn
 ): { dateLabel: string; timeLabel: string } {
-  const timeLabel = formatReminderTime24h(dueTime);
+  const timeLabel = formatWallClockTime(dueTime, regionalFormat);
 
   if (dueDate === todayKey) {
     return { dateLabel: t('common.today'), timeLabel };
@@ -29,14 +30,7 @@ export function formatReminderDateTimeParts(
     return { dateLabel: t('common.tomorrow'), timeLabel };
   }
 
-  const parsed = parseLocalDate(dueDate);
-  const dateLabel = parsed
-    ? parsed.toLocaleDateString(locale, {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
-    : dueDate;
+  const dateLabel = formatMediumDate(dueDate, regionalFormat);
 
   return { dateLabel, timeLabel };
 }
@@ -123,7 +117,7 @@ function isWithinDateRange(
 
 export function buildUpcomingReminders(
   reminders: PetReminder[],
-  locale: string,
+  regionalFormat: RegionalFormatContext,
   t: TranslateFn,
   options?: {
     excludeReminderIds?: readonly string[];
@@ -162,7 +156,7 @@ export function buildUpcomingReminders(
     const { dateLabel, timeLabel } = formatReminderDateTimeParts(
       reminder.dueDate,
       reminder.dueTime,
-      locale,
+      regionalFormat,
       todayKey,
       tomorrowKey,
       t
@@ -191,7 +185,7 @@ export function buildUpcomingReminders(
 
 export function buildOverdueReminders(
   reminders: PetReminder[],
-  locale: string,
+  regionalFormat: RegionalFormatContext,
   t: TranslateFn,
   options?: {
     limit?: number;
@@ -213,7 +207,7 @@ export function buildOverdueReminders(
     const { dateLabel, timeLabel } = formatReminderDateTimeParts(
       reminder.dueDate,
       reminder.dueTime,
-      locale,
+      regionalFormat,
       todayKey,
       tomorrowKey,
       t
@@ -258,15 +252,9 @@ export function hasUpcomingReminders(
   );
 }
 
-export function formatCompletedReminderDate(dateString: string, locale: string): string {
-  const parsed = parseLocalDate(dateString);
-  if (!parsed) {
-    return dateString;
-  }
-
-  return parsed.toLocaleDateString(locale, {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+export function formatCompletedReminderDate(
+  dateString: string,
+  regionalFormat: RegionalFormatContext
+): string {
+  return formatMediumDate(dateString, regionalFormat);
 }

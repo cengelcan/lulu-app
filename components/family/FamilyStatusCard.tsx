@@ -25,7 +25,7 @@ export function FamilyStatusCard({
   const { t } = useTranslation();
   const brandAccentSoft = useThemeColor({}, 'brandAccentSoft');
   const textSecondaryColor = useThemeColor({}, 'textSecondary');
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
+  const accentColor = useThemeColor({}, 'accent');
 
   return (
     <View style={[styles.card, { backgroundColor: brandAccentSoft }]}>
@@ -37,7 +37,7 @@ export function FamilyStatusCard({
         </ThemedText>
       </View>
       {showPremiumBadge ? (
-        <View style={[styles.badge, { backgroundColor: brandAccentColor }]}>
+        <View style={[styles.badge, { backgroundColor: accentColor }]}>
           <IconSymbol name="crown.fill" size={12} color="#FBBF24" />
           <ThemedText style={styles.badgeText}>{t('family.premiumBadge')}</ThemedText>
         </View>

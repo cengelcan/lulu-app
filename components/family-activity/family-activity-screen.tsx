@@ -12,6 +12,7 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { LayoutTokens } from '@/constants/layout';
 import { Spacing, Typography } from '@/constants/theme';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { useFamilyActivityStore } from '@/stores/family-activity.store';
@@ -22,7 +23,6 @@ import {
   filterFamilyActivityEvents,
   isFamilyActivityUnread,
 } from '@/utils/family-activity';
-import { getLocaleTag } from '@/utils/locale';
 import { buildFamilyActivityItems } from '@/utils/inbox/providers/family-activity-provider';
 import { translateError } from '@/utils/translate-error';
 
@@ -30,8 +30,8 @@ const ALL_FILTER = 'all';
 
 export function FamilyActivityScreen() {
   const router = useRouter();
-  const { t, language } = useTranslation();
-  const locale = getLocaleTag(language);
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const screenOptions = useHubStackScreenOptions(t('familyActivity.title'));
   const secondary = useThemeColor({}, 'textSecondary');
   const warning = useThemeColor({}, 'warning');
@@ -87,7 +87,7 @@ export function FamilyActivityScreen() {
       permission: null,
       dismissedIds: new Set(),
       referenceDate: new Date(),
-      locale,
+      regionalFormat,
       t,
       activityEvents: visibleEvents,
       actorDisplayNames,
@@ -99,11 +99,11 @@ export function FamilyActivityScreen() {
         ...item,
         isUnread: Boolean(event && isFamilyActivityUnread(event, lastReadAt)),
         subtitleText: event
-          ? formatActivityRelativeTime(event.occurredAt, locale)
+          ? formatActivityRelativeTime(event.occurredAt, regionalFormat.languageLocale)
           : undefined,
       };
     });
-  }, [actorDisplayNames, lastReadAt, locale, pets, t, visibleEvents]);
+  }, [actorDisplayNames, lastReadAt, pets, regionalFormat, t, visibleEvents]);
 
   const handleItemPress = (item: InboxItem) => {
     router.push(item.route);

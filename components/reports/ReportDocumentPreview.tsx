@@ -3,6 +3,7 @@ import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import { Radius } from '@/constants/theme';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { generateReportHtml } from '@/services/reports/generate-report-html';
 import { REPORT_PAGE_HEIGHT, REPORT_PAGE_WIDTH } from '@/services/reports/html/report-layout';
 import { REPORT_SCREEN_PAGE_GAP } from '@/services/reports/html/report-styles';
@@ -63,6 +64,8 @@ export function ReportDocumentPreview({
   summary = null,
 }: ReportDocumentPreviewProps) {
   const [containerWidth, setContainerWidth] = useState(0);
+  const previewBackgroundColor = useThemeColor({}, 'surfaceSoft');
+  const borderColor = useThemeColor({}, 'border');
 
   const hasSummary = Boolean(summary && summary.lines.length > 0);
 
@@ -94,6 +97,7 @@ export function ReportDocumentPreview({
         primaryColor,
         summary,
         mode: 'screen',
+        screenBackgroundColor: previewBackgroundColor,
       }),
     [
       content,
@@ -105,6 +109,7 @@ export function ReportDocumentPreview({
       pet,
       photoDataUri,
       primaryColor,
+      previewBackgroundColor,
       qrCodeDataUri,
       shellLabels,
       summary,
@@ -130,7 +135,12 @@ export function ReportDocumentPreview({
   };
 
   return (
-    <View style={styles.container} onLayout={handleLayout}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: previewBackgroundColor, borderColor },
+      ]}
+      onLayout={handleLayout}>
       {scale > 0 ? (
         <View style={{ height: scaledHeight, overflow: 'hidden' }}>
           <View
@@ -162,7 +172,7 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
-    backgroundColor: '#e5e7eb',
   },
 });

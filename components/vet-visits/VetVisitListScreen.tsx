@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { ContextualEducationCard } from '@/components/onboarding/contextual-education-card';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ContentState } from '@/components/ui/content-state';
@@ -11,19 +12,22 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { PlusLockButtonIcon } from '@/components/ui/PlusLockIcon';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useHubStackScreenOptions } from '@/hooks/use-hub-stack-screen-options';
+import { useContextualEducation } from '@/hooks/use-contextual-education';
 import { usePlusFeature } from '@/hooks/use-plus-feature';
+import { useRegionalFormat } from '@/hooks/use-regional-format';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePetStore } from '@/stores/pet.store';
 import { useVetVisitStore } from '@/stores/vet-visit.store';
 import type { VetVisitBundle } from '@/types/vet-visit';
-import { getLocaleTag } from '@/utils/locale';
+import { formatDateTime } from '@/utils/formatters';
 import { getVetVisitPreparationProgress } from '@/utils/vet-visit';
 import { trackVetVisitEvent } from '@/services/analytics/vet-visit';
 
 export function VetVisitListScreen() {
   const router = useRouter();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const regionalFormat = useRegionalFormat();
   const pet = usePetStore((state) => state.pet);
   const bundles = useVetVisitStore((state) => state.bundles);
   const isLoading = useVetVisitStore((state) => state.isLoading);
@@ -35,6 +39,7 @@ export function VetVisitListScreen() {
   const screenOptions = useHubStackScreenOptions(t('vetVisits.title'));
   const { allowed: canCreateVisit, requestAccess } = usePlusFeature('vetVisitWorkspace');
   const hasVisitCreationAccess = canCreateVisit || pet?.sharingRole === 'member';
+  const vetVisitEducation = useContextualEducation('vet_visit');
 
   useFocusEffect(useCallback(() => {
     if (pet?.id) void loadVisits(pet.id);
@@ -67,9 +72,7 @@ export function VetVisitListScreen() {
     statusLabel?: string
   ) => {
     const progress = getVetVisitPreparationProgress(bundle);
-    const dateLabel = new Date(bundle.visit.scheduledAt).toLocaleString(getLocaleTag(language), {
-      dateStyle: 'medium', timeStyle: 'short',
-    });
+    const dateLabel = formatDateTime(bundle.visit.scheduledAt, regionalFormat);
     return (
       <Pressable key={bundle.visit.id} accessibilityRole="button" onPress={() => router.push(route)}>
         {({ pressed }) => (
@@ -103,6 +106,14 @@ export function VetVisitListScreen() {
         <ThemedText lightColor={secondary} darkColor={secondary} style={Typography.body}>
           {t('vetVisits.description')}
         </ThemedText>
+        {vetVisitEducation.isVisible ? (
+          <ContextualEducationCard
+            title={t('contextualEducation.vetVisitTitle')}
+            description={t('contextualEducation.vetVisitDescription')}
+            icon="calendar.badge.checkmark"
+            onDismiss={vetVisitEducation.dismiss}
+          />
+        ) : null}
         <Button title={t('vetVisits.prepare')}
           trailingIcon={!hasVisitCreationAccess ? <PlusLockButtonIcon /> : undefined}
           onPress={() => {

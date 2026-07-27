@@ -4,14 +4,14 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | Backlog — not toplama ve kapsam netleştirme |
+| Durum | In Progress — Faz 2 tamamlandı, Faz 3 genel geçiş/QA sırada |
 | Öncelik | P1 |
 | Hedef sürüm | v1.4 |
 | Task türü | Ürün / UX / Altyapı |
 | Tahmini efor | XL |
 | Ürün katmanı | Her ikisi |
 | Bağımlılıklar | 004, 008 ve v1.3 Release QA |
-| Son güncelleme | 2026-07-26 |
+| Son güncelleme | 2026-07-27 |
 
 ## Bağlam ve problem
 
@@ -39,35 +39,53 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 - Tarih biçimi App Store storefront ülkesinden alınmayacak. App Store hesabının
   ülkesi kullanıcının dili, yaşadığı bölge veya tercih ettiği tarih biçimi için
   güvenilir bir kaynak değildir.
-- İlk sürümde tarih/saat/sayı formatı uygulamanın aktif diline ait locale'dan
-  üretilecek: EN → uygun İngilizce locale, DE → Almanca locale, TR → Türkçe
-  locale. Aynı rapor ve ekranda tek formatter sözleşmesi kullanılacak.
-- Ağırlık tercihi kullanıcıya aittir; aynı family içindeki kullanıcılar aynı pet
-  verisini kendi `kg` veya `lb` tercihleriyle görebilir.
+- Uygulama dili ile cihaz bölgesi ayrı kaynaklardır. Metinler ve metin içeren
+  tarih parçaları aktif uygulama dilini; kısa tarih sırası, sayı ayırıcıları ve
+  12/24 saat davranışı cihazın Region/Calendar ayarını kullanır. Örneğin Türkiye
+  bölgesinde İngilizce Lulu kullanan kişi İngilizce metinlerle birlikte gün-ay-yıl
+  ve 24 saat düzeni görür.
+- `en-TR` gibi birleştirilmiş BCP 47 etiketine tek başına güvenilmeyecek; bazı
+  Intl/CLDR ortamları bunu ABD tarih ve sayı düzenine geri düşürebilir. Ortak
+  formatter bu durumu test edilmiş bölgesel kurallarla güvenli biçimde çözer.
+- v1.4'te ayrıca uygulama içi Region/Date Format seçimi eklenmez. Cihaz bölgesi
+  değişirse yeni değer uygulama açılışında; Android'de ayrıca foreground
+  dönüşünde yeniden okunur.
+- Ağırlık tercihi kullanıcıya aittir; local-first saklanır ve authenticated
+  kullanıcı için profil tercihi olarak cihazlar arasında senkronize edilir. Aynı
+  family içindeki kullanıcılar aynı pet verisini kendi `kg` veya `lb`
+  tercihleriyle görebilir.
+- Mevcut ağırlık kayıtlarının `{ value, unit }` kaynağı yeniden yazılmaz. Grafik,
+  karşılaştırma ve gösterim katmanı her kaydı ortak dönüşüm utility'siyle
+  normalize eder; tercih değiştirmek sağlık verisini mutate etmez.
 - Bildirim kategorisi tercihi cihaz/kullanıcı bazlıdır; bir cihazda kapatmak
   reminder, medication planı veya sağlık kaydını silmez.
 - Care Tools sırası teknik modüllere göre değil, kullanım sıklığı ve bakım
   yolculuğuna göre düzenlenecek.
+- Analytics v1.4 için bağımlılık değildir. Başlangıç sırası kullanıcı yolculuğu
+  kararıyla sabitlenir; analytics ayrı bir sonraki çalışma olarak kalır.
+- Medication dose ve refill bildirimleri ayrı tercihlerdir.
+- İlk açılış tek kısa değer ekranıdır; Medication, Family ve Vet Visit eğitimi
+  ilgili yüzeyde bir defa gösterilen inline açıklamalarla yapılır.
 
 ## Kapsam
 
 ### 1. Kısa ve progressive onboarding
 
-- [ ] Yeni kullanıcı için tek, kısa karşılama/değer ekranı.
-- [ ] Günlük bakım, aile koordinasyonu ve veteriner hazırlığını en fazla üç kısa
+- [x] Yeni kullanıcı için tek, kısa karşılama/değer ekranı.
+- [x] Günlük bakım, aile koordinasyonu ve veteriner hazırlığını en fazla üç kısa
   faydayla anlatma.
-- [ ] Karşılama sonrası doğrudan auth ve pet setup akışına geçiş.
-- [ ] Medication, Family ve Vet Visit için yalnız ilk kullanımda gösterilen
+- [x] Karşılama sonrası doğrudan auth ve pet setup akışına geçiş.
+- [x] Medication, Family ve Vet Visit için yalnız ilk kullanımda gösterilen
   bağlamsal açıklamalar.
-- [ ] Onboarding sürümünün saklanması; mevcut kullanıcıya veya tamamlayan
+- [x] Onboarding sürümünün saklanması; mevcut kullanıcıya veya tamamlayan
   kullanıcıya yeniden gösterilmemesi.
-- [ ] Skip/geri/cold start/auth redirect ve family invite girişlerinin aynı
+- [x] Skip/geri/cold start/auth redirect ve family invite girişlerinin aynı
   ekranda döngü oluşturmaması.
 
 ### 2. System, Light ve Dark tema
 
-- [ ] Settings altında `System / Light / Dark` seçimi ve kalıcı tercih.
-- [ ] Tema değişikliğinin yeniden başlatma gerektirmeden uygulanması.
+- [x] Settings altında `System / Light / Dark` seçimi ve kalıcı tercih.
+- [x] Tema değişikliğinin yeniden başlatma gerektirmeden uygulanması.
 - [ ] Semantic renk token'larının bütün temel ekranlarda kullanılması.
 - [ ] Auth, setup, Home, Care, pet detail/edit, records, reminders, medication,
   Vet Visit, reports, paywall, modal ve content state görsel turu.
@@ -77,72 +95,74 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 
 ### 3. Pet detail ve edit hiyerarşisi
 
-- [ ] Pet detail ekranının form yerine hızlı okunabilen özet yüzeyi olması.
-- [ ] Üst bölümde fotoğraf, ad, yaş ve temel durum.
-- [ ] Irkın tek özet satırı olarak gösterilmesi; tüm seçeneklerin varsayılan açık
+- [x] Pet detail ekranının form yerine hızlı okunabilen özet yüzeyi olması.
+- [x] Üst bölümde fotoğraf, ad, yaş ve temel durum.
+- [x] Irkın tek özet satırı olarak gösterilmesi; tüm seçeneklerin varsayılan açık
   listelenmemesi.
-- [ ] Sağlık sorunlarının kompakt chip/özet olarak gösterilmesi; uzun listede
+- [x] Sağlık sorunlarının kompakt chip/özet olarak gösterilmesi; uzun listede
   `+N more` benzeri kontrollü genişleme.
-- [ ] Irk ve sağlık seçeneklerinin yalnız Edit sırasında searchable picker veya
+- [x] Irk ve sağlık seçeneklerinin yalnız Edit sırasında searchable picker veya
   sheet içinde açılması.
-- [ ] Profil, sağlık, bakım ve paylaşım bölümlerinin kısa ve belirgin hiyerarşisi.
-- [ ] Büyük metin ve küçük ekranda ana aksiyonların uzun içerik altında
+- [x] Profil, sağlık, bakım ve paylaşım bölümlerinin kısa ve belirgin hiyerarşisi.
+- [x] Büyük metin ve küçük ekranda ana aksiyonların uzun içerik altında
   kaybolmaması.
 
 ### 4. Tek tarih ve locale sözleşmesi
 
-- [ ] Uygulama ve PDF raporları için ortak tarih/saat formatter katmanı.
-- [ ] Aynı raporda `DD.MM.YYYY`, `MM/DD/YYYY` ve yazılı tarihlerin istemeden
+- [x] Uygulama ve PDF raporları için ortak tarih/saat formatter katmanı.
+- [x] Aynı raporda `DD.MM.YYYY`, `MM/DD/YYYY` ve yazılı tarihlerin istemeden
   karışmasının engellenmesi.
-- [ ] Saklama ve senkronizasyonda ISO tarih/zaman değerlerinin korunması;
+- [x] Saklama ve senkronizasyonda ISO tarih/zaman değerlerinin korunması;
   locale'ın yalnız gösterim katmanında uygulanması.
-- [ ] Tarih aralığı, record tarihi, report başlığı, timeline, reminder,
+- [x] Tarih aralığı, record tarihi, report başlığı, timeline, reminder,
   medication ve Vet Visit çıktılarının aynı aktif locale'ı kullanması.
-- [ ] 12/24 saat davranışının aktif locale/sistem tercihiyle tutarlı olması.
-- [ ] EN, DE ve TR için snapshot/unit testleri; DST ve gün sınırı testleri.
+- [x] 12/24 saat davranışının aktif locale/sistem tercihiyle tutarlı olması.
+- [x] EN, DE ve TR için snapshot/unit testleri; DST ve gün sınırı testleri.
 
 ### 5. Kullanıcıya özel ağırlık birimi
 
-- [ ] Settings altında `kg / lb` tercihi.
-- [ ] İlk varsayılanın aktif locale/region için belgelenmiş kuralla seçilmesi;
+- [x] Settings altında `kg / lb` tercihi.
+- [x] İlk varsayılanın aktif locale/region için belgelenmiş kuralla seçilmesi;
   kullanıcı seçiminin her zaman öncelikli olması.
-- [ ] Weight record formu, pet detail, Home/Health Overview, grafikler ve PDF
+- [x] Weight record formu, pet detail, Home/Health Overview, grafikler ve PDF
   raporlarının aynı tercihe uyması.
-- [ ] Mevcut kayıtların birimi bilinerek güvenli dönüşüm; yuvarlama kaynaklı
+- [x] Mevcut kayıtların birimi bilinerek güvenli dönüşüm; yuvarlama kaynaklı
   değer drift'i oluşmaması.
-- [ ] Aynı değer art arda kg ↔ lb görüntülendiğinde saklanan temel değerin
+- [x] Aynı değer art arda kg ↔ lb görüntülendiğinde saklanan temel değerin
   değişmemesi.
-- [ ] Family üyelerinin aynı pet kaydını kendi birim tercihiyle görebilmesi.
+- [x] Family üyelerinin aynı pet kaydını kendi birim tercihiyle görebilmesi.
 
 ### 6. Ayrıntılı bildirim tercihleri
 
-- [ ] Sistem bildirim izni ile uygulama içi kategori tercihlerinin görsel olarak
+- [x] Sistem bildirim izni ile uygulama içi kategori tercihlerinin görsel olarak
   ayrılması.
-- [ ] Daily Check-in bildirimi ve saati.
-- [ ] Genel pet reminder bildirimleri.
-- [ ] Medication dose ve refill bildirimleri.
-- [ ] Family Activity digest bildirimi ve destekleniyorsa sıklığı.
+- [x] Daily Check-in bildirimi ve saati.
+- [x] Genel pet reminder bildirimleri.
+- [x] Medication dose ve refill bildirimleri.
+- [x] Family Activity digest bildirimi ve destekleniyorsa sıklığı. — v1.4'te
+  mevcut digest sıklığı korunuyor; ayrı sıklık seçimi eklenmedi.
 - [ ] Gelecekte Vet Visit yaklaşan randevu bildirimi eklenebilmesi için genişleyen
   kategori sözleşmesi.
-- [ ] Bir kategori kapatıldığında o kategoriye ait planlanmış local
+- [x] Bir kategori kapatıldığında o kategoriye ait planlanmış local
   notification'ların iptal edilmesi; yeniden açıldığında yalnız gelecekteki
   uygun bildirimlerin tekrar planlanması.
-- [ ] OS izni kapalıysa kategori seçimlerinin kaybolmaması ve Settings'e açık
+- [x] OS izni kapalıysa kategori seçimlerinin kaybolmaması ve Settings'e açık
   yönlendirme gösterilmesi.
-- [ ] Bildirim önizlemelerinde hassas sağlık notu, family kodu veya tedavi
+- [x] Bildirim önizlemelerinde hassas sağlık notu, family kodu veya tedavi
   ayrıntısının varsayılan gösterilmemesi.
 
 ### 7. Care Tools bilgi mimarisi
 
-- [ ] Sıralamanın analytics ve kullanıcı yolculuğuyla doğrulanması.
-- [ ] Başlangıç önerisi: `Check-in → Medications → Reminders → Vet Visits →
+- [x] Sıralamanın kullanıcı yolculuğuyla doğrulanması; analytics ürün kararıyla
+  sonraki çalışmaya ertelendi.
+- [x] Başlangıç önerisi: `Check-in → Medications → Reminders → Vet Visits →
   Health Records`; güncel/urgent aksiyonların statik araç listesinin üstünde
   kalması.
-- [ ] Health Report ve Family Activity'nin bağlama uygun ayrı bölüm/aksiyon
+- [x] Health Report ve Family Activity'nin bağlama uygun ayrı bölüm/aksiyon
   olarak değerlendirilmesi; Care Tools içine rastgele karıştırılmaması.
-- [ ] Sık kullanılan araçların erişimini kolaylaştırırken nadir araçları
+- [x] Sık kullanılan araçların erişimini kolaylaştırırken nadir araçları
   görünmez hale getirmeyen bölümleme.
-- [ ] VoiceOver sırası ile görsel sıranın aynı olması.
+- [x] VoiceOver sırası ile görsel sıranın aynı olması.
 
 ### Kapsam dışı
 
@@ -171,7 +191,8 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 ### Tercihler
 
 - `themePreference`: `system | light | dark`.
-- `weightUnitPreference`: `kg | lb`.
+- `weightUnitPreference`: `kg | lb`; local-first ve kullanıcı profiliyle
+  senkronize.
 - `onboardingVersionCompleted`: number/string.
 - Notification preferences: `dailyCheckIn`, `petReminders`,
   `medicationDoses`, `medicationRefill`, `familyDigest`; cihaz bazlı saklama ve
@@ -184,8 +205,9 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 - Tarih, saat, sayı ve ağırlık gösterimi ortak utility/hook katmanına taşınır.
 - PDF üretimi uygulamadaki formatter'ı kullanır; HTML template içinde bağımsız
   locale varsayımı yapılmaz.
-- Ağırlık saklama stratejisi implementasyon öncesi mevcut kayıtlarla doğrulanır;
-  önerilen yaklaşım canonical kg + display-time conversion'dır.
+- Legacy ağırlık kaydı kendi `value + unit` değerini korur. Ortak utility her
+  kaydı hesaplama sırasında kg'a normalize eder ve seçilen birime display-time
+  conversion uygular; tercih değişimi kayıt metadata'sını overwrite etmez.
 
 ### Muhtemel dosyalar
 
@@ -218,8 +240,8 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 - [ ] Tarih, saat, ondalık ayırıcı ve birimler aktif locale ile doğrulanır.
 - [ ] VoiceOver tema seçeneklerini, birim seçimini ve toggle durumlarını açıkça
   okur.
-- [ ] Light/dark kontrastı, Dynamic Type ve Reduce Motion kontrol edilir.
-- [ ] Uzun Almanca metin ve en büyük makul yazı boyutunda Settings/Care/pet
+- [x] Light/dark kontrastı, Dynamic Type ve Reduce Motion kontrol edilir.
+- [x] Uzun Almanca metin ve en büyük makul yazı boyutunda Settings/Care/pet
   detail taşmaz.
 
 ## Analytics
@@ -237,35 +259,114 @@ yazılmaz.
 
 ### Faz 0 — Audit ve sözleşmeler
 
-- [ ] Rapor ve ekranlardaki bütün tarih formatter'larını envanterle.
-- [ ] Ağırlık giriş/gösterim/saklama noktalarını ve legacy kayıtları envanterle.
-- [ ] Notification schedule kaynakları ve mevcut tercih migration'ını çıkar.
-- [ ] Tema token'larında hard-coded dark yüzeyleri belirle.
-- [ ] Care Tools kullanım verisi yoksa sıralamayı kullanıcı yolculuğu kararıyla
+- [x] Rapor ve ekranlardaki bütün tarih formatter'larını envanterle. — Ayrıntılar `015-experience-foundations-audit.md` içinde.
+- [x] Ağırlık giriş/gösterim/saklama noktalarını ve legacy kayıtları envanterle.
+- [x] Notification schedule kaynakları ve mevcut tercih migration'ını çıkar.
+- [x] Tema token'larında hard-coded dark yüzeyleri belirle.
+- [x] Care Tools kullanım verisi yoksa sıralamayı kullanıcı yolculuğu kararıyla
   geçici olarak sabitle.
 
 ### Faz 1 — Tercih altyapısı
 
-- [ ] Tema, ağırlık ve notification kategori preference sözleşmeleri.
-- [ ] Ortak locale/date/weight formatter katmanı.
-- [ ] Mevcut kullanıcılar için geriye uyumlu local migration.
+- [x] Tema, ağırlık ve notification kategori preference sözleşmeleri. — Versiyonlu schema, güvenli varsayılanlar ve kategori sözleşmesi eklendi.
+- [x] Ortak locale/date/weight formatter katmanı. — Uygulama dili + cihaz bölgesi context'i, kısa/uzun tarih, saat, sayı ve drift oluşturmayan kg/lb utility'leri testlerle eklendi.
+- [x] Mevcut kullanıcılar için geriye uyumlu local migration. — Legacy değerler yeni SQLite localStorage kaydına kopyalanıyor; hata açılışı engellemiyor ve eski anahtarlar silinmiyor.
 
 ### Faz 2 — Ana kullanıcı yüzeyleri
 
-- [ ] Settings tercih ekranları.
-- [ ] Pet detail/edit progressive disclosure tasarımı.
-- [ ] Care Tools yeni bölümleme ve sıralama.
-- [ ] Kısa onboarding ve bağlamsal açıklamalar.
+- [x] Settings tercih ekranları. — Tema, ağırlık birimi ve notification kategori
+  tercihleri tamamlandı.
+- [x] Pet detail/edit progressive disclosure tasarımı. — Profil fotoğraf/ad/yaş/durum
+  özeti, kontrollü sağlık chip'leri ve Edit içinde açılan searchable ırk/sağlık
+  alanları tamamlandı; büyük metinde hero dikey düzene geçiyor ve Edit aksiyonu
+  navigation header'da görünür kalıyor.
+- [x] Care Tools yeni bölümleme ve sıralama. — Aksiyon gerekli/yaklaşan içerik
+  statik araçların üstüne taşındı; ana sıra tek sabitten üretiliyor ve Health
+  Report ile Family Activity `Geçmiş ve koordinasyon` bölümünde ayrıştırıldı.
+- [x] Kısa onboarding ve bağlamsal açıklamalar. — Eski dört adımlı route'lar
+  kaldırıldı; tek welcome ekranı üç kısa faydayla doğrudan auth'a ilerliyor.
+  Onboarding legacy boolean ve sürümlü preference birlikte tamamlanıyor;
+  Medication, Family ve Vet Visit açıklamaları konu bazında bir defa gösteriliyor.
 
 ### Faz 3 — Uygulama geneli geçiş
 
 - [ ] Tema ve formatter'ların bütün ekranlara uygulanması.
+  - Root/navigation/status bar/splash, Settings, auth/reset-password,
+    onboarding kabuğu, Check-in, Home haftalık check-in, ortak date/time picker,
+    family/medication/Vet Visit hata durumları ve dashboard empty-state
+    illüstrasyonları light/dark semantic token'lara geçirildi. Reports ekran
+    kabuğu, Paywall ve Family rozet/avatarlardaki kontrast da uyarlandı; PDF'in
+    yazdırılabilir belge yüzeyi bilinçli olarak beyaz bırakıldı.
+  - Cihaz bölgesini uygulama dilinden bağımsız okuyan ortak regional context
+    hook'u eklendi. Care/Vet Visit tarih-saatleri, Home tarih başlığı ve yaklaşan
+    reminder, Check-in, pet tarihleri ve ortak date/time picker bu sözleşmeye
+    geçirildi. `YYYY-MM-DD` değerlerinin saat diliminde gün kaydırmaması testle
+    güvenceye alındı. Rapor, timeline ve diğer uygulama yüzeylerinin formatter
+    geçişi de tamamlandı.
+  - Regional context Reports/PDF üretim zincirine, record/reminder listelerine,
+    inbox ve Family Activity veri akışına, Health Overview ve kilo grafiğine
+    taşındı. Reminder/medication saatleri timestamp'ten ayrılarak 12/24 saat
+    tercihine uyan ve saat diliminde kaymayan wall-clock formatter'a geçirildi.
+  - Memorial/subscription tarihleri, trend gün etiketleri ve notification
+    önizlemesi ortak katmana alındı. Kullanılmayan legacy locale/date/time
+    formatter'ları kaldırıldı; uygulama yüzeylerinde bağımsız `toLocale*`
+    formatlaması kalmadı.
 - [ ] Report/PDF, notification scheduling ve family görünümünün uyarlanması.
+  - Ağırlık tercihi local-first saklama ve kullanıcı profili senkronizasyonuna
+    bağlandı. Home sağlık özeti, kilo grafiği, kayıt listeleri ve PDF raporu
+    kaynak kaydı değiştirmeden seçilen `kg/lb` birimine dönüştürüyor.
+  - Yeni weight record formu kullanıcının seçili birimiyle açılıyor; mevcut
+    kayıt düzenlenirken kaynağın kendi birimi korunuyor. Local bildirim
+    önizlemeleri medication adı/dozu, reminder başlığı/notu veya family kodu
+    göstermeyen genel metne geçirildi; ayrıntılar yalnız uygulama açıldığında
+    görünür. Family Activity digest zaten yalnız aktivite sayısını gösteriyor.
 - [ ] EN/DE/TR, iPhone/iPad, accessibility ve migration QA.
+  - 2026-07-27: Temiz iPhone 17 Pro Simulator turunda tek ekran onboarding EN,
+    DE ve TR için doğrulandı; uzun Almanca/Türkçe fayda metinlerinde taşma veya
+    kesilme görülmedi. Auth ekranı `System` tercihiyle uygulama açıkken light →
+    dark geçişinde status bar, Apple/email aksiyonları ve yasal metin kontrastını
+    doğru korudu. Settings/Care/pet detail ve iPad/accessibility turu sürüyor.
+  - 2026-07-27: Settings, Care, Pet Detail ve Pet Edit ekranları Almanca uzun
+    metinlerle iPhone 17 Pro Simulator'da light/dark doğrulandı. Dark cold
+    start'ta açık notification switch thumb'larının kaybolduğu görüldü; açık
+    track semantic brand accent, thumb sabit açık yüzey rengine geçirilerek
+    light/dark ve cold start'ta yeniden doğrulandı.
+  - iOS/Hermes'in `Intl.*.formatToParts` sağlamadığı runtime'da Home Health
+    Overview render'ı çöküyordu. Tarih, sayı ve medication timezone parçalama
+    işlemleri `formatToParts` gerektirmeyen fallback'lere geçirildi. Home'da
+    Almanca bölgesel `5,2 kg` gösterimi ve Pet Detail geçişi simülatörde
+    doğrulandı; formatToParts'sız regresyon testleri eklendi.
+  - 2026-07-27: iPad Pro 13-inch Simulator portrait turunda Settings, Care Hub
+    ve Pet Profile Almanca ve `accessibility-extra-extra-extra-large` Dynamic
+    Type kategorisinde doğrulandı. Ortak `ThemedText` line-height değeri fontla
+    birlikte büyümediği için metinlerin kesildiği bulundu; line-height aynı
+    `maxFontSizeMultiplier` sınırıyla ölçeklenerek uygulama genelinde düzeltildi
+    ve regresyon testi eklendi. Settings segmentleri büyük yazıda dikey düzene
+    geçiyor; Pet Profile header Edit aksiyonu erişilebilir boyutta görünür
+    kalıyor.
+  - iOS picker sheet genişliği ilk açılıştaki `Dimensions.get` değerinden
+    ayrıldı; güncel container genişliğine uyuyor ve iPad'de 640 pt ile
+    sınırlanıyor. Auth expandable email animasyonu da `ReduceMotion.System`
+    sözleşmesine geçirildi. Settings switch'lerinde VoiceOver role/state bilgisi
+    açıkça sağlanıyor.
+  - 2026-07-27: Orientation ürün kararı kesinleştirildi: iPhone ve Android
+    telefonlar portrait-only; iPad portrait ve landscape destekliyor. Root
+    `orientation: portrait`, `ios.supportsTablet: true` ve açıkça tanımlanan
+    `ios.requireFullScreen: false` sözleşmesi Expo prebuild çıktısında telefon
+    için yalnız portrait, iPad için dört yön üretiyor. Yeni development binary
+    iPad Pro 13-inch Simulator'a kuruldu; Home portrait ve landscape'te siyah
+    letterbox olmadan tam ekran, responsive iki kolon ve tab bar ile doğrulandı.
+    App config sözleşmesi otomatik testle koruma altına alındı.
+  - 2026-07-27: v1.3 → v1.4 tercih migration'ı saklama bağımlılıklarından
+    ayrılarak gerçek legacy snapshot ile regresyon testine alındı. Eski onboarding,
+    tema ve notification seçimleri yeni şemaya kopyalanırken v1.3 anahtarları
+    mutate edilmiyor. Sağlık verisi SQLite şeması v1.3 ile aynı `user_version 20`
+    olduğundan v1.4 bu tabloları yeniden oluşturmuyor; önceki simulator verileri
+    yeni native binary kurulumundan sonra görünür kaldı.
 
 ## Kabul kriterleri
 
-- [ ] Yeni kullanıcı Lulu'nun değerini anlayıp gereksiz carousel olmadan pet
+- [x] Yeni kullanıcı Lulu'nun değerini anlayıp gereksiz carousel olmadan pet
   setup'a ulaşır.
 - [ ] System, Light ve Dark seçimi uygulamanın temel ekranlarında tutarlı çalışır.
 - [ ] Aynı raporda tarih formatı karışmaz; aktif dilin locale'ı her yerde aynıdır.
@@ -273,10 +374,10 @@ yazılmaz.
   oluşturmaz.
 - [ ] Daily Check-in, pet reminder, medication ve family bildirimleri ayrı ayrı
   yönetilebilir.
-- [ ] Care Tools sırası günlük bakım yolculuğunu destekler ve erişilebilir sıra
+- [x] Care Tools sırası günlük bakım yolculuğunu destekler ve erişilebilir sıra
   ile eşleşir.
-- [ ] Pet detail seçenek listesi gibi görünmez; bilgiler kısa özet halinde okunur.
-- [ ] Mevcut kullanıcı güncellemesinde tercih veya sağlık verisi kaybolmaz.
+- [x] Pet detail seçenek listesi gibi görünmez; bilgiler kısa özet halinde okunur.
+- [x] Mevcut kullanıcı güncellemesinde tercih veya sağlık verisi kaybolmaz.
 
 ## Test planı
 
@@ -293,12 +394,23 @@ yazılmaz.
 
 - [ ] Temiz kurulum ve v1.3 → v1.4 yükseltme.
 - [ ] Fiziksel iPhone ve küçük/büyük iPhone Simulator.
-- [ ] iPad portrait/landscape smoke turu.
+- [x] iPad portrait/landscape smoke turu.
+  - iPad Pro 13-inch portrait; normal ve en büyük Dynamic Type ile tamamlandı.
+    Yeni native binary ile landscape tam ekran Home düzeni de doğrulandı.
 - [ ] System/Light/Dark ve uygulama açıkken sistem tema değişimi.
+  - Auth ekranında System light/dark canlı geçişi iPhone 17 Pro Simulator'da
+    doğrulandı. Settings, Care, Pet Detail ve Pet Edit de light/dark ve Settings
+    için dark cold start ile doğrulandı; uygulama geneli tur henüz tamamlanmadı.
 - [ ] EN/DE/TR; rapor, timeline ve tarih sınırı senaryoları.
+  - Onboarding EN/DE/TR görsel turu tamamlandı; rapor/timeline senaryoları açık.
 - [ ] Kg/lb iki kullanıcıyla aynı shared pet görünümü.
 - [ ] Her notification kategorisi açık/kapalı ve OS permission denied.
 - [ ] Dynamic Type, VoiceOver, Reduce Motion ve kontrast.
+  - Mevcut WCAG otomatik kontrast testleri ve bu turun light/dark görsel
+    kontrast kontrolleri geçti. iPad'de en büyük Dynamic Type turu tamamlandı;
+    bütün Reanimated state geçişleri sistem Reduce Motion tercihine bağlı.
+    Settings seçim/toggle accessibility role-state kod denetimi tamamlandı;
+    gerçek VoiceOver odak/sıra cihaz turu açık.
 
 ## Rollout ve geri dönüş
 
@@ -310,20 +422,19 @@ yazılmaz.
 
 ## Açık sorular
 
-- [ ] Aktif uygulama dili dışında ayrıca `Region / Date format` tercihi gerekli mi,
-  yoksa dil tabanlı locale v1.4 için yeterli mi?
-- [ ] Ağırlık tercihi Supabase user profile ile cihazlar arasında senkronize
-  edilmeli mi?
-- [ ] Medication refill bildirimi v1.4'te ayrı toggle mı, medication altında alt
-  tercih mi olmalı?
-- [ ] Care Tools kullanım analytics'i yayın öncesinde yeterli veri üretecek mi?
-- [ ] Progressive onboarding tooltip, coach mark veya inline card yaklaşımından
-  hangisini kullanmalı?
+- [x] Aktif uygulama dili dışında ayrıca `Region / Date format` tercihi gerekli mi? — v1.4'te manuel seçim yok; uygulama dili metni, cihaz bölgesi tarih/saat/sayı düzenini belirler.
+- [x] Ağırlık tercihi Supabase user profile ile cihazlar arasında senkronize edilmeli mi? — Evet; local-first cache ile kullanıcı profiline senkronize edilir.
+- [x] Medication refill bildirimi v1.4'te ayrı toggle mı, medication altında alt tercih mi olmalı? — Ayrı toggle.
+- [x] Care Tools kullanım analytics'i yayın öncesinde yeterli veri üretecek mi? — Analytics v1.4 bağımlılığından çıkarıldı; sıra kullanıcı yolculuğuyla sabitlenecek.
+- [x] Progressive onboarding tooltip, coach mark veya inline card yaklaşımından hangisini kullanmalı? — Tek karşılama ekranı ve özellik yüzeylerinde bir defalık inline card.
+- [x] iPad landscape v1.4 kapsamında desteklenecek mi? — Evet. Telefonlar
+  portrait-only kalırken iPad portrait ve landscape destekliyor; multitasking
+  kapatılmıyor.
 
 ## Definition of Done
 
 - [ ] Bütün kabul kriterleri otomatik ve manuel testlerle doğrulandı.
-- [ ] Yeni preference migration'ı veri kaybı olmadan geçti.
+- [x] Yeni preference migration'ı veri kaybı olmadan geçti.
 - [ ] Rapor ve uygulama aynı locale/format sözleşmesini kullanıyor.
 - [ ] Tema ve pet detail referans ekranları tasarım QA'dan geçti.
 - [ ] Bildirim category değişiklikleri gerçek cihazda schedule/cancel ile

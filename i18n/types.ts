@@ -30,6 +30,16 @@ export type Translations = {
     clear: string;
     dismissDialog: string;
   };
+  appUpdate: {
+    title: string;
+    message: string;
+    requiredTitle: string;
+    requiredMessage: string;
+    versionLabel: string;
+    updateButton: string;
+    laterButton: string;
+    openStoreFailed: string;
+  };
   tabs: {
     home: string;
     care: string;

@@ -11,7 +11,7 @@
 | Tahmini efor | XL |
 | Ürün katmanı | Her ikisi |
 | Bağımlılıklar | 004, 008 ve v1.3 Release QA |
-| Son güncelleme | 2026-07-27 |
+| Son güncelleme | 2026-07-28 |
 
 ## Bağlam ve problem
 
@@ -66,6 +66,13 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 - Medication dose ve refill bildirimleri ayrı tercihlerdir.
 - İlk açılış tek kısa değer ekranıdır; Medication, Family ve Vet Visit eğitimi
   ilgili yüzeyde bir defa gösterilen inline açıklamalarla yapılır.
+- App Store binary güncellemeleri cihazın otomatik güncelleme ayarına bırakılmaz;
+  uygulama açılışında Supabase'teki iOS release policy kontrol edilir. Önerilen
+  güncelleme `Daha Sonra` seçeneği olan Lulu-stilli sheet, desteklenmeyen sürüm
+  ise kapatılamayan tam ekran olarak gösterilir. Ağ/policy hatası açılışı
+  engellemez ve uygulama güncellemeyi kendi içinde kurmaya çalışmaz. Bu kod ilk
+  kez v1.4 binary'sinde bulunduğu için mağazadaki v1.3 → v1.4 geçişini geriye
+  dönük yönetemez; uygulama içi yönlendirme v1.4 → sonraki sürümlerde etkindir.
 
 ## Kapsam
 
@@ -370,6 +377,13 @@ yazılmaz.
     mutate edilmiyor. Sağlık verisi SQLite şeması v1.3 ile aynı `user_version 20`
     olduğundan v1.4 bu tabloları yeniden oluşturmuyor; önceki simulator verileri
     yeni native binary kurulumundan sonra görünür kaldı.
+  - 2026-07-28: iOS binary sürüm kontrolü public-read Supabase release policy,
+    App Store release-type filtresi ve sürüm karşılaştırma katmanıyla eklendi.
+    Optional sheet ile zorunlu tam ekran EN/DE/TR metinleriyle simülatörde
+    doğrulandı. TestFlight v1.4, policy'deki canlı App Store sürümü hâlâ v1.3
+    iken güncelleme istemez; policy yalnız daha yeni binary App Store'da gerçekten
+    yayına alındıktan sonra yükseltilir. Mağazadaki mevcut v1.3 binary bu kodu
+    içermediğinden v1.4 modalı gösteremez.
 
 ## Kabul kriterleri
 
@@ -400,6 +414,10 @@ yazılmaz.
 ### Manuel QA
 
 - [ ] Temiz kurulum ve v1.3 → v1.4 yükseltme.
+- [ ] v1.4 binary üzerinde daha yeni canlı sürüm policy'siyle optional update
+  sheet'i; `Daha Sonra` tekrar hatırlatma aralığı ve App Store yönlendirmesi.
+- [ ] Destek alt sınırının altında kalan binary üzerinde kapatılamayan zorunlu
+  güncelleme ekranı; ağ/policy hatasında fail-open davranışı.
 - [ ] Fiziksel iPhone ve küçük/büyük iPhone Simulator.
 - [x] iPad portrait/landscape smoke turu.
   - iPad Pro 13-inch portrait; normal ve en büyük Dynamic Type ile tamamlandı.

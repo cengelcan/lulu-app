@@ -28,6 +28,16 @@ export const de: Translations = {
     clear: 'Leeren',
     dismissDialog: 'Dialog schließen',
   },
+  appUpdate: {
+    title: 'Ein neues Lulu-Update ist verfügbar',
+    message: 'Aktualisiere Lulu für die neuesten Verbesserungen und das beste Erlebnis.',
+    requiredTitle: 'Lulu muss aktualisiert werden',
+    requiredMessage: 'Diese Version wird nicht mehr unterstützt. Aktualisiere Lulu, um sicher fortzufahren.',
+    versionLabel: 'Lulu-Version {{version}}',
+    updateButton: 'Im App Store aktualisieren',
+    laterButton: 'Später',
+    openStoreFailed: 'Der App Store konnte nicht geöffnet werden. Bitte versuche es erneut.',
+  },
   tabs: {
     home: 'Start',
     care: 'Pflege',

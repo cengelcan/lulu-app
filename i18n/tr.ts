@@ -28,6 +28,16 @@ export const tr: Translations = {
     "clear": "Temizle",
     "dismissDialog": "İletişim kutusunu kapat"
   },
+  "appUpdate": {
+    "title": "Yeni bir Lulu güncellemesi hazır",
+    "message": "En yeni iyileştirmeler ve en iyi Lulu deneyimi için uygulamanı güncelle.",
+    "requiredTitle": "Lulu'nun güncellenmesi gerekiyor",
+    "requiredMessage": "Bu sürüm artık desteklenmiyor. Güvenle devam etmek için Lulu'yu güncelle.",
+    "versionLabel": "Sürüm {{version}}",
+    "updateButton": "App Store'da Güncelle",
+    "laterButton": "Daha Sonra",
+    "openStoreFailed": "App Store açılamadı. Lütfen tekrar dene."
+  },
   "tabs": {
     "home": "Ana Sayfa",
     "care": "Bakım",

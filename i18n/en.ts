@@ -28,6 +28,16 @@ export const en: Translations = {
     clear: 'Clear',
     dismissDialog: 'Dismiss dialog',
   },
+  appUpdate: {
+    title: 'A new Lulu update is ready',
+    message: 'Update for the latest improvements and the best Lulu experience.',
+    requiredTitle: 'Lulu needs an update',
+    requiredMessage: 'This version is no longer supported. Update Lulu to continue safely.',
+    versionLabel: 'Version {{version}}',
+    updateButton: 'Update in App Store',
+    laterButton: 'Later',
+    openStoreFailed: 'The App Store could not be opened. Please try again.',
+  },
   tabs: {
     home: 'Home',
     care: 'Care',

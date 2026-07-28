@@ -21,6 +21,7 @@ export const StorageKeys = {
   joinRemindersPromptPending: '@pet_health_journal/join_reminders_prompt_pending',
   joinRemindersPromptDismissed: '@pet_health_journal/join_reminders_prompt_dismissed',
   contextualEducationDismissed: '@pet_health_journal/contextual_education_dismissed',
+  appUpdateDismissal: '@lulu/app_update_dismissal',
 } as const;
 
 export type StorageKey = (typeof StorageKeys)[keyof typeof StorageKeys];

@@ -6,6 +6,7 @@ import { useEffect, useMemo } from 'react';
 import 'react-native-reanimated';
 
 import { Colors } from '@/constants/theme';
+import { AppUpdateGate } from '@/components/app-update/AppUpdateGate';
 import { useNotificationResponse } from '@/hooks/use-notification-response';
 import { useAuthDeepLink } from '@/hooks/use-auth-deep-link';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -83,6 +84,7 @@ export default function RootLayout() {
         />
         <Stack.Screen name="paywall-preview" />
       </Stack>
+      <AppUpdateGate />
       <StatusBar animated style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
   );

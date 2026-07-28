@@ -4,7 +4,7 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | In Progress — Faz 2 tamamlandı, Faz 3 genel geçiş/QA sırada |
+| Durum | QA — v1.4 TestFlight release candidate hazırlanıyor |
 | Öncelik | P1 |
 | Hedef sürüm | v1.4 |
 | Task türü | Ürün / UX / Altyapı |

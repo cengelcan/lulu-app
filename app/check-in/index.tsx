@@ -431,6 +431,7 @@ export default function CheckInScreen() {
           <CheckInHeader
             petName={pet.name}
             petPhotoUri={pet.photoUri}
+            petSpecies={pet.species}
             screenTitle={screenTitle}
             selectedDate={selectedDate}
             onOpenDatePicker={() => setDatePickerVisible(true)}

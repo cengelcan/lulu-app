@@ -1,8 +1,9 @@
 import { type Href, useRouter } from 'expo-router';
 import { useCallback } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, useColorScheme as useSystemColorScheme } from 'react-native';
 
 import { WelcomeScreen } from '@/components/welcome/welcome-screen';
+import { Colors } from '@/constants/theme';
 import { useTranslation } from '@/hooks/use-translation';
 import { setUserSetupPath } from '@/storage/setup-path.storage';
 import { useOnboardingStore } from '@/stores/onboarding.store';
@@ -11,6 +12,8 @@ import { translateError } from '@/utils/translate-error';
 export default function WelcomeRoute() {
   const router = useRouter();
   const { t } = useTranslation();
+  const systemColorScheme = useSystemColorScheme() === 'light' ? 'light' : 'dark';
+  const linkColor = Colors[systemColorScheme].text;
   const completeOnboarding = useOnboardingStore((state) => state.completeOnboarding);
   const clearError = useOnboardingStore((state) => state.clearError);
   const isLoading = useOnboardingStore((state) => state.isLoading);
@@ -46,7 +49,7 @@ export default function WelcomeRoute() {
       error={translateError(t, error)}
       footerExtra={
         <Pressable accessibilityRole="button" onPress={() => void handleJoinFamily()}>
-          <Text allowFontScaling style={styles.joinLink}>
+          <Text allowFontScaling style={[styles.joinLink, { color: linkColor }]}>
             {t('welcome.joinFamilyButton')}
           </Text>
         </Pressable>
@@ -61,7 +64,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     fontWeight: '600',
-    color: '#ffffff',
     opacity: 0.92,
   },
 });

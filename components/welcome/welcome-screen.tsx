@@ -1,16 +1,36 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useColorScheme as useSystemColorScheme,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LuluLogo } from '@/components/LuluLogo';
 import { Button } from '@/components/ui/Button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts, Palette, Radius, Spacing, Typography } from '@/constants/theme';
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { Colors, Fonts, Palette, Radius, Spacing, Typography } from '@/constants/theme';
 
-const WELCOME_BG = require('@/assets/images/welcome-bg.png');
+const WELCOME_BG_DARK = require('@/assets/images/welcome-bg.png');
+const WELCOME_BG_LIGHT = require('@/assets/images/welcome-bg-light-v2.jpg');
 const LOGO_SIZE = 180;
+
+const DARK_OVERLAY_COLORS = [
+  'rgba(0,0,0,0.78)',
+  'rgba(0,0,0,0.35)',
+  'rgba(0,0,0,0.2)',
+  'rgba(0,0,0,0.72)',
+] as const;
+const LIGHT_OVERLAY_COLORS = [
+  'rgba(248,246,255,0.72)',
+  'rgba(248,246,255,0.38)',
+  'rgba(255,255,255,0.18)',
+  'rgba(239,235,250,0.52)',
+] as const;
 
 type WelcomeBenefit = {
   icon: 'checkmark.circle.fill' | 'person.2.fill' | 'calendar.badge.checkmark';
@@ -38,28 +58,25 @@ export function WelcomeScreen({
   error = null,
   footerExtra,
 }: WelcomeScreenProps) {
-  const brandAccentColor = useThemeColor({}, 'brandAccent');
-  const buttonTextColor = useThemeColor({}, 'primaryText');
-  const alertColor = useThemeColor({}, 'alert');
+  const colorScheme = useSystemColorScheme() === 'light' ? 'light' : 'dark';
+  const isDark = colorScheme === 'dark';
+  const theme = Colors[colorScheme];
+  const welcomeBackground = isDark ? WELCOME_BG_DARK : WELCOME_BG_LIGHT;
+  const overlayColors = isDark ? DARK_OVERLAY_COLORS : LIGHT_OVERLAY_COLORS;
 
   return (
     <View style={styles.root}>
       <Image
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
-        source={WELCOME_BG}
+        source={welcomeBackground}
         style={styles.backgroundImage}
         contentFit="cover"
         contentPosition="bottom center"
       />
 
       <LinearGradient
-        colors={[
-          'rgba(0,0,0,0.78)',
-          'rgba(0,0,0,0.35)',
-          'rgba(0,0,0,0.2)',
-          'rgba(0,0,0,0.72)',
-        ]}
+        colors={[...overlayColors]}
         locations={[0, 0.32, 0.62, 1]}
         style={styles.gradientOverlay}
         pointerEvents="none"
@@ -71,24 +88,50 @@ export function WelcomeScreen({
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
-            <LuluLogo accessibilityLabel={appName} size={LOGO_SIZE} style={styles.logo} />
+            <LuluLogo
+              accessibilityLabel={appName}
+              colorSchemeOverride={colorScheme}
+              size={LOGO_SIZE}
+              style={styles.logo}
+            />
 
-            <Text allowFontScaling style={styles.appName}>
+            <Text
+              allowFontScaling
+              style={[
+                styles.appName,
+                { color: isDark ? Palette.brandAccentLight : theme.accent },
+              ]}>
               {appName}
             </Text>
 
-            <Text allowFontScaling style={styles.subtitle}>
+            <Text allowFontScaling style={[styles.subtitle, { color: theme.text }]}>
               {tagline}
             </Text>
           </View>
 
           <View style={styles.benefits}>
             {benefits.slice(0, 3).map((benefit) => (
-              <View key={benefit.label} style={styles.benefitRow}>
-                <View style={styles.benefitIcon}>
-                  <IconSymbol name={benefit.icon} size={20} color={brandAccentColor} />
+              <View
+                key={benefit.label}
+                style={[
+                  styles.benefitRow,
+                  {
+                    borderColor: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(61,48,102,0.16)',
+                    backgroundColor: isDark ? 'rgba(0,0,0,0.42)' : 'rgba(255,255,255,0.68)',
+                  },
+                ]}>
+                <View
+                  style={[
+                    styles.benefitIcon,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(255,255,255,0.12)'
+                        : 'rgba(115,98,168,0.11)',
+                    },
+                  ]}>
+                  <IconSymbol name={benefit.icon} size={20} color={theme.brandAccent} />
                 </View>
-                <Text allowFontScaling style={styles.benefitLabel}>
+                <Text allowFontScaling style={[styles.benefitLabel, { color: theme.text }]}>
                   {benefit.label}
                 </Text>
               </View>
@@ -101,7 +144,15 @@ export function WelcomeScreen({
                 accessibilityLiveRegion="assertive"
                 allowFontScaling
                 selectable
-                style={[styles.error, { color: alertColor }]}>
+                style={[
+                  styles.error,
+                  {
+                    color: theme.alert,
+                    backgroundColor: isDark
+                      ? 'rgba(0,0,0,0.58)'
+                      : 'rgba(255,255,255,0.82)',
+                  },
+                ]}>
                 {error}
               </Text>
             ) : null}
@@ -111,7 +162,9 @@ export function WelcomeScreen({
               onPress={onStart}
               disabled={isLoading}
               style={styles.startButton}
-              trailingIcon={<IconSymbol name="pawprint.fill" size={18} color={buttonTextColor} />}
+              trailingIcon={
+                <IconSymbol name="pawprint.fill" size={18} color={theme.primaryText} />
+              }
             />
             {footerExtra ? <View style={styles.footerExtra}>{footerExtra}</View> : null}
           </View>
@@ -159,7 +212,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   appName: {
-    color: Palette.brandAccentLight,
     textAlign: 'center',
     fontSize: 40,
     lineHeight: 44,
@@ -172,7 +224,6 @@ const styles = StyleSheet.create({
     }),
   },
   subtitle: {
-    color: Palette.onDark,
     textAlign: 'center',
     ...Typography.body,
     fontWeight: '500',
@@ -192,8 +243,6 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     borderCurve: 'continuous',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.28)',
-    backgroundColor: 'rgba(0,0,0,0.42)',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
   },
@@ -203,11 +252,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.12)',
     flexShrink: 0,
   },
   benefitLabel: {
-    color: Palette.onDark,
     flex: 1,
     ...Typography.bodySemiBold,
   },
@@ -228,7 +275,6 @@ const styles = StyleSheet.create({
   error: {
     ...Typography.caption,
     textAlign: 'center',
-    backgroundColor: 'rgba(0,0,0,0.58)',
     padding: Spacing.sm,
     borderRadius: Radius.md,
   },

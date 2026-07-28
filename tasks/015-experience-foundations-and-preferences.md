@@ -91,6 +91,13 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
   Vet Visit, reports, paywall, modal ve content state görsel turu.
 - [ ] Navigation bar, status bar, splash, görseller, grafikler ve gölgelerin iki
   temada bilinçli davranması.
+  - 2026-07-27: Native splash ve ilk karşılama ekranı sistem görünümünü izleyen
+    ayrı light/dark görsellere geçirildi. Açık splash için daha yüksek kontrastlı
+    logo üretildi; ilk preference yüklenmeden önceki zorunlu dark fallback
+    kaldırıldı. Pet türü seçimi, edit/avatar, setup ve Home yardım kartındaki
+    stok kedi/köpek görselleri ortak Lulu illüstrasyon setiyle değiştirildi.
+    Fotoğrafı olmayan pet avatarları Check-in, Home, My Pets, Pet Edit, profil,
+    setup ve family yüzeylerinde tür bilgisini aynı ortak sete iletiyor.
 - [ ] WCAG AA kontrast regresyon testlerinin light ve dark palette için geçmesi.
 
 ### 3. Pet detail ve edit hiyerarşisi
@@ -401,6 +408,9 @@ yazılmaz.
   - Auth ekranında System light/dark canlı geçişi iPhone 17 Pro Simulator'da
     doğrulandı. Settings, Care, Pet Detail ve Pet Edit de light/dark ve Settings
     için dark cold start ile doğrulandı; uygulama geneli tur henüz tamamlanmadı.
+  - İlk karşılama ekranının dark sistem görünümü yeni yıldızlı arka plan ve açık
+    logo ile iPhone 17 Pro Simulator'da doğrulandı. Native light/dark splash
+    ayrımı config regresyon testiyle korunuyor; temiz binary cold-start turu açık.
 - [ ] EN/DE/TR; rapor, timeline ve tarih sınırı senaryoları.
   - Onboarding EN/DE/TR görsel turu tamamlandı; rapor/timeline senaryoları açık.
 - [ ] Kg/lb iki kullanıcıyla aynı shared pet görünümü.

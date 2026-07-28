@@ -5,8 +5,8 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette, Radius } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-const DOG_ICON = require('@/assets/images/pet-icon-dog.png');
-const CAT_ICON = require('@/assets/images/pet-icon-cat.png');
+const DOG_ICON = require('@/assets/images/pet-icon-dog-v2.png');
+const CAT_ICON = require('@/assets/images/pet-icon-cat-v2.png');
 
 export function CheckInPrefsIllustration() {
   const brandAccentColor = useThemeColor({}, 'brandAccent');

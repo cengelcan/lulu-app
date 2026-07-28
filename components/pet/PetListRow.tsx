@@ -112,7 +112,7 @@ function MemorialPetListRow({
           styles.memorialMainPressable,
           { opacity: disabled ? 0.6 : pressed ? 0.7 : 1 },
         ]}>
-        <PetAvatar photoUri={pet.photoUri} size={48} />
+        <PetAvatar photoUri={pet.photoUri} species={pet.species} size={48} />
         <View style={styles.info}>
           <ThemedText type="defaultSemiBold" numberOfLines={1}>
             {pet.name}
@@ -210,7 +210,7 @@ function ActivePetListRow({
           styles.cardMainPressable,
           { opacity: disabled ? 0.6 : pressed ? 0.7 : 1 },
         ]}>
-        <PetAvatar photoUri={pet.photoUri} size={48} />
+        <PetAvatar photoUri={pet.photoUri} species={pet.species} size={48} />
         <View style={styles.info}>
           <ThemedText type="defaultSemiBold" numberOfLines={1}>
             {pet.name}

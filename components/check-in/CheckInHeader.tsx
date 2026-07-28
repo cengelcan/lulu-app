@@ -14,6 +14,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatLocalDate, getTodayStart, parseLocalDate } from '@/utils/date';
 import { formatWeekdayDate } from '@/utils/formatters';
+import type { PetSpecies } from '@/types/pet';
 
 type CheckInDatePickerProps = {
   selectedDate: string;
@@ -94,6 +95,7 @@ export function CheckInDatePicker({
 type CheckInHeaderProps = {
   petName: string;
   petPhotoUri?: string | null;
+  petSpecies?: PetSpecies | null;
   screenTitle: string;
   selectedDate: string;
   onOpenDatePicker: () => void;
@@ -102,6 +104,7 @@ type CheckInHeaderProps = {
 export function CheckInHeader({
   petName,
   petPhotoUri,
+  petSpecies,
   screenTitle,
   selectedDate,
   onOpenDatePicker,
@@ -113,7 +116,13 @@ export function CheckInHeader({
   return (
     <View style={styles.container}>
       <View style={styles.avatarWrap}>
-        <PetAvatar accentBorder accentColor={checkInTheme.accent} photoUri={petPhotoUri} size={72} />
+        <PetAvatar
+          accentBorder
+          accentColor={checkInTheme.accent}
+          photoUri={petPhotoUri}
+          species={petSpecies}
+          size={72}
+        />
         <View
           style={[
             styles.heartBadge,

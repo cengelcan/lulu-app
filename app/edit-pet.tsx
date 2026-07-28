@@ -622,7 +622,7 @@ export default function EditPetScreen() {
           <GroupedSection title={t('pet.sections.profilePhoto')}>
             <View style={styles.formSectionBody}>
               <View style={styles.photoRow}>
-                <PetAvatar photoUri={photoUri} size={88} />
+                <PetAvatar photoUri={photoUri} species={species} size={88} />
                 <Pressable
                   accessibilityLabel={t('pet.changePhotoA11y')}
                   accessibilityRole="button"

@@ -44,7 +44,7 @@ export function PetProfileCard({
       style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}>
       <Card>
         <View style={styles.topRow}>
-          <PetAvatar photoUri={pet.photoUri} size={56} />
+          <PetAvatar photoUri={pet.photoUri} species={pet.species} size={56} />
           <View style={styles.info}>
             <ThemedText
               type="defaultSemiBold"

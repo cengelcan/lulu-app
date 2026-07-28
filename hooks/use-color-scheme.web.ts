@@ -8,7 +8,5 @@ export function useColorScheme(): 'light' | 'dark' {
   const preference = useExperiencePreferencesStore(
     (state) => state.preferences?.themePreference
   );
-  const hasLoaded = useExperiencePreferencesStore((state) => state.hasLoaded);
-
-  return resolveThemeColorScheme(hasLoaded ? preference ?? 'system' : 'dark', systemColorScheme);
+  return resolveThemeColorScheme(preference ?? 'system', systemColorScheme);
 }

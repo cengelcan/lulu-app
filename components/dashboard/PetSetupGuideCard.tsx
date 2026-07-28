@@ -30,8 +30,8 @@ import {
   type PetSetupGuideTaskId,
 } from '@/utils/pet-setup-guide';
 
-const CAT_ICON = require('@/assets/images/pet-icon-cat.png');
-const DOG_ICON = require('@/assets/images/pet-icon-dog.png');
+const CAT_ICON = require('@/assets/images/pet-icon-cat-v2.png');
+const DOG_ICON = require('@/assets/images/pet-icon-dog-v2.png');
 
 const GRADIENT_LIGHT = ['#E8F4FC', '#F3F9FE', '#FAFDFF'] as const;
 const GRADIENT_DARK = ['#1A2433', '#1A1A1A', '#141414'] as const;

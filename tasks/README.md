@@ -25,15 +25,23 @@ Bu klasör ilk App Store yayını sonrasında ele alınacak ürün geliştirmele
 
 ## Sıralı yol haritası
 
-### Yayın kapanış durumu — 2026-07-27
+### Yayın kapanış durumu — 2026-08-16
 
 - v1.1–v1.3 kapsamındaki Task 001–008 tamamlandı ve dokümantasyonları kapatıldı.
+- v1.4 kapsamındaki Task 015 tamamlandı. iOS build `17`, kaynak commit
+  `b334628` üzerinden üretildi ve v1.4.0, 2026-08-02 tarihinde App Store'da
+  yayına alındı.
+- Canlı iOS release policy `latest_version = 1.4.0` olarak güncellendi.
 - Analytics uygulaması ürün kararıyla sonraki sürüme ertelendi.
 - Design System'in uygulama geneli tema, visual regression ve ayrıntılı
   erişilebilirlik çalışmaları Task 015'in v1.4 kapsamına taşındı.
 - Mevcut Free/Plus sınırları korunuyor; daha kapsamlı monetizasyon değişikliği
   ayrı bir gelecek ürün güncellemesinde ele alınacak.
 - v1.3.0, 2026-07-27 tarihinde yayına alındı.
+
+Bir sonraki production binary öncesinde Expo SDK 57 patch paketleri hizalanmalı;
+2026-08-16 kontrolünde `expo-doctor`, Hermes bellek regresyonu düzeltmesi için
+`expo >= 57.0.9` ve `react-native >= 0.86.2` gereksinimini bildirdi.
 
 | Sıra | Task | Öncelik | Efor | Önerilen hedef | Bağımlılık |
 |---|---|---:|---:|---|---|

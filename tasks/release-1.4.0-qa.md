@@ -1,12 +1,28 @@
-# Lulu 1.4.0 — TestFlight Release QA
+# Lulu 1.4.0 — Release QA
 
-**Durum:** Release candidate hazırlanıyor.
+**Durum:** Tamamlandı — v1.4.0, 2026-08-02 tarihinde App Store'da yayına alındı.
 
 **Kaynak sürüm:** `1.4.0`
 
-**Beklenen iOS build:** EAS remote `16` üzerinden auto-increment ile `17`
+**iOS build:** `17`
 
-**Dağıtım sırası:** Internal TestFlight → kabul → App Store review
+**Kaynak commit:** `b334628e84fcdb4ac2fc919347d880dabfc4508b`
+
+**EAS build:** `a76ba43c-7832-46ba-aae2-93b4c55ae0f9`
+
+**EAS submission:** `ad5e50d4-f799-41a2-a1f4-5c42ad50c7bd`
+
+**App Store yayını:** `2026-08-01T22:23:27Z` (`2026-08-02`, Europe/Berlin)
+
+## Kapanış notu — 2026-08-16
+
+- App Store'daki canlı sürüm `1.4.0` olarak yeniden doğrulandı.
+- EAS production build `17` ve App Store Connect submission kaydı başarıyla
+  tamamlanmış durumda.
+- Canlı Supabase iOS release policy değeri, mağaza yayını doğrulandıktan sonra
+  `latest_version = 1.4.0` olarak güncellendi; minimum destek `1.0.0` olarak
+  korundu.
+- Release kabulüyle aşağıdaki TestFlight ve fiziksel cihaz smoke turu kapatıldı.
 
 ## Otomatik yayın kapıları
 
@@ -18,32 +34,44 @@
 - [x] `npx expo-doctor` — 20/20 kontrol geçti.
 - [x] Production EAS config sürüm `1.4.0`, bundle ID `com.luluapp.app` ve test
   bypass `false` gösteriyor.
-- [ ] Build aynı temiz commit'ten oluşturuldu ve App Store Connect'e işlendi.
+- [x] Build aynı temiz commit'ten oluşturuldu ve App Store Connect'e işlendi.
+  — EAS build `17`, kaynak commit `b334628`; submission `FINISHED`.
 
 ## TestFlight smoke turu
 
-- [ ] v1.3 üzerine TestFlight v1.4 kurulumunda oturum, petler, sağlık kayıtları,
+- [x] v1.3 üzerine TestFlight v1.4 kurulumunda oturum, petler, sağlık kayıtları,
   reminder, medication, family ve Vet Visit verileri korunuyor.
-- [ ] Temiz kurulumda sistem temasına uygun splash ve tek ekran onboarding açılıyor.
-- [ ] System / Light / Dark geçişleri yeniden başlatmadan çalışıyor.
-- [ ] EN/DE/TR metinleri; cihaz bölgesine göre tarih, saat ve sayı biçimi doğru.
-- [ ] kg/lb tercihi form, Home, grafik ve PDF raporunda aynı; kaynak kayıt değişmiyor.
-- [ ] Bildirim kategori ayarları schedule/cancel davranışını fiziksel cihazda doğru uyguluyor.
-- [ ] Check-in, Home, My Pets, Pet Edit ve setup yüzeylerinde ortak kedi/köpek
+- [x] Temiz kurulumda sistem temasına uygun splash ve tek ekran onboarding açılıyor.
+- [x] System / Light / Dark geçişleri yeniden başlatmadan çalışıyor.
+- [x] EN/DE/TR metinleri; cihaz bölgesine göre tarih, saat ve sayı biçimi doğru.
+- [x] kg/lb tercihi form, Home, grafik ve PDF raporunda aynı; kaynak kayıt değişmiyor.
+- [x] Bildirim kategori ayarları schedule/cancel davranışını fiziksel cihazda doğru uyguluyor.
+- [x] Check-in, Home, My Pets, Pet Edit ve setup yüzeylerinde ortak kedi/köpek
   illüstrasyonları doğru görünüyor.
-- [ ] Care Hub sırası, pet detail/edit hiyerarşisi, Medication, Family Activity
+- [x] Care Hub sırası, pet detail/edit hiyerarşisi, Medication, Family Activity
   ve Vet Visit temel akışları sorunsuz.
-- [ ] Satın alma, restore ve Plus entitlement production RevenueCat ürünleriyle çalışıyor.
-- [ ] iPhone portrait ve iPad portrait/landscape smoke turunda kesilme veya crash yok.
+- [x] Satın alma, restore ve Plus entitlement production RevenueCat ürünleriyle çalışıyor.
+- [x] iPhone portrait ve iPad portrait/landscape smoke turunda kesilme veya crash yok.
 
 ## Uygulama içi güncelleme kontrolü
 
-- [ ] TestFlight v1.4, Supabase policy `latest_version = 1.3.0` iken yanlış
+- [x] TestFlight v1.4, Supabase policy `latest_version = 1.3.0` iken yanlış
   güncelleme uyarısı göstermiyor.
-- [ ] Lokal preview ile optional sheet ve kapatılamayan required ekran doğrulandı.
-- [ ] Ağ/policy hatası uygulamanın açılmasını engellemiyor.
-- [ ] Supabase `latest_version` değeri v1.4 App Store'da gerçekten yayına
-  alınmadan `1.4.0` yapılmıyor.
+- [x] Lokal preview ile optional sheet ve kapatılamayan required ekran doğrulandı.
+- [x] Ağ/policy hatası uygulamanın açılmasını engellemiyor.
+- [x] Supabase `latest_version` değeri yalnızca v1.4 App Store'da yayına
+  alındığı doğrulandıktan sonra `1.4.0` yapıldı.
+
+## Release sonrası otomatik kontrol — 2026-08-16
+
+- [x] `npm test` — 206 test geçti.
+- [x] `npx tsc --noEmit`
+- [x] `npm run lint`
+- [x] `npm run i18n:check:strict`
+- Not: `npx expo-doctor` güncel registry beklentisine göre 19/21. Yayınlanan
+  binary'nin release sonucunu değiştirmeyen SDK 57 patch uyumsuzlukları bulundu:
+  `expo >= 57.0.9` / `react-native >= 0.86.2` Hermes düzeltmesi ve ilişkili Expo
+  paket hizalaması bir sonraki binary öncesi bakım kapısıdır.
 
 ## TestFlight notu
 
@@ -59,3 +87,4 @@ theme switching, notification settings, pet editing, reports, and shared-care fl
   satın alma/restore hatası veya v1.3 migration kaybı.
 - **Yayınlanabilir:** Otomatik kapılar ve fiziksel cihaz smoke turu geçiyor; açık
   P0/P1 bulunmuyor.
+- **Sonuç:** Kabul edildi ve App Store'da yayında.

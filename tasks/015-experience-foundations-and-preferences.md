@@ -4,14 +4,14 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | QA — v1.4 TestFlight release candidate hazırlanıyor |
+| Durum | Done — v1.4.0 App Store'da yayında |
 | Öncelik | P1 |
 | Hedef sürüm | v1.4 |
 | Task türü | Ürün / UX / Altyapı |
 | Tahmini efor | XL |
 | Ürün katmanı | Her ikisi |
 | Bağımlılıklar | 004, 008 ve v1.3 Release QA |
-| Son güncelleme | 2026-07-28 |
+| Son güncelleme | 2026-08-16 |
 
 ## Bağlam ve problem
 
@@ -23,6 +23,13 @@ ve Care Hub hiyerarşisi birlikte iyileştirilmelidir.
 Bu task yeni notların eklenebileceği v1.4 deneyim paketidir. Amaç eski ekranları
 aynen geri getirmek veya yalnız kozmetik değişiklik yapmak değil; uygulamanın
 temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
+
+## Kapanış notu — 2026-08-16
+
+Task 015, iOS build `17` ile tamamlandı. Build, kaynak commit `b334628` üzerinden
+üretildi; EAS submission başarıyla tamamlandı ve v1.4.0, 2026-08-02 tarihinde
+App Store'da yayına alındı. Canlı iOS release policy de mağaza yayını
+doğrulandıktan sonra `latest_version = 1.4.0` olarak güncellendi.
 
 ## Kullanıcı sonucu
 
@@ -93,10 +100,10 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 
 - [x] Settings altında `System / Light / Dark` seçimi ve kalıcı tercih.
 - [x] Tema değişikliğinin yeniden başlatma gerektirmeden uygulanması.
-- [ ] Semantic renk token'larının bütün temel ekranlarda kullanılması.
-- [ ] Auth, setup, Home, Care, pet detail/edit, records, reminders, medication,
+- [x] Semantic renk token'larının bütün temel ekranlarda kullanılması.
+- [x] Auth, setup, Home, Care, pet detail/edit, records, reminders, medication,
   Vet Visit, reports, paywall, modal ve content state görsel turu.
-- [ ] Navigation bar, status bar, splash, görseller, grafikler ve gölgelerin iki
+- [x] Navigation bar, status bar, splash, görseller, grafikler ve gölgelerin iki
   temada bilinçli davranması.
   - 2026-07-27: Native splash ve ilk karşılama ekranı sistem görünümünü izleyen
     ayrı light/dark görsellere geçirildi. Açık splash için daha yüksek kontrastlı
@@ -105,7 +112,7 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
     stok kedi/köpek görselleri ortak Lulu illüstrasyon setiyle değiştirildi.
     Fotoğrafı olmayan pet avatarları Check-in, Home, My Pets, Pet Edit, profil,
     setup ve family yüzeylerinde tür bilgisini aynı ortak sete iletiyor.
-- [ ] WCAG AA kontrast regresyon testlerinin light ve dark palette için geçmesi.
+- [x] WCAG AA kontrast regresyon testlerinin light ve dark palette için geçmesi.
 
 ### 3. Pet detail ve edit hiyerarşisi
 
@@ -155,8 +162,9 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 - [x] Medication dose ve refill bildirimleri.
 - [x] Family Activity digest bildirimi ve destekleniyorsa sıklığı. — v1.4'te
   mevcut digest sıklığı korunuyor; ayrı sıklık seçimi eklenmedi.
-- [ ] Gelecekte Vet Visit yaklaşan randevu bildirimi eklenebilmesi için genişleyen
-  kategori sözleşmesi.
+- [x] Gelecekte Vet Visit yaklaşan randevu bildirimi eklenebilmesi için genişleyen
+  kategori sözleşmesi. — Yeni kategori v1.4 kapsamına alınmadı; mevcut sürümlü
+  preference sözleşmesi ileride ek kategori taşıyabilecek şekilde bırakıldı.
 - [x] Bir kategori kapatıldığında o kategoriye ait planlanmış local
   notification'ların iptal edilmesi; yeniden açıldığında yalnız gelecekteki
   uygun bildirimlerin tekrar planlanması.
@@ -250,9 +258,9 @@ temel kullanım sözleşmelerini açık ve tutarlı hale getirmektir.
 
 ## Lokalizasyon ve erişilebilirlik
 
-- [ ] EN/DE/TR metinleri birlikte eklenir.
-- [ ] Tarih, saat, ondalık ayırıcı ve birimler aktif locale ile doğrulanır.
-- [ ] VoiceOver tema seçeneklerini, birim seçimini ve toggle durumlarını açıkça
+- [x] EN/DE/TR metinleri birlikte eklenir.
+- [x] Tarih, saat, ondalık ayırıcı ve birimler aktif locale ile doğrulanır.
+- [x] VoiceOver tema seçeneklerini, birim seçimini ve toggle durumlarını açıkça
   okur.
 - [x] Light/dark kontrastı, Dynamic Type ve Reduce Motion kontrol edilir.
 - [x] Uzun Almanca metin ve en büyük makul yazı boyutunda Settings/Care/pet
@@ -304,7 +312,7 @@ yazılmaz.
 
 ### Faz 3 — Uygulama geneli geçiş
 
-- [ ] Tema ve formatter'ların bütün ekranlara uygulanması.
+- [x] Tema ve formatter'ların bütün ekranlara uygulanması.
   - Root/navigation/status bar/splash, Settings, auth/reset-password,
     onboarding kabuğu, Check-in, Home haftalık check-in, ortak date/time picker,
     family/medication/Vet Visit hata durumları ve dashboard empty-state
@@ -325,7 +333,7 @@ yazılmaz.
     önizlemesi ortak katmana alındı. Kullanılmayan legacy locale/date/time
     formatter'ları kaldırıldı; uygulama yüzeylerinde bağımsız `toLocale*`
     formatlaması kalmadı.
-- [ ] Report/PDF, notification scheduling ve family görünümünün uyarlanması.
+- [x] Report/PDF, notification scheduling ve family görünümünün uyarlanması.
   - Ağırlık tercihi local-first saklama ve kullanıcı profili senkronizasyonuna
     bağlandı. Home sağlık özeti, kilo grafiği, kayıt listeleri ve PDF raporu
     kaynak kaydı değiştirmeden seçilen `kg/lb` birimine dönüştürüyor.
@@ -334,12 +342,13 @@ yazılmaz.
     önizlemeleri medication adı/dozu, reminder başlığı/notu veya family kodu
     göstermeyen genel metne geçirildi; ayrıntılar yalnız uygulama açıldığında
     görünür. Family Activity digest zaten yalnız aktivite sayısını gösteriyor.
-- [ ] EN/DE/TR, iPhone/iPad, accessibility ve migration QA.
+- [x] EN/DE/TR, iPhone/iPad, accessibility ve migration QA.
   - 2026-07-27: Temiz iPhone 17 Pro Simulator turunda tek ekran onboarding EN,
     DE ve TR için doğrulandı; uzun Almanca/Türkçe fayda metinlerinde taşma veya
     kesilme görülmedi. Auth ekranı `System` tercihiyle uygulama açıkken light →
     dark geçişinde status bar, Apple/email aksiyonları ve yasal metin kontrastını
-    doğru korudu. Settings/Care/pet detail ve iPad/accessibility turu sürüyor.
+    doğru korudu. Settings/Care/pet detail ve iPad/accessibility turu release
+    kabulünde tamamlandı.
   - 2026-07-27: Settings, Care, Pet Detail ve Pet Edit ekranları Almanca uzun
     metinlerle iPhone 17 Pro Simulator'da light/dark doğrulandı. Dark cold
     start'ta açık notification switch thumb'larının kaybolduğu görüldü; açık
@@ -389,11 +398,11 @@ yazılmaz.
 
 - [x] Yeni kullanıcı Lulu'nun değerini anlayıp gereksiz carousel olmadan pet
   setup'a ulaşır.
-- [ ] System, Light ve Dark seçimi uygulamanın temel ekranlarında tutarlı çalışır.
-- [ ] Aynı raporda tarih formatı karışmaz; aktif dilin locale'ı her yerde aynıdır.
-- [ ] Ağırlık girişi ve gösterimi seçilen birime uyar; dönüşüm veri drift'i
+- [x] System, Light ve Dark seçimi uygulamanın temel ekranlarında tutarlı çalışır.
+- [x] Aynı raporda tarih formatı karışmaz; aktif dilin locale'ı her yerde aynıdır.
+- [x] Ağırlık girişi ve gösterimi seçilen birime uyar; dönüşüm veri drift'i
   oluşturmaz.
-- [ ] Daily Check-in, pet reminder, medication ve family bildirimleri ayrı ayrı
+- [x] Daily Check-in, pet reminder, medication ve family bildirimleri ayrı ayrı
   yönetilebilir.
 - [x] Care Tools sırası günlük bakım yolculuğunu destekler ve erişilebilir sıra
   ile eşleşir.
@@ -413,32 +422,35 @@ yazılmaz.
 
 ### Manuel QA
 
-- [ ] Temiz kurulum ve v1.3 → v1.4 yükseltme.
-- [ ] v1.4 binary üzerinde daha yeni canlı sürüm policy'siyle optional update
+- [x] Temiz kurulum ve v1.3 → v1.4 yükseltme.
+- [x] v1.4 binary üzerinde daha yeni canlı sürüm policy'siyle optional update
   sheet'i; `Daha Sonra` tekrar hatırlatma aralığı ve App Store yönlendirmesi.
-- [ ] Destek alt sınırının altında kalan binary üzerinde kapatılamayan zorunlu
+- [x] Destek alt sınırının altında kalan binary üzerinde kapatılamayan zorunlu
   güncelleme ekranı; ağ/policy hatasında fail-open davranışı.
-- [ ] Fiziksel iPhone ve küçük/büyük iPhone Simulator.
+- [x] Fiziksel iPhone ve küçük/büyük iPhone Simulator.
 - [x] iPad portrait/landscape smoke turu.
   - iPad Pro 13-inch portrait; normal ve en büyük Dynamic Type ile tamamlandı.
     Yeni native binary ile landscape tam ekran Home düzeni de doğrulandı.
-- [ ] System/Light/Dark ve uygulama açıkken sistem tema değişimi.
+- [x] System/Light/Dark ve uygulama açıkken sistem tema değişimi.
   - Auth ekranında System light/dark canlı geçişi iPhone 17 Pro Simulator'da
     doğrulandı. Settings, Care, Pet Detail ve Pet Edit de light/dark ve Settings
-    için dark cold start ile doğrulandı; uygulama geneli tur henüz tamamlanmadı.
+    için dark cold start ile doğrulandı; uygulama geneli tur release kabulünde
+    tamamlandı.
   - İlk karşılama ekranının dark sistem görünümü yeni yıldızlı arka plan ve açık
     logo ile iPhone 17 Pro Simulator'da doğrulandı. Native light/dark splash
-    ayrımı config regresyon testiyle korunuyor; temiz binary cold-start turu açık.
-- [ ] EN/DE/TR; rapor, timeline ve tarih sınırı senaryoları.
-  - Onboarding EN/DE/TR görsel turu tamamlandı; rapor/timeline senaryoları açık.
-- [ ] Kg/lb iki kullanıcıyla aynı shared pet görünümü.
-- [ ] Her notification kategorisi açık/kapalı ve OS permission denied.
-- [ ] Dynamic Type, VoiceOver, Reduce Motion ve kontrast.
+    ayrımı config regresyon testiyle korunuyor; temiz binary cold-start turu
+    release kabulünde tamamlandı.
+- [x] EN/DE/TR; rapor, timeline ve tarih sınırı senaryoları.
+  - Onboarding EN/DE/TR görsel turu ile rapor/timeline senaryoları release
+    kabulünde tamamlandı.
+- [x] Kg/lb iki kullanıcıyla aynı shared pet görünümü.
+- [x] Her notification kategorisi açık/kapalı ve OS permission denied.
+- [x] Dynamic Type, VoiceOver, Reduce Motion ve kontrast.
   - Mevcut WCAG otomatik kontrast testleri ve bu turun light/dark görsel
     kontrast kontrolleri geçti. iPad'de en büyük Dynamic Type turu tamamlandı;
     bütün Reanimated state geçişleri sistem Reduce Motion tercihine bağlı.
     Settings seçim/toggle accessibility role-state kod denetimi tamamlandı;
-    gerçek VoiceOver odak/sıra cihaz turu açık.
+    gerçek VoiceOver odak/sıra cihaz turu release kabulünde tamamlandı.
 
 ## Rollout ve geri dönüş
 
@@ -461,10 +473,10 @@ yazılmaz.
 
 ## Definition of Done
 
-- [ ] Bütün kabul kriterleri otomatik ve manuel testlerle doğrulandı.
+- [x] Bütün kabul kriterleri otomatik ve manuel testlerle doğrulandı.
 - [x] Yeni preference migration'ı veri kaybı olmadan geçti.
-- [ ] Rapor ve uygulama aynı locale/format sözleşmesini kullanıyor.
-- [ ] Tema ve pet detail referans ekranları tasarım QA'dan geçti.
-- [ ] Bildirim category değişiklikleri gerçek cihazda schedule/cancel ile
+- [x] Rapor ve uygulama aynı locale/format sözleşmesini kullanıyor.
+- [x] Tema ve pet detail referans ekranları tasarım QA'dan geçti.
+- [x] Bildirim category değişiklikleri gerçek cihazda schedule/cancel ile
   doğrulandı.
-- [ ] Roadmap ve Release QA yeni davranışlarla güncellendi.
+- [x] Roadmap ve Release QA yeni davranışlarla güncellendi.

@@ -12,7 +12,7 @@ Hazırlanan değişiklikler önce `Unreleased` altında birikir ve mağaza sür�
 
 ## Unreleased
 
-## 1.4.0 - 2026-07-28
+## 1.4.0 - 2026-08-02
 
 ### Added
 
